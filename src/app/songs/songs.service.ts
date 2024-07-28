@@ -2,7 +2,6 @@ import { Injectable, signal } from '@angular/core';
 import { SearchStatus, Song } from './models/song.model';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable, tap } from 'rxjs';
-import { environment } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +9,7 @@ import { environment } from '../../environments/environment.development';
 export class SongsService {
   private songs = signal<Song[]>([]);
   private searchStatus = signal<SearchStatus>(SearchStatus.None);
-  private baseApi = environment.apiUrl + '/songs?search=';
+  private baseApi = process.env['API_URL'] + '/songs?search=';
   songs$ = this.songs.asReadonly();
   status$ = this.searchStatus.asReadonly();
 
