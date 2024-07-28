@@ -11,15 +11,11 @@ import { SongsService } from '../songs.service';
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
 })
-export class SearchComponent implements OnInit {
-  searchTerm = signal<string>('mgl');
+export class SearchComponent {
+  searchTerm = signal<string>('');
 
   faMagnifyingGlass = faMagnifyingGlass;
   constructor(private songsService: SongsService) {}
-
-  ngOnInit(): void {
-    this.songsService.searchSongs(this.searchTerm()).subscribe();
-  }
 
   submit() {
     this.songsService.searchSongs(this.searchTerm()).subscribe();
