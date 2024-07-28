@@ -14,9 +14,7 @@ export class SongsService {
   songs$ = this.songs.asReadonly();
   status$ = this.searchStatus.asReadonly();
 
-  constructor(private httpService: HttpClient) {
-    console.log('baseapi', this.baseApi);
-  }
+  constructor(private httpService: HttpClient) {}
 
   searchSongs(searchTerm: string): Observable<Song[]> {
     this.setStatusLoading();
