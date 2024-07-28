@@ -1,0 +1,36 @@
+.slideUp {
+  animation: slideUp 0.3s ease-in-out forwards;
+}
+
+.slideDown {
+  animation: slideDown 0.2s ease-in-out forwards;
+}
+
+.cool3dArtworkAnimation {
+  animation: cool3dArtwork 10s ease-in-out alternate infinite;
+}
+
+@keyframes cool3dArtwork {
+  to {
+    transform: perspective(800px) rotateY(-5deg) translateY(-10px)
+      rotateX(10deg) scale(1);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+  }
+  50% {
+    transform: translateY(-10%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(100%);
+  }
+}

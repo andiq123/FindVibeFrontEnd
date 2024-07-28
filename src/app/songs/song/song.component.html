@@ -1,0 +1,24 @@
+<div
+  class="rounded-lg p-3 flex justify-between items-center"
+  [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
+>
+  <div class="grid grid-flow-col gap-3 items-center">
+    <div class="w-24 rounded-xl overflow-hidden">
+      <img
+        class="object-fill w-full h-full"
+        [src]="song().image"
+        [alt]="song().artist"
+        referrerpolicy="no-referrer"
+      />
+    </div>
+    <div>
+      <h2 class="text-xl font-bold">{{ song().title }}</h2>
+      <p class="text-md">{{ song().artist }}</p>
+    </div>
+  </div>
+  <app-player-button
+    [status]="status()"
+    (onPlay)="play()"
+    (onPause)="pause()"
+  />
+</div>

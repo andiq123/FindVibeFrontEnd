@@ -1,0 +1,15 @@
+.slideUp {
+  animation: slideUp 0.3s ease-in-out forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+  }
+  50% {
+    transform: translateY(-10%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,13 @@
+<form (ngSubmit)="submit()" class="relative">
+  <input
+    type="text"
+    placeholder="Search..."
+    name="searchTerm"
+    class="bg-base-300 px-5 py-3 w-full mx-auto my-5 outline-none shadow-md rounded-lg"
+    [(ngModel)]="searchTerm"
+  />
+
+  <button type="submit" class="btn absolute right-0 bottom-5 rounded-r-lg">
+    <fa-icon class="text-xl" [icon]="faMagnifyingGlass"></fa-icon>
+  </button>
+</form>

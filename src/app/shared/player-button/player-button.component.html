@@ -1,0 +1,21 @@
+@switch (status()) { @case (playerStatus.Playing) {
+<button
+  class="text-white text-4xl btn btn-lg bg-base-100 hover:bg-base-200 w-20"
+  (click)="pause()"
+>
+  <fa-icon [icon]="faPause" />
+</button>
+} @case (playerStatus.Loading){
+<button
+  class="text-white text-4xl btn btn-lg bg-base-100 hover:bg-base-200 w-20"
+>
+  <span class="loading loading-spinner loading-lg"></span>
+</button>
+} @default {
+<button
+  class="text-white text-4xl btn btn-lg bg-base-100 hover:bg-base-200 w-20"
+  (click)="play()"
+>
+  <fa-icon [icon]="faPlay" />
+</button>
+}}

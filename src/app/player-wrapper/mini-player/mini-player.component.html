@@ -1,0 +1,26 @@
+<div
+  class="bg-base-100 rounded-t-2xl p-3 flex justify-between items-center fixed bottom-0 w-full slideUp"
+>
+  <div
+    class="grid grid-flow-col gap-3 justify-start cursor-pointer w-full"
+    (click)="toggleSize()"
+  >
+    <div class="img w-20 rounded-xl overflow-hidden">
+      <img
+        class="object-fill w-full h-full"
+        [src]="song()!.image"
+        [alt]="song()!.artist"
+        referrerpolicy="no-referrer"
+      />
+    </div>
+    <div>
+      <h2 class="text-xl font-bold">{{ song()!.title }}</h2>
+      <p class="text-md">{{ song()!.artist }}</p>
+    </div>
+  </div>
+  <app-player-button
+    [status]="status()"
+    (onPlay)="play()"
+    (onPause)="pause()"
+  />
+</div>

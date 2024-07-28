@@ -1,0 +1,5 @@
+@if (song()){ @if ( miniPlayer()){
+<app-mini-player (onToggleSize)="onToggleSize()" />
+}@else {
+<app-full-player (onToggleSize)="onToggleSize()" />
+}}

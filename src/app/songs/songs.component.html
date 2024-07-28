@@ -1,0 +1,29 @@
+<div class="w-[95%] mx-auto">
+  <app-search />
+
+  @switch (status()) { @case (searchStatus.None) {
+  <div
+    class="flex justify-center bg-base-200 w-fit mx-auto py-5 px-10 rounded-xl shadow-xl"
+  >
+    <p class="text-center">Search for some songs</p>
+  </div>
+  } @case (searchStatus.Loading){
+  <div
+    class="flex justify-center bg-base-200 w-fit mx-auto py-5 px-10 rounded-xl shadow-xl"
+  >
+    <span class="loading loading-ball loading-lg"></span>
+    <span class="loading loading-ball loading-lg"></span>
+    <span class="loading loading-ball loading-lg"></span>
+  </div>
+  } @case (searchStatus.Error) {
+  <p class="text-center">Could not find any songs by this search</p>
+  } @case(searchStatus.Finished){
+  <ul class="flex flex-col gap-1 mb-24">
+    @for(song of songs(); track song.id){
+    <li><app-song [song]="song" /></li>
+    } @empty {
+    <li class="text-center">Search for some songs</li>
+    }
+  </ul>
+  } }
+</div>

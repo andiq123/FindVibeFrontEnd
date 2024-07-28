@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { SongsComponent } from './songs/songs.component';
+import { SearchComponent } from './songs/search/search.component';
+import { PlayerWrapperComponent } from './player-wrapper/player-wrapper.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [SongsComponent, SearchComponent, PlayerWrapperComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'clientAngular';
+  constructor() {}
 }
