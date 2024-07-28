@@ -2,8 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { SearchStatus, Song } from './models/song.model';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable, tap } from 'rxjs';
-import { environment } from '../../environments/environment.development';
-import { PlayerService } from '../player-wrapper/player.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +17,7 @@ export class SongsService {
   constructor(private httpService: HttpClient) {}
 
   searchSongs(searchTerm: string): Observable<Song[]> {
+    console.log(this.baseApi);
     this.setStatusLoading();
     return this.httpService.get<Song[]>(this.baseApi + searchTerm).pipe(
       tap((songs) => {
