@@ -14,10 +14,11 @@ export class SongsService {
   songs$ = this.songs.asReadonly();
   status$ = this.searchStatus.asReadonly();
 
-  constructor(private httpService: HttpClient) {}
+  constructor(private httpService: HttpClient) {
+    console.log('baseapi', this.baseApi);
+  }
 
   searchSongs(searchTerm: string): Observable<Song[]> {
-    console.log(this.baseApi);
     this.setStatusLoading();
     return this.httpService.get<Song[]>(this.baseApi + searchTerm).pipe(
       tap((songs) => {
