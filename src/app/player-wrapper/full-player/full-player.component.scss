@@ -1,5 +1,5 @@
 .slideUp {
-  animation: slideUp 0.3s ease-in-out forwards;
+  animation: slideUp 0.4s ease-in-out forwards;
 }
 
 .slideDown {
@@ -21,8 +21,8 @@
   0% {
     transform: translateY(100%);
   }
-  50% {
-    transform: translateY(-10%);
+  60% {
+    transform: translateY(-5%);
   }
   100% {
     transform: translateY(0);
