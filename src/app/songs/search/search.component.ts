@@ -3,6 +3,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FormsModule } from '@angular/forms';
 import { SongsService } from '../songs.service';
+import { SuggestionsService } from '../suggestions.service';
 
 @Component({
   selector: 'app-search',
@@ -15,10 +16,14 @@ export class SearchComponent {
   searchTerm = signal<string>('');
 
   faMagnifyingGlass = faMagnifyingGlass;
-  constructor(private songsService: SongsService) {}
+  constructor(
+    private songsService: SongsService,
+    private suggestionsService: SuggestionsService
+  ) {}
 
   submit() {
     if (this.searchTerm() === '') return;
-    this.songsService.searchSongs(this.searchTerm()).subscribe();
+    // this.songsService.searchSongs(this.searchTerm()).subscribe();
+    this.suggestionsService.getSuggestions(this.searchTerm());
   }
 }
