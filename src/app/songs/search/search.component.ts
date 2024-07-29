@@ -18,6 +18,7 @@ export class SearchComponent {
   constructor(private songsService: SongsService) {}
 
   submit() {
+    if (this.searchTerm() === '') return;
     this.songsService.searchSongs(this.searchTerm()).subscribe();
   }
 }

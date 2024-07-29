@@ -3,10 +3,12 @@ import {
   Component,
   effect,
   ElementRef,
+  OnChanges,
   OnInit,
   output,
   Signal,
   signal,
+  SimpleChanges,
   viewChild,
 } from '@angular/core';
 import { Song } from '../../songs/models/song.model';
@@ -122,9 +124,15 @@ export class FullPlayerComponent implements OnInit, AfterViewInit {
 
   toggleRepeat() {
     this.playerService.toggleRepeat();
+    if (this.isShuffle()) {
+      this.playerService.toggleShuffle();
+    }
   }
 
   toggleShuffle() {
     this.playerService.toggleShuffle();
+    if (this.isRepeat()) {
+      this.playerService.toggleRepeat();
+    }
   }
 }

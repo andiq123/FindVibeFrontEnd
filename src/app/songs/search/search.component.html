@@ -7,7 +7,11 @@
     [(ngModel)]="searchTerm"
   />
 
-  <button type="submit" class="btn absolute right-0 bottom-5 rounded-r-lg">
+  <button
+    type="submit"
+    class="btn absolute right-0 bottom-5 rounded-r-lg"
+    [disabled]="searchTerm() === ''"
+  >
     <fa-icon class="text-xl" [icon]="faMagnifyingGlass"></fa-icon>
   </button>
 </form>
