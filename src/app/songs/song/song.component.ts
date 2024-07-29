@@ -4,11 +4,12 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlayerService } from '../../player-wrapper/player.service';
 import { PlayerStatus } from '../../player-wrapper/models/player.model';
 import { PlayerButtonComponent } from '../../shared/player-button/player-button.component';
+import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
 
 @Component({
   selector: 'app-song',
   standalone: true,
-  imports: [FontAwesomeModule, PlayerButtonComponent],
+  imports: [FontAwesomeModule, PlayerButtonComponent, MovingTitleComponent],
   templateUrl: './song.component.html',
   styleUrl: './song.component.scss',
 })

@@ -1,25 +1,9 @@
 <div
-  class="h-screen fixed inset-0 z-50 overflow-hidden bg-base-200 slideUp"
+  class="h-screen fixed inset-0 z-50 overflow-hidden bg-base-200"
   [class.slideDown]="isClosingAnimation()"
   #playerRef
 >
-  @if(status() === playerStatus.Loading){
-  <div
-    class="fixed h-screen w-screen z-10 bg-base-200 bg-opacity-40 backdrop-blur-sm flex flex-col justify-center items-center"
-  >
-    <div class="h-[80%] flex items-center flex-col justify-around">
-      <span class="loading loading-ring loading-lg scale-150"></span>
-      <button
-        class="btn bg-transparent w-96 text-3xl border-none"
-        (click)="toggleSize()"
-      >
-        <fa-icon [icon]="faArrowDown" />
-      </button>
-    </div>
-  </div>
-  }
-
-  <div class="flex flex-col items-center justify-center h-full px-10 gap-2">
+  <div class="flex flex-col items-center justify-center h-full px-10 gap-3">
     <img
       [src]="song()!.image"
       alt="Song Art BG"
@@ -28,8 +12,15 @@
     />
 
     <div
-      class="rounded-md overflow-hidden shadow-2xl shadow-black cool3dArtworkAnimation"
+      class="rounded-md overflow-hidden shadow-2xl shadow-black cool3dArtworkAnimation relative"
     >
+      @if(status() === playerStatus.Loading){
+      <div
+        class="absolute h-full w-full z-10 bg-base-200 bg-opacity-30 backdrop-blur-sm flex flex-col justify-center items-center"
+      >
+        <span class="loading loading-ring loading-lg scale-150"></span>
+      </div>
+      }
       <img
         [src]="song()!.image"
         alt="Song Art"
@@ -39,7 +30,7 @@
     </div>
 
     <div class="mr-auto">
-      <div class="text-white text-2xl font-bold mt-5">{{ song()!.title }}</div>
+      <app-moving-title [title]="song()!.title" [isActive]="true" />
       <div class="text-white text-lg mt-1">{{ song()!.artist }}</div>
     </div>
 
@@ -60,9 +51,9 @@
       </div>
     </div>
 
-    <div class="flex gap-4 mt-5">
+    <div class="flex gap-8 flex-wrap justify-center">
       <button
-        class="text-white text-4xl btn bg-transparent btn-lg border-none"
+        class="text-4xl btn bg-transparent btn-lg border-none w-16"
         (click)="previousSong()"
       >
         <fa-icon [icon]="faStepBackward" />
@@ -70,14 +61,14 @@
 
       @switch (status()) { @case (playerStatus.Playing) {
       <button
-        class="text-white text-4xl btn bg-transparent btn-lg border-none"
+        class="text-4xl btn bg-transparent btn-lg border-none w-16"
         (click)="pause()"
       >
         <fa-icon [icon]="faPause" />
       </button>
       } @default {
       <button
-        class="text-white text-4xl btn bg-transparent btn-lg border-none"
+        class="text-4xl btn bg-transparent btn-lg border-none w-16"
         (click)="play()"
       >
         <fa-icon [icon]="faPlay" />
@@ -85,18 +76,31 @@
       }}
 
       <button
-        class="text-white text-4xl btn bg-transparent btn-lg border-none"
+        class="text-4xl btn bg-transparent btn-lg border-none w-16"
         (click)="nextSong()"
       >
         <fa-icon [icon]="faStepForward" />
       </button>
-    </div>
 
-    <button
-      class="btn bg-transparent w-96 text-3xl border-none"
-      (click)="toggleSize()"
-    >
-      <fa-icon [icon]="faArrowDown" />
-    </button>
+      <button
+        class="text-4xl btn bg-transparent btn-lg border-none w-16"
+        [class]="{ 'bg-transparent': !isRepeat() }"
+        (click)="toggleRepeat()"
+      >
+        <fa-icon [icon]="faRepeat" />
+      </button>
+
+      <button class="text-4xl btn btn-lg w-16" (click)="toggleSize()">
+        <fa-icon [icon]="faArrowDown" />
+      </button>
+
+      <button
+        class="text-4xl btn btn-lg border-none w-16"
+        [class]="{ 'bg-transparent': !isShuffle() }"
+        (click)="toggleShuffle()"
+      >
+        <fa-icon [icon]="faShuffle" />
+      </button>
+    </div>
   </div>
 </div>

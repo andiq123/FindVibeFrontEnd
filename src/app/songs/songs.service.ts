@@ -30,6 +30,10 @@ export class SongsService {
     );
   }
 
+  wakeServer(): Observable<void> {
+    return this.httpService.get<void>(this.baseApi + 'test');
+  }
+
   getPreviousSong(currentSongId: string): Song {
     const songIndex = this.songs().findIndex(
       (song) => song.id === currentSongId
@@ -44,7 +48,10 @@ export class SongsService {
     ];
   }
 
-  getNextSong(currentSongId: string): Song {
+  getNextSong(currentSongId: string, randomSong = false): Song {
+    if (randomSong) {
+      return this.songs()[Math.floor(Math.random() * this.songs().length)];
+    }
     const songIndex = this.songs().findIndex(
       (song) => song.id === currentSongId
     );

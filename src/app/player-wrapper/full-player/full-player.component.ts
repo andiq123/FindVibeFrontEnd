@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  effect,
   ElementRef,
   OnInit,
   output,
@@ -17,16 +18,19 @@ import {
   faPlay,
   faPause,
   faArrowDown,
+  faRepeat,
+  faShuffle,
 } from '@fortawesome/free-solid-svg-icons';
 import { PlayerService } from '../player.service';
 import { PlayerStatus } from '../models/player.model';
 import { getDominantColor } from '@rtcoder/dominant-color';
 import { SongsService } from '../../songs/songs.service';
+import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
 
 @Component({
   selector: 'app-full-player',
   standalone: true,
-  imports: [FontAwesomeModule],
+  imports: [FontAwesomeModule, MovingTitleComponent],
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
 })
@@ -35,6 +39,8 @@ export class FullPlayerComponent implements OnInit, AfterViewInit {
   status!: Signal<PlayerStatus>;
   currentTime!: Signal<number>;
   duration!: Signal<number>;
+  isRepeat!: Signal<boolean>;
+  isShuffle!: Signal<boolean>;
   onToggleSize = output<void>();
   img = viewChild<ElementRef<HTMLImageElement>>('img');
 
@@ -43,6 +49,8 @@ export class FullPlayerComponent implements OnInit, AfterViewInit {
   faPlay = faPlay;
   faPause = faPause;
   faArrowDown = faArrowDown;
+  faRepeat = faRepeat;
+  faShuffle = faShuffle;
 
   playerStatus = PlayerStatus;
 
@@ -60,6 +68,8 @@ export class FullPlayerComponent implements OnInit, AfterViewInit {
     this.status = this.playerService.status$;
     this.currentTime = this.playerService.currentTime$;
     this.duration = this.playerService.duration$;
+    this.isRepeat = this.playerService.isRepeat$;
+    this.isShuffle = this.playerService.isShuffle$;
     this.song = this.playerService.song$;
   }
 
@@ -108,5 +118,13 @@ export class FullPlayerComponent implements OnInit, AfterViewInit {
     const previousSong = this.songsService.getPreviousSong(this.song()!.id);
     this.playerService.setSong(previousSong);
     this.play();
+  }
+
+  toggleRepeat() {
+    this.playerService.toggleRepeat();
+  }
+
+  toggleShuffle() {
+    this.playerService.toggleShuffle();
   }
 }

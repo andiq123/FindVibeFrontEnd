@@ -5,7 +5,7 @@
     class="grid grid-flow-col gap-3 justify-start cursor-pointer w-full"
     (click)="toggleSize()"
   >
-    <div class="img w-20 rounded-xl overflow-hidden">
+    <div class="img w-16 rounded-xl overflow-hidden">
       <img
         class="object-fill w-full h-full"
         [src]="song()!.image"
@@ -14,8 +14,8 @@
       />
     </div>
     <div>
-      <h2 class="text-xl font-bold">{{ song()!.title }}</h2>
-      <p class="text-md">{{ song()!.artist }}</p>
+      <app-moving-title [title]="song()!.title" [isActive]="true" />
+      <p class="text-xs">{{ song()!.artist }}</p>
     </div>
   </div>
   <app-player-button

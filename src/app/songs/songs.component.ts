@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { SongsService } from './songs.service';
 import { SongComponent } from './song/song.component';
 import { SearchComponent } from './search/search.component';
@@ -17,4 +17,5 @@ export class SongsComponent {
   status = computed(() => this.songsService.status$());
 
   searchStatus = SearchStatus;
+  constructor() {}
 }
