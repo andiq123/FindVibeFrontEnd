@@ -31,10 +31,12 @@ export class SearchComponent implements OnInit {
 
   ngOnInit(): void {
     this.suggestions = this.suggestionsService.suggestions$;
+
     this.activatedRoute.queryParams.pipe(take(2)).subscribe((params) => {
       if (params['query']) {
         this.searchTerm.set(params['query']);
         this.submit();
+        return;
       }
     });
   }
@@ -48,11 +50,6 @@ export class SearchComponent implements OnInit {
   search(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
-
-    this.router.navigate([], {
-      queryParams: { query: value },
-      queryParamsHandling: 'merge',
-    });
 
     if (this.timeOut) {
       clearTimeout(this.timeOut);
@@ -70,6 +67,12 @@ export class SearchComponent implements OnInit {
   submit() {
     if (this.searchTerm() === '') return;
     this.suggestionsService.reset();
+
     this.songsService.searchSongs(this.searchTerm()).subscribe();
+
+    this.router.navigate([], {
+      queryParams: { query: this.searchTerm() },
+      queryParamsHandling: 'merge',
+    });
   }
 }
