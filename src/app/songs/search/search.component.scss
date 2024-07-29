@@ -1,0 +1,14 @@
+.slideDown {
+  animation: slideDown 0.1s ease-in-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-5%);
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

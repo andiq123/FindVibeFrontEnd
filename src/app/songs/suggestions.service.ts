@@ -1,18 +1,27 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable, signal } from '@angular/core';
+import { environment } from '../../environments/environment.development';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SuggestionsService {
+  baseUrl = environment.API_URL + '/suggestions?query=';
+  private suggestions = signal<string[]>([]);
+  suggestions$ = this.suggestions.asReadonly();
+
   constructor(private httpClient: HttpClient) {}
 
-  link =
-    'https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&?q=';
+  getSuggestions(term: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(this.baseUrl + term).pipe(
+      tap((suggestions) => {
+        this.suggestions.set(suggestions);
+      })
+    );
+  }
 
-  getSuggestions(term: string) {
-    return this.httpClient.get(this.link + term).subscribe((data) => {
-      console.log(data);
-    });
+  reset() {
+    this.suggestions.set([]);
   }
 }

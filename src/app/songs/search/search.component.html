@@ -4,7 +4,9 @@
     placeholder="Search..."
     name="searchTerm"
     class="bg-base-300 px-5 py-3 w-full mx-auto my-5 outline-none shadow-md rounded-lg"
-    [(ngModel)]="searchTerm"
+    [value]="searchTerm()"
+    (input)="search($event)"
+    autocomplete="off"
   />
 
   <button
@@ -14,4 +16,18 @@
   >
     <fa-icon class="text-xl" [icon]="faMagnifyingGlass"></fa-icon>
   </button>
+  @if(suggestions().length>0){
+  <ul
+    class="fixed bg-base-300 top-12 mt-5 p-3 flex flex-col gap-1 rounded-lg slideDown"
+  >
+    @for(suggestion of suggestions(); track i; let i = $index){
+    <li
+      class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-base-100"
+      (click)="addSuggestion(suggestion)"
+    >
+      {{ suggestion | titlecase }}
+    </li>
+    }
+  </ul>
+  }
 </form>
