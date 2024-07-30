@@ -16,6 +16,10 @@ export class SongsService {
 
   constructor(private httpService: HttpClient) {}
 
+  wakeServer(): Observable<void> {
+    return this.httpService.get<void>(this.baseApi + 'test');
+  }
+
   searchSongs(searchTerm: string): Observable<Song[]> {
     this.setStatusLoading();
     return this.httpService.get<Song[]>(this.baseApi + searchTerm).pipe(
@@ -28,10 +32,6 @@ export class SongsService {
         throw e;
       })
     );
-  }
-
-  wakeServer(): Observable<void> {
-    return this.httpService.get<void>(this.baseApi + 'test');
   }
 
   getPreviousSong(currentSongId: string): Song {
@@ -48,10 +48,7 @@ export class SongsService {
     ];
   }
 
-  getNextSong(currentSongId: string, randomSong = false): Song {
-    if (randomSong) {
-      return this.songs()[Math.floor(Math.random() * this.songs().length)];
-    }
+  getNextSong(currentSongId: string): Song {
     const songIndex = this.songs().findIndex(
       (song) => song.id === currentSongId
     );
@@ -61,6 +58,10 @@ export class SongsService {
     }
 
     return this.songs()[(songIndex + 1) % this.songs().length];
+  }
+
+  getRandomSongFromCurrentPlaylist(): Song {
+    return this.songs()[Math.floor(Math.random() * this.songs().length)];
   }
 
   private setStatusFinished() {

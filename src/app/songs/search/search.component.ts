@@ -31,7 +31,37 @@ export class SearchComponent implements OnInit {
 
   ngOnInit(): void {
     this.suggestions = this.suggestionsService.suggestions$;
+    this.checkAndSetIfQueryParamsExist();
+  }
 
+  searchBySuggestion(suggestion: string) {
+    this.searchTerm.set(suggestion);
+    this.submit();
+  }
+
+  search(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm.set(value);
+
+    if (this.searchTerm() === '') this.suggestionsService.reset();
+
+    if (this.timeOut) clearTimeout(this.timeOut);
+
+    this.timeOut = setTimeout(() => {
+      this.suggestionsService.getSuggestions(this.searchTerm()).subscribe();
+    }, 100);
+  }
+
+  submit() {
+    if (this.searchTerm() === '') return;
+
+    this.songsService.searchSongs(this.searchTerm()).subscribe();
+
+    this.setQueryParamsToCurrentSearchTerm();
+    this.suggestionsService.reset();
+  }
+
+  private checkAndSetIfQueryParamsExist() {
     this.activatedRoute.queryParams.pipe(take(2)).subscribe((params) => {
       if (params['query']) {
         this.searchTerm.set(params['query']);
@@ -41,35 +71,7 @@ export class SearchComponent implements OnInit {
     });
   }
 
-  addSuggestion(suggestion: string) {
-    this.searchTerm.set(suggestion);
-    this.submit();
-    this.suggestionsService.reset();
-  }
-
-  search(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.searchTerm.set(value);
-
-    if (this.timeOut) {
-      clearTimeout(this.timeOut);
-    }
-
-    this.timeOut = setTimeout(() => {
-      if (this.searchTerm() === '') {
-        this.suggestionsService.reset();
-        return;
-      }
-      this.suggestionsService.getSuggestions(this.searchTerm()).subscribe();
-    }, 200);
-  }
-
-  submit() {
-    if (this.searchTerm() === '') return;
-    this.suggestionsService.reset();
-
-    this.songsService.searchSongs(this.searchTerm()).subscribe();
-
+  private setQueryParamsToCurrentSearchTerm() {
     this.router.navigate([], {
       queryParams: { query: this.searchTerm() },
       queryParamsHandling: 'merge',

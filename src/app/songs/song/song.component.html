@@ -1,9 +1,9 @@
 <div
-  class="rounded-lg p-3 flex justify-between items-center"
+  class="rounded-lg py-1 px-2 flex justify-between items-center"
   [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
 >
   <div class="grid grid-flow-col gap-3 items-center">
-    <div class="w-16 rounded-xl overflow-hidden">
+    <div class="w-12 rounded-xl overflow-hidden">
       <img
         class="object-fill w-full h-full"
         [src]="song().image"

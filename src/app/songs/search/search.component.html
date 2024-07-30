@@ -18,14 +18,15 @@
   </button>
   @if(suggestions().length>0){
   <ul
-    class="absolute bg-base-300 top-12 mt-5 p-3 flex flex-col gap-1 rounded-lg slideDown"
+    class="absolute bg-base-300 top-12 mt-5 p-3 w-full flex flex-col gap-1 rounded-lg slideDown z-50 overflow-scroll max-h-56"
   >
     @for(suggestion of suggestions(); track i; let i = $index){
     <li
-      class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-base-100"
-      (click)="addSuggestion(suggestion)"
+      class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-base-100 flex gap-3 items-center"
+      (click)="searchBySuggestion(suggestion)"
     >
-      {{ suggestion | titlecase }}
+      <fa-icon class="text-xs" [icon]="faMagnifyingGlass"></fa-icon
+      >{{ suggestion | titlecase }}
     </li>
     }
   </ul>

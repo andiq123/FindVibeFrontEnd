@@ -28,6 +28,7 @@ import { PlayerStatus } from '../models/player.model';
 import { getDominantColor } from '@rtcoder/dominant-color';
 import { SongsService } from '../../songs/songs.service';
 import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
+import { SettingsService } from '../settings.service';
 
 @Component({
   selector: 'app-full-player',
@@ -63,15 +64,15 @@ export class FullPlayerComponent implements OnInit, AfterViewInit {
 
   constructor(
     private playerService: PlayerService,
-    private songsService: SongsService
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
     this.status = this.playerService.status$;
     this.currentTime = this.playerService.currentTime$;
     this.duration = this.playerService.duration$;
-    this.isRepeat = this.playerService.isRepeat$;
-    this.isShuffle = this.playerService.isShuffle$;
+    this.isRepeat = this.settingsService.isRepeat$;
+    this.isShuffle = this.settingsService.isShuffle$;
     this.song = this.playerService.song$;
   }
 
@@ -107,32 +108,22 @@ export class FullPlayerComponent implements OnInit, AfterViewInit {
 
   seekTime(event: Event) {
     const value = (event.target as HTMLInputElement).value;
-    this.playerService.setNewCurrentTime(+value);
+    this.playerService.setCurrentTime(+value);
   }
 
   nextSong() {
-    const nextSong = this.songsService.getNextSong(this.song()!.id);
-    this.playerService.setSong(nextSong);
-    this.play();
+    this.playerService.setNextSong();
   }
 
   previousSong() {
-    const previousSong = this.songsService.getPreviousSong(this.song()!.id);
-    this.playerService.setSong(previousSong);
-    this.play();
+    this.playerService.setNextSong();
   }
 
   toggleRepeat() {
-    this.playerService.toggleRepeat();
-    if (this.isShuffle()) {
-      this.playerService.toggleShuffle();
-    }
+    this.settingsService.toggleRepeat();
   }
 
   toggleShuffle() {
-    this.playerService.toggleShuffle();
-    if (this.isRepeat()) {
-      this.playerService.toggleRepeat();
-    }
+    this.settingsService.toggleShuffle();
   }
 }
