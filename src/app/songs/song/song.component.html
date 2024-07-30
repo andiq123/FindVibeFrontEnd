@@ -13,7 +13,11 @@
     </div>
     <div>
       <app-moving-title [title]="song().title" [isActive]="isActive()" />
-      <p class="text-xs">{{ song().artist }}</p>
+      <app-moving-title
+        [title]="song().artist"
+        [isActive]="isActive()"
+        classes="text-xs"
+      />
     </div>
   </div>
   <app-player-button

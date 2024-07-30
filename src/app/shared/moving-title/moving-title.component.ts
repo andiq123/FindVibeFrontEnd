@@ -9,6 +9,7 @@ import { Component, computed, input, OnInit, signal } from '@angular/core';
 })
 export class MovingTitleComponent {
   title = input.required<string>();
+  classes = input<string>('text-md font-bold');
   isActive = input<boolean>(false);
   offset = signal<number>(23);
 

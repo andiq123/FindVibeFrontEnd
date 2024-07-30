@@ -31,7 +31,8 @@
 
     <div class="mr-auto">
       <app-moving-title [title]="song()!.title" [isActive]="true" />
-      <div class="text-white text-lg mt-1">{{ song()!.artist }}</div>
+      <app-moving-title [title]="song()!.artist" [isActive]="true" />
+      <!-- <div class="text-white text-lg mt-1">{{ song()!.artist }}</div> -->
     </div>
 
     <div class="w-full">
