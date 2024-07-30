@@ -87,6 +87,7 @@ export class PlayerService {
 
   setNextSong() {
     if (this.settingsService.isRepeat$()) {
+      this.player().currentTime = 0;
       this.play();
       return;
     }
