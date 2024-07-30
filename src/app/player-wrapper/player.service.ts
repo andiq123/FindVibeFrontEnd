@@ -92,15 +92,14 @@ export class PlayerService {
       return;
     }
 
+    let songToBePlayed: Song;
     if (this.settingsService.isShuffle$()) {
-      const randomSong = this.songsService.getRandomSongFromCurrentPlaylist();
-      this.setSong(randomSong);
-      this.play();
-      return;
+      songToBePlayed = this.songsService.getRandomSongFromCurrentPlaylist();
+    } else {
+      songToBePlayed = this.songsService.getNextSong(this.song()!.id);
     }
 
-    const nextSong = this.songsService.getNextSong(this.song()!.id);
-    this.setSong(nextSong);
+    this.setSong(songToBePlayed);
     this.play();
   }
 
