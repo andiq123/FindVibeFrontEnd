@@ -18,7 +18,7 @@
   </button>
   @if(suggestions().length>0){
   <ul
-    class="absolute bg-base-300 top-12 mt-5 p-3 w-full flex flex-col gap-1 rounded-lg slideDown z-50 overflow-scroll max-h-56"
+    class="absolute bg-base-300 top-12 mt-5 p-3 w-full flex flex-col gap-1 rounded-lg slideDown z-50 overflow-y-scroll max-h-56"
   >
     @for(suggestion of suggestions(); track i; let i = $index){
     <li
