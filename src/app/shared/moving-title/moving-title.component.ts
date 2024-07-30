@@ -10,6 +10,7 @@ import { Component, computed, input, OnInit, signal } from '@angular/core';
 export class MovingTitleComponent {
   title = input.required<string>();
   isActive = input<boolean>(false);
+  offset = signal<number>(23);
 
   isLonger = computed(() => {
     return this.title().length > this.offset();
@@ -30,6 +31,4 @@ export class MovingTitleComponent {
     }
     return this.title();
   });
-
-  offset = signal<number>(30);
 }
