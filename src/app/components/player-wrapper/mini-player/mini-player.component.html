@@ -1,4 +1,4 @@
-<div class="bg-base-100 rounded-t-2xl p-3 fixed bottom-0 w-full slideUp">
+<div class="bg-base-200 rounded-t-2xl p-3 fixed bottom-0 w-full lg:w-[800px] lg:ml-40 slideUp">
   <div
     class="flex gap-3 justify-start items-center cursor-pointer w-full"
     (click)="toggleSize()"
@@ -6,8 +6,10 @@
     <div class="w-14 rounded-xl overflow-hidden">
       <img
         class="object-fill w-full h-full"
-        [src]="song()!.image"
+        [ngSrc]="song()!.image"
         [alt]="song()!.artist"
+        width="100"
+        height="100"
         referrerpolicy="no-referrer"
       />
     </div>

@@ -3,11 +3,12 @@ import { SongsService } from './songs.service';
 import { SongComponent } from './song/song.component';
 import { SearchComponent } from './search/search.component';
 import { SearchStatus } from './models/song.model';
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-songs',
   standalone: true,
-  imports: [SongComponent, SearchComponent],
+  imports: [SongComponent, SearchComponent, RouterLink],
   templateUrl: './songs.component.html',
   styleUrl: './songs.component.scss',
 })

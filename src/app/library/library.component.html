@@ -1,0 +1,42 @@
+<div class="w-[95%] mx-auto mt-16">
+  @if (!user()) {
+    <dialog class="modal h-96 mt-16" open>
+      <div class="modal-box shadow-none">
+        <h3 class="text-xl font-bold">FindVibe</h3>
+        <p class="py-2 text-lg">Your library is synced by your name!</p>
+        <div class="modal-action flex justify-center">
+          <form (ngSubmit)="setUpUser()" method="dialog" class="flex flex-col gap-4">
+            <label class="input input-bordered flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                class="h-4 w-4 opacity-70">
+                <path
+                  d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"/>
+              </svg>
+              <input name="username" type="text" class="grow" placeholder="Type..." [(ngModel)]="name"
+                     autocomplete="off"/>
+            </label>
+            <button class="btn btn-md w-full text-xl" type="submit">Save</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+  } @else {
+    <div class="flex justify-between items-center my-2">
+      <h1 class="font-bold text-2xl mb-2">Favorites</h1>
+      <button class="btn" (click)="changeUser()">Change User</button>
+    </div>
+    <ul class="flex flex-col gap-1 mb-24">
+      @for (song of songs(); track song.id) {
+        <li>
+          <app-song [song]="song"/>
+        </li>
+      } @empty {
+        <li class="text-center">Search for some songs</li>
+      }
+    </ul>
+  }
+
+</div>

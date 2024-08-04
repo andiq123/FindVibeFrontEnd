@@ -1,15 +1,17 @@
 import { Component, effect } from '@angular/core';
 import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
-import { PlayerWrapperComponent } from './player-wrapper/player-wrapper.component';
+import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
 import { Title } from '@angular/platform-browser';
-import { PlayerService } from './player-wrapper/player.service';
+import { PlayerService } from './components/player-wrapper/player.service';
 import { SongsService } from './songs/songs.service';
+import {RouterOutlet} from "@angular/router";
+import {NavigationComponent} from "./components/navigation/navigation.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SongsComponent, SearchComponent, PlayerWrapperComponent],
+  imports: [SongsComponent, SearchComponent, PlayerWrapperComponent, RouterOutlet, NavigationComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

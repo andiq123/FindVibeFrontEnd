@@ -1,28 +1,32 @@
-import { Injectable, signal } from '@angular/core';
-import { Song } from '../songs/models/song.model';
-import { PlayerStatus } from './models/player.model';
-import { SongsService } from '../songs/songs.service';
-import { SettingsService } from './settings.service';
+import {Injectable, signal} from '@angular/core';
+import {Song} from '../../songs/models/song.model';
+import {PlayerStatus} from './models/player.model';
+import {SongsService} from '../../songs/songs.service';
+import {SettingsService} from './settings.service';
+import {LibraryService} from "../../library/library.service";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlayerService {
   private song = signal<Song | null>(null);
+  song$ = this.song.asReadonly();
   private player = signal<HTMLAudioElement>(new Audio());
   private status = signal<PlayerStatus>(PlayerStatus.Stopped);
-  private currentTime = signal<number>(0);
-  private duration = signal<number>(0);
-
-  song$ = this.song.asReadonly();
   status$ = this.status.asReadonly();
+  private currentTime = signal<number>(0);
   currentTime$ = this.currentTime.asReadonly();
+  private duration = signal<number>(0);
   duration$ = this.duration.asReadonly();
 
   constructor(
     private songsService: SongsService,
-    private settingsService: SettingsService
-  ) {}
+    private settingsService: SettingsService,
+    private libraryService: LibraryService,
+    private router: Router
+  ) {
+  }
 
   registerEvents() {
     this.player().addEventListener('loadstart', () => {
@@ -80,12 +84,15 @@ export class PlayerService {
   }
 
   setPreviousSong() {
-    const previousSong = this.songsService.getPreviousSong(this.song()!.id);
+    const isLibraryRoute = this.router.url === "/library";
+    const previousSong = isLibraryRoute ? this.libraryService.getPreviousSong(this.song()!.id) : this.songsService.getPreviousSong(this.song()!.id);
     this.setSong(previousSong);
     this.play();
   }
 
   setNextSong() {
+    const isLibraryRoute = this.router.url === "/library";
+
     if (this.settingsService.isRepeat$()) {
       this.player().currentTime = 0;
       this.play();
@@ -94,9 +101,9 @@ export class PlayerService {
 
     let songToBePlayed: Song;
     if (this.settingsService.isShuffle$()) {
-      songToBePlayed = this.songsService.getRandomSongFromCurrentPlaylist();
+      songToBePlayed = isLibraryRoute ? this.libraryService.getRandomSongFromCurrentPlaylist() : this.songsService.getRandomSongFromCurrentPlaylist();
     } else {
-      songToBePlayed = this.songsService.getNextSong(this.song()!.id);
+      songToBePlayed = isLibraryRoute ? this.libraryService.getNextSong(this.song()!.id) : this.songsService.getNextSong(this.song()!.id);
     }
 
     this.setSong(songToBePlayed);

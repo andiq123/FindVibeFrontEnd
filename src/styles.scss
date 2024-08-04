@@ -9,6 +9,12 @@ html {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
 ::-webkit-scrollbar {
   display: none;
+}
+
+:root {
+  max-width: 1200px;
+  margin: 0 auto;
 }

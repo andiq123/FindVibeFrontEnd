@@ -12,8 +12,7 @@
 
 @keyframes cool3dArtwork {
   to {
-    transform: perspective(800px) rotateY(-5deg) translateY(-10px)
-      rotateX(10deg) scale(1);
+    transform: perspective(800px) rotateY(-5deg) translateY(-10px) rotateX(10deg) scale(1);
   }
 }
 

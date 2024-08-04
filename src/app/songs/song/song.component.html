@@ -3,26 +3,40 @@
   [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
 >
   <div class="grid grid-flow-col gap-3 items-center">
-    <div class="w-12 rounded-xl overflow-hidden">
+    <div class="w-14 rounded-lg overflow-hidden relative">
+      <app-player-button
+        [status]="status()"
+        (onPlay)="play()"
+        (onPause)="pause()"
+        classes="absolute top-0 h-full w-full backdrop-brightness-50"
+      />
       <img
         class="object-fill w-full h-full"
-        [src]="song().image"
+        [ngSrc]="song().image"
         [alt]="song().artist"
+        width="10"
+        height="10"
         referrerpolicy="no-referrer"
       />
     </div>
     <div>
-      <app-moving-title [title]="song().title" [isActive]="isActive()" />
+      <app-moving-title [title]="song().title" [isActive]="isActive()"/>
       <app-moving-title
         [title]="song().artist"
         [isActive]="isActive()"
         classes="text-xs"
       />
     </div>
+
+
   </div>
-  <app-player-button
-    [status]="status()"
-    (onPlay)="play()"
-    (onPause)="pause()"
-  />
+  @if (isAbleToAddToFav()) {
+    <button class="btn btn-md" (click)="toggleAddToFavorite()">
+      @if (isFavorited()) {
+        <fa-icon [icon]="favoritedHeart"/>
+      } @else {
+        <fa-icon [icon]="unFavoritedHeart"/>
+      }
+    </button>
+  }
 </div>
