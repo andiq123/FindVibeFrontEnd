@@ -30,7 +30,11 @@
     </div>
   </div>
   @if (isAbleToAddToFav()) {
-  <button class="btn btn-md w-14" (click)="toggleAddToFavorite()">
+  <button
+    class="btn btn-md w-14"
+    (click)="toggleAddToFavorite()"
+    [disabled]="isLoadingFavorite()"
+  >
     @if(isLoadingFavorite()){
     <span class="loading loading-spinner loading-md"></span>
     }@else{ @if (isFavorited()) {
@@ -42,7 +46,7 @@
   }
 </div>
 }@placeholder {
-<p class="rounded-lg py-1 px-2 flex justify-between items-center bg-base-200">
+<p class="rounded-lg py-2 px-3 flex justify-between items-center bg-base-200">
   Song is loading...
 </p>
 }

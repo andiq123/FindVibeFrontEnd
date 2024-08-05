@@ -1,5 +1,11 @@
 <div class="w-[95%] mx-auto mt-16">
-  @if (!isLoggedIn()) {<app-user-form /> } @else {
+  @if (!isLoggedIn()) {<app-user-form /> } @else { @if(songsAreLoading()){
+  <div class="flex justify-center w-fit mx-auto py-5 px-10">
+    <span class="loading loading-ball loading-lg"></span>
+    <span class="loading loading-ball loading-lg"></span>
+    <span class="loading loading-ball loading-lg"></span>
+  </div>
+  } @else {
   <div class="flex justify-between items-center my-2">
     <h1 class="font-bold text-2xl mb-2">Favorites</h1>
     <button class="btn" (click)="changeUser()">Change User</button>
@@ -13,5 +19,5 @@
     <li class="text-center">Search for some songs</li>
     }
   </ul>
-  }
+  } }
 </div>

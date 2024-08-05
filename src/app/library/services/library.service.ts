@@ -13,6 +13,9 @@ import { SongToAddFavorite } from '../models/songToAddFavorite.model';
 export class LibraryService {
   private songs = signal<Song[]>([]);
   songs$ = this.songs.asReadonly();
+  private loadingSongs = signal<boolean>(false);
+  loadingSongs$ = this.loadingSongs.asReadonly();
+
   private currentLoadingFavoriteSongIds = signal<string[]>([]);
   currentLoadingFavoriteSongIds$ =
     this.currentLoadingFavoriteSongIds.asReadonly();
@@ -20,11 +23,16 @@ export class LibraryService {
   constructor(private libraryBackService: LibraryBackService) {}
 
   setupLibrarySongs(userId: string) {
+    this.loadingSongs.set(true);
     return this.libraryBackService.getFavoritesSong(userId).pipe(
       take(1),
-      tap((songs) => this.songs.set(songs.songs)),
+      tap((songs) => {
+        this.songs.set(songs.songs);
+        this.loadingSongs.set(false);
+      }),
       catchError((err) => {
         this.songs.set([]);
+        this.loadingSongs.set(false);
         throw err;
       })
     );

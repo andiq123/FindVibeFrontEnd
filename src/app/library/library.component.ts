@@ -24,6 +24,7 @@ import { UserFormComponent } from './components/user-form/user-form.component';
 export class LibraryComponent implements OnInit {
   songs!: Signal<Song[]>;
   isLoggedIn!: Signal<boolean>;
+  songsAreLoading!: Signal<boolean>;
 
   constructor(
     private libraryService: LibraryService,
@@ -32,6 +33,7 @@ export class LibraryComponent implements OnInit {
 
   ngOnInit(): void {
     this.songs = this.libraryService.songs$;
+    this.songsAreLoading = this.libraryService.loadingSongs$;
     this.isLoggedIn = computed(() => !!this.userService.user$());
   }
 

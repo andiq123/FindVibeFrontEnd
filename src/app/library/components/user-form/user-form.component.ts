@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
+import { LibraryService } from '../../services/library.service';
 
 @Component({
   selector: 'app-user-form',
@@ -12,9 +13,14 @@ import { FormsModule } from '@angular/forms';
 export class UserFormComponent {
   name = signal<string>('');
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private libraryService: LibraryService
+  ) {}
 
   setUpUser() {
-    this.userService.registerUser(this.name()).subscribe();
+    this.userService.registerUser(this.name()).subscribe((user) => {
+      this.libraryService.setupLibrarySongs(user.id).subscribe();
+    });
   }
 }
