@@ -1,7 +1,7 @@
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Injectable, signal} from '@angular/core';
-import {environment} from '../../environments/environment.development';
-import {Observable, tap} from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
@@ -12,8 +12,7 @@ export class SuggestionsService {
   private suggestions = signal<string[]>([]);
   suggestions$ = this.suggestions.asReadonly();
 
-  constructor(private httpClient: HttpClient) {
-  }
+  constructor(private httpClient: HttpClient) {}
 
   getSuggestions(term: string): Observable<{ results: string[] }> {
     return this.httpClient.get<{ results: string[] }>(this.baseUrl + term).pipe(

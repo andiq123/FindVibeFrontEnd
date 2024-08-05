@@ -1,8 +1,8 @@
-import {Injectable, signal} from '@angular/core';
-import {SearchStatus, Song} from './models/song.model';
-import {HttpClient} from '@angular/common/http';
-import {catchError, Observable, tap} from 'rxjs';
-import {environment} from '../../environments/environment.development';
+import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { catchError, Observable, tap } from 'rxjs';
+import { SearchStatus, Song } from '../models/song.model';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
@@ -10,16 +10,11 @@ import {environment} from '../../environments/environment.development';
 export class SongsService {
   private songs = signal<Song[]>([]);
   private searchStatus = signal<SearchStatus>(SearchStatus.None);
-  private baseApi = environment.API_URL + "/api/songs/search?searchQuery=";
+  private baseApi = environment.API_URL + '/api/songs/search?searchQuery=';
   songs$ = this.songs.asReadonly();
   status$ = this.searchStatus.asReadonly();
 
-  constructor(private httpService: HttpClient) {
-  }
-
-  wakeServer(): Observable<void> {
-    return this.httpService.get<void>(this.baseApi + 'test');
-  }
+  constructor(private httpService: HttpClient) {}
 
   searchSongs(searchTerm: string): Observable<{ songs: Song[] }> {
     this.setStatusLoading();
@@ -47,8 +42,8 @@ export class SongsService {
     }
 
     return this.songs()[
-    (songIndex - 1 + this.songs().length) % this.songs().length
-      ];
+      (songIndex - 1 + this.songs().length) % this.songs().length
+    ];
   }
 
   getNextSong(currentSongId: string): Song {

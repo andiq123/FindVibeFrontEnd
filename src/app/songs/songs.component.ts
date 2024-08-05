@@ -1,9 +1,10 @@
-import { Component, computed, effect, inject } from '@angular/core';
-import { SongsService } from './songs.service';
+import { Component, computed, inject } from '@angular/core';
+
 import { SongComponent } from './song/song.component';
 import { SearchComponent } from './search/search.component';
 import { SearchStatus } from './models/song.model';
-import {RouterLink} from "@angular/router";
+import { RouterLink } from '@angular/router';
+import { SongsService } from './services/songs.service';
 
 @Component({
   selector: 'app-songs',

@@ -1,11 +1,11 @@
-import {Component, OnInit, signal, Signal} from '@angular/core';
-import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
-import {faMagnifyingGlass} from '@fortawesome/free-solid-svg-icons';
-import {FormsModule} from '@angular/forms';
-import {SongsService} from '../songs.service';
-import {SuggestionsService} from '../suggestions.service';
-import {TitleCasePipe} from '@angular/common';
-import {ActivatedRoute, Router} from '@angular/router';
+import { Component, OnInit, signal, Signal } from '@angular/core';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { FormsModule } from '@angular/forms';
+import { TitleCasePipe } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { SongsService } from '../services/songs.service';
+import { SuggestionsService } from '../services/suggestions.service';
 
 @Component({
   selector: 'app-search',
@@ -26,8 +26,7 @@ export class SearchComponent implements OnInit {
     private suggestionsService: SuggestionsService,
     private activatedRoute: ActivatedRoute,
     private router: Router
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     this.suggestions = this.suggestionsService.suggestions$;
@@ -47,7 +46,7 @@ export class SearchComponent implements OnInit {
       clearTimeout(this.timeOut);
       setTimeout(() => {
         this.suggestionsService.reset();
-      }, 200);
+      }, 300);
     } else {
       this.searchSuggestionByTimeOut();
     }
@@ -61,12 +60,12 @@ export class SearchComponent implements OnInit {
     await this.setQueryParamsToCurrentSearchTerm();
     setTimeout(() => {
       this.suggestionsService.reset();
-    }, 200);
+    }, 300);
   }
 
   private async setQueryParamsToCurrentSearchTerm() {
     await this.router.navigate([], {
-      queryParams: {query: this.searchTerm()},
+      queryParams: { query: this.searchTerm() },
       queryParamsHandling: 'merge',
     });
   }
@@ -82,7 +81,7 @@ export class SearchComponent implements OnInit {
   }
 
   private searchIfQueryPresent() {
-    const query = this.activatedRoute.snapshot.queryParams["query"];
+    const query = this.activatedRoute.snapshot.queryParams['query'];
     if (query) {
       this.searchTerm.set(query);
       this.songsService.searchSongs(this.searchTerm()).subscribe();

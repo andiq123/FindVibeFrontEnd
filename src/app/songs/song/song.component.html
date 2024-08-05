@@ -1,3 +1,4 @@
+@defer (on viewport){
 <div
   class="rounded-lg py-1 px-2 flex justify-between items-center"
   [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
@@ -20,23 +21,28 @@
       />
     </div>
     <div>
-      <app-moving-title [title]="song().title" [isActive]="isActive()"/>
+      <app-moving-title [title]="song().title" [isActive]="isActive()" />
       <app-moving-title
         [title]="song().artist"
         [isActive]="isActive()"
         classes="text-xs"
       />
     </div>
-
-
   </div>
   @if (isAbleToAddToFav()) {
-    <button class="btn btn-md" (click)="toggleAddToFavorite()">
-      @if (isFavorited()) {
-        <fa-icon [icon]="favoritedHeart"/>
-      } @else {
-        <fa-icon [icon]="unFavoritedHeart"/>
-      }
-    </button>
+  <button class="btn btn-md w-14" (click)="toggleAddToFavorite()">
+    @if(isLoadingFavorite()){
+    <span class="loading loading-spinner loading-md"></span>
+    }@else{ @if (isFavorited()) {
+    <fa-icon [icon]="favoritedHeart" />
+    } @else {
+    <fa-icon [icon]="unFavoritedHeart" />
+    } }
+  </button>
   }
 </div>
+}@placeholder {
+<p class="rounded-lg py-1 px-2 flex justify-between items-center bg-base-200">
+  Song is loading...
+</p>
+}

@@ -1,3 +1,15 @@
-<app-navigation/>
-<router-outlet/>
-<app-player-wrapper/>
+@if(!isAwakeServer()){
+<div class="w-full flex flex-col justify-center items-center gap-3 h-[50vh]">
+  <h1 class="font-bold text-3xl">FindVibe</h1>
+  @if(!serverIsDown()){
+  <p class="text-xl">Server is awakening...</p>
+  <span class="loading loading-dots loading-lg"></span>
+  }@else {
+  <p class="text-xl text-red-400">Server is down, please try again later...</p>
+  }
+</div>
+}@else {
+<app-navigation />
+<router-outlet />
+<app-player-wrapper />
+}
