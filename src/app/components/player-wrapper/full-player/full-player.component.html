@@ -3,11 +3,13 @@
   [class.slideDown]="isClosingAnimation()"
   #playerRef
 >
-  <div class="flex flex-col items-center justify-center h-full px-10 gap-3 lg:max-w-sm lg:mx-auto">
+  <div
+    class="flex flex-col items-center justify-center h-full px-10 gap-3 lg:max-w-sm lg:mx-auto"
+  >
     <img
       [ngSrc]="song()!.image"
       alt="Song Art BG"
-      style="width: 100%; height: auto;"
+      style="width: 100%; height: auto"
       class="absolute -z-10 opacity-30 blur-xl h-screen w-screen scale-110"
       width="500"
       height="500"
@@ -18,16 +20,16 @@
       class="rounded-md overflow-hidden shadow-2xl shadow-black cool3dArtworkAnimation relative"
     >
       @if (status() === playerStatus.Loading) {
-        <div
-          class="absolute h-full w-full z-10 bg-base-200 bg-opacity-30 backdrop-blur-sm flex flex-col justify-center items-center"
-        >
-          <span class="loading loading-ring loading-lg scale-150"></span>
-        </div>
+      <div
+        class="absolute h-full w-full z-10 bg-base-200 bg-opacity-30 backdrop-blur-sm flex flex-col justify-center items-center"
+      >
+        <span class="loading loading-ring loading-lg scale-150"></span>
+      </div>
       }
       <img
         [ngSrc]="song()!.image"
         alt="Song Art"
-        style="width: 100%; height: auto;"
+        style="width: 100%; height: auto"
         width="300"
         height="300"
         referrerpolicy="no-referrer"
@@ -36,19 +38,25 @@
 
     <div class="w-full flex justify-between items-center mt-3">
       <div class="mr-auto">
-        <app-moving-title [title]="song()!.title" [isActive]="true"/>
-        <app-moving-title [title]="song()!.artist" [isActive]="true"/>
+        <app-moving-title [title]="song()!.title" [isActive]="true" />
+        <app-moving-title [title]="song()!.artist" [isActive]="true" />
         <!-- <div class="text-white text-lg mt-1">{{ song()!.artist }}</div> -->
       </div>
       @if (isAbleToAddToFav()) {
-        <button class="btn btn-md bg-transparent border-none active:bg-transparent hover:bg-transparent" [style]="{color:dominantColor()|async}"
-                (click)="toggleAddToFavorite()">
-          @if (isFavorited()) {
-            <fa-icon [icon]="favoritedHeart" size="2x"/>
-          } @else {
-            <fa-icon [icon]="unFavoritedHeart" size="2x"/>
-          }
-        </button>
+      <button
+        class="btn btn-md w-14 bg-transparent border-none active:bg-transparent hover:bg-transparent disabled:bg-transparent"
+        [style]="{ color: dominantColor() | async }"
+        (click)="toggleAddToFavorite()"
+        [disabled]="isLoadingFavorite()"
+      >
+        @if(isLoadingFavorite()){
+        <span class="loading loading-spinner loading-xs"></span>
+        }@else{ @if (isFavorited()) {
+        <fa-icon [icon]="favoritedHeart" />
+        } @else {
+        <fa-icon [icon]="unFavoritedHeart" />
+        } }
+      </button>
       }
     </div>
 
@@ -60,7 +68,7 @@
         [max]="duration()"
         [value]="currentTime()"
         (input)="seekTime($event)"
-        [style]="{ '--range-shdw': dominantColor() |async }"
+        [style]="{ '--range-shdw': dominantColor() | async }"
         class="range transition-all duration-300"
       />
       <div class="flex justify-between">
@@ -74,33 +82,30 @@
         class="text-4xl btn bg-transparent btn-lg border-none w-16"
         (click)="previousSong()"
       >
-        <fa-icon [icon]="faStepBackward"/>
+        <fa-icon [icon]="faStepBackward" />
       </button>
 
-      @switch (status()) {
-        @case (playerStatus.Playing) {
-          <button
-            class="text-4xl btn bg-transparent btn-lg border-none w-16"
-            (click)="pause()"
-          >
-            <fa-icon [icon]="faPause"/>
-          </button>
-        }
-        @default {
-          <button
-            class="text-4xl btn bg-transparent btn-lg border-none w-16"
-            (click)="play()"
-          >
-            <fa-icon [icon]="faPlay"/>
-          </button>
-        }
-      }
+      @switch (status()) { @case (playerStatus.Playing) {
+      <button
+        class="text-4xl btn bg-transparent btn-lg border-none w-16"
+        (click)="pause()"
+      >
+        <fa-icon [icon]="faPause" />
+      </button>
+      } @default {
+      <button
+        class="text-4xl btn bg-transparent btn-lg border-none w-16"
+        (click)="play()"
+      >
+        <fa-icon [icon]="faPlay" />
+      </button>
+      } }
 
       <button
         class="text-4xl btn bg-transparent btn-lg border-none w-16"
         (click)="nextSong()"
       >
-        <fa-icon [icon]="faStepForward"/>
+        <fa-icon [icon]="faStepForward" />
       </button>
 
       <button
@@ -108,12 +113,15 @@
         [class]="{ 'bg-transparent': !isRepeat() }"
         (click)="toggleRepeat()"
       >
-        <fa-icon [icon]="faRepeat"/>
+        <fa-icon [icon]="faRepeat" />
       </button>
 
-      <button class="text-4xl btn btn-lg w-16 outline-none text-white" (click)="toggleSize()"
-              [style]="{'background-color': dominantColor()|async}">
-        <fa-icon [icon]="faArrowDown"/>
+      <button
+        class="text-4xl btn btn-lg w-16 outline-none text-white"
+        (click)="toggleSize()"
+        [style]="{ 'background-color': dominantColor() | async }"
+      >
+        <fa-icon [icon]="faArrowDown" />
       </button>
 
       <button
@@ -121,7 +129,7 @@
         [class]="{ 'bg-transparent': !isShuffle() }"
         (click)="toggleShuffle()"
       >
-        <fa-icon [icon]="faShuffle"/>
+        <fa-icon [icon]="faShuffle" />
       </button>
     </div>
   </div>

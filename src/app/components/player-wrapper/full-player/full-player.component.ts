@@ -52,6 +52,7 @@ export class FullPlayerComponent implements OnInit {
   isShuffle!: Signal<boolean>;
   isAbleToAddToFav!: Signal<boolean>;
   isFavorited!: Signal<boolean>;
+  isLoadingFavorite!: Signal<boolean>;
   onToggleSize = output<void>();
 
   faStepBackward = faStepBackward;
@@ -93,6 +94,11 @@ export class FullPlayerComponent implements OnInit {
     this.isAbleToAddToFav = computed(() => {
       return !!this.userService.user$();
     });
+    this.isLoadingFavorite = computed(() =>
+      this.libraryService
+        .currentLoadingFavoriteSongIds$()
+        .includes(this.song()!.id)
+    );
   }
 
   convertTime(timeToConvert: number): string {
