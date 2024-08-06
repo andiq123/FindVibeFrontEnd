@@ -7,6 +7,12 @@ export const convertTime = (time: number) => {
   return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
+export const addHerokutoLink = (link: string) => {
+  const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+  const proxiedUrl = `${corsProxy}${link}`;
+  return proxiedUrl;
+};
+
 export const convertKbToMb = (kb: number): number => {
   return Math.round(kb / 1024);
 };

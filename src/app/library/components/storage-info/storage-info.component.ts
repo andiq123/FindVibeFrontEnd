@@ -12,19 +12,35 @@ import { LibraryService } from '../../services/library.service';
 export class StorageInfoComponent implements OnInit {
   storageTotal!: Signal<number>;
   storageUsed!: Signal<number>;
+  loadingDownloading = signal<boolean>(false);
 
-  constructor(
-    private storageService: StorageService,
-    private libraryService: LibraryService
-  ) {}
+  libraryExists = signal<boolean>(false);
+
+  constructor(private storageService: StorageService) {}
 
   ngOnInit(): void {
     this.storageTotal = this.storageService.storageTotal;
     this.storageUsed = this.storageService.storageUsed;
     this.storageService.setUpStorage();
+    this.checkIfLibraryExists();
   }
 
-  downloadAll() {
-    this.libraryService.cacheAllSongs();
+  async downloadAll() {
+    this.loadingDownloading.set(true);
+    await this.storageService.cacheAllSongs();
+    await this.checkIfLibraryExists();
+    this.storageService.setUpStorage();
+    this.loadingDownloading.set(false);
+  }
+
+  async removeCache() {
+    await this.storageService.removeCache();
+    this.storageService.setUpStorage();
+    await this.checkIfLibraryExists();
+  }
+
+  private async checkIfLibraryExists() {
+    const exists = await caches.has('library');
+    this.libraryExists.set(exists);
   }
 }

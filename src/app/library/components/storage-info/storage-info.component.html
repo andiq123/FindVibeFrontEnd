@@ -2,7 +2,14 @@
   <p class="text-xl font-bold">Storage info</p>
 
   <div class="flex items-center gap-3">
-    <button class="btn" (click)="downloadAll()">Download All</button>
+    <button class="btn" (click)="downloadAll()">
+      Download All @if(loadingDownloading()){
+      <span class="loading loading-spinner loading-md"></span>
+      }
+    </button>
+    @if(libraryExists()){
+    <button class="btn" (click)="removeCache()">Rm Lib</button>
+    }
     <progress
       class="progress progress-primary w-56"
       [value]="storageUsed()"

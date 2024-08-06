@@ -15,6 +15,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../shared/favorite-button/favorite-button.component';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { addHerokutoLink } from '../../utils/utils';
 
 @Component({
   selector: 'app-song',
@@ -70,9 +71,7 @@ export class SongComponent implements OnInit {
 
   async checkIfAvailableOffline() {
     const songCache = await caches.open('library');
-    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-
-    const proxiedUrl = `${corsProxy}${this.song().link}`;
+    const proxiedUrl = addHerokutoLink(this.song().link);
     const isAvailable = await songCache.match(proxiedUrl);
     this.song().downloaded = !!isAvailable;
   }

@@ -118,7 +118,7 @@ export class AppComponent implements OnInit {
         artist: this.playerService.song$()?.artist,
         artwork: [
           {
-            src: this.playerService.song$()!.image,
+            src: this.playerService.song$()?.image || '',
             sizes: '512x512',
             type: 'image/png',
           },

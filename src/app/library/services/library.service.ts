@@ -20,38 +20,7 @@ export class LibraryService {
   currentLoadingFavoriteSongIds$ =
     this.currentLoadingFavoriteSongIds.asReadonly();
 
-  constructor(
-    private libraryBackService: LibraryBackService,
-    private storageService: StorageService
-  ) {}
-
-  async cacheAllSongs() {
-    const cachedLibrary = await caches.open('library');
-    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-
-    this.songs().forEach(async (song) => {
-      const proxiedUrl = `${corsProxy}${song.link}`;
-
-      const response = await fetch(proxiedUrl, {
-        method: 'GET',
-        headers: {
-          Origin: window.location.origin,
-        },
-      });
-      await cachedLibrary.add(response.url);
-
-      this.songs.update((prevSongs) =>
-        prevSongs.map((x) => {
-          if (x.id === song.id) {
-            x.downloaded = true;
-          }
-          return x;
-        })
-      );
-
-      this.storageService.setUpStorage();
-    });
-  }
+  constructor(private libraryBackService: LibraryBackService) {}
 
   setupLibrarySongs(userId: string) {
     this.loadingSongs.set(true);
@@ -105,6 +74,17 @@ export class LibraryService {
           prevSongs.filter((song) => song.link !== link)
         );
         this.removeSongFromLoadingFavorites(id);
+      })
+    );
+  }
+
+  setSongDownloaded(songId: string) {
+    this.songs.update((prevSongs) =>
+      prevSongs.map((x) => {
+        if (x.id === songId) {
+          x.downloaded = true;
+        }
+        return x;
       })
     );
   }
