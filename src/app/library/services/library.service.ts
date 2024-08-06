@@ -23,7 +23,6 @@ export class LibraryService {
     effect(async () => {
       if (this.songs().length > 0) {
         await this.cacheAllSongs();
-        console.log('finished');
       }
     });
   }
