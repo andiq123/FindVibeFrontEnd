@@ -59,13 +59,7 @@ export class PlayerService {
       this.updateDuration(this.player().duration);
     });
 
-    navigator.mediaSession.setActionHandler('nexttrack', () => {
-      this.setNextSong();
-    });
-
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
-      this.setPreviousSong();
-    });
+    this.player().controls = false;
   }
 
   setSong(song: Song) {

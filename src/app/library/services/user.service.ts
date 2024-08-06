@@ -25,6 +25,7 @@ export class UserService {
   }
 
   registerUser(userName: string) {
+    userName = userName.toLocaleLowerCase();
     return this.httpClient
       .post<User>(this.baseUrl + '/users', { userName })
       .pipe(

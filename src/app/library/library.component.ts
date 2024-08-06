@@ -13,17 +13,19 @@ import { User } from './models/user.model';
 import { LibraryService } from './services/library.service';
 import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-library',
   standalone: true,
-  imports: [SongComponent, UserFormComponent],
+  imports: [SongComponent, UserFormComponent, TitleCasePipe],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
 })
 export class LibraryComponent implements OnInit {
   songs!: Signal<Song[]>;
   isLoggedIn!: Signal<boolean>;
+  username!: Signal<string>;
   songsAreLoading!: Signal<boolean>;
 
   constructor(
@@ -35,6 +37,7 @@ export class LibraryComponent implements OnInit {
     this.songs = this.libraryService.songs$;
     this.songsAreLoading = this.libraryService.loadingSongs$;
     this.isLoggedIn = computed(() => !!this.userService.user$());
+    this.username = computed(() => this.userService.user$()?.name || '');
   }
 
   changeUser() {

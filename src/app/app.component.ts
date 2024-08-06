@@ -55,6 +55,47 @@ export class AppComponent implements OnInit {
       }
       this.title.setTitle('FindVibe');
     });
+
+    // Media Session
+    effect(() => {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: this.playerService.song$()?.title,
+        artist: this.playerService.song$()?.artist,
+        artwork: [
+          {
+            src: this.playerService.song$()!.image,
+            sizes: '512x512',
+            type: 'image/png',
+          },
+        ],
+      });
+
+      navigator.mediaSession.setPositionState({
+        duration: this.playerService.duration$(),
+        playbackRate: 1,
+        position: this.playerService.currentTime$(),
+      });
+    });
+
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+      this.playerService.setNextSong();
+    });
+
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+      this.playerService.setPreviousSong();
+    });
+
+    navigator.mediaSession.setActionHandler('play', () => {
+      this.playerService.play();
+    });
+
+    navigator.mediaSession.setActionHandler('pause', () => {
+      this.playerService.pause();
+    });
+
+    navigator.mediaSession.setActionHandler('stop', () => {
+      this.playerService.stop();
+    });
   }
 
   ngOnInit(): void {
