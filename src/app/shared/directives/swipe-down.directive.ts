@@ -21,7 +21,6 @@ export class SwipeDownDirective {
 
   @HostListener('touchstart', ['$event'])
   onSwipeStart(event: TouchEvent) {
-    event.preventDefault();
     const currentPixels = event.touches[0].clientY;
     this.offsetPixels.set(currentPixels);
     this.startTime.set(new Date());
@@ -29,7 +28,6 @@ export class SwipeDownDirective {
 
   @HostListener('touchmove', ['$event'])
   onSwipeMove(event: TouchEvent) {
-    event.preventDefault();
     const currentPixels = event.touches[0].clientY;
     if (this.offsetPixels() > this.swipeStartTrigger) return;
     this.topSignal.set(currentPixels - this.offsetPixels());
