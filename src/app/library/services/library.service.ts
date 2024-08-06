@@ -21,14 +21,16 @@ export class LibraryService {
 
   constructor(private libraryBackService: LibraryBackService) {}
 
-  // cacheAllSongs() {
-  //   this.songs().forEach(async (x) => {
-  //     const cacheLibrary = await caches.open('library');
-  //     cacheLibrary.add('https://corsproxy.io/?' + x.link);
-  //   });
-  //   const ca = caches.open('library');
+  // async cacheAllSongs() {
+  //   const cacheLibrary = await caches.open('library');
+  //   const link = 'https://cors-anywhere.herokuapp.com/' + this.songs()[0].link;
+  //   await cacheLibrary.add(link);
+  //   // this.songs().forEach(async (x) => {
+  //   //   await cacheLibrary.add(x.link);
+  //   // });
 
-  //   console.log(ca);
+  //   const cachedUrl = await cacheLibrary.keys(link);
+  //   console.log(cachedUrl);
   // }
 
   setupLibrarySongs(userId: string) {
