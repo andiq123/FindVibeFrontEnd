@@ -113,8 +113,6 @@ export class AppComponent implements OnInit {
   private setupNavigationMedia() {
     // Media Session
     effect(() => {
-      if (!this.playerService.song$()) return;
-
       navigator.mediaSession.metadata = new MediaMetadata({
         title: this.playerService.song$()?.title,
         artist: this.playerService.song$()?.artist,

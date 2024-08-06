@@ -32,8 +32,8 @@
       "urls": ["/api/**"],
       "cacheConfig": {
         "maxSize": 100,
-        "maxAge": "300d",
-        "timeout": "1s",
+        "maxAge": "200d",
+        "timeout": "10s",
         "strategy": "freshness"
       }
     }
