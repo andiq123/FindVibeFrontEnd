@@ -33,6 +33,7 @@ export class AppComponent implements OnInit {
   onToggleSize() {}
   isAwakeServer = signal<boolean>(false);
   serverIsDown = signal<boolean>(false);
+  siteIsOffline = signal<boolean>(false);
 
   constructor(
     private title: Title,
@@ -44,6 +45,8 @@ export class AppComponent implements OnInit {
     private swUpdate: SwUpdate,
     @Inject(DOCUMENT) private document: Document
   ) {
+    this.siteIsOffline.set(navigator.onLine === false);
+
     swUpdate.versionUpdates
       .pipe(
         filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
