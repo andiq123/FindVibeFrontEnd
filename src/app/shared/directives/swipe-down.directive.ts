@@ -23,7 +23,6 @@ export class SwipeDownDirective {
   onSwipeStart(event: TouchEvent) {
     event.preventDefault();
     const currentPixels = event.touches[0].clientY;
-    if (currentPixels > this.swipeStartTrigger) return;
     this.offsetPixels.set(currentPixels);
     this.startTime.set(new Date());
   }
@@ -32,7 +31,7 @@ export class SwipeDownDirective {
   onSwipeMove(event: TouchEvent) {
     event.preventDefault();
     const currentPixels = event.touches[0].clientY;
-    if (currentPixels > this.swipeStartTrigger) return;
+    if (this.offsetPixels() > this.swipeStartTrigger) return;
     this.topSignal.set(currentPixels - this.offsetPixels());
     this.top = `${this.topSignal()}px`;
   }
@@ -48,6 +47,8 @@ export class SwipeDownDirective {
     } else {
       this.returnTopToZeroSmoothly();
     }
+
+    this.offsetPixels.set(0);
   }
 
   private returnTopToZeroSmoothly() {
