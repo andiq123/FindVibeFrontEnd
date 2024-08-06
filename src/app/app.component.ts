@@ -47,6 +47,7 @@ export class AppComponent implements OnInit {
       const body = this.document.querySelector('body');
       body?.classList.toggle('noScroll', !isMiniPlayer);
     });
+
     effect(() => {
       const song = this.playerService.song$();
       if (song) {
