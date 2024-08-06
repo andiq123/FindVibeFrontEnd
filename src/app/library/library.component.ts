@@ -49,6 +49,7 @@ export class LibraryComponent implements OnInit {
     this.isLoggedIn = computed(() => !!this.userService.user$());
     this.username = computed(() => this.userService.user$()?.name || '');
     this.isServerDown = this.settingsService.isServerDown$;
+    this.libraryService.updateSilentLibrarySongs(this.username());
   }
 
   changeUser() {

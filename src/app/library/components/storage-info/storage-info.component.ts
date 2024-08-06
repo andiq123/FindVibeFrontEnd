@@ -16,10 +16,7 @@ export class StorageInfoComponent implements OnInit {
     return this.storageUsed() / this.storageTotal();
   });
 
-  constructor(
-    private storageService: StorageService,
-    private libraryService: LibraryService
-  ) {}
+  constructor(private storageService: StorageService) {}
 
   ngOnInit(): void {
     this.storageTotal = this.storageService.storageTotal;
@@ -27,6 +24,6 @@ export class StorageInfoComponent implements OnInit {
   }
 
   downloadAll() {
-    this.libraryService.cacheAllSongs();
+    // this.libraryService.cacheAllSongs();
   }
 }

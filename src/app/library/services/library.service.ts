@@ -22,15 +22,15 @@ export class LibraryService {
 
   constructor(private libraryBackService: LibraryBackService) {}
 
-  cacheAllSongs() {
-    this.songs().forEach(async (x) => {
-      const cacheLibrary = await caches.open('library');
-      cacheLibrary.add('https://corsproxy.io/?' + x.link);
-    });
-    const ca = caches.open('library');
+  // cacheAllSongs() {
+  //   this.songs().forEach(async (x) => {
+  //     const cacheLibrary = await caches.open('library');
+  //     cacheLibrary.add('https://corsproxy.io/?' + x.link);
+  //   });
+  //   const ca = caches.open('library');
 
-    console.log(ca);
-  }
+  //   console.log(ca);
+  // }
 
   setupLibrarySongs(userId: string) {
     this.loadingSongs.set(true);
@@ -44,6 +44,15 @@ export class LibraryService {
         this.songs.set([]);
         this.loadingSongs.set(false);
         throw err;
+      })
+    );
+  }
+
+  updateSilentLibrarySongs(userId: string) {
+    return this.libraryBackService.getFavoritesSong(userId).pipe(
+      take(1),
+      tap((songs) => {
+        this.songs.set(songs.songs);
       })
     );
   }

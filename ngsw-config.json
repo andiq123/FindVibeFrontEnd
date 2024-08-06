@@ -29,11 +29,22 @@
   "dataGroups": [
     {
       "name": "api",
-      "urls": ["/api/**", "https://cdn.muzkan.net/**"],
+      "urls": ["/api/**"],
       "cacheConfig": {
         "maxSize": 100,
         "maxAge": "300d",
-        "timeout": "5s"
+        "timeout": "5s",
+        "strategy": "freshness"
+      }
+    },
+    {
+      "name": "songsource",
+      "urls": ["https://cdn.muzkan.net/**?h=*"],
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "300d",
+        "timeout": "3s",
+        "strategy": "performance"
       }
     }
   ]
