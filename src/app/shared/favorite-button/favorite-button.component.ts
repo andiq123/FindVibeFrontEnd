@@ -46,12 +46,14 @@ export class FavoriteButtonComponent implements OnInit {
 
   toggleAddToFavorite() {
     if (this.isFavorited()) {
-      this.libraryService.removeFromFavorites(this.song().id, this.song().link);
+      this.libraryService
+        .removeFromFavorites(this.song().id, this.song().link)
+        .subscribe();
     } else {
-      this.libraryService.addToFavorites(
-        this.song(),
-        this.userService.user$()!.id
-      );
+      console.log(this.userService.user$()!.name);
+      this.libraryService
+        .addToFavorites(this.song(), this.userService.user$()!.id)
+        .subscribe();
     }
   }
 }

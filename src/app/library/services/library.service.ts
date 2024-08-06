@@ -5,6 +5,7 @@ import { LibraryBackService } from './library-back.service';
 import { catchError, tap } from 'rxjs';
 import { Song } from '../../songs/models/song.model';
 import { SongToAddFavorite } from '../models/songToAddFavorite.model';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,13 +20,10 @@ export class LibraryService {
   currentLoadingFavoriteSongIds$ =
     this.currentLoadingFavoriteSongIds.asReadonly();
 
-  constructor(private libraryBackService: LibraryBackService) {
-    effect(async () => {
-      if (this.songs().length > 0) {
-        await this.cacheAllSongs();
-      }
-    });
-  }
+  constructor(
+    private libraryBackService: LibraryBackService,
+    private storageService: StorageService
+  ) {}
 
   async cacheAllSongs() {
     const cachedLibrary = await caches.open('library');
@@ -41,6 +39,17 @@ export class LibraryService {
         },
       });
       await cachedLibrary.add(response.url);
+
+      this.songs.update((prevSongs) =>
+        prevSongs.map((x) => {
+          if (x.id === song.id) {
+            x.downloaded = true;
+          }
+          return x;
+        })
+      );
+
+      this.storageService.setUpStorage();
     });
   }
 
@@ -79,24 +88,25 @@ export class LibraryService {
       userId: userId,
     };
 
-    this.libraryBackService.addToFavorites(favoriteSong).subscribe(() => {
-      this.songs.update((prevSongs) => [...prevSongs, song]);
-      this.removeSongFromLoadingFavorites(song.id);
-    });
+    return this.libraryBackService.addToFavorites(favoriteSong).pipe(
+      tap(() => {
+        this.songs.update((prevSongs) => [...prevSongs, song]);
+        this.removeSongFromLoadingFavorites(song.id);
+      })
+    );
   }
 
   removeFromFavorites(id: string, link: string) {
     this.addSongToLoadingFavorites(id);
     const songId = this.songs().find((x) => x.link === link)!.id;
-    this.libraryBackService
-      .removeFromFavorites(songId)
-      .pipe()
-      .subscribe(() => {
+    return this.libraryBackService.removeFromFavorites(songId).pipe(
+      tap(() => {
         this.songs.update((prevSongs) =>
           prevSongs.filter((song) => song.link !== link)
         );
         this.removeSongFromLoadingFavorites(id);
-      });
+      })
+    );
   }
 
   getPreviousSong(currentSongId: string): Song {

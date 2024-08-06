@@ -1,4 +1,11 @@
-import { Component, computed, input, OnInit, Signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  OnInit,
+  signal,
+  Signal,
+} from '@angular/core';
 import { Song } from '../models/song.model';
 import { PlayerService } from '../../components/player-wrapper/player.service';
 import { PlayerStatus } from '../../components/player-wrapper/models/player.model';
@@ -6,6 +13,8 @@ import { PlayerButtonComponent } from '../../shared/player-button/player-button.
 import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
 import { NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../shared/favorite-button/favorite-button.component';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-song',
@@ -15,6 +24,7 @@ import { FavoriteButtonComponent } from '../../shared/favorite-button/favorite-b
     MovingTitleComponent,
     NgOptimizedImage,
     FavoriteButtonComponent,
+    FontAwesomeModule,
   ],
   templateUrl: './song.component.html',
   styleUrl: './song.component.scss',
@@ -22,8 +32,10 @@ import { FavoriteButtonComponent } from '../../shared/favorite-button/favorite-b
 export class SongComponent implements OnInit {
   song = input.required<Song>();
   isActive!: Signal<boolean>;
+  isFavoritePage = input<boolean>(false);
 
   status!: Signal<PlayerStatus>;
+  faCheck = faCheck;
 
   constructor(private playerService: PlayerService) {}
 
@@ -37,6 +49,10 @@ export class SongComponent implements OnInit {
       }
       return PlayerStatus.Paused;
     });
+
+    if (this.isFavoritePage()) {
+      this.checkIfAvailableOffline().then(() => {});
+    }
   }
 
   async play() {
@@ -50,5 +66,14 @@ export class SongComponent implements OnInit {
 
   pause() {
     this.playerService.pause();
+  }
+
+  async checkIfAvailableOffline() {
+    const songCache = await caches.open('library');
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+
+    const proxiedUrl = `${corsProxy}${this.song().link}`;
+    const isAvailable = await songCache.match(proxiedUrl);
+    this.song().downloaded = !!isAvailable;
   }
 }

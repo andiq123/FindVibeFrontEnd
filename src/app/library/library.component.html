@@ -1,12 +1,29 @@
 <div class="w-[95%] mx-auto mt-16">
-  @if (!isLoggedIn()) {<app-user-form /> } @else { @if(songsAreLoading()){
-  <div class="flex justify-center w-fit mx-auto py-5 px-10">
-    <span class="loading loading-ball loading-lg"></span>
-    <span class="loading loading-ball loading-lg"></span>
-    <span class="loading loading-ball loading-lg"></span>
+  @if (!isLoggedIn()) { @if(!userLoading()){ <app-user-form />}@else {
+  <div
+    class="flex flex-col items-center justify-center w-fit mx-auto py-5 px-10"
+  >
+    <p class="text-center font-bold">User loading...</p>
+    <div>
+      <span class="loading loading-ball loading-lg"></span>
+      <span class="loading loading-ball loading-lg"></span>
+      <span class="loading loading-ball loading-lg"></span>
+    </div>
+  </div>
+  } } @else { @if(songsAreLoading()){
+  <div
+    class="flex flex-col items-center justify-center w-fit mx-auto py-5 px-10"
+  >
+    <p class="text-center font-bold">Songs loading...</p>
+    <div>
+      <span class="loading loading-ball loading-lg"></span>
+      <span class="loading loading-ball loading-lg"></span>
+      <span class="loading loading-ball loading-lg"></span>
+    </div>
   </div>
   } @else {
   <div class="flex flex-col">
+    <app-storage-info />
     <div class="flex justify-between items-center my-2">
       <h1 class="font-bold text-2xl mb-2">
         {{ username() | titlecase }}'s Favorites
@@ -16,14 +33,14 @@
     <ul class="flex flex-col gap-1 mb-24">
       @for (song of songs(); track song.id) {
       <li>
-        <app-song [song]="song" />
+        <app-song [song]="song" [isFavoritePage]="true" />
       </li>
       } @empty {
       <li class="text-center">Search for some songs</li>
       }
     </ul>
   </div>
-  } @if (isServerDown()) {
+  }@if (isServerDown()) {
   <div class="flex justify-between my-3 items-center border border-primary p-3">
     <p class="font-bold text-2xl text-red-300">Server is down...</p>
     <button class="btn" (click)="reloadPage()">Reload Page</button>

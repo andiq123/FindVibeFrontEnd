@@ -12,18 +12,19 @@ import { LibraryService } from '../../services/library.service';
 export class StorageInfoComponent implements OnInit {
   storageTotal!: Signal<number>;
   storageUsed!: Signal<number>;
-  progress = computed(() => {
-    return this.storageUsed() / this.storageTotal();
-  });
 
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private libraryService: LibraryService
+  ) {}
 
   ngOnInit(): void {
     this.storageTotal = this.storageService.storageTotal;
     this.storageUsed = this.storageService.storageUsed;
+    this.storageService.setUpStorage();
   }
 
   downloadAll() {
-    // this.libraryService.cacheAllSongs();
+    this.libraryService.cacheAllSongs();
   }
 }

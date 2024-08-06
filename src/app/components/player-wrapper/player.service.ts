@@ -69,11 +69,9 @@ export class PlayerService {
     const proxiedUrl = `${corsProxy}${song.link}`;
     const inCache = await cachedLibrary.match(proxiedUrl);
     if (inCache) {
-      console.log('found in cache');
       const blob = await inCache!.blob();
       this.player().src = URL.createObjectURL(blob);
     } else {
-      console.log('not found in cache');
       this.player().src = song.link;
     }
 

@@ -7,7 +7,9 @@ import { convertKbToGb, convertKbToMb, convertMbToGb } from '../../utils/utils';
 export class StorageService {
   storageTotal = signal<number>(0);
   storageUsed = signal<number>(0);
-  constructor() {
+  constructor() {}
+
+  setUpStorage() {
     navigator.storage.estimate().then((data) => {
       this.storageTotal.set(convertKbToGb(data.quota!));
       this.storageUsed.set(convertKbToGb(data.usage!));

@@ -30,6 +30,12 @@
     </div>
   </div>
   <div class="flex gap-3">
+    @if(song().downloaded){
+    <button class="btn cursor-default">
+      <fa-icon [icon]="faCheck" />
+    </button>
+    }
+
     <app-favorite-button [song]="song()" />
   </div>
 </div>

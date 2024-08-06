@@ -11,6 +11,8 @@ export class UserService {
   private baseUrl = environment.API_URL + '/api';
   private user = signal<User | null>(null);
   user$ = this.user.asReadonly();
+  private userLoading = signal<boolean>(false);
+  userLoading$ = this.userLoading.asReadonly();
 
   constructor(private httpClient: HttpClient) {}
 
@@ -24,6 +26,7 @@ export class UserService {
   }
 
   registerUser(userName: string) {
+    this.userLoading.set(true);
     userName = userName.toLocaleLowerCase();
     return this.httpClient
       .post<User>(this.baseUrl + '/users', { userName })
@@ -31,6 +34,7 @@ export class UserService {
         tap((user: User) => {
           this.user.set(user);
           this.setUserToLocalStorage(user);
+          this.userLoading.set(false);
         })
       );
   }

@@ -36,6 +36,7 @@ export class LibraryComponent implements OnInit {
   username!: Signal<string>;
   songsAreLoading!: Signal<boolean>;
   isServerDown!: Signal<boolean>;
+  userLoading!: Signal<boolean>;
 
   constructor(
     private libraryService: LibraryService,
@@ -50,6 +51,7 @@ export class LibraryComponent implements OnInit {
     this.username = computed(() => this.userService.user$()?.name || '');
     this.isServerDown = this.settingsService.isServerDown$;
     this.libraryService.updateSilentLibrarySongs(this.username());
+    this.userLoading = this.userService.userLoading$;
   }
 
   changeUser() {
