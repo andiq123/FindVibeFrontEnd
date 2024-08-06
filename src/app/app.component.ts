@@ -1,17 +1,10 @@
-import {
-  Component,
-  effect,
-  Inject,
-  OnInit,
-  Signal,
-  signal,
-} from '@angular/core';
+import { Component, effect, Inject, OnInit } from '@angular/core';
 import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
 import { Title } from '@angular/platform-browser';
 import { PlayerService } from './components/player-wrapper/player.service';
-import { Router, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { WakeService } from './services/wake.service';
 import { catchError, filter, tap } from 'rxjs';

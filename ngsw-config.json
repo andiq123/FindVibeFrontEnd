@@ -25,5 +25,16 @@
         ]
       }
     }
+  ],
+  "dataGroups": [
+    {
+      "name": "api",
+      "urls": ["/api/**", "https://cdn.muzkan.net/**"],
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "1y",
+        "timeout": "10s"
+      }
+    }
   ]
 }
