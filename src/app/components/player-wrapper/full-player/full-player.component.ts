@@ -31,15 +31,6 @@ import { UserService } from '../../../library/services/user.service';
 import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
 import { SwipeDownDirective } from '../../../shared/directives/swipe-down.directive';
 
-const song = {
-  id: 'b24bdcdf-1149-48f4-8a99-0b365eccf9bc',
-  title: 'Modul Vara',
-  artist: 'Iuliana Beregoi',
-  image:
-    'https://lh3.googleusercontent.com/58DnMXyby-UfoPDQo7mEjO0DodKLwpiRWVQAelhxkEwbnGbDhAaG5WBTSLb5X6fAv475p8FQ4Yz85V4B=w350-h350-l90-rj',
-  link: 'https://cdn.muzkan.net/?h=JGraYpdVSC4gwKZ7w0kQAsVAiNCnckikPr2ScywR4pFGHNpSaGljNfm4dGOuNDUJhkGXyqx-m5QA',
-};
-
 @Component({
   selector: 'app-full-player',
   standalone: true,
@@ -80,9 +71,7 @@ export class FullPlayerComponent implements OnInit {
 
   constructor(
     private playerService: PlayerService,
-    private settingsService: SettingsService,
-    private libraryService: LibraryService,
-    private userService: UserService
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
@@ -91,8 +80,7 @@ export class FullPlayerComponent implements OnInit {
     this.duration = this.playerService.duration$;
     this.isRepeat = this.settingsService.isRepeat$;
     this.isShuffle = this.settingsService.isShuffle$;
-    // this.song = this.playerService.song$;
-    this.song = signal<Song>(song);
+    this.song = this.playerService.song$;
   }
 
   convertTime(timeToConvert: number): string {
