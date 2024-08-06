@@ -30,6 +30,7 @@ import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { faHeart as unFavoritedHeart } from '@fortawesome/free-regular-svg-icons';
 import { LibraryService } from '../../../library/services/library.service';
 import { UserService } from '../../../library/services/user.service';
+import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
 
 @Component({
   selector: 'app-full-player',
@@ -39,6 +40,7 @@ import { UserService } from '../../../library/services/user.service';
     MovingTitleComponent,
     NgOptimizedImage,
     AsyncPipe,
+    FavoriteButtonComponent,
   ],
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',

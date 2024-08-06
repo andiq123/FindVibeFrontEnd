@@ -13,19 +13,16 @@ import { PlayerStatus } from '../../components/player-wrapper/models/player.mode
 import { PlayerButtonComponent } from '../../shared/player-button/player-button.component';
 import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
 import { NgOptimizedImage } from '@angular/common';
-import { faHeart as favoritedHeart } from '@fortawesome/free-solid-svg-icons';
-import { faHeart as unFavoritedHeart } from '@fortawesome/free-regular-svg-icons';
-import { LibraryService } from '../../library/services/library.service';
-import { UserService } from '../../library/services/user.service';
+import { FavoriteButtonComponent } from '../../shared/favorite-button/favorite-button.component';
 
 @Component({
   selector: 'app-song',
   standalone: true,
   imports: [
-    FontAwesomeModule,
     PlayerButtonComponent,
     MovingTitleComponent,
     NgOptimizedImage,
+    FavoriteButtonComponent,
   ],
   templateUrl: './song.component.html',
   styleUrl: './song.component.scss',
@@ -33,28 +30,14 @@ import { UserService } from '../../library/services/user.service';
 export class SongComponent implements OnInit {
   song = input.required<Song>();
   isActive!: Signal<boolean>;
-  isFavorited!: Signal<boolean>;
+
   status!: Signal<PlayerStatus>;
-  isAbleToAddToFav!: Signal<boolean>;
 
-  isLoadingFavorite!: Signal<boolean>;
-  unFavoritedHeart = unFavoritedHeart;
-  favoritedHeart = favoritedHeart;
-
-  constructor(
-    private playerService: PlayerService,
-    private libraryService: LibraryService,
-    private userService: UserService
-  ) {}
+  constructor(private playerService: PlayerService) {}
 
   ngOnInit(): void {
     this.isActive = computed(
       () => this.playerService.song$()?.link === this.song().link
-    );
-    this.isFavorited = computed(() =>
-      this.libraryService
-        .songs$()
-        .some((song) => song.link === this.song().link)
     );
     this.status = computed(() => {
       if (this.isActive()) {
@@ -62,15 +45,6 @@ export class SongComponent implements OnInit {
       }
       return PlayerStatus.Paused;
     });
-    this.isAbleToAddToFav = computed(() => {
-      return !!this.userService.user$();
-    });
-
-    this.isLoadingFavorite = computed(() =>
-      this.libraryService
-        .currentLoadingFavoriteSongIds$()
-        .includes(this.song().id)
-    );
   }
 
   play() {
@@ -84,16 +58,5 @@ export class SongComponent implements OnInit {
 
   pause() {
     this.playerService.pause();
-  }
-
-  toggleAddToFavorite() {
-    if (this.isFavorited()) {
-      this.libraryService.removeFromFavorites(this.song().id, this.song().link);
-    } else {
-      this.libraryService.addToFavorites(
-        this.song(),
-        this.userService.user$()!.id
-      );
-    }
   }
 }

@@ -9,10 +9,8 @@
     <img
       [ngSrc]="song()!.image"
       alt="Song Art BG"
-      style="width: 100%; height: auto"
-      class="absolute -z-10 opacity-30 blur-xl h-screen w-screen scale-110"
-      width="500"
-      height="500"
+      class="absolute -z-10 opacity-30 blur-xl scale-110"
+      fill
       referrerpolicy="no-referrer"
     />
 
@@ -40,24 +38,12 @@
       <div class="mr-auto">
         <app-moving-title [title]="song()!.title" [isActive]="true" />
         <app-moving-title [title]="song()!.artist" [isActive]="true" />
-        <!-- <div class="text-white text-lg mt-1">{{ song()!.artist }}</div> -->
       </div>
-      @if (isAbleToAddToFav()) {
-      <button
-        class="btn btn-md w-14 bg-transparent border-none active:bg-transparent hover:bg-transparent disabled:bg-transparent"
-        [style]="{ color: dominantColor() | async }"
-        (click)="toggleAddToFavorite()"
-        [disabled]="isLoadingFavorite()"
-      >
-        @if(isLoadingFavorite()){
-        <span class="loading loading-spinner loading-xs"></span>
-        }@else{ @if (isFavorited()) {
-        <fa-icon [icon]="favoritedHeart" />
-        } @else {
-        <fa-icon [icon]="unFavoritedHeart" />
-        } }
-      </button>
-      }
+      <app-favorite-button
+        [song]="song()!"
+        [dominantColor]="(dominantColor() | async) || 'white'"
+        [forPlayer]="true"
+      />
     </div>
 
     <div class="w-full">

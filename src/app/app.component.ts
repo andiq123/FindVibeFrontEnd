@@ -1,4 +1,4 @@
-import { Component, effect, OnInit, signal } from '@angular/core';
+import { Component, effect, Inject, OnInit, signal } from '@angular/core';
 import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
@@ -10,6 +10,8 @@ import { WakeService } from './services/wake.service';
 import { catchError } from 'rxjs';
 import { UserService } from './library/services/user.service';
 import { LibraryService } from './library/services/library.service';
+import { SettingsService } from './components/player-wrapper/settings.service';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -33,8 +35,15 @@ export class AppComponent implements OnInit {
     private playerService: PlayerService,
     private wakeService: WakeService,
     private userService: UserService,
-    private libraryService: LibraryService
+    private libraryService: LibraryService,
+    private settingsService: SettingsService,
+    @Inject(DOCUMENT) private document: Document
   ) {
+    effect(() => {
+      const isMiniPlayer = this.settingsService.isMiniPlayer$();
+      const body = this.document.querySelector('body');
+      body?.classList.toggle('noScroll', !isMiniPlayer);
+    });
     effect(() => {
       const song = this.playerService.song$();
       if (song) {

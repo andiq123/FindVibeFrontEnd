@@ -6,11 +6,17 @@ import { Injectable, signal } from '@angular/core';
 export class SettingsService {
   private isRepeat = signal<boolean>(false);
   private isShuffle = signal<boolean>(false);
+  private isMiniPlayer = signal<boolean>(true);
   isRepeat$ = this.isRepeat.asReadonly();
   isShuffle$ = this.isShuffle.asReadonly();
+  isMiniPlayer$ = this.isMiniPlayer.asReadonly();
 
   constructor() {
     this.setIsRepeatAndShuffle();
+  }
+
+  toggleMiniPlayer() {
+    this.isMiniPlayer.set(!this.isMiniPlayer());
   }
 
   toggleRepeat() {

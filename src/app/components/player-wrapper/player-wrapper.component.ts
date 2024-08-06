@@ -3,6 +3,7 @@ import { MiniPlayerComponent } from './mini-player/mini-player.component';
 import { FullPlayerComponent } from './full-player/full-player.component';
 import { PlayerService } from './player.service';
 import { Song } from '../../songs/models/song.model';
+import { SettingsService } from './settings.service';
 
 @Component({
   selector: 'app-player-wrapper',
@@ -12,18 +13,22 @@ import { Song } from '../../songs/models/song.model';
   styleUrl: './player-wrapper.component.scss',
 })
 export class PlayerWrapperComponent implements OnInit {
-  miniPlayer = signal<boolean>(true);
+  isMiniPlayer!: Signal<boolean>;
 
   song!: Signal<Song | null>;
 
-  constructor(private playerService: PlayerService) {}
+  constructor(
+    private playerService: PlayerService,
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit(): void {
     this.song = this.playerService.song$;
+    this.isMiniPlayer = this.settingsService.isMiniPlayer$;
     this.playerService.registerEvents();
   }
 
   onToggleSize() {
-    this.miniPlayer.update((value) => !value);
+    this.settingsService.toggleMiniPlayer();
   }
 }

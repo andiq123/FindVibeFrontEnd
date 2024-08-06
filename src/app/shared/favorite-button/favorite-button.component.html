@@ -1,0 +1,27 @@
+@if (isAbleToAddToFav()) {
+<button
+  class="btn btn-md w-14"
+  [class]="
+    forPlayer()
+      ? {
+          'bg-transparent': true,
+          'border-none': true,
+          'active:bg-transparent': true,
+          'hover:bg-transparent': true,
+          'disabled:bg-transparent': true
+        }
+      : {}
+  "
+  [style]="{ color: dominantColor() }"
+  (click)="toggleAddToFavorite()"
+  [disabled]="isLoadingFavorite()"
+>
+  @if(isLoadingFavorite()){
+  <span class="loading loading-spinner loading-lg"></span>
+  }@else{ @if (isFavorited()) {
+  <fa-icon [icon]="favoritedHeart" [size]="forPlayer() ? '2x' : '1x'" /> } @else
+  {
+  <fa-icon [icon]="unFavoritedHeart" [size]="forPlayer() ? '2x' : '1x'" />
+  } }
+</button>
+}
