@@ -1,4 +1,4 @@
-import { Component, effect, Inject, OnInit } from '@angular/core';
+import { Component, effect, Inject, OnInit, signal } from '@angular/core';
 import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
@@ -30,7 +30,8 @@ import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  onToggleSize() {}
+  newUpdateAvaialble = signal(false);
+  secondsToUpdate = signal(3);
 
   constructor(
     private title: Title,
@@ -68,7 +69,14 @@ export class AppComponent implements OnInit {
         filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
       )
       .subscribe(() => {
-        document.location.reload();
+        this.newUpdateAvaialble.set(true);
+        setInterval(() => {
+          if (this.secondsToUpdate() < 1) {
+            document.location.reload();
+          } else {
+            this.secondsToUpdate.update((x) => x - 1);
+          }
+        }, 1000);
       });
 
     this.wakeServer().subscribe(() => {
