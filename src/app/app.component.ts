@@ -7,12 +7,13 @@ import { PlayerService } from './components/player-wrapper/player.service';
 import { RouterOutlet } from '@angular/router';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { WakeService } from './services/wake.service';
-import { catchError } from 'rxjs';
+import { catchError, filter } from 'rxjs';
 import { UserService } from './library/services/user.service';
 import { LibraryService } from './library/services/library.service';
 import { SettingsService } from './components/player-wrapper/settings.service';
 import { DOCUMENT } from '@angular/common';
 import { FullPlayerComponent } from './components/player-wrapper/full-player/full-player.component';
+import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 
 @Component({
   selector: 'app-root',
@@ -40,8 +41,18 @@ export class AppComponent implements OnInit {
     private userService: UserService,
     private libraryService: LibraryService,
     private settingsService: SettingsService,
+    private swUpdate: SwUpdate,
     @Inject(DOCUMENT) private document: Document
   ) {
+    swUpdate.versionUpdates
+      .pipe(
+        filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
+      )
+      .subscribe((evt) => {
+        // Reload the page to update to the latest version.
+        document.location.reload();
+      });
+
     effect(() => {
       const isMiniPlayer = this.settingsService.isMiniPlayer$();
       const body = this.document.querySelector('body');
@@ -71,12 +82,6 @@ export class AppComponent implements OnInit {
             type: 'image/png',
           },
         ],
-      });
-
-      navigator.mediaSession.setPositionState({
-        duration: this.playerService.duration$(),
-        playbackRate: 1,
-        position: this.playerService.currentTime$(),
       });
     });
 
