@@ -45,16 +45,6 @@ export class AppComponent implements OnInit {
     private swUpdate: SwUpdate,
     @Inject(DOCUMENT) private document: Document
   ) {
-    this.siteIsOffline.set(navigator.onLine === false);
-
-    swUpdate.versionUpdates
-      .pipe(
-        filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
-      )
-      .subscribe(() => {
-        document.location.reload();
-      });
-
     effect(() => {
       const isMiniPlayer = this.settingsService.isMiniPlayer$();
       const body = this.document.querySelector('body');
@@ -109,6 +99,14 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.siteIsOffline.set(navigator.onLine === false);
+    this.swUpdate.versionUpdates
+      .pipe(
+        filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
+      )
+      .subscribe(() => {
+        document.location.reload();
+      });
     this.wakeServer().subscribe(() => {
       this.isAwakeServer.set(true);
       this.loadUserAndSongs();
