@@ -14,11 +14,18 @@ import { LibraryService } from './services/library.service';
 import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
 import { TitleCasePipe } from '@angular/common';
+import { StorageService } from './services/storage.service';
+import { StorageInfoComponent } from './components/storage-info/storage-info.component';
 
 @Component({
   selector: 'app-library',
   standalone: true,
-  imports: [SongComponent, UserFormComponent, TitleCasePipe],
+  imports: [
+    SongComponent,
+    UserFormComponent,
+    TitleCasePipe,
+    StorageInfoComponent,
+  ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
 })

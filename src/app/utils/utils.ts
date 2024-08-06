@@ -6,3 +6,16 @@ export const convertTime = (time: number) => {
   }
   return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
+
+export const convertKbToMb = (kb: number): number => {
+  return Math.round(kb / 1024);
+};
+
+export const convertMbToGb = (mb: number): number => {
+  return Math.round(mb / 1024);
+};
+
+export const convertKbToGb = (kb: number): number => {
+  const mbConverted = convertKbToMb(kb);
+  return convertMbToGb(mbConverted);
+};

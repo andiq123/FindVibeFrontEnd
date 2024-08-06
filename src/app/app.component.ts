@@ -48,8 +48,7 @@ export class AppComponent implements OnInit {
       .pipe(
         filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
       )
-      .subscribe((evt) => {
-        // Reload the page to update to the latest version.
+      .subscribe(() => {
         document.location.reload();
       });
 

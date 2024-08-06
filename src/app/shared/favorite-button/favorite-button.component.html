@@ -2,13 +2,9 @@
 <button
   class="btn btn-md w-14"
   [class]="
-    forPlayer() && {
-      'bg-transparent': true,
-      'border-none': true,
-      'active:bg-transparent': true,
-      'hover:bg-transparent': true,
-      'disabled:bg-transparent': true
-    }
+    forPlayer()
+      ? 'bg-transparent border-none active:bg-transparent hover:bg-transparent disabled:bg-transparent'
+      : ''
   "
   (click)="toggleAddToFavorite()"
   [disabled]="isLoadingFavorite()"

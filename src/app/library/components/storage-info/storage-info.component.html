@@ -1,0 +1,11 @@
+<div>
+  <p class="text-xl font-bold">Storage info</p>
+  <div class="flex items-center justify-end gap-3">
+    <progress
+      class="progress progress-primary w-56"
+      [value]="storageUsed()"
+      [max]="storageTotal()"
+    ></progress>
+    <p class="font-bold">{{ storageUsed() }}GB / {{ storageTotal() }}GB</p>
+  </div>
+</div>
