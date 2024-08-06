@@ -50,7 +50,6 @@ export class FavoriteButtonComponent implements OnInit {
         .removeFromFavorites(this.song().id, this.song().link)
         .subscribe();
     } else {
-      console.log(this.userService.user$()!.name);
       this.libraryService
         .addToFavorites(this.song(), this.userService.user$()!.id)
         .subscribe();
