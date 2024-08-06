@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Song } from '../../songs/models/song.model';
 import { PlayerStatus } from './models/player.model';
-import { SettingsService } from './settings.service';
+import { SettingsService } from '../../services/settings.service';
 import { Router } from '@angular/router';
 import { LibraryService } from '../../library/services/library.service';
 import { SongsService } from '../../songs/services/songs.service';

@@ -24,7 +24,7 @@ import { PlayerService } from '../player.service';
 import { PlayerStatus } from '../models/player.model';
 import { getDominantColor } from '@rtcoder/dominant-color';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
-import { SettingsService } from '../settings.service';
+import { SettingsService } from '../../../services/settings.service';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { LibraryService } from '../../../library/services/library.service';
 import { UserService } from '../../../library/services/user.service';

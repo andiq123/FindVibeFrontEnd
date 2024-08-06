@@ -3,7 +3,7 @@ import { MiniPlayerComponent } from './mini-player/mini-player.component';
 import { FullPlayerComponent } from './full-player/full-player.component';
 import { PlayerService } from './player.service';
 import { Song } from '../../songs/models/song.model';
-import { SettingsService } from './settings.service';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-player-wrapper',

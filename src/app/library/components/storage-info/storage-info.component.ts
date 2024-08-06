@@ -1,5 +1,6 @@
 import { Component, computed, OnInit, Signal, signal } from '@angular/core';
 import { StorageService } from '../../services/storage.service';
+import { LibraryService } from '../../services/library.service';
 
 @Component({
   selector: 'app-storage-info',
@@ -15,16 +16,17 @@ export class StorageInfoComponent implements OnInit {
     return this.storageUsed() / this.storageTotal();
   });
 
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private libraryService: LibraryService
+  ) {}
 
   ngOnInit(): void {
     this.storageTotal = this.storageService.storageTotal;
     this.storageUsed = this.storageService.storageUsed;
-    (async () => {
-      if (navigator.storage && (await navigator.storage.persist())) {
-        const isPersisted = await navigator.storage.persisted();
-        console.log(`Persisted storage granted: ${isPersisted}`);
-      }
-    })();
+  }
+
+  downloadAll() {
+    this.libraryService.cacheAllSongs();
   }
 }

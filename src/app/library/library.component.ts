@@ -16,6 +16,7 @@ import { UserFormComponent } from './components/user-form/user-form.component';
 import { TitleCasePipe } from '@angular/common';
 import { StorageService } from './services/storage.service';
 import { StorageInfoComponent } from './components/storage-info/storage-info.component';
+import { SettingsService } from '../services/settings.service';
 
 @Component({
   selector: 'app-library',
@@ -34,10 +35,12 @@ export class LibraryComponent implements OnInit {
   isLoggedIn!: Signal<boolean>;
   username!: Signal<string>;
   songsAreLoading!: Signal<boolean>;
+  isServerDown!: Signal<boolean>;
 
   constructor(
     private libraryService: LibraryService,
-    private userService: UserService
+    private userService: UserService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
@@ -45,9 +48,14 @@ export class LibraryComponent implements OnInit {
     this.songsAreLoading = this.libraryService.loadingSongs$;
     this.isLoggedIn = computed(() => !!this.userService.user$());
     this.username = computed(() => this.userService.user$()?.name || '');
+    this.isServerDown = this.settingsService.isServerDown$;
   }
 
   changeUser() {
     this.userService.resetUser();
+  }
+
+  reloadPage() {
+    document.location.replace('/songs');
   }
 }

@@ -1,3 +1,12 @@
+@if(!isCheckedServer()){
+<div
+  class="w-full flex flex-col justify-center items-center gap-3 h-[50vh] slideDown"
+>
+  <p class="text-xl">Server is awakening...</p>
+  <span class="loading loading-dots loading-lg"></span>
+</div>
+}@else {
+
 <div class="w-[95%] mx-auto mt-14">
   <app-search />
   <h1 class="font-bold text-2xl mb-2">Search</h1>
@@ -25,3 +34,4 @@
   </ul>
   } }
 </div>
+}

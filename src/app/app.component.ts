@@ -1,16 +1,23 @@
-import { Component, effect, Inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  Inject,
+  OnInit,
+  Signal,
+  signal,
+} from '@angular/core';
 import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
 import { Title } from '@angular/platform-browser';
 import { PlayerService } from './components/player-wrapper/player.service';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { WakeService } from './services/wake.service';
-import { catchError, filter } from 'rxjs';
+import { catchError, filter, tap } from 'rxjs';
 import { UserService } from './library/services/user.service';
 import { LibraryService } from './library/services/library.service';
-import { SettingsService } from './components/player-wrapper/settings.service';
+import { SettingsService } from './services/settings.service';
 import { DOCUMENT } from '@angular/common';
 import { FullPlayerComponent } from './components/player-wrapper/full-player/full-player.component';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
@@ -31,9 +38,6 @@ import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 })
 export class AppComponent implements OnInit {
   onToggleSize() {}
-  isAwakeServer = signal<boolean>(false);
-  serverIsDown = signal<boolean>(false);
-  siteIsOffline = signal<boolean>(false);
 
   constructor(
     private title: Title,
@@ -60,6 +64,52 @@ export class AppComponent implements OnInit {
       this.title.setTitle('FindVibe');
     });
 
+    this.setupNavigationMedia();
+  }
+
+  ngOnInit(): void {
+    this.loadUser();
+
+    this.swUpdate.versionUpdates
+      .pipe(
+        filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
+      )
+      .subscribe(() => {
+        document.location.reload();
+      });
+
+    this.wakeServer().subscribe(() => {
+      this.loadSongs();
+    });
+  }
+
+  private wakeServer() {
+    this.settingsService.setIsCheckedServerPending();
+    return this.wakeService.wakeServer().pipe(
+      tap(() => {
+        this.settingsService.setIsCheckedServerDone();
+        this.settingsService.setServerUp();
+      }),
+      catchError((err) => {
+        this.settingsService.setIsCheckedServerDone();
+        this.settingsService.setServerDown();
+        throw err;
+      })
+    );
+  }
+
+  private loadSongs() {
+    const userId = this.userService.loadUser();
+    if (userId) {
+      this.libraryService.setupLibrarySongs(userId).subscribe();
+    }
+  }
+
+  private loadUser() {
+    this.userService.loadUser();
+  }
+
+  private setupNavigationMedia() {
     // Media Session
     effect(() => {
       if (!this.playerService.song$()) return;
@@ -96,37 +146,5 @@ export class AppComponent implements OnInit {
     navigator.mediaSession.setActionHandler('stop', () => {
       this.playerService.stop();
     });
-  }
-
-  ngOnInit(): void {
-    this.siteIsOffline.set(navigator.onLine === false);
-    this.swUpdate.versionUpdates
-      .pipe(
-        filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
-      )
-      .subscribe(() => {
-        document.location.reload();
-      });
-    this.wakeServer().subscribe(() => {
-      this.isAwakeServer.set(true);
-      this.loadUserAndSongs();
-    });
-  }
-
-  private wakeServer() {
-    return this.wakeService.wakeServer().pipe(
-      catchError((err) => {
-        this.isAwakeServer.set(false);
-        this.serverIsDown.set(true);
-        throw err;
-      })
-    );
-  }
-
-  private loadUserAndSongs() {
-    const userId = this.userService.loadUser();
-    if (userId) {
-      this.libraryService.setupLibrarySongs(userId).subscribe();
-    }
   }
 }

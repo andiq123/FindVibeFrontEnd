@@ -22,6 +22,16 @@ export class LibraryService {
 
   constructor(private libraryBackService: LibraryBackService) {}
 
+  cacheAllSongs() {
+    this.songs().forEach(async (x) => {
+      const cacheLibrary = await caches.open('library');
+      cacheLibrary.add('https://corsproxy.io/?' + x.link);
+    });
+    const ca = caches.open('library');
+
+    console.log(ca);
+  }
+
   setupLibrarySongs(userId: string) {
     this.loadingSongs.set(true);
     return this.libraryBackService.getFavoritesSong(userId).pipe(

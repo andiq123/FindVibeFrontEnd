@@ -7,9 +7,13 @@ export class SettingsService {
   private isRepeat = signal<boolean>(false);
   private isShuffle = signal<boolean>(false);
   private isMiniPlayer = signal<boolean>(true);
+  private isServerDown = signal<boolean>(false);
+  private isCheckedServer = signal<boolean>(false);
   isRepeat$ = this.isRepeat.asReadonly();
   isShuffle$ = this.isShuffle.asReadonly();
   isMiniPlayer$ = this.isMiniPlayer.asReadonly();
+  isServerDown$ = this.isServerDown.asReadonly();
+  isCheckedServer$ = this.isCheckedServer.asReadonly();
 
   constructor() {
     this.setIsRepeatAndShuffle();
@@ -54,5 +58,21 @@ export class SettingsService {
     if (isShuffle) {
       this.isShuffle.set(JSON.parse(isShuffle));
     }
+  }
+
+  setServerUp() {
+    this.isServerDown.set(false);
+  }
+
+  setServerDown() {
+    this.isServerDown.set(true);
+  }
+
+  setIsCheckedServerDone() {
+    this.isCheckedServer.set(true);
+  }
+
+  setIsCheckedServerPending() {
+    this.isCheckedServer.set(false);
   }
 }
