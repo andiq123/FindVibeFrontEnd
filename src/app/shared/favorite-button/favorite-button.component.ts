@@ -15,7 +15,6 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 })
 export class FavoriteButtonComponent implements OnInit {
   forPlayer = input<boolean>(false);
-  dominantColor = input<string>('');
   song = input.required<Song>();
   isAbleToAddToFav!: Signal<boolean>;
   isFavorited!: Signal<boolean>;
