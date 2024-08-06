@@ -1,10 +1,9 @@
-import { Injectable, Signal, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 import { LibraryBackService } from './library-back.service';
 
-import { catchError, take, tap } from 'rxjs';
+import { catchError, tap } from 'rxjs';
 import { Song } from '../../songs/models/song.model';
-import { User } from '../models/user.model';
 import { SongToAddFavorite } from '../models/songToAddFavorite.model';
 
 @Injectable({
@@ -35,7 +34,6 @@ export class LibraryService {
   setupLibrarySongs(userId: string) {
     this.loadingSongs.set(true);
     return this.libraryBackService.getFavoritesSong(userId).pipe(
-      take(1),
       tap((songs) => {
         this.songs.set(songs.songs);
         this.loadingSongs.set(false);
@@ -50,7 +48,6 @@ export class LibraryService {
 
   updateSilentLibrarySongs(userId: string) {
     return this.libraryBackService.getFavoritesSong(userId).pipe(
-      take(1),
       tap((songs) => {
         this.songs.set(songs.songs);
       })

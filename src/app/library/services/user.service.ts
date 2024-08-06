@@ -2,8 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { User } from '../models/user.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
-import { of, switchMap, take, tap } from 'rxjs';
-import { LibraryService } from './library.service';
+import { tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +28,6 @@ export class UserService {
     return this.httpClient
       .post<User>(this.baseUrl + '/users', { userName })
       .pipe(
-        take(1),
         tap((user: User) => {
           this.user.set(user);
           this.setUserToLocalStorage(user);
