@@ -53,7 +53,6 @@ export class SwipeDownDirective {
     if (duration < timeCloseTrigger && this.topSignal() > closeSizeTrigger) {
       this.onClose.emit();
     } else {
-      console.log('offset', this.offsetPixels());
       if (this.offsetPixels() < closeSizeTrigger) {
         this.slideToZero = true;
       }

@@ -62,9 +62,20 @@ export class PlayerService {
     this.player().controls = false;
   }
 
-  setSong(song: Song) {
+  async setSong(song: Song) {
+    const cachedLibrary = await caches.open('library');
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+
+    const proxiedUrl = `${corsProxy}${song.link}`;
+    const inCache = await cachedLibrary.match(proxiedUrl);
+    if (inCache) {
+      const blob = await inCache!.blob();
+      this.player().src = URL.createObjectURL(blob);
+    } else {
+      this.player().src = song.link;
+    }
+
     this.song.set(song);
-    this.player().src = this.song()!.link;
   }
 
   setCurrentTime(time: number) {
@@ -84,16 +95,16 @@ export class PlayerService {
     this.player().currentTime = 0;
   }
 
-  setPreviousSong() {
+  async setPreviousSong() {
     const isLibraryRoute = this.router.url === '/library';
     const previousSong = isLibraryRoute
       ? this.libraryService.getPreviousSong(this.song()!.id)
       : this.songsService.getPreviousSong(this.song()!.id);
-    this.setSong(previousSong);
+    await this.setSong(previousSong);
     this.play();
   }
 
-  setNextSong() {
+  async setNextSong() {
     const isLibraryRoute = this.router.url === '/library';
 
     if (this.settingsService.isRepeat$()) {
@@ -113,7 +124,7 @@ export class PlayerService {
         : this.songsService.getNextSong(this.song()!.id);
     }
 
-    this.setSong(songToBePlayed);
+    await this.setSong(songToBePlayed);
     this.play();
   }
 

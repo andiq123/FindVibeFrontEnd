@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { effect, Injectable, signal } from '@angular/core';
 
 import { LibraryBackService } from './library-back.service';
 
@@ -19,19 +19,30 @@ export class LibraryService {
   currentLoadingFavoriteSongIds$ =
     this.currentLoadingFavoriteSongIds.asReadonly();
 
-  constructor(private libraryBackService: LibraryBackService) {}
+  constructor(private libraryBackService: LibraryBackService) {
+    effect(async () => {
+      if (this.songs().length > 0) {
+        await this.cacheAllSongs();
+        console.log('finished');
+      }
+    });
+  }
 
-  // async cacheAllSongs() {
-  //   const cacheLibrary = await caches.open('library');
-  //   const link = 'https://cors-anywhere.herokuapp.com/' + this.songs()[0].link;
-  //   await cacheLibrary.add(link);
-  //   // this.songs().forEach(async (x) => {
-  //   //   await cacheLibrary.add(x.link);
-  //   // });
+  async cacheAllSongs() {
+    const cachedLibrary = await caches.open('library');
+    const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    const link = this.songs()[0].link;
 
-  //   const cachedUrl = await cacheLibrary.keys(link);
-  //   console.log(cachedUrl);
-  // }
+    const proxiedUrl = `${corsProxy}${link}`;
+
+    const response = await fetch(proxiedUrl, {
+      method: 'GET',
+      headers: {
+        Origin: window.location.origin,
+      },
+    });
+    await cachedLibrary.add(response.url);
+  }
 
   setupLibrarySongs(userId: string) {
     this.loadingSongs.set(true);

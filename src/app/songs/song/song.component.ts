@@ -1,13 +1,5 @@
-import {
-  Component,
-  computed,
-  input,
-  OnInit,
-  signal,
-  Signal,
-} from '@angular/core';
+import { Component, computed, input, OnInit, Signal } from '@angular/core';
 import { Song } from '../models/song.model';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlayerService } from '../../components/player-wrapper/player.service';
 import { PlayerStatus } from '../../components/player-wrapper/models/player.model';
 import { PlayerButtonComponent } from '../../shared/player-button/player-button.component';
@@ -47,12 +39,12 @@ export class SongComponent implements OnInit {
     });
   }
 
-  play() {
+  async play() {
     if (this.isActive()) {
       this.playerService.play();
       return;
     }
-    this.playerService.setSong(this.song());
+    await this.playerService.setSong(this.song());
     this.playerService.play();
   }
 
