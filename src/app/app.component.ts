@@ -12,6 +12,7 @@ import { UserService } from './library/services/user.service';
 import { LibraryService } from './library/services/library.service';
 import { SettingsService } from './components/player-wrapper/settings.service';
 import { DOCUMENT } from '@angular/common';
+import { FullPlayerComponent } from './components/player-wrapper/full-player/full-player.component';
 
 @Component({
   selector: 'app-root',
@@ -22,11 +23,13 @@ import { DOCUMENT } from '@angular/common';
     PlayerWrapperComponent,
     RouterOutlet,
     NavigationComponent,
+    FullPlayerComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
+  onToggleSize() {}
   isAwakeServer = signal<boolean>(false);
   serverIsDown = signal<boolean>(false);
 

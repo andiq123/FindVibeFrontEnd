@@ -13,7 +13,6 @@ import { convertTime } from '../../../utils/utils';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faArrowDown,
-  faHeart as favoritedHeart,
   faPause,
   faPlay,
   faRepeat,
@@ -27,10 +26,19 @@ import { getDominantColor } from '@rtcoder/dominant-color';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
 import { SettingsService } from '../settings.service';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
-import { faHeart as unFavoritedHeart } from '@fortawesome/free-regular-svg-icons';
 import { LibraryService } from '../../../library/services/library.service';
 import { UserService } from '../../../library/services/user.service';
 import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
+import { SwipeDownDirective } from '../../../shared/directives/swipe-down.directive';
+
+const song = {
+  id: 'b24bdcdf-1149-48f4-8a99-0b365eccf9bc',
+  title: 'Modul Vara',
+  artist: 'Iuliana Beregoi',
+  image:
+    'https://lh3.googleusercontent.com/58DnMXyby-UfoPDQo7mEjO0DodKLwpiRWVQAelhxkEwbnGbDhAaG5WBTSLb5X6fAv475p8FQ4Yz85V4B=w350-h350-l90-rj',
+  link: 'https://cdn.muzkan.net/?h=JGraYpdVSC4gwKZ7w0kQAsVAiNCnckikPr2ScywR4pFGHNpSaGljNfm4dGOuNDUJhkGXyqx-m5QA',
+};
 
 @Component({
   selector: 'app-full-player',
@@ -41,6 +49,7 @@ import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorit
     NgOptimizedImage,
     AsyncPipe,
     FavoriteButtonComponent,
+    SwipeDownDirective,
   ],
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
@@ -52,9 +61,6 @@ export class FullPlayerComponent implements OnInit {
   duration!: Signal<number>;
   isRepeat!: Signal<boolean>;
   isShuffle!: Signal<boolean>;
-  isAbleToAddToFav!: Signal<boolean>;
-  isFavorited!: Signal<boolean>;
-  isLoadingFavorite!: Signal<boolean>;
   onToggleSize = output<void>();
 
   faStepBackward = faStepBackward;
@@ -64,8 +70,6 @@ export class FullPlayerComponent implements OnInit {
   faArrowDown = faArrowDown;
   faRepeat = faRepeat;
   faShuffle = faShuffle;
-  unFavoritedHeart = unFavoritedHeart;
-  favoritedHeart = favoritedHeart;
 
   playerStatus = PlayerStatus;
 
@@ -87,20 +91,8 @@ export class FullPlayerComponent implements OnInit {
     this.duration = this.playerService.duration$;
     this.isRepeat = this.settingsService.isRepeat$;
     this.isShuffle = this.settingsService.isShuffle$;
-    this.song = this.playerService.song$;
-    this.isFavorited = computed(() =>
-      this.libraryService
-        .songs$()
-        .some((song) => song.link === this.song()!.link)
-    );
-    this.isAbleToAddToFav = computed(() => {
-      return !!this.userService.user$();
-    });
-    this.isLoadingFavorite = computed(() =>
-      this.libraryService
-        .currentLoadingFavoriteSongIds$()
-        .includes(this.song()!.id)
-    );
+    // this.song = this.playerService.song$;
+    this.song = signal<Song>(song);
   }
 
   convertTime(timeToConvert: number): string {
@@ -141,20 +133,6 @@ export class FullPlayerComponent implements OnInit {
 
   toggleShuffle() {
     this.settingsService.toggleShuffle();
-  }
-
-  toggleAddToFavorite() {
-    if (this.isFavorited()) {
-      this.libraryService.removeFromFavorites(
-        this.song()!.id,
-        this.song()!.link
-      );
-    } else {
-      this.libraryService.addToFavorites(
-        this.song()!,
-        this.userService.user$()!.id
-      );
-    }
   }
 
   private async updateDominantColor(): Promise<string> {
