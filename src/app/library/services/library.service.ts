@@ -31,17 +31,18 @@ export class LibraryService {
   async cacheAllSongs() {
     const cachedLibrary = await caches.open('library');
     const corsProxy = 'https://cors-anywhere.herokuapp.com/';
-    const link = this.songs()[0].link;
 
-    const proxiedUrl = `${corsProxy}${link}`;
+    this.songs().forEach(async (song) => {
+      const proxiedUrl = `${corsProxy}${song.link}`;
 
-    const response = await fetch(proxiedUrl, {
-      method: 'GET',
-      headers: {
-        Origin: window.location.origin,
-      },
+      const response = await fetch(proxiedUrl, {
+        method: 'GET',
+        headers: {
+          Origin: window.location.origin,
+        },
+      });
+      await cachedLibrary.add(response.url);
     });
-    await cachedLibrary.add(response.url);
   }
 
   setupLibrarySongs(userId: string) {
