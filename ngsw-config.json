@@ -32,8 +32,8 @@
       "urls": ["/api/**", "https://cdn.muzkan.net/**"],
       "cacheConfig": {
         "maxSize": 100,
-        "maxAge": "1y",
-        "timeout": "10s"
+        "maxAge": "300d",
+        "timeout": "5s"
       }
     }
   ]
