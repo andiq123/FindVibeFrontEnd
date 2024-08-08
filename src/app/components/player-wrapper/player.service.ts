@@ -11,15 +11,11 @@ import { addHerokutoLink } from '../../utils/utils';
   providedIn: 'root',
 })
 export class PlayerService {
-  private song = signal<Song | null>(null);
-  song$ = this.song.asReadonly();
   private player = signal<HTMLAudioElement>(new Audio());
-  private status = signal<PlayerStatus>(PlayerStatus.Stopped);
-  status$ = this.status.asReadonly();
-  private currentTime = signal<number>(0);
-  currentTime$ = this.currentTime.asReadonly();
-  private duration = signal<number>(0);
-  duration$ = this.duration.asReadonly();
+  song$ = signal<Song | null>(null);
+  status$ = signal<PlayerStatus>(PlayerStatus.Stopped);
+  currentTime$ = signal<number>(0);
+  duration$ = signal<number>(0);
 
   constructor(
     private songsService: SongsService,
@@ -30,33 +26,33 @@ export class PlayerService {
 
   registerEvents() {
     this.player().addEventListener('loadstart', () => {
-      this.status.set(PlayerStatus.Loading);
+      this.status$.set(PlayerStatus.Loading);
     });
 
     this.player().addEventListener('loadeddata', () => {
-      this.status.set(PlayerStatus.Playing);
+      this.status$.set(PlayerStatus.Playing);
     });
 
     this.player().addEventListener('play', () => {
-      this.status.set(PlayerStatus.Playing);
+      this.status$.set(PlayerStatus.Playing);
     });
 
     this.player().addEventListener('pause', () => {
-      this.status.set(PlayerStatus.Paused);
+      this.status$.set(PlayerStatus.Paused);
     });
 
     this.player().addEventListener('ended', () => {
-      this.status.set(PlayerStatus.Ended);
+      this.status$.set(PlayerStatus.Ended);
       this.setNextSong();
     });
 
     this.player().addEventListener('error', () => {
-      this.status.set(PlayerStatus.Error);
-      this.song.set(null);
+      this.status$.set(PlayerStatus.Error);
+      this.song$.set(null);
     });
 
     this.player().addEventListener('timeupdate', () => {
-      this.currentTime.set(this.player().currentTime);
+      this.currentTime$.set(this.player().currentTime);
       this.updateDuration(this.player().duration);
     });
 
@@ -75,7 +71,7 @@ export class PlayerService {
       this.player().src = song.link;
     }
 
-    this.song.set(song);
+    this.song$.set(song);
   }
 
   setCurrentTime(time: number) {
@@ -96,10 +92,15 @@ export class PlayerService {
   }
 
   async setPreviousSong() {
+    if (this.currentTime$() > 5) {
+      this.player().currentTime = 0;
+      return;
+    }
+
     const isLibraryRoute = this.router.url === '/library';
     const previousSong = isLibraryRoute
-      ? this.libraryService.getPreviousSong(this.song()!.id)
-      : this.songsService.getPreviousSong(this.song()!.id);
+      ? this.libraryService.getPreviousSong(this.song$()!.id)
+      : this.songsService.getPreviousSong(this.song$()!.id);
     await this.setSong(previousSong);
     this.play();
   }
@@ -120,8 +121,8 @@ export class PlayerService {
         : this.songsService.getRandomSongFromCurrentPlaylist();
     } else {
       songToBePlayed = isLibraryRoute
-        ? this.libraryService.getNextSong(this.song()!.id)
-        : this.songsService.getNextSong(this.song()!.id);
+        ? this.libraryService.getNextSong(this.song$()!.id)
+        : this.songsService.getNextSong(this.song$()!.id);
     }
 
     await this.setSong(songToBePlayed);
@@ -129,13 +130,13 @@ export class PlayerService {
   }
 
   private updateDuration(time: number) {
-    if (!this.duration()) {
-      this.duration.set(time);
+    if (!this.duration$()) {
+      this.duration$.set(time);
       return;
     }
 
-    if (time !== this.duration()) {
-      this.duration.set(time);
+    if (time !== this.duration$()) {
+      this.duration$.set(time);
       return;
     }
 
