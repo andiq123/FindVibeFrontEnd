@@ -4,7 +4,16 @@ import { offlineGuard } from './shared/guards/offline.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'songs', pathMatch: 'full' },
-  { path: 'songs', component: SongsComponent, canActivate: [offlineGuard] },
+  {
+    path: 'songs',
+    component: SongsComponent,
+    canActivate: [offlineGuard],
+  },
+  {
+    path: 'songs/:query',
+    component: SongsComponent,
+    canActivate: [offlineGuard],
+  },
   {
     path: 'library',
     loadComponent: () =>

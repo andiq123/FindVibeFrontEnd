@@ -1,5 +1,4 @@
-import { Component, computed, effect, inject, OnInit } from '@angular/core';
-
+import { Component, computed, effect, input } from '@angular/core';
 import { SongComponent } from './song/song.component';
 import { SearchComponent } from './search/search.component';
 import { SearchStatus } from './models/song.model';
@@ -15,15 +14,19 @@ import { SettingsService } from '../services/settings.service';
   styleUrl: './songs.component.scss',
 })
 export class SongsComponent {
-  private songsService = inject(SongsService);
-  private settingsService = inject(SettingsService);
+  query = input<string>('');
 
   songs = computed(() => this.songsService.songs$());
   status = computed(() => this.songsService.status$());
   isCheckedServer = computed(() => this.settingsService.isCheckedServer$());
 
   searchStatus = SearchStatus;
-  constructor(private router: Router) {
+
+  constructor(
+    private router: Router,
+    private songsService: SongsService,
+    private settingsService: SettingsService
+  ) {
     effect(() => {
       if (this.settingsService.isServerDown$()) {
         this.router.navigate(['/library']);

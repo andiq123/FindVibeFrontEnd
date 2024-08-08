@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  input,
-  OnInit,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -45,8 +38,8 @@ export class MovingTitleComponent {
     return this.title();
   });
 
-  redirectToSearch() {
-    this.router.navigate(['/songs'], { queryParams: { query: this.title() } });
+  async redirectToSearch() {
+    await this.router.navigate([`/songs/${this.title()}`]);
     this.closePlayer.emit();
   }
 }

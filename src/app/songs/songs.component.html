@@ -8,7 +8,7 @@
 }@else {
 
 <div class="w-[95%] mx-auto">
-  <app-search />
+  <app-search [query]="query()" />
   <h1 class="font-bold text-2xl mb-2">Search</h1>
   @switch (status()) { @case (searchStatus.None) {
   <div class="flex justify-center w-fit mx-auto py-5 px-10">

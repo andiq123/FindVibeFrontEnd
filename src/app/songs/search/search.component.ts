@@ -1,9 +1,9 @@
-import { Component, OnInit, signal, Signal } from '@angular/core';
+import { Component, computed, input, OnInit, signal } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { SongsService } from '../services/songs.service';
 import { SuggestionsService } from '../services/suggestions.service';
 
@@ -15,8 +15,9 @@ import { SuggestionsService } from '../services/suggestions.service';
   styleUrl: './search.component.scss',
 })
 export class SearchComponent implements OnInit {
+  query = input<string>('');
   searchTerm = signal<string>('');
-  suggestions!: Signal<string[]>;
+  suggestions = computed(() => this.suggestionsService.suggestions$());
 
   faMagnifyingGlass = faMagnifyingGlass;
   timeOut: ReturnType<typeof setTimeout> | undefined;
@@ -24,12 +25,10 @@ export class SearchComponent implements OnInit {
   constructor(
     private songsService: SongsService,
     private suggestionsService: SuggestionsService,
-    private activatedRoute: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.suggestions = this.suggestionsService.suggestions$;
     this.searchIfQueryPresent();
   }
 
@@ -64,10 +63,7 @@ export class SearchComponent implements OnInit {
   }
 
   private async setQueryParamsToCurrentSearchTerm() {
-    await this.router.navigate([], {
-      queryParams: { query: this.searchTerm() },
-      queryParamsHandling: 'merge',
-    });
+    await this.router.navigate([`/songs/${this.searchTerm()}`]);
   }
 
   private searchSuggestionByTimeOut() {
@@ -81,10 +77,9 @@ export class SearchComponent implements OnInit {
   }
 
   private searchIfQueryPresent() {
-    const query = this.activatedRoute.snapshot.queryParams['query'];
-    if (query) {
-      this.searchTerm.set(query);
-      this.songsService.searchSongs(this.searchTerm()).subscribe();
-    }
+    if (this.query() === '' || this.query() === undefined) return;
+
+    this.searchTerm.set(this.query() || '');
+    this.songsService.searchSongs(this.searchTerm()).subscribe();
   }
 }
