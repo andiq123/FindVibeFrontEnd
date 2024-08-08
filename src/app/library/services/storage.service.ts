@@ -1,8 +1,6 @@
 import { Injectable, Signal, signal } from '@angular/core';
 import { addHerokutoLink, bytesToGB, delayCustom } from '../../utils/utils';
 import { Song } from '../../songs/models/song.model';
-import { LibraryService } from './library.service';
-import { of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +25,11 @@ export class StorageService {
     const cachedLibrary = await caches.open('library');
 
     for (const song of songs) {
+      if (await this.isAvalaibleOffline(song.link)) {
+        console.log('skipping:', song.title);
+        continue;
+      }
+      console.log('not skipping:', song.title);
       const proxiedUrl = addHerokutoLink(song.link);
 
       const response = await fetch(proxiedUrl, {
@@ -35,7 +38,7 @@ export class StorageService {
           Origin: window.location.origin,
         },
       });
-      await cachedLibrary.add(response.url);
+      await cachedLibrary.add(new Request(response.url));
 
       await this.setUpStorage();
 
@@ -49,5 +52,12 @@ export class StorageService {
     setTimeout(async () => {
       await this.setUpStorage();
     }, 500);
+  }
+
+  async isAvalaibleOffline(songLink: string) {
+    const songCache = await caches.open('library');
+    const proxiedUrl = addHerokutoLink(songLink);
+    const isAvailable = await songCache.match(proxiedUrl);
+    return !!isAvailable?.url;
   }
 }

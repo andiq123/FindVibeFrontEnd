@@ -1,25 +1,24 @@
-@switch (status()) {
-  @case (playerStatus.Playing) {
-    <button
-      class="text-white text-2xl btn btn-md bg-base-100 hover:bg-base-200"
-      [classList]="classes()"
-      (click)="pause()"
-    >
-      <fa-icon [icon]="faPause" size="2xl"/>
-    </button>
-  }
-  @case (playerStatus.Loading) {
-    <button class="text-white text-2xl btn btn-md bg-base-100 hover:bg-base-200" [classList]="classes()">
-      <span class="loading loading-spinner loading-lg"></span>
-    </button>
-  }
-  @default {
-    <button
-      class="text-white text-2xl btn btn-xl bg-base-100 hover:bg-base-200 border"
-      [classList]="classes()"
-      (click)="play()"
-    >
-      <fa-icon [icon]="faPlay" size="2xl"/>
-    </button>
-  }
-}
+@switch (status()) { @case (playerStatus.Playing) {
+<button
+  class="text-white text-2xl btn btn-md bg-base-100 hover:bg-base-200"
+  [classList]="classes()"
+  (click)="pause()"
+>
+  <fa-icon [icon]="faPause" size="2xl" />
+</button>
+} @case (playerStatus.Loading) {
+<button
+  class="text-white text-2xl btn btn-md bg-base-100 hover:bg-base-200"
+  [classList]="classes()"
+>
+  <span class="loading loading-spinner loading-lg"></span>
+</button>
+} @default {
+<button
+  class="text-white text-2xl btn btn-xl bg-base-100 hover:bg-base-200 border"
+  [classList]="classes()"
+  (click)="play()"
+>
+  <fa-icon [icon]="faPlay" size="2xl" />
+</button>
+} }

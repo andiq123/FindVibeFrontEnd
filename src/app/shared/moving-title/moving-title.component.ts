@@ -11,7 +11,7 @@ export class MovingTitleComponent {
   title = input.required<string>();
   classes = input<string>('text-md font-bold');
   isActive = input<boolean>(false);
-  offset = signal<number>(23);
+  offset = signal<number>(21);
 
   isLonger = computed(() => {
     return this.title().length > this.offset();

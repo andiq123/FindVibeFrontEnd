@@ -15,11 +15,15 @@
     </div>
 
     <div>
-      <app-moving-title [title]="song()!.title" [isActive]="true" />
+      <app-moving-title
+        [title]="song()!.title"
+        [isActive]="true"
+        classes="max-w-60"
+      />
       <app-moving-title
         [title]="song()!.artist"
         [isActive]="true"
-        classes="text-xs"
+        classes="text-xs max-w-60"
       />
     </div>
 

@@ -22,7 +22,11 @@
       />
     </div>
     <div>
-      <app-moving-title [title]="song().title" [isActive]="isActive()" />
+      <app-moving-title
+        [title]="song().title"
+        [isActive]="isActive()"
+        classes="max-w-44"
+      />
       <app-moving-title
         [title]="song().artist"
         [isActive]="isActive()"
@@ -31,7 +35,7 @@
     </div>
   </div>
   <div class="flex gap-3">
-    @if(song().downloaded){
+    @if(isAvaiableOffline() | async){
     <button class="btn cursor-default">
       <fa-icon [icon]="faCheck" />
     </button>
