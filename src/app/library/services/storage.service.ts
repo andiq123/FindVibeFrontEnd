@@ -66,4 +66,18 @@ export class StorageService {
   emptyAvailableOfflineSongIds() {
     this.availableOfflineSongIds$.set([]);
   }
+
+  async removeOneSongFromAvailableOfflineSongIds(
+    songId: string,
+    songLink: string
+  ) {
+    const songCache = await caches.open('library');
+    const proxiedUrl = addHerokutoLink(songLink);
+
+    await songCache.delete(proxiedUrl);
+
+    this.availableOfflineSongIds$.update((prev) =>
+      prev.filter((id) => id !== songId)
+    );
+  }
 }

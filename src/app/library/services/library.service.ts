@@ -5,6 +5,7 @@ import { LibraryBackService } from './library-back.service';
 import { catchError, tap } from 'rxjs';
 import { Song } from '../../songs/models/song.model';
 import { SongToAddFavorite } from '../models/songToAddFavorite.model';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,10 @@ export class LibraryService {
   currentLoadingFavoriteSongIds$ =
     this.currentLoadingFavoriteSongIds.asReadonly();
 
-  constructor(private libraryBackService: LibraryBackService) {}
+  constructor(
+    private libraryBackService: LibraryBackService,
+    private storageService: StorageService
+  ) {}
 
   updateLibrarySongs(userId: string) {
     return this.libraryBackService.getFavoritesSong(userId).pipe(
@@ -57,7 +61,11 @@ export class LibraryService {
     const songId = this.songs().find((x) => x.link === link)!.id;
     return this.libraryBackService.removeFromFavorites(songId).pipe(
       tap({
-        next: () => {
+        next: async () => {
+          await this.storageService.removeOneSongFromAvailableOfflineSongIds(
+            id,
+            link
+          );
           this.songs.update((prevSongs) =>
             prevSongs.filter((song) => song.link !== link)
           );
