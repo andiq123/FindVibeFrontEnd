@@ -3,12 +3,13 @@
   class="rounded-lg py-1 px-2 flex justify-between items-center"
   [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
 >
-  <div class="grid grid-flow-col gap-3 items-center">
+  <div
+    class="grid grid-flow-col gap-3 items-center w-full justify-start cursor-pointer"
+    (click)="playOrPause()"
+  >
     <div class="w-14 rounded-lg overflow-hidden relative">
       <app-player-button
         [status]="status()"
-        (onPlay)="play()"
-        (onPause)="pause()"
         classes="absolute top-0 h-full w-full backdrop-brightness-50"
       />
       <img

@@ -66,6 +66,14 @@ export class SongComponent implements OnInit {
     this.playerService.pause();
   }
 
+  async playOrPause() {
+    if (this.status() === PlayerStatus.Paused) {
+      await this.play();
+    } else {
+      this.pause();
+    }
+  }
+
   async checkIfAvailableOffline() {
     const songCache = await caches.open('library');
     const proxiedUrl = addHerokutoLink(this.song().link);

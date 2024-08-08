@@ -1,12 +1,12 @@
 <ul
-  class="grid grid-cols-2 rounded-b-2xl fixed top-0 w-full lg:w-[1200px] z-10 bg-gradient-to-b from-base-300 from-50% to-transparent">
+  class="grid grid-cols-2 fixed bottom-0 w-full lg:w-[1200px] z-10 bg-base-200 rounded-t-lg bg-opacity-60 backdrop-blur-lg"
+>
   @for (navItem of navList(); track navItem.name) {
-    <li
-      class="flex flex-col p-1 items-center cursor-pointer "
-      [routerLink]="navItem.link">
-      <p routerLinkActive="text-primary">{{ navItem.name | titlecase }}</p>
-      <fa-icon [icon]="navItem.icon" routerLinkActive="text-xl text-primary"/>
-    </li>
+  <li
+    class="flex flex-col p-1 items-center cursor-pointer py-3"
+    [routerLink]="navItem.link"
+  >
+    <fa-icon [icon]="navItem.icon" routerLinkActive="text-xl text-primary" />
+  </li>
   }
 </ul>
-

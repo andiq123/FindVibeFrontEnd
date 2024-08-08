@@ -1,9 +1,11 @@
-<div class="bg-base-200 rounded-t-2xl p-3 fixed bottom-0 w-full lg:w-[800px] lg:ml-40 slideUp">
+<div
+  class="bg-base-200 rounded-t-2xl fixed bottom-12 w-full lg:w-[800px] lg:ml-40 slideUp"
+>
   <div
-    class="flex gap-3 justify-start items-center cursor-pointer w-full"
+    class="flex gap-3 justify-start items-center cursor-pointer w-full p-3"
     (click)="toggleSize()"
   >
-    <div class="w-14 rounded-xl overflow-hidden">
+    <div class="w-14 rounded-md overflow-hidden">
       <img
         class="object-fill w-full h-full"
         [ngSrc]="song()!.image"
