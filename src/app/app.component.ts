@@ -9,9 +9,7 @@ import { NavigationComponent } from './components/navigation/navigation.componen
 import { WakeService } from './services/wake.service';
 import { catchError, filter, tap } from 'rxjs';
 import { UserService } from './library/services/user.service';
-import { LibraryService } from './library/services/library.service';
 import { SettingsService } from './services/settings.service';
-import { DOCUMENT } from '@angular/common';
 import { FullPlayerComponent } from './components/player-wrapper/full-player/full-player.component';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 
@@ -38,17 +36,9 @@ export class AppComponent implements OnInit {
     private playerService: PlayerService,
     private wakeService: WakeService,
     private userService: UserService,
-    private libraryService: LibraryService,
     private settingsService: SettingsService,
-    private swUpdate: SwUpdate,
-    @Inject(DOCUMENT) private document: Document
+    private swUpdate: SwUpdate
   ) {
-    // effect(() => {
-    //   const isMiniPlayer = this.settingsService.isMiniPlayer$();
-    //   const body = this.document.querySelector('body');
-    //   body?.classList.toggle('noScroll', !isMiniPlayer);
-    // });
-
     effect(() => {
       const song = this.playerService.song$();
       this.title.setTitle(song?.title || 'FindVibe');

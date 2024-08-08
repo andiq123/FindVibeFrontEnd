@@ -14,7 +14,7 @@ import { SettingsService } from '../../services/settings.service';
 })
 export class PlayerWrapperComponent implements OnInit {
   isMiniPlayer!: Signal<boolean>;
-
+  data = signal<string>('test');
   song!: Signal<Song | null>;
 
   constructor(
@@ -29,6 +29,7 @@ export class PlayerWrapperComponent implements OnInit {
   }
 
   onToggleSize() {
+    this.data.update((text) => text + '!');
     this.settingsService.toggleMiniPlayer();
   }
 }

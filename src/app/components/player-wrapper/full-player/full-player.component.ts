@@ -88,6 +88,7 @@ export class FullPlayerComponent implements OnInit {
   toggleSize() {
     this.playerRef()?.nativeElement.addEventListener('animationend', () => {
       this.onToggleSize.emit();
+      console.log('miaw');
     });
     this.isClosingAnimation.set(true);
   }
