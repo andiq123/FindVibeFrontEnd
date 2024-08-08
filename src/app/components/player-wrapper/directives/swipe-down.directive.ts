@@ -14,6 +14,7 @@ import {
 export class SwipeDownDirective {
   topSignal = signal<number>(0);
   offsetPixels = signal<number>(0);
+  lastOffsetPixels = signal<number>(0);
   startTime = signal<Date>(new Date());
   onClose = output<void>();
   swipeStartTrigger = 400;
@@ -40,21 +41,26 @@ export class SwipeDownDirective {
   @HostListener('touchmove', ['$event'])
   onSwipeMove(event: TouchEvent) {
     const currentPixels = event.touches[0].clientY;
+    this.lastOffsetPixels.set(currentPixels);
     if (this.offsetPixels() > this.swipeStartTrigger) return;
     this.topSignal.set(currentPixels - this.offsetPixels());
   }
 
   @HostListener('touchend', ['$event'])
-  onSwipeEnd() {
-    const closeSizeTrigger = 500;
+  onSwipeEnd(event: TouchEvent) {
+    const closeSizeTrigger = 400;
     const timeCloseTrigger = 600;
     const duration = new Date().getTime() - this.startTime().getTime();
 
     if (duration < timeCloseTrigger && this.topSignal() > closeSizeTrigger) {
       this.onClose.emit();
     } else {
-      if (this.offsetPixels() < closeSizeTrigger) {
+      if (
+        this.offsetPixels() < closeSizeTrigger ||
+        this.lastOffsetPixels() < 0
+      ) {
         this.slideToZero = true;
+        this.lastOffsetPixels.set(0);
       }
     }
 
