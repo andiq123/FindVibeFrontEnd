@@ -2,6 +2,7 @@ import { Injectable, Signal, signal } from '@angular/core';
 import { addHerokutoLink, bytesToGB, delayCustom } from '../../utils/utils';
 import { Song } from '../../songs/models/song.model';
 import { LibraryService } from './library.service';
+import { of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -24,21 +25,23 @@ export class StorageService {
 
   async cacheAllSongs(songs: Song[]) {
     const cachedLibrary = await caches.open('library');
-    const song = songs[0];
-    const proxiedUrl = addHerokutoLink(song.link);
 
-    const response = await fetch(proxiedUrl, {
-      method: 'GET',
-      headers: {
-        Origin: window.location.origin,
-      },
-    });
-    await cachedLibrary.add(response.url);
+    for (const song of songs) {
+      const proxiedUrl = addHerokutoLink(song.link);
 
-    await this.setUpStorage();
+      const response = await fetch(proxiedUrl, {
+        method: 'GET',
+        headers: {
+          Origin: window.location.origin,
+        },
+      });
+      await cachedLibrary.add(response.url);
 
-    song.downloaded = true;
-    await delayCustom(500);
+      await this.setUpStorage();
+
+      song.downloaded = true;
+      await delayCustom(500);
+    }
   }
 
   async removeCache() {
