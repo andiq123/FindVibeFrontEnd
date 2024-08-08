@@ -3,13 +3,13 @@
 >
   @for (navItem of navList(); track navItem.name) {
   <li
-    class="flex flex-col p-1 items-center cursor-pointer py-6"
+    class="flex flex-col p-1 items-center cursor-pointer py-5"
     [routerLink]="navItem.link"
   >
     <fa-icon
       [icon]="navItem.icon"
       routerLinkActive="text-xl text-primary"
-      size="2xl"
+      size="xl"
     />
   </li>
   }
