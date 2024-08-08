@@ -46,7 +46,7 @@ export class SwipeDownDirective {
 
   @HostListener('touchend', ['$event'])
   onSwipeEnd() {
-    const closeSizeTrigger = 500;
+    const closeSizeTrigger = 350;
     const timeCloseTrigger = 500;
     const duration = new Date().getTime() - this.startTime().getTime();
 
