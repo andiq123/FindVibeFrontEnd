@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   effect,
   OnInit,
   output,
@@ -13,40 +14,30 @@ import { PlayerService } from '../player.service';
 import { PlayerStatus } from '../models/player.model';
 import { PlayerButtonComponent } from '../../../shared/player-button/player-button.component';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
-import {NgOptimizedImage} from "@angular/common";
-
-const song: Song = {
-  id: 'b8fe0bc1-d627-4689-999d-6bd9456c5fd5',
-  title: 'Allegro Ventigo (Feat. Matteo)',
-  artist: 'Dan Bălan',
-  image:
-    'https://lh3.googleusercontent.com/M5NWQnDh87OTs6IW…v9oNtyysOi97QdaHIR2OcfB92PZ35hZ_=w350-h350-l90-rj',
-  link: 'https://cdn.muzkan.net/?h=JGraYpdVSCkMwl1cGWtcIc7u…0kFF_E8uhno7JTV_phjeHpqR-jMYCjHGBXg7CRVhq0mKgY0gW',
-};
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-mini-player',
   standalone: true,
-  imports: [FontAwesomeModule, PlayerButtonComponent, MovingTitleComponent, NgOptimizedImage],
+  imports: [
+    FontAwesomeModule,
+    PlayerButtonComponent,
+    MovingTitleComponent,
+    NgOptimizedImage,
+  ],
   templateUrl: './mini-player.component.html',
   styleUrl: './mini-player.component.scss',
 })
-export class MiniPlayerComponent implements OnInit {
+export class MiniPlayerComponent {
+  song = computed(() => this.playerService.song$());
+  status = computed(() => this.playerService.status$());
   onToggleSize = output<void>();
 
   playerStatus = PlayerStatus;
 
-  song!: Signal<Song | null>;
-  status!: Signal<PlayerStatus>;
-
   faArrowUp = faArrowUp;
 
   constructor(private playerService: PlayerService) {}
-
-  ngOnInit(): void {
-    this.song = this.playerService.song$;
-    this.status = this.playerService.status$;
-  }
 
   toggleSize() {
     this.onToggleSize.emit();
