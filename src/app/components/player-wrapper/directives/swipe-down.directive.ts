@@ -48,7 +48,7 @@ export class SwipeDownDirective {
 
   @HostListener('touchend', ['$event'])
   onSwipeEnd(event: TouchEvent) {
-    const closeSizeTrigger = 400;
+    const closeSizeTrigger = 300;
     const timeCloseTrigger = 600;
     const duration = new Date().getTime() - this.startTime().getTime();
 
@@ -57,7 +57,7 @@ export class SwipeDownDirective {
     } else {
       if (
         this.offsetPixels() < closeSizeTrigger ||
-        this.lastOffsetPixels() < 0
+        this.lastOffsetPixels() < 100
       ) {
         this.slideToZero = true;
         this.lastOffsetPixels.set(0);
