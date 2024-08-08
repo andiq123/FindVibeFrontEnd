@@ -1,3 +1,5 @@
+import { environment } from '../../environments/environment.development';
+
 export const convertTime = (time: number) => {
   const minutes = Math.floor(time / 60);
   const seconds = Math.floor(time % 60);
@@ -8,20 +10,15 @@ export const convertTime = (time: number) => {
 };
 
 export const addHerokutoLink = (link: string) => {
+  // const baseUrl = environment.API_URL + '/api/streams/';
   const corsProxy = 'https://cors-anywhere.herokuapp.com/';
   const proxiedUrl = `${corsProxy}${link}`;
   return proxiedUrl;
 };
 
-export const convertKbToMb = (kb: number): number => {
-  return Math.round(kb / 1024);
+export const bytesToGB = (bytes: number): number => {
+  return parseFloat((bytes / 1024 ** 3).toFixed(2));
 };
 
-export const convertMbToGb = (mb: number): number => {
-  return Math.round(mb / 1024);
-};
-
-export const convertKbToGb = (kb: number): number => {
-  const mbConverted = convertKbToMb(kb);
-  return convertMbToGb(mbConverted);
-};
+export const delayCustom = (time: number) =>
+  new Promise((resolve) => setTimeout(resolve, time));

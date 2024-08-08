@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { User } from '../models/user.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
-import { tap } from 'rxjs';
+import { delay, Subject, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -11,12 +11,11 @@ export class UserService {
   private baseUrl = environment.API_URL + '/api';
   private user = signal<User | null>(null);
   user$ = this.user.asReadonly();
-  private userLoading = signal<boolean>(false);
-  userLoading$ = this.userLoading.asReadonly();
+  userLoggedIn = new Subject();
 
   constructor(private httpClient: HttpClient) {}
 
-  loadUser() {
+  loadUserFromStorage() {
     const user = this.getUserFromLocalStorage();
     if (user) {
       this.user.set(user);
@@ -26,15 +25,16 @@ export class UserService {
   }
 
   registerUser(userName: string) {
-    this.userLoading.set(true);
     userName = userName.toLocaleLowerCase();
     return this.httpClient
       .post<User>(this.baseUrl + '/users', { userName })
       .pipe(
-        tap((user: User) => {
-          this.user.set(user);
-          this.setUserToLocalStorage(user);
-          this.userLoading.set(false);
+        tap({
+          next: (user: User) => {
+            this.user.set(user);
+            this.setUserToLocalStorage(user);
+            this.userLoggedIn.next(true);
+          },
         })
       );
   }

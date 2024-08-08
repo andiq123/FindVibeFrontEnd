@@ -43,33 +43,36 @@ export class AppComponent implements OnInit {
     private swUpdate: SwUpdate,
     @Inject(DOCUMENT) private document: Document
   ) {
-    effect(() => {
-      const isMiniPlayer = this.settingsService.isMiniPlayer$();
-      const body = this.document.querySelector('body');
-      body?.classList.toggle('noScroll', !isMiniPlayer);
-    });
+    // effect(() => {
+    //   const isMiniPlayer = this.settingsService.isMiniPlayer$();
+    //   const body = this.document.querySelector('body');
+    //   body?.classList.toggle('noScroll', !isMiniPlayer);
+    // });
 
     effect(() => {
       const song = this.playerService.song$();
-      if (song) {
-        this.title.setTitle(song.title);
-        return;
-      }
-      this.title.setTitle('FindVibe');
+      this.title.setTitle(song?.title || 'FindVibe');
     });
 
     this.setupNavigationMedia();
   }
 
   ngOnInit(): void {
-    this.loadUser();
+    this.checkIfAlreadyLogged();
+    this.checkForUpdate().subscribe();
+    this.wakeServer().subscribe();
+  }
 
-    this.swUpdate.versionUpdates
-      .pipe(
-        filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY')
-      )
-      .subscribe(() => {
+  private checkIfAlreadyLogged() {
+    this.userService.loadUserFromStorage();
+  }
+
+  private checkForUpdate() {
+    return this.swUpdate.versionUpdates.pipe(
+      filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
+      tap(() => {
         this.newUpdateAvaialble.set(true);
+
         setInterval(() => {
           if (this.secondsToUpdate() < 1) {
             document.location.reload();
@@ -77,11 +80,8 @@ export class AppComponent implements OnInit {
             this.secondsToUpdate.update((x) => x - 1);
           }
         }, 1000);
-      });
-
-    this.wakeServer().subscribe(() => {
-      this.loadSongs();
-    });
+      })
+    );
   }
 
   private wakeServer() {
@@ -97,17 +97,6 @@ export class AppComponent implements OnInit {
         throw err;
       })
     );
-  }
-
-  private loadSongs() {
-    const userId = this.userService.loadUser();
-    if (userId) {
-      this.libraryService.setupLibrarySongs(userId).subscribe();
-    }
-  }
-
-  private loadUser() {
-    this.userService.loadUser();
   }
 
   private setupNavigationMedia() {

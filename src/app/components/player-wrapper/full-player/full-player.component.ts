@@ -26,10 +26,8 @@ import { getDominantColor } from '@rtcoder/dominant-color';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
 import { SettingsService } from '../../../services/settings.service';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
-import { LibraryService } from '../../../library/services/library.service';
-import { UserService } from '../../../library/services/user.service';
 import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
-import { SwipeDownDirective } from '../../../shared/directives/swipe-down.directive';
+import { SwipeDownDirective } from '../directives/swipe-down.directive';
 
 @Component({
   selector: 'app-full-player',

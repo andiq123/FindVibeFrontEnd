@@ -2,21 +2,18 @@ import {
   Component,
   computed,
   effect,
+  OnDestroy,
   OnInit,
   signal,
   Signal,
 } from '@angular/core';
-import { Song } from '../songs/models/song.model';
 import { SongComponent } from '../songs/song/song.component';
-import { FormsModule } from '@angular/forms';
-import { User } from './models/user.model';
 import { LibraryService } from './services/library.service';
 import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
 import { TitleCasePipe } from '@angular/common';
-import { StorageService } from './services/storage.service';
 import { StorageInfoComponent } from './components/storage-info/storage-info.component';
-import { SettingsService } from '../services/settings.service';
+import { catchError, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-library',
@@ -30,35 +27,48 @@ import { SettingsService } from '../services/settings.service';
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
 })
-export class LibraryComponent implements OnInit {
-  songs!: Signal<Song[]>;
-  isLoggedIn!: Signal<boolean>;
-  username!: Signal<string>;
-  songsAreLoading!: Signal<boolean>;
-  isServerDown!: Signal<boolean>;
-  userLoading!: Signal<boolean>;
+export class LibraryComponent implements OnInit, OnDestroy {
+  private subscriptions: Subscription[] = [];
+  songs = computed(() => this.libraryService.songs$());
+  isLoggedIn = computed(() => !!this.userService.user$());
+  username = computed(() => this.userService.user$()?.name || '');
+  userId = computed(() => this.userService.user$()?.id || '');
+
+  loadingSongs = signal<boolean>(true);
 
   constructor(
     private libraryService: LibraryService,
-    private userService: UserService,
-    private settingsService: SettingsService
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
-    this.songs = this.libraryService.songs$;
-    this.songsAreLoading = this.libraryService.loadingSongs$;
-    this.isLoggedIn = computed(() => !!this.userService.user$());
-    this.username = computed(() => this.userService.user$()?.name || '');
-    this.isServerDown = this.settingsService.isServerDown$;
-    this.libraryService.updateSilentLibrarySongs(this.username());
-    this.userLoading = this.userService.userLoading$;
+    if (this.isLoggedIn()) {
+      this.loadLibrary();
+    } else {
+      this.registerWaitForNewUser();
+    }
+  }
+
+  loadLibrary() {
+    this.libraryService.updateLibrarySongs(this.userId()).subscribe(() => {
+      this.loadingSongs.set(false);
+    });
   }
 
   changeUser() {
     this.userService.resetUser();
+    this.registerWaitForNewUser();
   }
 
-  reloadPage() {
-    document.location.replace('/songs');
+  private registerWaitForNewUser() {
+    this.subscriptions.push(
+      this.userService.userLoggedIn.subscribe(() => {
+        this.loadLibrary();
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

@@ -1,5 +1,5 @@
-<dialog class="modal h-96 mt-16" open>
-  <div class="modal-box shadow-none">
+<div class="h-96 mt-16 w-96 mx-auto">
+  <div class="">
     <h3 class="text-xl font-bold">FindVibe</h3>
     <p class="py-2 text-lg">Your library is synced by your name!</p>
     <div class="modal-action flex justify-center">
@@ -28,8 +28,16 @@
             autocomplete="off"
           />
         </label>
-        <button class="btn btn-md w-full text-xl" type="submit">Save</button>
+        <button
+          class="btn btn-md w-full text-xl"
+          type="submit"
+          [disabled]="!name() || loadingSubmiting()"
+        >
+          Save @if(loadingSubmiting()){
+          <span class="loading loading-spinner loading-md"></span>
+          }
+        </button>
       </form>
     </div>
   </div>
-</dialog>
+</div>

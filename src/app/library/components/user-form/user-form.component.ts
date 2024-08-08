@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
 import { LibraryService } from '../../services/library.service';
@@ -12,15 +12,16 @@ import { LibraryService } from '../../services/library.service';
 })
 export class UserFormComponent {
   name = signal<string>('');
+  loadingSubmiting = signal<boolean>(false);
 
-  constructor(
-    private userService: UserService,
-    private libraryService: LibraryService
-  ) {}
+  constructor(private userService: UserService) {}
 
   setUpUser() {
-    this.userService.registerUser(this.name()).subscribe((user) => {
-      this.libraryService.setupLibrarySongs(user.id).subscribe();
+    this.loadingSubmiting.set(true);
+    this.userService.registerUser(this.name()).subscribe({
+      next: () => {
+        this.loadingSubmiting.set(false);
+      },
     });
   }
 }

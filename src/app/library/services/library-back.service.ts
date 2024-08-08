@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { SongToAddFavorite } from '../models/songToAddFavorite.model';
 import { Song } from '../../songs/models/song.model';
+import { catchError, delay, Observable, Subject, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,19 +13,54 @@ export class LibraryBackService {
 
   constructor(private httpClient: HttpClient) {}
 
-  getFavoritesSong(userId: string) {
-    return this.httpClient.get<{ songs: Song[] }>(
-      this.baseUrl + '/songs/get-favorites?userId=' + userId
-    );
+  getFavoritesSong(userId: string): Observable<{ songs: Song[] }> {
+    return new Observable((observer) => {
+      const songsFromStorage = this.getLibraryFromLocalStorage();
+
+      if (songsFromStorage.length > 0) {
+        observer.next({ songs: songsFromStorage });
+      }
+
+      this.httpClient
+        .get<{ songs: Song[] }>(
+          this.baseUrl + '/songs/get-favorites?userId=' + userId
+        )
+        .pipe(
+          catchError((e) => {
+            if (e.status === 404) {
+              this.setLibraryToLocalStorage([]);
+              observer.next({ songs: [] });
+            }
+            observer.complete();
+            return [];
+          }),
+          tap((data) => {
+            this.setLibraryToLocalStorage(data.songs);
+            observer.next(data);
+            observer.complete();
+          })
+        )
+        .subscribe();
+    });
   }
 
   addToFavorites(song: SongToAddFavorite) {
     return this.httpClient.post(this.baseUrl + '/songs/add-favorite', song);
   }
 
-  removeFromFavorites(userId: string) {
+  removeFromFavorites(songId: string) {
     return this.httpClient.delete(
-      this.baseUrl + '/songs/remove-favorite?userId=' + userId
+      this.baseUrl + '/songs/remove-favorite?songId=' + songId
     );
+  }
+
+  private setLibraryToLocalStorage(songs: Song[]) {
+    localStorage.setItem('library', JSON.stringify(songs));
+  }
+
+  private getLibraryFromLocalStorage() {
+    const library = localStorage.getItem('library');
+    if (!library) return [];
+    return JSON.parse(library) as Song[];
   }
 }

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 
 @Injectable({
@@ -16,6 +16,7 @@ export class SuggestionsService {
 
   getSuggestions(term: string): Observable<{ results: string[] }> {
     return this.httpClient.get<{ results: string[] }>(this.baseUrl + term).pipe(
+      timeout(1000),
       tap((suggestions) => {
         this.suggestions.set(suggestions.results);
       })

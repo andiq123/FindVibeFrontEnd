@@ -1,11 +1,10 @@
-import { effect, Injectable, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 import { LibraryBackService } from './library-back.service';
 
 import { catchError, tap } from 'rxjs';
 import { Song } from '../../songs/models/song.model';
 import { SongToAddFavorite } from '../models/songToAddFavorite.model';
-import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,8 +12,6 @@ import { StorageService } from './storage.service';
 export class LibraryService {
   private songs = signal<Song[]>([]);
   songs$ = this.songs.asReadonly();
-  private loadingSongs = signal<boolean>(false);
-  loadingSongs$ = this.loadingSongs.asReadonly();
 
   private currentLoadingFavoriteSongIds = signal<string[]>([]);
   currentLoadingFavoriteSongIds$ =
@@ -22,25 +19,12 @@ export class LibraryService {
 
   constructor(private libraryBackService: LibraryBackService) {}
 
-  setupLibrarySongs(userId: string) {
-    this.loadingSongs.set(true);
+  updateLibrarySongs(userId: string) {
     return this.libraryBackService.getFavoritesSong(userId).pipe(
-      tap((songs) => {
-        this.songs.set(songs.songs);
-        this.loadingSongs.set(false);
-      }),
-      catchError((err) => {
-        this.songs.set([]);
-        this.loadingSongs.set(false);
-        throw err;
-      })
-    );
-  }
-
-  updateSilentLibrarySongs(userId: string) {
-    return this.libraryBackService.getFavoritesSong(userId).pipe(
-      tap((songs) => {
-        this.songs.set(songs.songs);
+      tap({
+        next: (data) => {
+          this.songs.set(data.songs);
+        },
       })
     );
   }
@@ -58,9 +42,11 @@ export class LibraryService {
     };
 
     return this.libraryBackService.addToFavorites(favoriteSong).pipe(
-      tap(() => {
-        this.songs.update((prevSongs) => [...prevSongs, song]);
-        this.removeSongFromLoadingFavorites(song.id);
+      tap({
+        next: () => {
+          this.songs.update((prevSongs) => [...prevSongs, song]);
+          this.removeSongFromLoadingFavorites(song.id);
+        },
       })
     );
   }
@@ -69,22 +55,13 @@ export class LibraryService {
     this.addSongToLoadingFavorites(id);
     const songId = this.songs().find((x) => x.link === link)!.id;
     return this.libraryBackService.removeFromFavorites(songId).pipe(
-      tap(() => {
-        this.songs.update((prevSongs) =>
-          prevSongs.filter((song) => song.link !== link)
-        );
-        this.removeSongFromLoadingFavorites(id);
-      })
-    );
-  }
-
-  setSongDownloaded(songId: string) {
-    this.songs.update((prevSongs) =>
-      prevSongs.map((x) => {
-        if (x.id === songId) {
-          x.downloaded = true;
-        }
-        return x;
+      tap({
+        next: () => {
+          this.songs.update((prevSongs) =>
+            prevSongs.filter((song) => song.link !== link)
+          );
+          this.removeSongFromLoadingFavorites(id);
+        },
       })
     );
   }

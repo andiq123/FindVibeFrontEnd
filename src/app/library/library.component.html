@@ -1,16 +1,5 @@
 <div class="w-[95%] mx-auto mt-16">
-  @if (!isLoggedIn()) { @if(!userLoading()){ <app-user-form />}@else {
-  <div
-    class="flex flex-col items-center justify-center w-fit mx-auto py-5 px-10"
-  >
-    <p class="text-center font-bold">User loading...</p>
-    <div>
-      <span class="loading loading-ball loading-lg"></span>
-      <span class="loading loading-ball loading-lg"></span>
-      <span class="loading loading-ball loading-lg"></span>
-    </div>
-  </div>
-  } } @else { @if(songsAreLoading()){
+  @if (!isLoggedIn()) { <app-user-form />} @else{ @if(loadingSongs()){
   <div
     class="flex flex-col items-center justify-center w-fit mx-auto py-5 px-10"
   >
@@ -21,7 +10,7 @@
       <span class="loading loading-ball loading-lg"></span>
     </div>
   </div>
-  } @else {
+  }@else {
   <div class="flex flex-col">
     <app-storage-info />
     <div class="flex justify-between items-center my-2">
@@ -36,14 +25,39 @@
         <app-song [song]="song" [isFavoritePage]="true" />
       </li>
       } @empty {
-      <li class="text-center">Search for some songs</li>
+      <p
+        class="text-center my-3 font-bold p-3 bg-base-200 rounded-lg shadow-lg"
+      >
+        You have no music in your favorites, add some!
+      </p>
       }
     </ul>
   </div>
-  }@if (isServerDown()) {
-  <div class="flex justify-between my-3 items-center border border-primary p-3">
-    <p class="font-bold text-2xl text-red-300">Server is down...</p>
-    <button class="btn" (click)="reloadPage()">Reload Page</button>
-  </div>
-  }}
+  } }
 </div>
+
+<!-- 
+  <div
+    class="flex flex-col items-center justify-center w-fit mx-auto py-5 px-10"
+  >
+    <p class="text-center font-bold">Songs loading...</p>
+    <div>
+      <span class="loading loading-ball loading-lg"></span>
+      <span class="loading loading-ball loading-lg"></span>
+      <span class="loading loading-ball loading-lg"></span>
+    </div>
+  </div>
+  } 
+
+
+  <div
+    class="flex flex-col items-center justify-center w-fit mx-auto py-5 px-10"
+  >
+    <p class="text-center font-bold">User loading...</p>
+    <div>
+      <span class="loading loading-ball loading-lg"></span>
+      <span class="loading loading-ball loading-lg"></span>
+      <span class="loading loading-ball loading-lg"></span>
+    </div>
+  </div>
+-->

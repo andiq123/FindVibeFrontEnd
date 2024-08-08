@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { SongsComponent } from './songs/songs.component';
-import { offlineGuard } from './shared/offline.guard';
+import { offlineGuard } from './shared/guards/offline.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'songs', pathMatch: 'full' },

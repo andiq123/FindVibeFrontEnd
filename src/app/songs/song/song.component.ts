@@ -32,27 +32,24 @@ import { addHerokutoLink } from '../../utils/utils';
 })
 export class SongComponent implements OnInit {
   song = input.required<Song>();
-  isActive!: Signal<boolean>;
+  status = computed(() => {
+    if (this.isActive()) {
+      return this.playerService.status$();
+    }
+    return PlayerStatus.Paused;
+  });
+  isActive = computed(
+    () => this.playerService.song$()?.link === this.song().link
+  );
   isFavoritePage = input<boolean>(false);
 
-  status!: Signal<PlayerStatus>;
   faCheck = faCheck;
 
   constructor(private playerService: PlayerService) {}
 
   ngOnInit(): void {
-    this.isActive = computed(
-      () => this.playerService.song$()?.link === this.song().link
-    );
-    this.status = computed(() => {
-      if (this.isActive()) {
-        return this.playerService.status$();
-      }
-      return PlayerStatus.Paused;
-    });
-
     if (this.isFavoritePage()) {
-      this.checkIfAvailableOffline().then(() => {});
+      this.checkIfAvailableOffline();
     }
   }
 
