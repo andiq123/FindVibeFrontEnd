@@ -14,9 +14,8 @@ import { PlayerButtonComponent } from '../../shared/player-button/player-button.
 import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../shared/favorite-button/favorite-button.component';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { addHerokutoLink } from '../../utils/utils';
 import { StorageService } from '../../library/services/storage.service';
 
 @Component({
@@ -28,7 +27,6 @@ import { StorageService } from '../../library/services/storage.service';
     NgOptimizedImage,
     FavoriteButtonComponent,
     FontAwesomeModule,
-    AsyncPipe,
   ],
   templateUrl: './song.component.html',
   styleUrl: './song.component.scss',
@@ -45,17 +43,21 @@ export class SongComponent {
     () => this.playerService.song$()?.link === this.song().link
   );
   isFavoritePage = input<boolean>(false);
-  isAvaiableOffline = computed(async () => {
-    if (this.isFavoritePage()) {
-      return (
-        (await this.storageService.isAvalaibleOffline(this.song().link)) ||
-        this.song().downloaded
-      );
-    }
-    return false;
+
+  isDownloadingOffline = computed(() => {
+    return this.storageService
+      .currentLoadingDownloadSongIds$()
+      .includes(this.song().id);
   });
 
-  faCheck = faCheck;
+  isAvaiableOffline = computed(() => {
+    return (
+      this.isFavoritePage() &&
+      this.storageService.availableOfflineSongIds$().includes(this.song().id)
+    );
+  });
+
+  faCloudArrowDown = faCloudArrowDown;
 
   constructor(
     private playerService: PlayerService,

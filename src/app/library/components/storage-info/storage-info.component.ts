@@ -15,6 +15,9 @@ export class StorageInfoComponent implements OnInit {
   storageTotal!: Signal<number>;
   storageUsed!: Signal<number>;
   loadingDownloading = signal<boolean>(false);
+  showRemoveCacheButton = computed(() => {
+    return this.storageService.availableOfflineSongIds$().length > 0;
+  });
 
   libraryExists = signal<boolean>(false);
   faTrash = faTrash;
@@ -28,26 +31,29 @@ export class StorageInfoComponent implements OnInit {
     this.storageTotal = this.storageService.storageTotal;
     this.storageUsed = this.storageService.storageUsed;
     this.storageService.setUpStorage();
-    this.checkIfLibraryExists();
+
+    this.populateAvailableOfflineSongs();
   }
 
   async downloadAll() {
     this.loadingDownloading.set(true);
-
     await this.storageService.cacheAllSongs(this.libraryService.songs$());
-    await this.checkIfLibraryExists();
-
     this.loadingDownloading.set(false);
   }
 
   async removeCache() {
     await this.storageService.removeCache();
-    await this.checkIfLibraryExists();
-    this.libraryService.songs$().forEach((song) => (song.downloaded = false));
+    this.storageService.emptyAvailableOfflineSongIds();
   }
 
-  private async checkIfLibraryExists() {
-    const exists = await caches.has('library');
-    this.libraryExists.set(exists);
+  populateAvailableOfflineSongs() {
+    this.libraryService.songs$().forEach(async (song) => {
+      if (await this.storageService.isAvalaibleOffline(song.link)) {
+        this.storageService.availableOfflineSongIds$.update((prev) => [
+          ...prev,
+          song.id,
+        ]);
+      }
+    });
   }
 }

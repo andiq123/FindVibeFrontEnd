@@ -13,7 +13,7 @@ import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
 import { TitleCasePipe } from '@angular/common';
 import { StorageInfoComponent } from './components/storage-info/storage-info.component';
-import { catchError, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-library',

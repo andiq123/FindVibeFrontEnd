@@ -9,9 +9,8 @@ export class StorageService {
   storageTotal = signal<number>(0);
   storageUsed = signal<number>(0);
 
-  private currentLoadingDownloadSongIds = signal<string[]>([]);
-  currentLoadingDownloadSongIds$ =
-    this.currentLoadingDownloadSongIds.asReadonly();
+  currentLoadingDownloadSongIds$ = signal<string[]>([]);
+  availableOfflineSongIds$ = signal<string[]>([]);
 
   constructor() {}
 
@@ -25,13 +24,11 @@ export class StorageService {
     const cachedLibrary = await caches.open('library');
 
     for (const song of songs) {
-      if (await this.isAvalaibleOffline(song.link)) {
-        console.log('skipping:', song.title);
-        continue;
-      }
-      console.log('not skipping:', song.title);
+      if (await this.isAvalaibleOffline(song.link)) continue;
+
       const proxiedUrl = addHerokutoLink(song.link);
 
+      this.currentLoadingDownloadSongIds$.update((prev) => [...prev, song.id]);
       const response = await fetch(proxiedUrl, {
         method: 'GET',
         headers: {
@@ -42,8 +39,13 @@ export class StorageService {
 
       await this.setUpStorage();
 
-      song.downloaded = true;
       await delayCustom(500);
+
+      this.currentLoadingDownloadSongIds$.update((prev) =>
+        prev.filter((id) => id !== song.id)
+      );
+
+      this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
     }
   }
 
@@ -59,5 +61,9 @@ export class StorageService {
     const proxiedUrl = addHerokutoLink(songLink);
     const isAvailable = await songCache.match(proxiedUrl);
     return !!isAvailable?.url;
+  }
+
+  emptyAvailableOfflineSongIds() {
+    this.availableOfflineSongIds$.set([]);
   }
 }

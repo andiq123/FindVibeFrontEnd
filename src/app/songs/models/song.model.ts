@@ -4,7 +4,6 @@ export interface Song {
   title: string;
   image: string;
   link: string;
-  downloaded?: boolean;
 }
 
 export enum SearchStatus {

@@ -2,12 +2,16 @@
   <p class="text-xl font-bold">Storage info</p>
   <div class="flex items-center gap-3 justify-between">
     <div class="flex gap-3">
-      <button class="btn" (click)="downloadAll()">
-        Download All @if(loadingDownloading()){
+      <button
+        class="btn"
+        (click)="downloadAll()"
+        [disabled]="loadingDownloading()"
+      >
+        Make All Offline @if(loadingDownloading()){
         <span class="loading loading-spinner loading-md"></span>
         }
       </button>
-      @if(libraryExists()){
+      @if(showRemoveCacheButton()){
       <button class="btn" (click)="removeCache()">
         <fa-icon [icon]="faTrash" />
       </button>
