@@ -1,4 +1,11 @@
-import { Component, effect, OnInit, Signal, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  OnInit,
+  Signal,
+  signal,
+} from '@angular/core';
 import { MiniPlayerComponent } from './mini-player/mini-player.component';
 import { FullPlayerComponent } from './full-player/full-player.component';
 import { PlayerService } from './player.service';
@@ -13,9 +20,8 @@ import { SettingsService } from '../../services/settings.service';
   styleUrl: './player-wrapper.component.scss',
 })
 export class PlayerWrapperComponent implements OnInit {
-  isMiniPlayer!: Signal<boolean>;
-  data = signal<string>('test');
-  song!: Signal<Song | null>;
+  isMiniPlayer = computed(() => this.settingsService.isMiniPlayer$());
+  song = computed(() => this.playerService.song$());
 
   constructor(
     private playerService: PlayerService,
@@ -23,13 +29,10 @@ export class PlayerWrapperComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.song = this.playerService.song$;
-    this.isMiniPlayer = this.settingsService.isMiniPlayer$;
     this.playerService.registerEvents();
   }
 
   onToggleSize() {
-    this.data.update((text) => text + '!');
     this.settingsService.toggleMiniPlayer();
   }
 }
