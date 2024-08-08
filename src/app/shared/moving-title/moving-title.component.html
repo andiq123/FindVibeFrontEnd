@@ -1,5 +1,11 @@
 <div class="container">
   <h2 [class]="classes()" [class.scroll-text]="isLonger() && isActive()">
-    {{ titleToDisplay() }}
+    @if(isRedirect()){
+    <span
+      (click)="redirectToSearch()"
+      class="cursor-pointer hover:text-slate-200 active:text-slate-200"
+      >{{ titleToDisplay() }}</span
+    >
+    }@else { {{ titleToDisplay() }}}
   </h2>
 </div>

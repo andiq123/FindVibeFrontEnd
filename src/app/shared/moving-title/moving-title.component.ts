@@ -1,4 +1,12 @@
-import { Component, computed, input, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-moving-title',
@@ -12,6 +20,10 @@ export class MovingTitleComponent {
   classes = input<string>('text-md font-bold');
   isActive = input<boolean>(false);
   offset = signal<number>(21);
+  isRedirect = input<boolean>(false);
+  closePlayer = output<void>();
+
+  constructor(private router: Router) {}
 
   isLonger = computed(() => {
     return this.title().length > this.offset();
@@ -32,4 +44,9 @@ export class MovingTitleComponent {
     }
     return this.title();
   });
+
+  redirectToSearch() {
+    this.router.navigate(['/songs'], { queryParams: { query: this.title() } });
+    this.closePlayer.emit();
+  }
 }

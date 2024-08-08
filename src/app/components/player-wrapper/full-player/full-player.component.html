@@ -49,6 +49,8 @@
           [title]="song()!.artist"
           [isActive]="true"
           classes="max-w-60"
+          [isRedirect]="true"
+          (closePlayer)="toggleSize()"
         />
       </div>
       <app-favorite-button [song]="song()!" [forPlayer]="true" />
