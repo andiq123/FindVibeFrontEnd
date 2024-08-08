@@ -45,6 +45,7 @@ export class LibraryService {
       tap({
         next: () => {
           this.songs.update((prevSongs) => [...prevSongs, song]);
+          this.libraryBackService.setLibraryToLocalStorage([...this.songs()]);
           this.removeSongFromLoadingFavorites(song.id);
         },
       })
@@ -60,6 +61,7 @@ export class LibraryService {
           this.songs.update((prevSongs) =>
             prevSongs.filter((song) => song.link !== link)
           );
+          this.libraryBackService.setLibraryToLocalStorage([...this.songs()]);
           this.removeSongFromLoadingFavorites(id);
         },
       })

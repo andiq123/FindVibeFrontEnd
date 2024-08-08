@@ -54,7 +54,7 @@ export class LibraryBackService {
     );
   }
 
-  private setLibraryToLocalStorage(songs: Song[]) {
+  setLibraryToLocalStorage(songs: Song[]) {
     localStorage.setItem('library', JSON.stringify(songs));
   }
 
