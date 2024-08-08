@@ -16,7 +16,7 @@ export class SwipeDownDirective {
   offsetPixels = signal<number>(0);
   startTime = signal<Date>(new Date());
   onClose = output<void>();
-  swipeStartTrigger = 500;
+  swipeStartTrigger = signal<number>(500);
 
   @HostBinding('style.transform') translateY = 'translateY(0px)';
   @HostBinding('class.slideToZero') slideToZero = false;
@@ -32,7 +32,7 @@ export class SwipeDownDirective {
   onSwipeStart(event: TouchEvent) {
     const currentPixels = event.touches[0].clientY;
     this.offsetPixels.set(currentPixels);
-    if (currentPixels > this.swipeStartTrigger) return;
+    if (currentPixels > this.swipeStartTrigger()) return;
     this.startTime.set(new Date());
     this.slideUp = false;
   }
@@ -40,7 +40,7 @@ export class SwipeDownDirective {
   @HostListener('touchmove', ['$event'])
   onSwipeMove(event: TouchEvent) {
     const currentPixels = event.touches[0].clientY;
-    if (this.offsetPixels() > this.swipeStartTrigger) return;
+    if (this.offsetPixels() > this.swipeStartTrigger()) return;
     this.topSignal.set(currentPixels - this.offsetPixels());
   }
 
@@ -53,7 +53,7 @@ export class SwipeDownDirective {
     if (duration < timeCloseTrigger && this.topSignal() > closeSizeTrigger) {
       this.onClose.emit();
     } else {
-      if (this.offsetPixels() < 500) {
+      if (this.offsetPixels() < this.swipeStartTrigger()) {
         this.slideToZero = true;
       }
     }
