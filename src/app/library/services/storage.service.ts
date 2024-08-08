@@ -40,7 +40,7 @@ export class StorageService {
 
         await this.setUpStorage();
 
-        await delayCustom(500);
+        await delayCustom(1000);
 
         this.currentLoadingDownloadSongIds$.update((prev) =>
           prev.filter((id) => id !== song.id)
