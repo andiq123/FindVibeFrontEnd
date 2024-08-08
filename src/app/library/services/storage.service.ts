@@ -29,17 +29,26 @@ export class StorageService {
       const proxiedUrl = addHerokutoLink(song.link);
 
       this.currentLoadingDownloadSongIds$.update((prev) => [...prev, song.id]);
-      const response = await fetch(proxiedUrl, {
-        method: 'GET',
-        headers: {
-          Origin: window.location.origin,
-        },
-      });
-      await cachedLibrary.add(new Request(response.url));
+      try {
+        const response = await fetch(proxiedUrl, {
+          method: 'GET',
+          headers: {
+            Origin: window.location.origin,
+          },
+        });
+        await cachedLibrary.add(new Request(response.url));
 
-      await this.setUpStorage();
+        await this.setUpStorage();
 
-      await delayCustom(500);
+        await delayCustom(500);
+      } catch (error) {
+        this.currentLoadingDownloadSongIds$.update((prev) =>
+          prev.filter((id) => id !== song.id)
+        );
+        this.availableOfflineSongIds$.update((prev) =>
+          prev.filter((id) => id !== song.id)
+        );
+      }
 
       this.currentLoadingDownloadSongIds$.update((prev) =>
         prev.filter((id) => id !== song.id)
