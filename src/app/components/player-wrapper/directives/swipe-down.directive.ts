@@ -16,7 +16,7 @@ export class SwipeDownDirective {
   offsetPixels = signal<number>(0);
   startTime = signal<Date>(new Date());
   onClose = output<void>();
-  swipeStartTrigger = signal<number>(500);
+  swipeStartTrigger = signal<number>(450);
 
   @HostBinding('style.transform') translateY = 'translateY(0px)';
   @HostBinding('class.slideToZero') slideToZero = false;
