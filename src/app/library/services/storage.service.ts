@@ -41,6 +41,12 @@ export class StorageService {
         await this.setUpStorage();
 
         await delayCustom(500);
+
+        this.currentLoadingDownloadSongIds$.update((prev) =>
+          prev.filter((id) => id !== song.id)
+        );
+
+        this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
       } catch (error) {
         this.currentLoadingDownloadSongIds$.update((prev) =>
           prev.filter((id) => id !== song.id)
@@ -49,12 +55,6 @@ export class StorageService {
           prev.filter((id) => id !== song.id)
         );
       }
-
-      this.currentLoadingDownloadSongIds$.update((prev) =>
-        prev.filter((id) => id !== song.id)
-      );
-
-      this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
     }
   }
 
