@@ -23,7 +23,7 @@
   } @case (searchStatus.Error) {
   <p class="text-center">Could not find any songs by this search</p>
   } @case (searchStatus.Finished) {
-  <ul class="flex flex-col gap-1 mb-24">
+  <ul class="flex flex-col gap-1 mb-36">
     @for (song of songs(); track song.id) { @defer (on viewport){
     <li>
       <app-song [song]="song" />
