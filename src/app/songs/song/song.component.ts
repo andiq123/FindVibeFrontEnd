@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  OnInit,
-  signal,
-  Signal,
-} from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { Song } from '../models/song.model';
 import { PlayerService } from '../../components/player-wrapper/player.service';
 import { PlayerStatus } from '../../components/player-wrapper/models/player.model';
