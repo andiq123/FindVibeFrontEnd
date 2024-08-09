@@ -24,11 +24,17 @@
   <p class="text-center">Could not find any songs by this search</p>
   } @case (searchStatus.Finished) {
   <ul class="flex flex-col gap-1 mb-24">
-    @for (song of songs(); track song.id) {
+    @for (song of songs(); track song.id) { @defer (on viewport){
     <li>
       <app-song [song]="song" />
     </li>
-    } @empty {
+    }@placeholder {
+    <p
+      class="rounded-lg py-2 px-3 flex justify-between items-center bg-base-200"
+    >
+      Song is loading...
+    </p>
+    } } @empty {
     <li class="text-center">Search for some songs</li>
     }
   </ul>

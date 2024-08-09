@@ -1,4 +1,3 @@
-@defer (on viewport){
 <div
   class="rounded-lg py-1 px-2 flex justify-between items-center"
   [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
@@ -44,8 +43,3 @@
     <app-favorite-button [song]="song()" />
   </div>
 </div>
-}@placeholder {
-<p class="rounded-lg py-2 px-3 flex justify-between items-center bg-base-200">
-  Song is loading...
-</p>
-}
