@@ -63,6 +63,9 @@ export class DragAndDropDirective {
     event.preventDefault();
     const target = event.target as HTMLDivElement;
 
+    const elToRemove = target.querySelector('#elToRemove');
+    elToRemove?.classList.remove('pointer-events-none');
+
     const draggable = target.attributes.getNamedItem('draggable');
     if (draggable) {
       target.classList.remove('dragTarget');
