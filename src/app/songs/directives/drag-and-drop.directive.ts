@@ -66,10 +66,13 @@ export class DragAndDropDirective {
     const elToRemove = target.querySelector('#elToRemove');
     elToRemove?.classList.remove('pointer-events-none');
 
-    target.classList.remove('dragTarget');
-    const initiatorId = event.dataTransfer?.getData('id');
-    const title = target.id;
-    this.reorderSongs.emit({ from: initiatorId!, to: title });
+    const draggable = target.attributes.getNamedItem('draggable');
+    if (draggable) {
+      target.classList.remove('dragTarget');
+      const initiatorId = event.dataTransfer?.getData('id');
+      const title = target.id;
+      this.reorderSongs.emit({ from: initiatorId!, to: title });
+    }
   }
 
   @HostListener('dragover', ['$event'])
