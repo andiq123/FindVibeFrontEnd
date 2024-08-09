@@ -9,7 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Song } from '../../../songs/models/song.model';
-import { convertTime } from '../../../utils/utils';
+import { addProxyLink, convertTime } from '../../../utils/utils';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faArrowDown,
@@ -43,13 +43,13 @@ import { SwipeDownDirective } from '../directives/swipe-down.directive';
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
 })
-export class FullPlayerComponent implements OnInit {
-  song!: Signal<Song | null>;
-  status!: Signal<PlayerStatus>;
-  currentTime!: Signal<number>;
-  duration!: Signal<number>;
-  isRepeat!: Signal<boolean>;
-  isShuffle!: Signal<boolean>;
+export class FullPlayerComponent {
+  song = computed(() => this.playerService.song$());
+  status = computed(() => this.playerService.status$());
+  currentTime = computed(() => this.playerService.currentTime$());
+  duration = computed(() => this.playerService.duration$());
+  isRepeat = computed(() => this.settingsService.isRepeat$());
+  isShuffle = computed(() => this.settingsService.isShuffle$());
   onToggleSize = output<void>();
 
   faStepBackward = faStepBackward;
@@ -71,15 +71,6 @@ export class FullPlayerComponent implements OnInit {
     private playerService: PlayerService,
     private settingsService: SettingsService
   ) {}
-
-  ngOnInit(): void {
-    this.status = this.playerService.status$;
-    this.currentTime = this.playerService.currentTime$;
-    this.duration = this.playerService.duration$;
-    this.isRepeat = this.settingsService.isRepeat$;
-    this.isShuffle = this.settingsService.isShuffle$;
-    this.song = this.playerService.song$;
-  }
 
   convertTime(timeToConvert: number): string {
     return convertTime(timeToConvert);

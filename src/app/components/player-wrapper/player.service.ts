@@ -5,7 +5,7 @@ import { SettingsService } from '../../services/settings.service';
 import { Router } from '@angular/router';
 import { LibraryService } from '../../library/services/library.service';
 import { SongsService } from '../../songs/services/songs.service';
-import { addHerokutoLink } from '../../utils/utils';
+import { addProxyLink } from '../../utils/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -62,7 +62,7 @@ export class PlayerService {
   async setSong(song: Song) {
     const cachedLibrary = await caches.open('library');
 
-    const proxiedUrl = addHerokutoLink(song.link);
+    const proxiedUrl = addProxyLink(song.link);
     const inCache = await cachedLibrary.match(proxiedUrl);
     if (inCache) {
       const blob = await inCache!.blob();

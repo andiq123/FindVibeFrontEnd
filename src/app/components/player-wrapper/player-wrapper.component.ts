@@ -1,15 +1,7 @@
-import {
-  Component,
-  computed,
-  effect,
-  OnInit,
-  Signal,
-  signal,
-} from '@angular/core';
+import { Component, computed, OnInit } from '@angular/core';
 import { MiniPlayerComponent } from './mini-player/mini-player.component';
 import { FullPlayerComponent } from './full-player/full-player.component';
 import { PlayerService } from './player.service';
-import { Song } from '../../songs/models/song.model';
 import { SettingsService } from '../../services/settings.service';
 
 @Component({

@@ -1,5 +1,5 @@
 import { Injectable, Signal, signal } from '@angular/core';
-import { addHerokutoLink, bytesToGB, delayCustom } from '../../utils/utils';
+import { addProxyLink, bytesToGB, delayCustom } from '../../utils/utils';
 import { Song } from '../../songs/models/song.model';
 
 @Injectable({
@@ -26,7 +26,7 @@ export class StorageService {
     for (const song of songs) {
       if (await this.isAvalaibleOffline(song.link)) continue;
 
-      const proxiedUrl = addHerokutoLink(song.link);
+      const proxiedUrl = addProxyLink(song.link);
 
       this.currentLoadingDownloadSongIds$.update((prev) => [...prev, song.id]);
       try {
@@ -67,7 +67,7 @@ export class StorageService {
 
   async isAvalaibleOffline(songLink: string) {
     const songCache = await caches.open('library');
-    const proxiedUrl = addHerokutoLink(songLink);
+    const proxiedUrl = addProxyLink(songLink);
     const isAvailable = await songCache.match(proxiedUrl);
     return !!isAvailable?.url;
   }
@@ -81,7 +81,7 @@ export class StorageService {
     songLink: string
   ) {
     const songCache = await caches.open('library');
-    const proxiedUrl = addHerokutoLink(songLink);
+    const proxiedUrl = addProxyLink(songLink);
 
     await songCache.delete(proxiedUrl);
 

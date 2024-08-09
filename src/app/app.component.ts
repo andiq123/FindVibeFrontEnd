@@ -1,17 +1,17 @@
-import { Component, effect, Inject, OnInit, signal } from '@angular/core';
+import { Component, effect, OnInit, signal } from '@angular/core';
 import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
 import { Title } from '@angular/platform-browser';
 import { PlayerService } from './components/player-wrapper/player.service';
 import { RouterOutlet } from '@angular/router';
-import { NavigationComponent } from './components/navigation/navigation.component';
 import { WakeService } from './services/wake.service';
 import { catchError, filter, tap } from 'rxjs';
 import { UserService } from './library/services/user.service';
 import { SettingsService } from './services/settings.service';
 import { FullPlayerComponent } from './components/player-wrapper/full-player/full-player.component';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
+import { NavigationComponent } from './components/navigation/navigation.component';
 
 @Component({
   selector: 'app-root',
@@ -21,8 +21,8 @@ import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
     SearchComponent,
     PlayerWrapperComponent,
     RouterOutlet,
-    NavigationComponent,
     FullPlayerComponent,
+    NavigationComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

@@ -6,6 +6,7 @@ const dotenv = require("dotenv").config({ path: "src/.env" });
 
 const envFile = `export const environment = {
     API_URL: '${process.env.API_URL}',
+    CORS_URL: '${process.env.CORS_URL}'
 };
 `;
 const targetPath = path.join(

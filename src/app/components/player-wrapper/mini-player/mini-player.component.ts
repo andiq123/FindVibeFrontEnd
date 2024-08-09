@@ -1,13 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  OnInit,
-  output,
-  signal,
-  Signal,
-} from '@angular/core';
-import { Song } from '../../../songs/models/song.model';
+import { Component, computed, output } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faArrowUp, faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { PlayerService } from '../player.service';
@@ -15,6 +6,7 @@ import { PlayerStatus } from '../models/player.model';
 import { PlayerButtonComponent } from '../../../shared/player-button/player-button.component';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
 import { NgOptimizedImage } from '@angular/common';
+import { NavigationComponent } from '../../navigation/navigation.component';
 
 @Component({
   selector: 'app-mini-player',

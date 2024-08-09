@@ -9,9 +9,8 @@ export const convertTime = (time: number) => {
   return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
-export const addHerokutoLink = (link: string) => {
-  // const baseUrl = environment.API_URL + '/api/streams/';
-  const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+export const addProxyLink = (link: string) => {
+  const corsProxy = environment.CORS_URL + '/';
   const proxiedUrl = `${corsProxy}${link}`;
   return proxiedUrl;
 };
