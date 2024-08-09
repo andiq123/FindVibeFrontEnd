@@ -3,7 +3,8 @@ import { environment } from '../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { SongToAddFavorite } from '../models/songToAddFavorite.model';
 import { Song } from '../../songs/models/song.model';
-import { catchError, delay, Observable, Subject, tap } from 'rxjs';
+import { catchError, delay, map, Observable, Subject, tap } from 'rxjs';
+import { Reorder } from '../models/reorder.model';
 
 @Injectable({
   providedIn: 'root',
@@ -40,8 +41,24 @@ export class LibraryBackService {
             observer.complete();
           })
         )
+        .pipe(
+          map((data) => {
+            return { songs: data.songs.sort((a, b) => a.order - b.order) };
+          })
+        )
         .subscribe();
     });
+  }
+
+  reorderSongs(reorders: Reorder[]) {
+    const reorderRequest = {
+      reorders,
+    };
+
+    return this.httpClient.post(
+      this.baseUrl + '/songs/reorder',
+      reorderRequest
+    );
   }
 
   addToFavorites(song: SongToAddFavorite) {

@@ -15,7 +15,7 @@ export class UserService {
 
   constructor(private httpClient: HttpClient) {}
 
-  loadUserFromStorage() {
+  loadUserIdFromStorage() {
     const user = this.getUserFromLocalStorage();
     if (user) {
       this.user.set(user);

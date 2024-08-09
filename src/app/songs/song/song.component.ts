@@ -1,14 +1,15 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { Song } from '../models/song.model';
 import { PlayerService } from '../../components/player-wrapper/player.service';
 import { PlayerStatus } from '../../components/player-wrapper/models/player.model';
 import { PlayerButtonComponent } from '../../shared/player-button/player-button.component';
 import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
-import { AsyncPipe, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../shared/favorite-button/favorite-button.component';
-import { faCheck, faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
+import { faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { StorageService } from '../../library/services/storage.service';
+import { DragAndDropDirective } from '../directives/drag-and-drop.directive';
 
 @Component({
   selector: 'app-song',
@@ -19,11 +20,15 @@ import { StorageService } from '../../library/services/storage.service';
     NgOptimizedImage,
     FavoriteButtonComponent,
     FontAwesomeModule,
+    DragAndDropDirective,
   ],
   templateUrl: './song.component.html',
   styleUrl: './song.component.scss',
 })
 export class SongComponent {
+  allowReorder = input<boolean>(false);
+  onReorderSongs = output<{ from: string; to: string }>();
+
   song = input.required<Song>();
   status = computed(() => {
     if (this.isActive()) {
@@ -75,5 +80,9 @@ export class SongComponent {
     } else {
       this.pause();
     }
+  }
+
+  reorder(data: { from: string; to: string }) {
+    this.onReorderSongs.emit(data);
   }
 }

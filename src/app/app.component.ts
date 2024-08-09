@@ -12,6 +12,7 @@ import { SettingsService } from './services/settings.service';
 import { FullPlayerComponent } from './components/player-wrapper/full-player/full-player.component';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { NavigationComponent } from './components/navigation/navigation.component';
+import { LibraryService } from './library/services/library.service';
 
 @Component({
   selector: 'app-root',
@@ -37,6 +38,7 @@ export class AppComponent implements OnInit {
     private wakeService: WakeService,
     private userService: UserService,
     private settingsService: SettingsService,
+    private libraryService: LibraryService,
     private swUpdate: SwUpdate
   ) {
     effect(() => {
@@ -48,13 +50,20 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.checkIfAlreadyLogged();
+    this.checkIfAlreadyLoggedAndLoadLibrary();
     this.checkForUpdate().subscribe();
     this.wakeServer().subscribe();
   }
 
-  private checkIfAlreadyLogged() {
-    this.userService.loadUserFromStorage();
+  private checkIfAlreadyLoggedAndLoadLibrary() {
+    const userId = this.userService.loadUserIdFromStorage();
+    if (userId) {
+      this.loadLibrary(userId).subscribe();
+    }
+  }
+
+  private loadLibrary(userId: string) {
+    return this.libraryService.updateLibrarySongs(userId);
   }
 
   private checkForUpdate() {

@@ -4,6 +4,7 @@ export interface Song {
   title: string;
   image: string;
   link: string;
+  order: number;
 }
 
 export enum SearchStatus {

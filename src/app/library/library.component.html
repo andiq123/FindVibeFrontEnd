@@ -22,7 +22,12 @@
     <ul class="flex flex-col gap-1 mb-36">
       @for (song of songs(); track song.id) { @defer (on viewport){
       <li>
-        <app-song [song]="song" [isFavoritePage]="true" />
+        <app-song
+          [song]="song"
+          [isFavoritePage]="true"
+          [allowReorder]="true"
+          (onReorderSongs)="reorderSongs($event)"
+        />
       </li>
       }@placeholder {
       <p

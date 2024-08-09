@@ -5,4 +5,5 @@ export interface SongToAddFavorite {
   image: string;
   link: string;
   userId: string;
+  order: number;
 }

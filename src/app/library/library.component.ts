@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  OnDestroy,
-  OnInit,
-  signal,
-  Signal,
-} from '@angular/core';
+import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { SongComponent } from '../songs/song/song.component';
 import { LibraryService } from './services/library.service';
 import { UserService } from './services/user.service';
@@ -66,6 +58,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
         this.loadLibrary();
       })
     );
+  }
+
+  reorderSongs(data: { from: string; to: string }) {
+    this.libraryService.changePlaces(data.from, data.to);
   }
 
   ngOnDestroy(): void {
