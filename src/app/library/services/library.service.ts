@@ -131,6 +131,7 @@ export class LibraryService {
     this.addReorders(reorders);
 
     this.reorderSongs();
+    console.log(this.songs$());
   }
 
   emptyReorders(isCancel = false) {
@@ -145,12 +146,17 @@ export class LibraryService {
 
   private reorderSongs() {
     this.songs$.update((prevSongs) => {
-      this.reorders().forEach((reorder) => {
-        const song = prevSongs.find((song) => song.id === reorder.songId)!;
-        song.order = reorder.order;
-      });
-
-      return prevSongs.sort((a, b) => a.order - b.order);
+      return prevSongs
+        .map((x) => {
+          const reorder = this.reorders().find(
+            (reorder) => reorder.songId === x.id
+          );
+          if (reorder) {
+            x.order = reorder.order;
+          }
+          return x;
+        })
+        .sort((a, b) => a.order - b.order);
     });
   }
 
