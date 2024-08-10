@@ -7,6 +7,8 @@ import { TitleCasePipe } from '@angular/common';
 import { StorageInfoComponent } from './components/storage-info/storage-info.component';
 import { catchError, Subscription, tap } from 'rxjs';
 import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.component';
+import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-library',
@@ -17,6 +19,7 @@ import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.
     TitleCasePipe,
     StorageInfoComponent,
     SongsWrapperComponent,
+    FontAwesomeModule,
   ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
@@ -33,6 +36,9 @@ export class LibraryComponent implements OnInit, OnDestroy {
   userId = computed(() => this.userService.user$()?.id || '');
 
   loadingSongs = signal<boolean>(true);
+
+  faCheck = faCheck;
+  faXmark = faXmark;
 
   constructor(
     private libraryService: LibraryService,

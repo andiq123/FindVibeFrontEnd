@@ -19,11 +19,11 @@
       </h1>
       <div class="flex gap-2">
         @if(orderHasChanged()) {
-        <button class="btn btn-error text-white" (click)="saveReorders()">
-          Save
+        <button class="btn btn-seondary text-white" (click)="saveReorders()">
+          <fa-icon [icon]="faCheck" size="lg" />
         </button>
-        <button class="btn btn-error text-white" (click)="cancelReorders()">
-          Cancel
+        <button class="btn btn-primary text-white" (click)="cancelReorders()">
+          <fa-icon [icon]="faXmark" size="lg" />
         </button>
         }
         <button class="btn" (click)="changeUser()">Change User</button>
