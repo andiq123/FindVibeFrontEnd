@@ -24,7 +24,7 @@ import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.
 export class LibraryComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   songs = computed(() => this.libraryService.songs$());
-  reorders = computed(() => this.libraryService.reorders());
+  orderHasChanged = computed(() => this.libraryService.orderHasChanged());
 
   loadingReorder = signal<boolean>(false);
 
@@ -63,7 +63,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   cancelReorders() {
-    this.libraryService.emptyReorders(true);
+    this.libraryService.resetReorder();
   }
 
   saveReorders() {
@@ -77,7 +77,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
         }),
         tap(() => {
           this.loadingReorder.set(false);
-          this.libraryService.emptyReorders();
         })
       )
       .subscribe();

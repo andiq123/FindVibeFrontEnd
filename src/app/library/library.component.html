@@ -18,7 +18,7 @@
         {{ username() | titlecase }}'s Favorites
       </h1>
       <div class="flex gap-2">
-        @if(reorders().length > 0) {
+        @if(orderHasChanged()) {
         <button class="btn btn-error text-white" (click)="saveReorders()">
           Save
         </button>

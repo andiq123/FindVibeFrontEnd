@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 
 import { LibraryBackService } from './library-back.service';
 
@@ -13,7 +13,17 @@ import { Reorder } from '../models/reorder.model';
 })
 export class LibraryService {
   songs$ = signal<Song[]>([]);
-  reorders = signal<Reorder[]>([]);
+  orderHasChanged = computed(() => {
+    const songsFromLocal = this.libraryBackService.getLibraryFromLocalStorage();
+    const songs = this.songs$();
+    for (let i = 0; i < songsFromLocal.length; i++) {
+      if (songsFromLocal[i].id !== songs[i].id) {
+        return true;
+      }
+    }
+
+    return false;
+  });
 
   currentLoadingFavoriteSongIds$ = signal<string[]>([]);
 
@@ -110,58 +120,37 @@ export class LibraryService {
   }
 
   saveReorders() {
-    return this.libraryBackService.reorderSongs(this.reorders()).pipe(
+    const reorders: Reorder[] = this.songs$().map((x) => ({
+      songId: x.id,
+      order: x.order,
+    }));
+    return this.libraryBackService.reorderSongs(reorders).pipe(
       tap(() => {
         this.libraryBackService.setLibraryToLocalStorage([...this.songs$()]);
+        this.resetReorder();
       })
     );
   }
 
   changePlaces(id1: string, id2: string) {
-    const reorderedSongs = this.songs$();
-
-    const song1 = reorderedSongs.find((song) => song.id === id1)!;
-    const song2 = reorderedSongs.find((song) => song.id === id2)!;
-
-    const reorders: Reorder[] = [
-      { songId: id1, order: song2.order },
-      { songId: id2, order: song1.order },
-    ];
-
-    this.addReorders(reorders);
-
-    this.reorderSongs();
-    console.log(this.songs$());
-  }
-
-  emptyReorders(isCancel = false) {
-    this.reorders.set([]);
-    if (isCancel) {
-      const songs = this.libraryBackService
-        .getLibraryFromLocalStorage()
-        .sort((a, b) => a.order - b.order);
-      this.songs$.set(songs);
-    }
-  }
-
-  private reorderSongs() {
     this.songs$.update((prevSongs) => {
-      return prevSongs
-        .map((x) => {
-          const reorder = this.reorders().find(
-            (reorder) => reorder.songId === x.id
-          );
-          if (reorder) {
-            x.order = reorder.order;
-          }
-          return x;
-        })
-        .sort((a, b) => a.order - b.order);
+      const song1 = prevSongs.find((x) => x.id === id1)!;
+      const song2 = prevSongs.find((x) => x.id === id2)!;
+
+      const index1 = prevSongs.findIndex((x) => x.id === id1);
+      const index2 = prevSongs.findIndex((x) => x.id === id2);
+
+      prevSongs[index1] = song2;
+      prevSongs[index2] = song1;
+      return prevSongs.map((song, i) => ({ ...song, order: i + 1 }));
     });
   }
 
-  private addReorders(reorders: Reorder[]) {
-    this.reorders.update((prevReorders) => [...prevReorders, ...reorders]);
+  resetReorder() {
+    const songs = this.libraryBackService
+      .getLibraryFromLocalStorage()
+      .sort((a, b) => a.order - b.order);
+    this.songs$.set(songs);
   }
 
   private addSongToLoadingFavorites(id: string) {
