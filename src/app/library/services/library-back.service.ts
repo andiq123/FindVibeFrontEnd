@@ -35,6 +35,9 @@ export class LibraryBackService {
             observer.complete();
             return [];
           }),
+          map((data) => {
+            return { songs: data.songs.sort((a, b) => a.order - b.order) };
+          }),
           tap((data) => {
             this.setLibraryToLocalStorage(data.songs);
             observer.next(data);
