@@ -16,6 +16,7 @@ export class PlayerService {
   status$ = signal<PlayerStatus>(PlayerStatus.Stopped);
   currentTime$ = signal<number>(0);
   duration$ = signal<number>(0);
+  firstError = signal<boolean>(true);
 
   constructor(
     private songsService: SongsService,
@@ -46,9 +47,19 @@ export class PlayerService {
       this.setNextSong();
     });
 
-    this.player().addEventListener('error', () => {
-      this.status$.set(PlayerStatus.Error);
-      this.song$.set(null);
+    this.player().addEventListener('error', async () => {
+      if (this.firstError()) {
+        this.firstError.set(false);
+        this.status$.set(PlayerStatus.Loading);
+        const proxiedUrl = addProxyLink(this.song$()!.link);
+        const response = await fetch(proxiedUrl);
+        const blob = await response.blob();
+        this.player().src = URL.createObjectURL(blob);
+      } else {
+        this.firstError.set(true);
+        this.status$.set(PlayerStatus.Error);
+        this.song$.set(null);
+      }
     });
 
     this.player().addEventListener('timeupdate', () => {

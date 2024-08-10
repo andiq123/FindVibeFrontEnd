@@ -40,7 +40,12 @@ export class MovingTitleComponent {
   });
 
   async redirectToSearch() {
-    await this.router.navigate([`/songs/${this.title()}`]);
     this.closePlayer.emit();
+    await this.router.navigate([`/songs/${this.title()}`]);
+
+    const currentPath = document.URL.split('/')[3];
+    if (currentPath === 'songs') {
+      window.location.reload();
+    }
   }
 }

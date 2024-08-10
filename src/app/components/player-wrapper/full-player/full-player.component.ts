@@ -2,9 +2,7 @@ import {
   Component,
   computed,
   ElementRef,
-  OnInit,
   output,
-  Signal,
   signal,
   viewChild,
 } from '@angular/core';
@@ -48,8 +46,10 @@ export class FullPlayerComponent {
   status = computed(() => this.playerService.status$());
   currentTime = computed(() => this.playerService.currentTime$());
   duration = computed(() => this.playerService.duration$());
+  isFirstError = computed(() => this.playerService.firstError());
   isRepeat = computed(() => this.settingsService.isRepeat$());
   isShuffle = computed(() => this.settingsService.isShuffle$());
+
   onToggleSize = output<void>();
 
   faStepBackward = faStepBackward;

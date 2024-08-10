@@ -18,7 +18,11 @@
     />
 
     <div
-      class="rounded-md overflow-hidden shadow-2xl shadow-black cool3dArtworkAnimation relative"
+      class="rounded-md overflow-hidden shadow-2xl shadow-black cool3dArtworkAnimation relative border-red-700 border-4"
+      [class]="{
+        'border-red-700': !isFirstError(),
+        'border-4': !isFirstError()
+      }"
     >
       @if (status() === playerStatus.Loading) {
       <div
