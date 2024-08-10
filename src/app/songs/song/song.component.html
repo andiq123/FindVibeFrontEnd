@@ -42,7 +42,8 @@
       <app-moving-title
         [title]="song().title"
         [isActive]="isActive()"
-        classes="w-56"
+        [classes]="'w-' + width()"
+        [offset]="offset()"
       />
       <app-moving-title
         [title]="song().artist"
