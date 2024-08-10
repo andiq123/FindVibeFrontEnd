@@ -13,6 +13,7 @@ import { Reorder } from '../models/reorder.model';
 })
 export class LibraryService {
   songs$ = signal<Song[]>([]);
+  reorders = signal<Reorder[]>([]);
 
   currentLoadingFavoriteSongIds$ = signal<string[]>([]);
 
@@ -108,35 +109,47 @@ export class LibraryService {
     return this.songs$()[Math.floor(Math.random() * this.songs$().length)];
   }
 
+  saveReorders() {
+    return this.libraryBackService.reorderSongs(this.reorders()).pipe(
+      tap(() => {
+        this.libraryBackService.setLibraryToLocalStorage([...this.songs$()]);
+      })
+    );
+  }
+
   changePlaces(id1: string, id2: string) {
-    const index1 = this.songs$().findIndex((x) => x.id === id1);
-    const index2 = this.songs$().findIndex((x) => x.id === id2);
+    const reorderedSongs = this.songs$();
 
-    if (index1 === -1 || index2 === -1) {
-      return;
-    }
+    const song1 = reorderedSongs.find((song) => song.id === id1)!;
+    const song2 = reorderedSongs.find((song) => song.id === id2)!;
 
-    const song1 = this.songs$()[index1];
-    const song2 = this.songs$()[index2];
+    const reorders: Reorder[] = [
+      { songId: id1, order: song2.order },
+      { songId: id2, order: song1.order },
+    ];
 
+    this.addReorders(reorders);
+
+    this.reorderSongs();
+  }
+
+  emptyReorders() {
+    this.reorders.set([]);
+  }
+
+  private reorderSongs() {
     this.songs$.update((prevSongs) => {
-      const orderAux = song2.order;
-      song2.order = song1.order;
-      song1.order = orderAux;
+      this.reorders().forEach((reorder) => {
+        const song = prevSongs.find((song) => song.id === reorder.songId)!;
+        song.order = reorder.order;
+      });
 
-      prevSongs[index1] = song2;
-      prevSongs[index2] = song1;
-      return prevSongs;
+      return prevSongs.sort((a, b) => a.order - b.order);
     });
+  }
 
-    this.libraryBackService.setLibraryToLocalStorage([...this.songs$()]);
-
-    const reorders: Reorder[] = this.songs$().map((song) => ({
-      songId: song.id,
-      order: song.order,
-    }));
-
-    this.libraryBackService.reorderSongs(reorders).subscribe();
+  private addReorders(reorders: Reorder[]) {
+    this.reorders.update((prevReorders) => [...prevReorders, ...reorders]);
   }
 
   private addSongToLoadingFavorites(id: string) {

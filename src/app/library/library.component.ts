@@ -5,7 +5,8 @@ import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
 import { TitleCasePipe } from '@angular/common';
 import { StorageInfoComponent } from './components/storage-info/storage-info.component';
-import { Subscription } from 'rxjs';
+import { catchError, Subscription, tap } from 'rxjs';
+import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.component';
 
 @Component({
   selector: 'app-library',
@@ -15,6 +16,7 @@ import { Subscription } from 'rxjs';
     UserFormComponent,
     TitleCasePipe,
     StorageInfoComponent,
+    SongsWrapperComponent,
   ],
   templateUrl: './library.component.html',
   styleUrl: './library.component.scss',
@@ -22,6 +24,10 @@ import { Subscription } from 'rxjs';
 export class LibraryComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   songs = computed(() => this.libraryService.songs$());
+  reorders = computed(() => this.libraryService.reorders());
+
+  loadingReorder = signal<boolean>(false);
+
   isLoggedIn = computed(() => !!this.userService.user$());
   username = computed(() => this.userService.user$()?.name || '');
   userId = computed(() => this.userService.user$()?.id || '');
@@ -52,19 +58,36 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.registerWaitForNewUser();
   }
 
+  reorderSongs(data: { from: string; to: string }) {
+    this.libraryService.changePlaces(data.from, data.to);
+  }
+
+  saveReorders() {
+    this.loadingReorder.set(true);
+    this.libraryService
+      .saveReorders()
+      .pipe(
+        catchError((e) => {
+          this.loadingReorder.set(false);
+          return [];
+        }),
+        tap(() => {
+          this.loadingReorder.set(false);
+          this.libraryService.emptyReorders();
+        })
+      )
+      .subscribe();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
   private registerWaitForNewUser() {
     this.subscriptions.push(
       this.userService.userLoggedIn.subscribe(() => {
         this.loadLibrary();
       })
     );
-  }
-
-  reorderSongs(data: { from: string; to: string }) {
-    this.libraryService.changePlaces(data.from, data.to);
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }
