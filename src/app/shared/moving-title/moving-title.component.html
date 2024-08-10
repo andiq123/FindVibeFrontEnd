@@ -1,4 +1,4 @@
-<div class="overflow-hidden">
+<div class="overflow-hidden" [class]="{ 'max-w-44': offset() <= 20 }">
   <h2 [class]="classes()" [class.scroll-text]="isLonger() && isActive()">
     @if(isRedirect()){
     <span
