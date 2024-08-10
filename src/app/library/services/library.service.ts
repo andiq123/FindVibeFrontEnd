@@ -133,8 +133,14 @@ export class LibraryService {
     this.reorderSongs();
   }
 
-  emptyReorders() {
+  emptyReorders(isCancel = false) {
     this.reorders.set([]);
+    if (isCancel) {
+      const songs = this.libraryBackService
+        .getLibraryFromLocalStorage()
+        .sort((a, b) => a.order - b.order);
+      this.songs$.set(songs);
+    }
   }
 
   private reorderSongs() {

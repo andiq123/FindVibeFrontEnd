@@ -62,6 +62,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.libraryService.changePlaces(data.from, data.to);
   }
 
+  cancelReorders() {
+    this.libraryService.emptyReorders(true);
+  }
+
   saveReorders() {
     this.loadingReorder.set(true);
     this.libraryService

@@ -75,7 +75,7 @@ export class LibraryBackService {
     localStorage.setItem('library', JSON.stringify(songs));
   }
 
-  private getLibraryFromLocalStorage() {
+  getLibraryFromLocalStorage() {
     const library = localStorage.getItem('library');
     if (!library) return [];
     return JSON.parse(library) as Song[];
