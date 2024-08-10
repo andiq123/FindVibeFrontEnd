@@ -4,7 +4,7 @@ import { PlayerService } from '../../components/player-wrapper/player.service';
 import { PlayerStatus } from '../../components/player-wrapper/models/player.model';
 import { PlayerButtonComponent } from '../../shared/player-button/player-button.component';
 import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
-import { NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage, NgTemplateOutlet } from '@angular/common';
 import { FavoriteButtonComponent } from '../../shared/favorite-button/favorite-button.component';
 import { faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -21,6 +21,7 @@ import { DragAndDropDirective } from '../directives/drag-and-drop.directive';
     FavoriteButtonComponent,
     FontAwesomeModule,
     DragAndDropDirective,
+    NgTemplateOutlet,
   ],
   templateUrl: './song.component.html',
   styleUrl: './song.component.scss',

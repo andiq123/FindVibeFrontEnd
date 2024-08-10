@@ -1,4 +1,5 @@
 @if(allowReorder()){
+
 <div
   class="rounded-lg py-1 px-2 flex justify-between items-center"
   [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
@@ -6,16 +7,27 @@
   (reorderSongs)="reorder($event)"
   [id]="song().id"
 >
+  <ng-container *ngTemplateOutlet="default"></ng-container>
+</div>
+}@else {
+<div
+  class="rounded-lg py-1 px-2 flex justify-between items-center"
+  [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
+>
+  <ng-container *ngTemplateOutlet="default"></ng-container>
+</div>
+}
+
+<ng-template #default>
   <div
     id="elToRemove"
     class="grid grid-flow-col gap-3 items-center w-full justify-start cursor-pointer"
     (click)="playOrPause()"
   >
     <div class="w-14 rounded-lg overflow-hidden relative">
-      <app-player-button
-        [status]="status()"
-        classes="absolute top-0 h-full w-full backdrop-brightness-50"
-      />
+      <div class="absolute inset-0 backdrop-brightness-50">
+        <app-player-button [status]="status()" />
+      </div>
       <img
         class="object-fill w-full h-full"
         [ngSrc]="song().image"
@@ -30,7 +42,7 @@
       <app-moving-title
         [title]="song().title"
         [isActive]="isActive()"
-        classes="max-w-44"
+        classes="w-56"
       />
       <app-moving-title
         [title]="song().artist"
@@ -49,54 +61,4 @@
 
     <app-favorite-button [song]="song()" />
   </div>
-</div>
-
-}@else {
-<div
-  class="rounded-lg py-1 px-2 flex justify-between items-center"
-  [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
->
-  <div
-    class="grid grid-flow-col gap-3 items-center w-full justify-start cursor-pointer"
-    (click)="playOrPause()"
-  >
-    <div class="w-14 rounded-lg overflow-hidden relative">
-      <app-player-button
-        [status]="status()"
-        classes="absolute top-0 h-full w-full backdrop-brightness-50"
-      />
-      <img
-        class="object-fill w-full h-full"
-        [ngSrc]="song().image"
-        [alt]="song().artist"
-        width="10"
-        height="10"
-        referrerpolicy="no-referrer"
-      />
-    </div>
-
-    <div>
-      <app-moving-title
-        [title]="song().title"
-        [isActive]="isActive()"
-        classes="max-w-44"
-      />
-      <app-moving-title
-        [title]="song().artist"
-        [isActive]="isActive()"
-        classes="text-xs"
-      />
-    </div>
-  </div>
-
-  <div class="flex gap-3 items-center">
-    @if(isDownloadingOffline()){
-    <span class="loading loading-spinner loading-xs"></span>
-    }@else{ @if(isAvaiableOffline()){
-    <fa-icon [icon]="faCloudArrowDown" />
-    } }
-
-    <app-favorite-button [song]="song()" />
-  </div>
-</div>
-}
+</ng-template>

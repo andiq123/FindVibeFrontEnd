@@ -13,13 +13,11 @@
   }@else {
   <div class="flex flex-col">
     <app-storage-info />
-    <div class="flex justify-between items-center my-2">
-      <h1 class="font-bold text-2xl mb-2">
-        {{ username() | titlecase }}'s Favorites
-      </h1>
+    <div class="flex justify-between items-center my-2 pb-2">
+      <h1 class="font-bold text-2xl">{{ username() | titlecase }}'s Library</h1>
       <div class="flex gap-2">
         @if(orderHasChanged()) {
-        <button class="btn btn-seondary text-white" (click)="saveReorders()">
+        <button class="btn btn-primary text-white" (click)="saveReorders()">
           <fa-icon [icon]="faCheck" size="lg" />
         </button>
         <button class="btn btn-primary text-white" (click)="cancelReorders()">

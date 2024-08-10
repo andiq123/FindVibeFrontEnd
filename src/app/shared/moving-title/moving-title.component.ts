@@ -12,7 +12,8 @@ export class MovingTitleComponent {
   title = input.required<string>();
   classes = input<string>('text-md font-bold');
   isActive = input<boolean>(false);
-  offset = signal<number>(21);
+
+  offset = input<number>(26);
   isRedirect = input<boolean>(false);
   closePlayer = output<void>();
 
