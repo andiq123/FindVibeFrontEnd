@@ -19,4 +19,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./library/library.component').then((c) => c.LibraryComponent),
   },
+  {
+    path: 'recent',
+    loadComponent: () =>
+      import('./recent/recent.component').then((c) => c.RecentComponent),
+  },
 ];

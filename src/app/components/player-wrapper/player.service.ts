@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { LibraryService } from '../../library/services/library.service';
 import { SongsService } from '../../songs/services/songs.service';
 import { addProxyLink } from '../../utils/utils';
+import { RecentService } from '../../recent/services/recent.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,11 +18,13 @@ export class PlayerService {
   currentTime$ = signal<number>(0);
   duration$ = signal<number>(0);
   firstError = signal<boolean>(true);
+  alreadyAddedInRecents = signal<boolean>(false);
 
   constructor(
     private songsService: SongsService,
     private settingsService: SettingsService,
     private libraryService: LibraryService,
+    private recentService: RecentService,
     private router: Router
   ) {}
 
@@ -71,12 +74,18 @@ export class PlayerService {
     this.player().addEventListener('timeupdate', () => {
       this.currentTime$.set(this.player().currentTime);
       this.updateDuration(this.player().duration);
+
+      if (this.currentTime$() > 7 && !this.alreadyAddedInRecents()) {
+        this.alreadyAddedInRecents.set(true);
+        this.recentService.addSongToRecents(this.song$()!);
+      }
     });
 
     this.player().controls = false;
   }
 
   async setSong(song: Song) {
+    this.alreadyAddedInRecents.set(false);
     const cachedLibrary = await caches.open('library');
 
     const proxiedUrl = addProxyLink(song.link);

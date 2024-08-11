@@ -4,6 +4,7 @@ import {
   IconDefinition,
 } from '@fortawesome/angular-fontawesome';
 import {
+  faClockRotateLeft,
   faFolderOpen,
   faMagnifyingGlass,
 } from '@fortawesome/free-solid-svg-icons';
@@ -28,6 +29,11 @@ export class NavigationComponent {
       name: 'library',
       icon: faFolderOpen,
       link: '/library',
+    },
+    {
+      name: 'recent',
+      icon: faClockRotateLeft,
+      link: '/recent',
     },
   ]);
   navList = signal<{ name: string; icon: IconDefinition; link: string }[]>(

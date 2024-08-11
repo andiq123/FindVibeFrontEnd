@@ -1,0 +1,20 @@
+<div class="w-[95%] mx-auto mt-3">
+  <h1 class="font-bold text-2xl">Recently Played</h1>
+  <ul class="flex flex-col gap-1 mb-36 mt-5">
+    @for (song of songs(); track song.link) { @defer (on viewport){
+    <li>
+      <app-song [song]="song" [offset]="20" />
+    </li>
+    }@placeholder {
+    <p
+      class="rounded-lg py-2 px-3 flex justify-between items-center bg-base-200"
+    >
+      Song is loading...
+    </p>
+    } } @empty {
+    <li class="text-center">
+      When you listen to songs, last 20 will show here
+    </li>
+    }
+  </ul>
+</div>
