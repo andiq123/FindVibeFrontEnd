@@ -67,17 +67,16 @@ export class AppComponent implements OnInit {
   }
 
   private checkForUpdate() {
-    this.newUpdateAvaialble.set(true);
     return this.swUpdate.versionUpdates.pipe(
       filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
       tap(() => {
         this.newUpdateAvaialble.set(true);
-        // this.countdown(3).subscribe((time) => {
-        //   this.secondsToUpdate.set(time);
-        //   if (time === 1) {
-        //     document.location.reload();
-        //   }
-        // });
+        this.countdown(3).subscribe((time) => {
+          this.secondsToUpdate.set(time);
+          if (time === 1) {
+            document.location.reload();
+          }
+        });
       })
     );
   }
