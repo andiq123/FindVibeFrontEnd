@@ -115,7 +115,7 @@ export class FullPlayerComponent {
 
   downloadSong() {
     const link = document.createElement('a');
-    link.download = this.song()!.title + '.mp3';
+    link.download = this.song()?.artist + ' - ' + this.song()!.title + '.mp3';
     link.href = this.song()!.link;
     link.click();
     link.remove();
