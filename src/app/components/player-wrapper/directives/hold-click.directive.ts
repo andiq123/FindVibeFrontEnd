@@ -16,7 +16,7 @@ export class HoldClickDirective {
   scale = signal(1);
   timerFinished = output();
   @HostBinding('style.transform') transform = 'scale(1)';
-  @HostBinding('class') class = ' transition-all duration-200';
+  @HostBinding('class') class = 'transition-all duration-500 ease-in-out';
 
   constructor() {
     effect(() => {
