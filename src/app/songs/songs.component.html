@@ -26,7 +26,7 @@
   <ul class="flex flex-col gap-1 mb-36">
     @for (song of songs(); track song.id) { @defer (on viewport){
     <li>
-      <app-song [song]="song" />
+      <app-song [song]="song" [offset]="20" />
     </li>
     }@placeholder {
     <p

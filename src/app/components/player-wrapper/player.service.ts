@@ -82,7 +82,6 @@ export class PlayerService {
     const proxiedUrl = addProxyLink(song.link);
     const inCache = await cachedLibrary.match(proxiedUrl);
     if (inCache) {
-      console.log('Song is cached');
       const blob = await inCache!.blob();
       this.player().src = URL.createObjectURL(blob);
     } else {
