@@ -4,8 +4,9 @@
 <app-player-wrapper />
 }@else {
 <div
-  class="bg-base-200 text-lg font-bold text-center h-[20vh] items-center flex shadow-lg rounded-b-xl justify-center"
+  class="bg-base-200 text-lg font-bold text-center h-[20vh] items-center shadow-lg rounded-b-xl justify-center flex flex-col"
 >
-  New update available, reddirecting in {{ secondsToUpdate() }} seconds...
+  <p>New update available</p>
+  <p>Reddirecting in {{ secondsToUpdate() }} seconds...</p>
 </div>
 }

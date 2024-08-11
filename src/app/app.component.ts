@@ -6,7 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { PlayerService } from './components/player-wrapper/player.service';
 import { RouterOutlet } from '@angular/router';
 import { WakeService } from './services/wake.service';
-import { catchError, filter, tap } from 'rxjs';
+import { catchError, filter, interval, map, takeWhile, tap } from 'rxjs';
 import { UserService } from './library/services/user.service';
 import { SettingsService } from './services/settings.service';
 import { FullPlayerComponent } from './components/player-wrapper/full-player/full-player.component';
@@ -67,18 +67,17 @@ export class AppComponent implements OnInit {
   }
 
   private checkForUpdate() {
+    this.newUpdateAvaialble.set(true);
     return this.swUpdate.versionUpdates.pipe(
       filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
       tap(() => {
         this.newUpdateAvaialble.set(true);
-
-        setInterval(() => {
-          if (this.secondsToUpdate() < 1) {
-            document.location.reload();
-          } else {
-            this.secondsToUpdate.update((x) => x - 1);
-          }
-        }, 1000);
+        // this.countdown(3).subscribe((time) => {
+        //   this.secondsToUpdate.set(time);
+        //   if (time === 1) {
+        //     document.location.reload();
+        //   }
+        // });
       })
     );
   }
@@ -133,5 +132,12 @@ export class AppComponent implements OnInit {
     navigator.mediaSession.setActionHandler('stop', () => {
       this.playerService.stop();
     });
+  }
+
+  private countdown(startTimer: number) {
+    return interval(1000).pipe(
+      map(() => startTimer--),
+      takeWhile(() => startTimer > -1)
+    );
   }
 }
