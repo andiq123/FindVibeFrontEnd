@@ -31,10 +31,16 @@ export class PlayerService {
     });
 
     this.player().addEventListener('loadeddata', () => {
+      if (!this.firstError()) {
+        this.firstError.set(true);
+      }
       this.status$.set(PlayerStatus.Playing);
     });
 
     this.player().addEventListener('play', () => {
+      if (!this.firstError()) {
+        this.firstError.set(true);
+      }
       this.status$.set(PlayerStatus.Playing);
     });
 
@@ -76,6 +82,7 @@ export class PlayerService {
     const proxiedUrl = addProxyLink(song.link);
     const inCache = await cachedLibrary.match(proxiedUrl);
     if (inCache) {
+      console.log('Song is cached');
       const blob = await inCache!.blob();
       this.player().src = URL.createObjectURL(blob);
     } else {

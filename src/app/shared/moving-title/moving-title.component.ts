@@ -41,11 +41,13 @@ export class MovingTitleComponent {
 
   async redirectToSearch() {
     this.closePlayer.emit();
-    await this.router.navigate([`/songs/${this.title()}`]);
 
     const currentPath = document.URL.split('/')[3];
     if (currentPath === 'songs') {
-      window.location.reload();
+      await this.router.navigate([`/library`]);
+      await this.router.navigate([`/songs/${this.title()}`]);
+    } else {
+      await this.router.navigate([`/songs/${this.title()}`]);
     }
   }
 }

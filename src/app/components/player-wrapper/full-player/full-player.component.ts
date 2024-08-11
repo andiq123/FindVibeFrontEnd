@@ -6,8 +6,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { Song } from '../../../songs/models/song.model';
-import { addProxyLink, convertTime } from '../../../utils/utils';
+import { convertTime } from '../../../utils/utils';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faArrowDown,
@@ -26,6 +25,7 @@ import { SettingsService } from '../../../services/settings.service';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
 import { SwipeDownDirective } from '../directives/swipe-down.directive';
+import { HoldClickDirective } from '../directives/hold-click.directive';
 
 @Component({
   selector: 'app-full-player',
@@ -37,6 +37,7 @@ import { SwipeDownDirective } from '../directives/swipe-down.directive';
     AsyncPipe,
     FavoriteButtonComponent,
     SwipeDownDirective,
+    HoldClickDirective,
   ],
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
@@ -110,6 +111,14 @@ export class FullPlayerComponent {
 
   toggleShuffle() {
     this.settingsService.toggleShuffle();
+  }
+
+  downloadSong() {
+    const link = document.createElement('a');
+    link.download = this.song()!.title + '.mp3';
+    link.href = this.song()!.link;
+    link.click();
+    link.remove();
   }
 
   private async updateDominantColor(): Promise<string> {
