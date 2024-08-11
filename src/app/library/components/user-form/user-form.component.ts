@@ -1,7 +1,6 @@
-import { Component, output, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
-import { LibraryService } from '../../services/library.service';
 
 @Component({
   selector: 'app-user-form',

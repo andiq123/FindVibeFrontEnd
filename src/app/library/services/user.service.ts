@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { User } from '../models/user.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
-import { delay, Subject, tap } from 'rxjs';
+import { Subject, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',

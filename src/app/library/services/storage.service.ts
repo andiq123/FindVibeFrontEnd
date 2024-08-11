@@ -1,4 +1,4 @@
-import { Injectable, Signal, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { addProxyLink, bytesToGB, delayCustom } from '../../utils/utils';
 import { Song } from '../../songs/models/song.model';
 
@@ -11,8 +11,6 @@ export class StorageService {
 
   currentLoadingDownloadSongIds$ = signal<string[]>([]);
   availableOfflineSongIds$ = signal<string[]>([]);
-
-  constructor() {}
 
   async setUpStorage() {
     const data = await navigator.storage.estimate();

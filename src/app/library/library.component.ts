@@ -77,7 +77,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.libraryService
       .saveReorders()
       .pipe(
-        catchError((e) => {
+        catchError(() => {
           this.loadingReorder.set(false);
           return [];
         }),

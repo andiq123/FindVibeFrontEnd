@@ -25,9 +25,9 @@ export class SongsService {
           this.songs.set(list.songs);
           this.setStatusFinished();
         }),
-        catchError((e: any) => {
+        catchError(() => {
           this.setStatusError();
-          throw e;
+          return [];
         })
       );
   }

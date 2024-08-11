@@ -1,8 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
-
 import { LibraryBackService } from './library-back.service';
-
-import { catchError, of, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { Song } from '../../songs/models/song.model';
 import { SongToAddFavorite } from '../models/songToAddFavorite.model';
 import { StorageService } from './storage.service';

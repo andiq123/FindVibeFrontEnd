@@ -6,7 +6,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { interval, map, Subscription, take, takeWhile } from 'rxjs';
+import { interval, map, Subscription, takeWhile } from 'rxjs';
 
 @Directive({
   selector: '[appHoldClick]',
