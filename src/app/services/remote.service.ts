@@ -43,7 +43,6 @@ export class RemoteService {
     await this.connection.start();
     await this.connection.invoke('Connect', this.username());
     this.isConnected.set(this.connection.state === 'Connected');
-    console.log(this.connection.state);
   }
 
   async disconnectFromServer() {
