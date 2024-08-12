@@ -1,11 +1,8 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { Song } from '../songs/models/song.model';
 import { PlayerStatus } from '../components/player-wrapper/models/player.model';
-import { SongsService } from '../songs/services/songs.service';
 import { SettingsService } from './settings.service';
-import { LibraryService } from '../library/services/library.service';
 import { RecentService } from '../recent/services/recent.service';
-import { Router } from '@angular/router';
 import { addProxyLink } from '../utils/utils';
 import { PlaylistService } from './playlist.service';
 
@@ -32,14 +29,7 @@ export class PlayerService {
       this.status$.set(PlayerStatus.Loading);
     });
 
-    this.player().addEventListener('loadeddata', () => {
-      if (!this.firstError()) {
-        this.firstError.set(true);
-      }
-      this.status$.set(PlayerStatus.Playing);
-    });
-
-    this.player().addEventListener('play', () => {
+    this.player().addEventListener('playing', () => {
       if (!this.firstError()) {
         this.firstError.set(true);
       }
@@ -57,15 +47,16 @@ export class PlayerService {
 
     this.player().addEventListener('error', async () => {
       if (this.firstError()) {
-        this.firstError.set(false);
         this.status$.set(PlayerStatus.Loading);
+        console.log('arrived here');
         const proxiedUrl = addProxyLink(this.song$()!.link);
         const response = await fetch(proxiedUrl);
         const blob = await response.blob();
         this.player().src = URL.createObjectURL(blob);
         setTimeout(() => {
           this.player().play();
-        }, 100);
+          this.firstError.set(false);
+        }, 500);
       } else {
         this.firstError.set(true);
         this.status$.set(PlayerStatus.Error);
@@ -87,7 +78,6 @@ export class PlayerService {
   }
 
   async setSong(song: Song) {
-    this.status$.set(PlayerStatus.Loading);
     this.alreadyAddedInRecents.set(false);
     const cachedLibrary = await caches.open('library');
 
@@ -99,7 +89,7 @@ export class PlayerService {
     } else {
       this.player().src = song.link;
     }
-
+    console.log(this.status$());
     this.playlistService.setCurrentSong(song);
   }
 

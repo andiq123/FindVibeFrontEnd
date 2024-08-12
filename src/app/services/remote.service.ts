@@ -75,8 +75,8 @@ export class RemoteService {
       this.playerService.pause();
     });
 
-    this.connection?.on('SetSong', (song: Song) => {
-      this.playerService.setSong(song);
+    this.connection?.on('SetSong', async (song: Song) => {
+      await this.playerService.setSong(song);
     });
 
     this.connection?.on('UpdateTime', (time: string) => {
