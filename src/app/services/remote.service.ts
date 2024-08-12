@@ -39,7 +39,7 @@ export class RemoteService {
     });
 
     this.registerEvents();
-    console.log(this.connection.state);
+
     await this.connection.start();
     await this.connection.invoke('Connect', this.username());
     this.isConnected.set(this.connection.state === 'Connected');
