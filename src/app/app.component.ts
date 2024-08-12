@@ -164,6 +164,13 @@ export class AppComponent implements OnInit {
         await this.remoteService.pause();
       }
     });
+
+    navigator.mediaSession.setActionHandler('seekto', async (details) => {
+      this.playerService.setCurrentTime(details.seekTime!);
+      if (this.remoteService.isConnected()) {
+        await this.remoteService.updateTime(details.seekTime!.toString());
+      }
+    });
   }
 
   private countdown(startTimer: number) {
