@@ -16,6 +16,7 @@ export class RemoteService {
   connection?: HubConnection;
   username = signal<string>('');
   otherSessions = signal<string[]>([]);
+  isConnected = signal<boolean>(false);
 
   constructor(private playerService: PlayerService) {}
 
@@ -38,9 +39,11 @@ export class RemoteService {
     });
 
     this.registerEvents();
-
+    console.log(this.connection.state);
     await this.connection.start();
     await this.connection.invoke('Connect', this.username());
+    this.isConnected.set(this.connection.state === 'Connected');
+    console.log(this.connection.state);
   }
 
   async disconnectFromServer() {

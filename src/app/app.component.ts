@@ -69,13 +69,13 @@ export class AppComponent implements OnInit {
     await this.remoteService.disconnectFromServer();
   }
 
-  private checkIfAlreadyLoggedAndLoadLibrary() {
+  private async checkIfAlreadyLoggedAndLoadLibrary() {
     const userId = this.userService.loadUserIdFromStorage();
     if (userId) {
       this.loadLibrary(userId).subscribe();
       const username = this.userService.user$()!.name;
       if (username != '') {
-        this.remoteService.connectToServer(username);
+        await this.remoteService.connectToServer(username);
       }
     }
   }
@@ -130,24 +130,39 @@ export class AppComponent implements OnInit {
       });
     });
 
-    navigator.mediaSession.setActionHandler('nexttrack', () => {
-      this.playerService.setNextSong();
+    navigator.mediaSession.setActionHandler('nexttrack', async () => {
+      const song = await this.playerService.setNextSong();
+      if (this.remoteService.isConnected()) {
+        await this.remoteService.setSong(song!);
+      }
     });
 
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
-      this.playerService.setPreviousSong();
+    navigator.mediaSession.setActionHandler('previoustrack', async () => {
+      const song = await this.playerService.setPreviousSong();
+      if (this.remoteService.isConnected()) {
+        await this.remoteService.setSong(song!);
+      }
     });
 
-    navigator.mediaSession.setActionHandler('play', () => {
+    navigator.mediaSession.setActionHandler('play', async () => {
       this.playerService.play();
+      if (this.remoteService.isConnected()) {
+        await this.remoteService.play();
+      }
     });
 
-    navigator.mediaSession.setActionHandler('pause', () => {
+    navigator.mediaSession.setActionHandler('pause', async () => {
       this.playerService.pause();
+      if (this.remoteService.isConnected()) {
+        await this.remoteService.pause();
+      }
     });
 
-    navigator.mediaSession.setActionHandler('stop', () => {
+    navigator.mediaSession.setActionHandler('stop', async () => {
       this.playerService.stop();
+      if (this.remoteService.isConnected()) {
+        await this.remoteService.pause();
+      }
     });
   }
 

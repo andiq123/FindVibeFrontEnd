@@ -84,6 +84,7 @@ export class PlayerService {
   }
 
   async setSong(song: Song) {
+    this.status$.set(PlayerStatus.Loading);
     this.alreadyAddedInRecents.set(false);
     const cachedLibrary = await caches.open('library');
 

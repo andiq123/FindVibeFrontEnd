@@ -70,22 +70,30 @@ export class SongComponent {
   async play() {
     if (this.isActive()) {
       this.playerService.play();
-      await this.remoteService.play();
+      if (this.remoteService.isConnected()) {
+        await this.remoteService.play();
+      }
 
       return;
     }
     this.onChangePlaylist.emit();
 
     await this.playerService.setSong(this.song());
-    await this.remoteService.setSong(this.song());
+    if (this.remoteService.isConnected()) {
+      await this.remoteService.setSong(this.song());
+    }
 
     this.playerService.play();
-    await this.remoteService.play();
+    if (this.remoteService.isConnected()) {
+      await this.remoteService.play();
+    }
   }
 
   async pause() {
     this.playerService.pause();
-    await this.remoteService.pause();
+    if (this.remoteService.isConnected()) {
+      await this.remoteService.pause();
+    }
   }
 
   async playOrPause() {
