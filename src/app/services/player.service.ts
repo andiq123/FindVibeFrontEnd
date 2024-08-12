@@ -22,12 +22,9 @@ export class PlayerService {
   alreadyAddedInRecents = signal<boolean>(false);
 
   constructor(
-    private songsService: SongsService,
     private settingsService: SettingsService,
-    private libraryService: LibraryService,
     private recentService: RecentService,
-    private playlistService: PlaylistService,
-    private router: Router
+    private playlistService: PlaylistService
   ) {}
 
   registerEvents() {
@@ -128,6 +125,7 @@ export class PlayerService {
     const previousSong = this.playlistService.previousSong;
     await this.setSong(previousSong);
     this.play();
+    return previousSong;
   }
 
   async setNextSong() {
@@ -140,6 +138,7 @@ export class PlayerService {
     const songToBePlayed = this.playlistService.nextSong;
     await this.setSong(songToBePlayed);
     this.play();
+    return songToBePlayed;
   }
 
   private updateDuration(time: number) {

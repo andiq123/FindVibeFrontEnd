@@ -10,6 +10,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { StorageService } from '../../library/services/storage.service';
 import { DragAndDropDirective } from '../directives/drag-and-drop.directive';
 import { PlayerService } from '../../services/player.service';
+import { RemoteService } from '../../services/remote.service';
 
 @Component({
   selector: 'app-song',
@@ -62,21 +63,29 @@ export class SongComponent {
 
   constructor(
     private playerService: PlayerService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private remoteService: RemoteService
   ) {}
 
   async play() {
     if (this.isActive()) {
       this.playerService.play();
+      await this.remoteService.play();
+
       return;
     }
     this.onChangePlaylist.emit();
+
     await this.playerService.setSong(this.song());
+    await this.remoteService.setSong(this.song());
+
     this.playerService.play();
+    await this.remoteService.play();
   }
 
-  pause() {
+  async pause() {
     this.playerService.pause();
+    await this.remoteService.pause();
   }
 
   async playOrPause() {

@@ -26,6 +26,7 @@ import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorit
 import { SwipeDownDirective } from '../directives/swipe-down.directive';
 import { HoldClickDirective } from '../directives/hold-click.directive';
 import { PlayerService } from '../../../services/player.service';
+import { RemoteService } from '../../../services/remote.service';
 
 @Component({
   selector: 'app-full-player',
@@ -70,7 +71,8 @@ export class FullPlayerComponent {
 
   constructor(
     private playerService: PlayerService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private remoteService: RemoteService
   ) {}
 
   convertTime(timeToConvert: number): string {
@@ -84,25 +86,30 @@ export class FullPlayerComponent {
     this.isClosingAnimation.set(true);
   }
 
-  play() {
+  async play() {
     this.playerService.play();
+    await this.remoteService.play();
   }
 
-  pause() {
+  async pause() {
     this.playerService.pause();
+    await this.remoteService.pause();
   }
 
-  seekTime(event: Event) {
+  async seekTime(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.playerService.setCurrentTime(+value);
+    await this.remoteService.updateTime(value);
   }
 
-  nextSong() {
-    this.playerService.setNextSong();
+  async nextSong() {
+    const song = await this.playerService.setNextSong();
+    await this.remoteService.setSong(song!);
   }
 
-  previousSong() {
-    this.playerService.setPreviousSong();
+  async previousSong() {
+    const song = await this.playerService.setPreviousSong();
+    await this.remoteService.setSong(song!);
   }
 
   toggleRepeat() {

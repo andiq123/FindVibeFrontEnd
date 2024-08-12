@@ -1,4 +1,11 @@
-import { Component, effect, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
@@ -13,6 +20,7 @@ import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { LibraryService } from './library/services/library.service';
 import { PlayerService } from './services/player.service';
+import { RemoteService } from './services/remote.service';
 
 @Component({
   selector: 'app-root',
@@ -39,7 +47,8 @@ export class AppComponent implements OnInit {
     private userService: UserService,
     private settingsService: SettingsService,
     private libraryService: LibraryService,
-    private swUpdate: SwUpdate
+    private swUpdate: SwUpdate,
+    private remoteService: RemoteService
   ) {
     effect(() => {
       const song = this.playerService.song$();
@@ -55,10 +64,19 @@ export class AppComponent implements OnInit {
     this.wakeServer().subscribe();
   }
 
+  @HostListener('window:beforeunload')
+  async onBeforeUnload() {
+    await this.remoteService.disconnectFromServer();
+  }
+
   private checkIfAlreadyLoggedAndLoadLibrary() {
     const userId = this.userService.loadUserIdFromStorage();
     if (userId) {
       this.loadLibrary(userId).subscribe();
+      const username = this.userService.user$()!.name;
+      if (username != '') {
+        this.remoteService.connectToServer(username);
+      }
     }
   }
 

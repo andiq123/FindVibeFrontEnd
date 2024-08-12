@@ -3,7 +3,11 @@ import { SongsComponent } from './songs/songs.component';
 import { offlineGuard } from './shared/guards/offline.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'songs', pathMatch: 'full' },
+  {
+    path: '',
+    redirectTo: 'songs',
+    pathMatch: 'full',
+  },
   {
     path: 'songs',
     component: SongsComponent,
