@@ -63,7 +63,9 @@ export class PlayerService {
         const response = await fetch(proxiedUrl);
         const blob = await response.blob();
         this.player().src = URL.createObjectURL(blob);
-        this.player().play();
+        setTimeout(() => {
+          this.player().play();
+        }, 100);
       } else {
         this.firstError.set(true);
         this.status$.set(PlayerStatus.Error);
