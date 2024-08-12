@@ -17,7 +17,6 @@ import {
   faStepBackward,
   faStepForward,
 } from '@fortawesome/free-solid-svg-icons';
-import { PlayerService } from '../player.service';
 import { PlayerStatus } from '../models/player.model';
 import { getDominantColor } from '@rtcoder/dominant-color';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
@@ -26,6 +25,7 @@ import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
 import { SwipeDownDirective } from '../directives/swipe-down.directive';
 import { HoldClickDirective } from '../directives/hold-click.directive';
+import { PlayerService } from '../../../services/player.service';
 
 @Component({
   selector: 'app-full-player',

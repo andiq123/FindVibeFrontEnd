@@ -1,19 +1,20 @@
-import { Injectable, signal } from '@angular/core';
-import { Song } from '../../songs/models/song.model';
-import { PlayerStatus } from './models/player.model';
-import { SettingsService } from '../../services/settings.service';
+import { computed, Injectable, signal } from '@angular/core';
+import { Song } from '../songs/models/song.model';
+import { PlayerStatus } from '../components/player-wrapper/models/player.model';
+import { SongsService } from '../songs/services/songs.service';
+import { SettingsService } from './settings.service';
+import { LibraryService } from '../library/services/library.service';
+import { RecentService } from '../recent/services/recent.service';
 import { Router } from '@angular/router';
-import { LibraryService } from '../../library/services/library.service';
-import { SongsService } from '../../songs/services/songs.service';
-import { addProxyLink } from '../../utils/utils';
-import { RecentService } from '../../recent/services/recent.service';
+import { addProxyLink } from '../utils/utils';
+import { PlaylistService } from './playlist.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlayerService {
   private player = signal<HTMLAudioElement>(new Audio());
-  song$ = signal<Song | null>(null);
+  song$ = computed(() => this.playlistService.currentSong());
   status$ = signal<PlayerStatus>(PlayerStatus.Stopped);
   currentTime$ = signal<number>(0);
   duration$ = signal<number>(0);
@@ -25,6 +26,7 @@ export class PlayerService {
     private settingsService: SettingsService,
     private libraryService: LibraryService,
     private recentService: RecentService,
+    private playlistService: PlaylistService,
     private router: Router
   ) {}
 
@@ -67,7 +69,7 @@ export class PlayerService {
       } else {
         this.firstError.set(true);
         this.status$.set(PlayerStatus.Error);
-        this.song$.set(null);
+        this.playlistService.setCurrentSong(null);
       }
     });
 
@@ -97,7 +99,7 @@ export class PlayerService {
       this.player().src = song.link;
     }
 
-    this.song$.set(song);
+    this.playlistService.setCurrentSong(song);
   }
 
   setCurrentTime(time: number) {
@@ -118,39 +120,24 @@ export class PlayerService {
   }
 
   async setPreviousSong() {
-    if (this.currentTime$() > 5) {
+    if (this.playlistService.needToReplay(this.currentTime$())) {
       this.player().currentTime = 0;
       return;
     }
 
-    const isLibraryRoute = this.router.url === '/library';
-    const previousSong = isLibraryRoute
-      ? this.libraryService.getPreviousSong(this.song$()!.id)
-      : this.songsService.getPreviousSong(this.song$()!.id);
+    const previousSong = this.playlistService.previousSong;
     await this.setSong(previousSong);
     this.play();
   }
 
   async setNextSong() {
-    const isLibraryRoute = this.router.url === '/library';
-
     if (this.settingsService.isRepeat$()) {
       this.player().currentTime = 0;
       this.play();
       return;
     }
 
-    let songToBePlayed: Song;
-    if (this.settingsService.isShuffle$()) {
-      songToBePlayed = isLibraryRoute
-        ? this.libraryService.getRandomSongFromCurrentPlaylist()
-        : this.songsService.getRandomSongFromCurrentPlaylist();
-    } else {
-      songToBePlayed = isLibraryRoute
-        ? this.libraryService.getNextSong(this.song$()!.id)
-        : this.songsService.getNextSong(this.song$()!.id);
-    }
-
+    const songToBePlayed = this.playlistService.nextSong;
     await this.setSong(songToBePlayed);
     this.play();
   }

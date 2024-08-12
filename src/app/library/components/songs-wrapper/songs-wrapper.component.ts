@@ -12,8 +12,13 @@ import { Song } from '../../../songs/models/song.model';
 export class SongsWrapperComponent {
   songs = input<Song[]>();
   onReorderSongs = output<{ from: string; to: string }>();
+  onChangePlaylist = output();
 
   reorderSongs(data: { from: string; to: string }) {
     this.onReorderSongs.emit(data);
+  }
+
+  changePlaylist() {
+    this.onChangePlaylist.emit();
   }
 }

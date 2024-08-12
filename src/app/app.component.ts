@@ -3,7 +3,6 @@ import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
 import { Title } from '@angular/platform-browser';
-import { PlayerService } from './components/player-wrapper/player.service';
 import { RouterOutlet } from '@angular/router';
 import { WakeService } from './services/wake.service';
 import { catchError, filter, interval, map, takeWhile, tap } from 'rxjs';
@@ -13,6 +12,7 @@ import { FullPlayerComponent } from './components/player-wrapper/full-player/ful
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { LibraryService } from './library/services/library.service';
+import { PlayerService } from './services/player.service';
 
 @Component({
   selector: 'app-root',

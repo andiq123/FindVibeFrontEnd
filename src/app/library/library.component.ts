@@ -9,6 +9,7 @@ import { catchError, Subscription, tap } from 'rxjs';
 import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.component';
 import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { PlaylistService } from '../services/playlist.service';
 
 @Component({
   selector: 'app-library',
@@ -42,7 +43,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   constructor(
     private libraryService: LibraryService,
-    private userService: UserService
+    private userService: UserService,
+    private playlistService: PlaylistService
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +53,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
     } else {
       this.registerWaitForNewUser();
     }
+  }
+
+  onChangePlaylist() {
+    this.playlistService.setCurrentPlaylist(this.songs());
   }
 
   loadLibrary() {

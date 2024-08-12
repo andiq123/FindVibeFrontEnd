@@ -1,6 +1,5 @@
 import { Component, computed, input, output } from '@angular/core';
 import { Song } from '../models/song.model';
-import { PlayerService } from '../../components/player-wrapper/player.service';
 import { PlayerStatus } from '../../components/player-wrapper/models/player.model';
 import { PlayerButtonComponent } from '../../shared/player-button/player-button.component';
 import { MovingTitleComponent } from '../../shared/moving-title/moving-title.component';
@@ -10,6 +9,7 @@ import { faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { StorageService } from '../../library/services/storage.service';
 import { DragAndDropDirective } from '../directives/drag-and-drop.directive';
+import { PlayerService } from '../../services/player.service';
 
 @Component({
   selector: 'app-song',
@@ -31,6 +31,7 @@ export class SongComponent {
   onReorderSongs = output<{ from: string; to: string }>();
   width = input<number>(56);
   offset = input<number>(26);
+  onChangePlaylist = output();
 
   song = input.required<Song>();
   status = computed(() => {
@@ -69,6 +70,7 @@ export class SongComponent {
       this.playerService.play();
       return;
     }
+    this.onChangePlaylist.emit();
     await this.playerService.setSong(this.song());
     this.playerService.play();
   }

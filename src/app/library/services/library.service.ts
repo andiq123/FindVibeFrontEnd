@@ -87,36 +87,6 @@ export class LibraryService {
     );
   }
 
-  getPreviousSong(currentSongId: string): Song {
-    const songIndex = this.songs$().findIndex(
-      (song) => song.id === currentSongId
-    );
-
-    if (songIndex === -1) {
-      return this.songs$()[0];
-    }
-
-    return this.songs$()[
-      (songIndex - 1 + this.songs$().length) % this.songs$().length
-    ];
-  }
-
-  getNextSong(currentSongId: string): Song {
-    const songIndex = this.songs$().findIndex(
-      (song) => song.id === currentSongId
-    );
-
-    if (songIndex === -1) {
-      return this.songs$()[0];
-    }
-
-    return this.songs$()[(songIndex + 1) % this.songs$().length];
-  }
-
-  getRandomSongFromCurrentPlaylist(): Song {
-    return this.songs$()[Math.floor(Math.random() * this.songs$().length)];
-  }
-
   saveReorders() {
     const reorders: Reorder[] = this.songs$().map((x) => ({
       songId: x.id,

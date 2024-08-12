@@ -1,8 +1,9 @@
 import { Component, computed, OnInit } from '@angular/core';
+
+import { SettingsService } from '../../services/settings.service';
+import { PlayerService } from '../../services/player.service';
 import { MiniPlayerComponent } from './mini-player/mini-player.component';
 import { FullPlayerComponent } from './full-player/full-player.component';
-import { PlayerService } from './player.service';
-import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-player-wrapper',

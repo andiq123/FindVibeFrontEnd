@@ -5,6 +5,8 @@ import { SearchStatus } from './models/song.model';
 import { Router, RouterLink } from '@angular/router';
 import { SongsService } from './services/songs.service';
 import { SettingsService } from '../services/settings.service';
+import { PlayerService } from '../services/player.service';
+import { PlaylistService } from '../services/playlist.service';
 
 @Component({
   selector: 'app-songs',
@@ -25,12 +27,17 @@ export class SongsComponent {
   constructor(
     private router: Router,
     private songsService: SongsService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private playlistService: PlaylistService
   ) {
     effect(() => {
       if (this.settingsService.isServerDown$()) {
         this.router.navigate(['/library']);
       }
     });
+  }
+
+  onChangePlaylist() {
+    this.playlistService.setCurrentPlaylist(this.songs());
   }
 }

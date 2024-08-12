@@ -3,7 +3,11 @@
   <ul class="flex flex-col gap-1 mb-36 mt-5">
     @for (song of songs(); track song.link) { @defer (on viewport){
     <li>
-      <app-song [song]="song" [offset]="20" />
+      <app-song
+        [song]="song"
+        [offset]="20"
+        (onChangePlaylist)="onChangePlaylist()"
+      />
     </li>
     }@placeholder {
     <p
