@@ -7,6 +7,8 @@ import {
 import { environment } from '../../environments/environment.development';
 import { Song } from '../songs/models/song.model';
 import { PlayerService } from './player.service';
+import { PlayerStatus } from '../components/player-wrapper/models/player.model';
+import { PlaylistService } from './playlist.service';
 
 @Injectable({
   providedIn: 'root',
@@ -67,8 +69,8 @@ export class RemoteService {
   }
 
   private registerEvents() {
-    this.connection?.on('Play', () => {
-      this.playerService.play();
+    this.connection?.on('Play', async () => {
+      await this.playerService.play();
     });
 
     this.connection?.on('Pause', () => {
