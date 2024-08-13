@@ -27,7 +27,6 @@ export class RemoteService {
 
     this.connection = new HubConnectionBuilder()
       .withUrl(this.baseUrl + '/player')
-      .configureLogging(LogLevel.Information)
       .build();
 
     this.connection.on('OtherSessionConnected', (sessionId: string) => {

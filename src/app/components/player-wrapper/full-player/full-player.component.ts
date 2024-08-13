@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  effect,
   ElementRef,
   output,
   signal,
@@ -48,7 +49,6 @@ export class FullPlayerComponent {
   status = computed(() => this.playerService.status$());
   currentTime = computed(() => this.playerService.currentTime$());
   duration = computed(() => this.playerService.duration$());
-  isFirstError = computed(() => this.playerService.firstError());
   isRepeat = computed(() => this.settingsService.isRepeat$());
   isShuffle = computed(() => this.settingsService.isShuffle$());
   isRemoteServerConnected = computed(() => this.remoteService.isConnected());
@@ -74,7 +74,16 @@ export class FullPlayerComponent {
     private playerService: PlayerService,
     private settingsService: SettingsService,
     private remoteService: RemoteService
-  ) {}
+  ) {
+    effect(async () => {
+      if (this.playerService.status$() === PlayerStatus.Ended) {
+        const song = await this.playerService.setNextSong();
+        if (song) {
+          await this.remoteService.setSong(song);
+        }
+      }
+    });
+  }
 
   convertTime(timeToConvert: number): string {
     return convertTime(timeToConvert);

@@ -1,11 +1,10 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Song } from '../songs/models/song.model';
 import { PlayerStatus } from '../components/player-wrapper/models/player.model';
 import { SettingsService } from './settings.service';
 import { RecentService } from '../recent/services/recent.service';
 import { addProxyLink } from '../utils/utils';
 import { PlaylistService } from './playlist.service';
-import { RemoteService } from './remote.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +15,6 @@ export class PlayerService {
   status$ = signal<PlayerStatus>(PlayerStatus.Stopped);
   currentTime$ = signal<number>(0);
   duration$ = signal<number>(0);
-  firstError = signal<boolean>(true);
   alreadyAddedInRecents = signal<boolean>(false);
 
   constructor(
@@ -31,9 +29,6 @@ export class PlayerService {
     });
 
     this.player().addEventListener('playing', () => {
-      if (!this.firstError()) {
-        this.firstError.set(true);
-      }
       this.status$.set(PlayerStatus.Playing);
     });
 
@@ -45,8 +40,8 @@ export class PlayerService {
       this.status$.set(PlayerStatus.Ended);
     });
 
-    this.player().addEventListener('error', async () => {
-      await this.errorRetry();
+    this.player().addEventListener('error', () => {
+      this.status$.set(PlayerStatus.Error);
     });
 
     this.player().addEventListener('timeupdate', () => {
@@ -62,23 +57,18 @@ export class PlayerService {
     this.player().controls = false;
   }
   async setSong(song: Song) {
-    try {
-      this.alreadyAddedInRecents.set(false);
-      const cachedLibrary = await caches.open('library');
+    const cachedLibrary = await caches.open('library');
 
-      const proxiedUrl = addProxyLink(song.link);
-      const inCache = await cachedLibrary.match(proxiedUrl);
-      if (inCache) {
-        const blob = await inCache!.blob();
-        this.player().src = URL.createObjectURL(blob);
-      } else {
-        this.player().src = song.link;
-      }
-      this.playlistService.setCurrentSong(song);
-      this.player().play();
-    } catch (error) {
-      await this.errorRetry();
+    const proxiedUrl = addProxyLink(song.link);
+    const inCache = await cachedLibrary.match(proxiedUrl);
+    if (inCache) {
+      const blob = await inCache!.blob();
+      this.player().src = URL.createObjectURL(blob);
+    } else {
+      this.player().src = proxiedUrl;
     }
+    this.playlistService.setCurrentSong(song);
+    this.player().play();
   }
 
   setCurrentTime(time: number) {
@@ -135,23 +125,5 @@ export class PlayerService {
     }
 
     return;
-  }
-
-  private async errorRetry() {
-    if (this.firstError()) {
-      this.status$.set(PlayerStatus.Loading);
-      const proxiedUrl = addProxyLink(this.song$()!.link);
-      const response = await fetch(proxiedUrl);
-      const blob = await response.blob();
-      this.player().src = URL.createObjectURL(blob);
-      setTimeout(() => {
-        this.player().play();
-        this.firstError.set(false);
-      }, 500);
-    } else {
-      this.firstError.set(true);
-      this.status$.set(PlayerStatus.Error);
-      this.playlistService.setCurrentSong(null);
-    }
   }
 }
