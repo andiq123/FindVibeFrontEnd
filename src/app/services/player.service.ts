@@ -5,6 +5,7 @@ import { SettingsService } from './settings.service';
 import { RecentService } from '../recent/services/recent.service';
 import { addProxyLink } from '../utils/utils';
 import { PlaylistService } from './playlist.service';
+import { StorageService } from '../library/services/storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,11 +17,13 @@ export class PlayerService {
   currentTime$ = signal<number>(0);
   duration$ = signal<number>(0);
   alreadyAddedInRecents = signal<boolean>(false);
+  isFirstError = signal<boolean>(true);
 
   constructor(
     private settingsService: SettingsService,
     private recentService: RecentService,
-    private playlistService: PlaylistService
+    private playlistService: PlaylistService,
+    private storageService: StorageService
   ) {}
 
   registerEvents() {
@@ -29,6 +32,9 @@ export class PlayerService {
     });
 
     this.player().addEventListener('playing', () => {
+      if (!this.isFirstError()) {
+        this.isFirstError.set(true);
+      }
       this.status$.set(PlayerStatus.Playing);
     });
 
@@ -40,8 +46,12 @@ export class PlayerService {
       this.status$.set(PlayerStatus.Ended);
     });
 
-    this.player().addEventListener('error', () => {
+    this.player().addEventListener('error', async () => {
       this.status$.set(PlayerStatus.Error);
+      if (this.isFirstError()) {
+        await this.retryError();
+        this.isFirstError.set(false);
+      }
     });
 
     this.player().addEventListener('timeupdate', () => {
@@ -57,17 +67,23 @@ export class PlayerService {
     this.player().controls = false;
   }
   async setSong(song: Song) {
-    const cachedLibrary = await caches.open('library');
-
-    const proxiedUrl = addProxyLink(song.link);
-    const inCache = await cachedLibrary.match(proxiedUrl);
-    if (inCache) {
-      const blob = await inCache!.blob();
-      this.player().src = URL.createObjectURL(blob);
-    } else {
-      this.player().src = proxiedUrl;
-    }
     this.playlistService.setCurrentSong(song);
+    this.status$.set(PlayerStatus.Loading);
+
+    const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
+
+    this.player().src = offlineLink ? offlineLink : song.link;
+
+    this.player().play();
+  }
+
+  private async retryError() {
+    await this.storageService.cacheSong(this.song$()!);
+    const offlineLink = await this.storageService.isAvalaibleOffline(
+      this.song$()!.link
+    );
+    this.player().src = offlineLink!;
+
     this.player().play();
   }
 

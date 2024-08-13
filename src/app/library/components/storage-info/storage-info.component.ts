@@ -48,7 +48,10 @@ export class StorageInfoComponent implements OnInit {
 
   populateAvailableOfflineSongs() {
     this.libraryService.songs$().forEach(async (song) => {
-      if (await this.storageService.isAvalaibleOffline(song.link)) {
+      const isAvailable = await this.storageService.isAvalaibleOffline(
+        song.link
+      );
+      if (isAvailable) {
         this.storageService.availableOfflineSongIds$.update((prev) => [
           ...prev,
           song.id,
