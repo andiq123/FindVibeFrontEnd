@@ -24,6 +24,7 @@ export class StorageService {
       const isAvailable = await this.isAvalaibleOffline(song.link);
       if (isAvailable) continue;
 
+      this.currentLoadingDownloadSongIds$.update((prev) => [...prev, song.id]);
       await this.cacheSong(song, cachedLibrary);
 
       await this.setUpStorage();
@@ -44,7 +45,6 @@ export class StorageService {
     }
 
     const proxiedUrl = addProxyLink(song.link);
-    this.currentLoadingDownloadSongIds$.update((prev) => [...prev, song.id]);
 
     await cachedLibrary.add(proxiedUrl);
   }

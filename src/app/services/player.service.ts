@@ -27,10 +27,6 @@ export class PlayerService {
   ) {}
 
   registerEvents() {
-    this.player().addEventListener('loadstart', () => {
-      this.status$.set(PlayerStatus.Loading);
-    });
-
     this.player().addEventListener('playing', () => {
       if (!this.isFirstError()) {
         this.isFirstError.set(true);
@@ -47,8 +43,9 @@ export class PlayerService {
     });
 
     this.player().addEventListener('error', async () => {
-      this.status$.set(PlayerStatus.Error);
       if (this.isFirstError()) {
+        this.status$.set(PlayerStatus.Loading);
+        console.log('error loading retrying...');
         await this.retryError();
         this.isFirstError.set(false);
       }
@@ -67,12 +64,17 @@ export class PlayerService {
     this.player().controls = false;
   }
   async setSong(song: Song) {
-    this.playlistService.setCurrentSong(song);
     this.status$.set(PlayerStatus.Loading);
+    this.playlistService.setCurrentSong(song);
 
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
-
-    this.player().src = offlineLink ? offlineLink : song.link;
+    if (offlineLink) {
+      const response = await fetch(offlineLink);
+      const blob = await response.blob();
+      this.player().src = URL.createObjectURL(blob);
+    } else {
+      this.player().src = offlineLink ? offlineLink : song.link;
+    }
 
     this.player().play();
   }
@@ -82,9 +84,18 @@ export class PlayerService {
     const offlineLink = await this.storageService.isAvalaibleOffline(
       this.song$()!.link
     );
-    this.player().src = offlineLink!;
+    if (offlineLink) {
+      const response = await fetch(offlineLink);
+      const blob = await response.blob();
+      if (blob.type !== 'audio/mpeg') {
+        this.status$.set(PlayerStatus.Error);
+      }
+      this.player().src = URL.createObjectURL(blob);
 
-    this.player().play();
+      this.player().play();
+    } else {
+      this.status$.set(PlayerStatus.Error);
+    }
   }
 
   setCurrentTime(time: number) {
