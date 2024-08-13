@@ -98,7 +98,6 @@ export class PlayerService {
       if (this.retries() <= this.maxRetries) {
         this.retryError();
         this.retries.update((prev) => prev + 1);
-        console.log(this.retries());
         return;
       } else {
         this.retries.set(0);
