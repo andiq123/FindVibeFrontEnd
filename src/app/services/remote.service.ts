@@ -7,8 +7,6 @@ import {
 import { environment } from '../../environments/environment.development';
 import { Song } from '../songs/models/song.model';
 import { PlayerService } from './player.service';
-import { PlayerStatus } from '../components/player-wrapper/models/player.model';
-import { PlaylistService } from './playlist.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +16,7 @@ export class RemoteService {
   connection?: HubConnection;
   username = signal<string>('');
   otherSessions = signal<string[]>([]);
-  isConnected = signal<boolean>(false);
+  private isConnected = signal<boolean>(false);
 
   constructor(private playerService: PlayerService) {}
 
@@ -52,19 +50,27 @@ export class RemoteService {
   }
 
   async setSong(song: Song) {
-    await this.connection?.invoke('SetSong', song, this.username());
+    if (this.isConnected()) {
+      await this.connection?.invoke('SetSong', song, this.username());
+    }
   }
 
   async play() {
-    await this.connection?.invoke('Play', this.username());
+    if (this.isConnected()) {
+      await this.connection?.invoke('Play', this.username());
+    }
   }
 
   async pause() {
-    await this.connection?.invoke('Pause', this.username());
+    if (this.isConnected()) {
+      await this.connection?.invoke('Pause', this.username());
+    }
   }
 
   async updateTime(time: string) {
-    await this.connection?.invoke('UpdateTime', time, this.username());
+    if (this.isConnected()) {
+      await this.connection?.invoke('UpdateTime', time, this.username());
+    }
   }
 
   private registerEvents() {

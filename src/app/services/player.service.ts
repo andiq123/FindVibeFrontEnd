@@ -108,6 +108,7 @@ export class PlayerService {
     }
 
     const songToBePlayed = this.playlistService.nextSong;
+    if (songToBePlayed === undefined || songToBePlayed === null) return;
     await this.setSong(songToBePlayed);
     this.play();
     return songToBePlayed;

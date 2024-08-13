@@ -51,7 +51,6 @@ export class FullPlayerComponent {
   duration = computed(() => this.playerService.duration$());
   isRepeat = computed(() => this.settingsService.isRepeat$());
   isShuffle = computed(() => this.settingsService.isShuffle$());
-  isRemoteServerConnected = computed(() => this.remoteService.isConnected());
 
   onToggleSize = output<void>();
 
@@ -77,10 +76,7 @@ export class FullPlayerComponent {
   ) {
     effect(async () => {
       if (this.playerService.status$() === PlayerStatus.Ended) {
-        const song = await this.playerService.setNextSong();
-        if (song) {
-          await this.remoteService.setSong(song);
-        }
+        await this.nextSong();
       }
     });
   }
@@ -97,39 +93,29 @@ export class FullPlayerComponent {
   }
 
   async play() {
-    this.playerService.play();
-    if (this.isRemoteServerConnected()) {
-      await this.remoteService.play();
-    }
+    await this.playerService.play();
+    await this.remoteService.play();
   }
 
   async pause() {
     this.playerService.pause();
-    if (this.isRemoteServerConnected()) {
-      await this.remoteService.pause();
-    }
+    await this.remoteService.pause();
   }
 
   async seekTime(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.playerService.setCurrentTime(+value);
-    if (this.isRemoteServerConnected()) {
-      await this.remoteService.updateTime(value);
-    }
+    await this.remoteService.updateTime(value);
   }
 
   async nextSong() {
     const song = await this.playerService.setNextSong();
-    if (this.isRemoteServerConnected()) {
-      await this.remoteService.setSong(song!);
-    }
+    await this.remoteService.setSong(song!);
   }
 
   async previousSong() {
     const song = await this.playerService.setPreviousSong();
-    if (this.isRemoteServerConnected()) {
-      await this.remoteService.setSong(song!);
-    }
+    await this.remoteService.setSong(song!);
   }
 
   toggleRepeat() {

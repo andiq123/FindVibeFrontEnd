@@ -1,11 +1,4 @@
-import {
-  Component,
-  effect,
-  HostListener,
-  OnDestroy,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { Component, effect, HostListener, OnInit, signal } from '@angular/core';
 import { SongsComponent } from './songs/songs.component';
 import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
@@ -132,44 +125,33 @@ export class AppComponent implements OnInit {
 
     navigator.mediaSession.setActionHandler('nexttrack', async () => {
       const song = await this.playerService.setNextSong();
-      if (this.remoteService.isConnected()) {
-        await this.remoteService.setSong(song!);
-      }
+      await this.remoteService.setSong(song!);
     });
 
     navigator.mediaSession.setActionHandler('previoustrack', async () => {
       const song = await this.playerService.setPreviousSong();
-      if (this.remoteService.isConnected()) {
-        await this.remoteService.setSong(song!);
-      }
+      await this.remoteService.setSong(song!);
     });
 
     navigator.mediaSession.setActionHandler('play', async () => {
       this.playerService.play();
-      if (this.remoteService.isConnected()) {
-        await this.remoteService.play();
-      }
+      await this.remoteService.play();
     });
 
     navigator.mediaSession.setActionHandler('pause', async () => {
       this.playerService.pause();
-      if (this.remoteService.isConnected()) {
-        await this.remoteService.pause();
-      }
+      await this.remoteService.pause();
     });
 
     navigator.mediaSession.setActionHandler('stop', async () => {
       this.playerService.stop();
-      if (this.remoteService.isConnected()) {
-        await this.remoteService.pause();
-      }
+      await this.remoteService.pause();
     });
 
     navigator.mediaSession.setActionHandler('seekto', async (details) => {
       this.playerService.setCurrentTime(details.seekTime!);
-      if (this.remoteService.isConnected()) {
-        await this.remoteService.updateTime(details.seekTime!.toString());
-      }
+
+      await this.remoteService.updateTime(details.seekTime!.toString());
     });
   }
 

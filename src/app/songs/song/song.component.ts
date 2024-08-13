@@ -32,32 +32,29 @@ export class SongComponent {
   onReorderSongs = output<{ from: string; to: string }>();
   width = input<number>(56);
   offset = input<number>(26);
-  onChangePlaylist = output();
-
   song = input.required<Song>();
+  isActive = computed(
+    () => this.playerService.song$()?.link === this.song().link
+  );
   status = computed(() => {
     if (this.isActive()) {
       return this.playerService.status$();
     }
     return PlayerStatus.Paused;
   });
-  isActive = computed(
-    () => this.playerService.song$()?.link === this.song().link
-  );
   isFavoritePage = input<boolean>(false);
-
   isDownloadingOffline = computed(() => {
     return this.storageService
       .currentLoadingDownloadSongIds$()
       .includes(this.song().id);
   });
-
   isAvaiableOffline = computed(() => {
     return (
       this.isFavoritePage() &&
       this.storageService.availableOfflineSongIds$().includes(this.song().id)
     );
   });
+  onChangePlaylist = output();
 
   faCloudArrowDown = faCloudArrowDown;
 
@@ -69,38 +66,29 @@ export class SongComponent {
 
   async play() {
     if (this.isActive()) {
-      this.playerService.play();
-      if (this.remoteService.isConnected()) {
-        await this.remoteService.play();
-      }
-
+      await this.playerService.play();
+      await this.remoteService.play();
       return;
     }
     this.onChangePlaylist.emit();
 
     await this.playerService.setSong(this.song());
-    if (this.remoteService.isConnected()) {
-      await this.remoteService.setSong(this.song());
-    }
+    await this.remoteService.setSong(this.song());
 
-    this.playerService.play();
-    if (this.remoteService.isConnected()) {
-      await this.remoteService.play();
-    }
+    await this.playerService.play();
+    await this.remoteService.play();
   }
 
   async pause() {
     this.playerService.pause();
-    if (this.remoteService.isConnected()) {
-      await this.remoteService.pause();
-    }
+    await this.remoteService.pause();
   }
 
   async playOrPause() {
     if (this.status() === PlayerStatus.Paused) {
       await this.play();
     } else {
-      this.pause();
+      await this.pause();
     }
   }
 

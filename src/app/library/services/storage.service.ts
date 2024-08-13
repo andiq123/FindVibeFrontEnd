@@ -25,34 +25,19 @@ export class StorageService {
       if (await this.isAvalaibleOffline(song.link)) continue;
 
       const proxiedUrl = addProxyLink(song.link);
-
       this.currentLoadingDownloadSongIds$.update((prev) => [...prev, song.id]);
-      try {
-        const response = await fetch(proxiedUrl, {
-          method: 'GET',
-          headers: {
-            Origin: window.location.origin,
-          },
-        });
-        await cachedLibrary.add(new Request(response.url));
 
-        await this.setUpStorage();
+      await cachedLibrary.add(proxiedUrl);
 
-        await delayCustom(1000);
+      await this.setUpStorage();
 
-        this.currentLoadingDownloadSongIds$.update((prev) =>
-          prev.filter((id) => id !== song.id)
-        );
+      await delayCustom(1000);
 
-        this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
-      } catch (error) {
-        this.currentLoadingDownloadSongIds$.update((prev) =>
-          prev.filter((id) => id !== song.id)
-        );
-        this.availableOfflineSongIds$.update((prev) =>
-          prev.filter((id) => id !== song.id)
-        );
-      }
+      this.currentLoadingDownloadSongIds$.update((prev) =>
+        prev.filter((id) => id !== song.id)
+      );
+
+      this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
     }
   }
 
