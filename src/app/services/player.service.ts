@@ -44,10 +44,12 @@ export class PlayerService {
 
     this.player().addEventListener('error', async () => {
       if (this.isFirstError()) {
+        this.isFirstError.set(false);
         this.status$.set(PlayerStatus.Loading);
         console.log('error loading retrying...');
         await this.retryError();
-        this.isFirstError.set(false);
+      } else {
+        this.status$.set(PlayerStatus.Error);
       }
     });
 
@@ -81,21 +83,7 @@ export class PlayerService {
 
   private async retryError() {
     await this.storageService.cacheSong(this.song$()!);
-    const offlineLink = await this.storageService.isAvalaibleOffline(
-      this.song$()!.link
-    );
-    if (offlineLink) {
-      const response = await fetch(offlineLink);
-      const blob = await response.blob();
-      if (blob.type !== 'audio/mpeg') {
-        this.status$.set(PlayerStatus.Error);
-      }
-      this.player().src = URL.createObjectURL(blob);
-
-      this.player().play();
-    } else {
-      this.status$.set(PlayerStatus.Error);
-    }
+    this.setSong(this.song$()!);
   }
 
   setCurrentTime(time: number) {
