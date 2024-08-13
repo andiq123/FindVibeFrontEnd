@@ -18,6 +18,8 @@ export class PlayerService {
   duration$ = signal<number>(0);
   alreadyAddedInRecents = signal<boolean>(false);
   isFirstError = signal<boolean>(true);
+  retries = signal<number>(0);
+  private maxRetries = 15;
 
   constructor(
     private settingsService: SettingsService,
@@ -46,7 +48,6 @@ export class PlayerService {
       if (this.isFirstError()) {
         this.isFirstError.set(false);
         this.status$.set(PlayerStatus.Loading);
-        console.log('error loading retrying...');
         await this.retryError();
       } else {
         this.status$.set(PlayerStatus.Error);
@@ -66,6 +67,7 @@ export class PlayerService {
     this.player().controls = false;
   }
   async setSong(song: Song) {
+    this.retries.set(0);
     this.status$.set(PlayerStatus.Loading);
     this.playlistService.setCurrentSong(song);
 
@@ -80,15 +82,12 @@ export class PlayerService {
     this.player().play();
   }
 
-  maxRetries = 15;
-  retries = signal<number>(0);
   private async retryError() {
     await this.storageService.cacheSong(this.song$()!);
     const resp = await this.storageService.isAvalaibleOffline(
       this.song$()!.link
     );
     if (!resp) {
-      console.log('resp is null');
       this.status$.set(PlayerStatus.Error);
       return;
     }

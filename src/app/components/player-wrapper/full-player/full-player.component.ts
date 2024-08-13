@@ -51,6 +51,7 @@ export class FullPlayerComponent {
   duration = computed(() => this.playerService.duration$());
   isRepeat = computed(() => this.settingsService.isRepeat$());
   isShuffle = computed(() => this.settingsService.isShuffle$());
+  errorRetries = computed(() => this.playerService.retries());
 
   onToggleSize = output<void>();
 
