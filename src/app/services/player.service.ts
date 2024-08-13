@@ -3,7 +3,6 @@ import { Song } from '../songs/models/song.model';
 import { PlayerStatus } from '../components/player-wrapper/models/player.model';
 import { SettingsService } from './settings.service';
 import { RecentService } from '../recent/services/recent.service';
-import { addProxyLink } from '../utils/utils';
 import { PlaylistService } from './playlist.service';
 import { StorageService } from '../library/services/storage.service';
 
@@ -47,12 +46,11 @@ export class PlayerService {
     this.player().addEventListener('error', async () => {
       if (this.isFirstError()) {
         this.isFirstError.set(false);
-        this.status$.set(PlayerStatus.Loading);
         await this.retryError();
-      } else {
-        this.isFirstError.set(true);
-        this.status$.set(PlayerStatus.Error);
+        return;
       }
+      this.isFirstError.set(true);
+      this.status$.set(PlayerStatus.Error);
     });
 
     this.player().addEventListener('timeupdate', () => {
@@ -72,8 +70,17 @@ export class PlayerService {
     this.playlistService.setCurrentSong(song);
 
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
+
     if (offlineLink) {
       const blob = await offlineLink.blob();
+      if (blob.type !== 'audio/mpeg') {
+        await this.storageService.removeOneSongFromAvailableOfflineSongIds(
+          song.id,
+          song.link
+        );
+        this.player().src = song.link;
+        return;
+      }
       this.player().src = URL.createObjectURL(blob);
     } else {
       this.player().src = song.link;
@@ -105,6 +112,7 @@ export class PlayerService {
       await this.retryError();
       return;
     }
+    this.retries.set(0);
     await this.setSong(this.song$()!);
   }
 
