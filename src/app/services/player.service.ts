@@ -82,7 +82,7 @@ export class PlayerService {
   }
 
   private async retryError() {
-    if (this.retries() > this.maxRetries) {
+    if (this.retries() >= this.maxRetries) {
       this.retries.set(0);
       this.status$.set(PlayerStatus.Error);
       return;
@@ -93,8 +93,8 @@ export class PlayerService {
       this.song$()!.link
     );
     if (!resp) {
-      this.retryError();
       this.retries.update((prev) => prev + 1);
+      this.retryError();
       return;
     }
 
