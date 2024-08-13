@@ -21,7 +21,10 @@ export class StorageService {
   async cacheAllSongs(songs: Song[]) {
     const cachedLibrary = await caches.open('library');
     for (const song of songs) {
-      const isAvailable = await this.isAvalaibleOffline(song.link);
+      const isAvailable = await this.isAvalaibleOffline(
+        song.link,
+        cachedLibrary
+      );
       if (isAvailable) continue;
 
       this.currentLoadingDownloadSongIds$.update((prev) => [...prev, song.id]);
@@ -45,7 +48,6 @@ export class StorageService {
     }
 
     const proxiedUrl = addProxyLink(song.link);
-
     await cachedLibrary.add(proxiedUrl);
   }
 
@@ -56,11 +58,16 @@ export class StorageService {
     }, 500);
   }
 
-  async isAvalaibleOffline(songLink: string) {
+  async isAvalaibleOffline(
+    songLink: string,
+    cachedLibrary: Cache | null = null
+  ) {
+    if (!cachedLibrary) {
+      cachedLibrary = await caches.open('library');
+    }
     const songCache = await caches.open('library');
     const proxiedUrl = addProxyLink(songLink);
-    const isAvailable = await songCache.match(proxiedUrl);
-    return isAvailable?.url;
+    return await songCache.match(proxiedUrl);
   }
 
   emptyAvailableOfflineSongIds() {

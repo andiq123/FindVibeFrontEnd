@@ -71,18 +71,41 @@ export class PlayerService {
 
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
     if (offlineLink) {
-      const response = await fetch(offlineLink);
-      const blob = await response.blob();
+      const blob = await offlineLink.blob();
       this.player().src = URL.createObjectURL(blob);
     } else {
-      this.player().src = offlineLink ? offlineLink : song.link;
+      this.player().src = song.link;
     }
 
     this.player().play();
   }
 
+  maxRetries = 15;
+  retries = signal<number>(0);
   private async retryError() {
     await this.storageService.cacheSong(this.song$()!);
+    const resp = await this.storageService.isAvalaibleOffline(
+      this.song$()!.link
+    );
+    if (!resp) {
+      console.log('resp is null');
+      this.status$.set(PlayerStatus.Error);
+      return;
+    }
+
+    const blob = await resp.blob();
+    if (blob.type !== 'audio/mpeg') {
+      if (this.retries() <= this.maxRetries) {
+        this.retryError();
+        this.retries.update((prev) => prev + 1);
+        console.log(this.retries());
+        return;
+      } else {
+        this.retries.set(0);
+        this.status$.set(PlayerStatus.Error);
+        return;
+      }
+    }
     this.setSong(this.song$()!);
   }
 
