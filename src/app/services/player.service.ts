@@ -67,7 +67,6 @@ export class PlayerService {
     this.player().controls = false;
   }
   async setSong(song: Song) {
-    this.retries.set(0);
     this.status$.set(PlayerStatus.Loading);
     this.playlistService.setCurrentSong(song);
 
@@ -83,28 +82,29 @@ export class PlayerService {
   }
 
   private async retryError() {
+    if (this.retries() > this.maxRetries) {
+      this.retries.set(0);
+      this.status$.set(PlayerStatus.Error);
+      return;
+    }
+
     await this.storageService.cacheSong(this.song$()!);
     const resp = await this.storageService.isAvalaibleOffline(
       this.song$()!.link
     );
     if (!resp) {
-      this.status$.set(PlayerStatus.Error);
+      this.retryError();
+      this.retries.update((prev) => prev + 1);
       return;
     }
 
     const blob = await resp.blob();
     if (blob.type !== 'audio/mpeg') {
-      if (this.retries() <= this.maxRetries) {
-        this.retryError();
-        this.retries.update((prev) => prev + 1);
-        return;
-      } else {
-        this.retries.set(0);
-        this.status$.set(PlayerStatus.Error);
-        return;
-      }
+      this.retries.update((prev) => prev + 1);
+      await this.retryError();
+      return;
     }
-    this.setSong(this.song$()!);
+    await this.setSong(this.song$()!);
   }
 
   setCurrentTime(time: number) {

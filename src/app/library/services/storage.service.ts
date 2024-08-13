@@ -51,13 +51,6 @@ export class StorageService {
     await cachedLibrary.add(proxiedUrl);
   }
 
-  async removeCache() {
-    await caches.delete('library');
-    setTimeout(async () => {
-      await this.setUpStorage();
-    }, 500);
-  }
-
   async isAvalaibleOffline(
     songLink: string,
     cachedLibrary: Cache | null = null
@@ -65,9 +58,16 @@ export class StorageService {
     if (!cachedLibrary) {
       cachedLibrary = await caches.open('library');
     }
-    const songCache = await caches.open('library');
+
     const proxiedUrl = addProxyLink(songLink);
-    return await songCache.match(proxiedUrl);
+    return await cachedLibrary.match(proxiedUrl);
+  }
+
+  async removeCache() {
+    await caches.delete('library');
+    setTimeout(async () => {
+      await this.setUpStorage();
+    }, 500);
   }
 
   emptyAvailableOfflineSongIds() {
