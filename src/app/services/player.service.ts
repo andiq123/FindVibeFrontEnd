@@ -66,6 +66,7 @@ export class PlayerService {
     this.player().controls = false;
   }
   async setSong(song: Song) {
+    this.retries.set(0);
     this.status$.set(PlayerStatus.Loading);
     this.playlistService.setCurrentSong(song);
 
@@ -91,7 +92,6 @@ export class PlayerService {
 
   private async retryError() {
     if (this.retries() >= this.maxRetries) {
-      this.retries.set(0);
       this.status$.set(PlayerStatus.Error);
       return;
     }
@@ -112,7 +112,7 @@ export class PlayerService {
       await this.retryError();
       return;
     }
-    this.retries.set(0);
+
     await this.setSong(this.song$()!);
   }
 
