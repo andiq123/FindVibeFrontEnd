@@ -3,7 +3,10 @@
   (click)="toggleSize()"
 >
   <div class="flex gap-3 justify-start items-center cursor-pointer w-full p-3">
-    <div class="w-14 rounded-md overflow-hidden">
+    <div class="w-14 rounded-md overflow-hidden relative">
+      <div class="absolute inset-0 backdrop-brightness-50">
+        <app-player-button [status]="status()" />
+      </div>
       <img
         class="object-fill w-full h-full"
         [ngSrc]="song()!.image"

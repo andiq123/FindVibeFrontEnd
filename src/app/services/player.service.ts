@@ -16,7 +16,6 @@ export class PlayerService {
   currentTime$ = signal<number>(0);
   duration$ = signal<number>(0);
   alreadyAddedInRecents = signal<boolean>(false);
-  isFirstError = signal<boolean>(true);
   retries = signal<number>(0);
   private maxRetries = 15;
 
@@ -29,10 +28,8 @@ export class PlayerService {
 
   registerEvents() {
     this.player().addEventListener('playing', () => {
-      if (!this.isFirstError()) {
-        this.isFirstError.set(true);
-      }
       this.status$.set(PlayerStatus.Playing);
+      this.retries.set(0);
     });
 
     this.player().addEventListener('pause', () => {
@@ -44,13 +41,18 @@ export class PlayerService {
     });
 
     this.player().addEventListener('error', async () => {
-      if (this.isFirstError()) {
-        this.isFirstError.set(false);
-        await this.retryError();
-        return;
+      const retryIng = () => {
+        if (this.retries() >= this.maxRetries) {
+          return;
+        }
+        this.retries.update((prev) => prev + 1);
+        return this.setSong(this.song$()!);
+      };
+
+      if (!retryIng()) {
+        this.status$.set(PlayerStatus.Error);
+        this.retries.set(0);
       }
-      this.isFirstError.set(true);
-      this.status$.set(PlayerStatus.Error);
     });
 
     this.player().addEventListener('timeupdate', () => {
@@ -65,55 +67,25 @@ export class PlayerService {
 
     this.player().controls = false;
   }
-  async setSong(song: Song) {
-    this.retries.set(0);
-    this.status$.set(PlayerStatus.Loading);
-    this.playlistService.setCurrentSong(song);
 
+  async setSong(song: Song) {
+    this.status$.set(PlayerStatus.Loading);
+
+    if (this.player().paused) {
+      this.player().pause();
+    }
+
+    this.playlistService.setCurrentSong(song);
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
 
     if (offlineLink) {
       const blob = await offlineLink.blob();
-      if (blob.type !== 'audio/mpeg') {
-        await this.storageService.removeOneSongFromAvailableOfflineSongIds(
-          song.id,
-          song.link
-        );
-        this.player().src = song.link;
-        return;
-      }
       this.player().src = URL.createObjectURL(blob);
     } else {
       this.player().src = song.link;
     }
 
     this.player().play();
-  }
-
-  private async retryError() {
-    if (this.retries() >= this.maxRetries) {
-      this.status$.set(PlayerStatus.Error);
-      return;
-    }
-
-    await this.storageService.cacheSong(this.song$()!);
-    const resp = await this.storageService.isAvalaibleOffline(
-      this.song$()!.link
-    );
-    if (!resp) {
-      this.retries.update((prev) => prev + 1);
-      this.retryError();
-      return;
-    }
-
-    const blob = await resp.blob();
-    if (blob.type !== 'audio/mpeg') {
-      this.retries.update((prev) => prev + 1);
-      await this.retryError();
-      return;
-    }
-
-    await this.setSong(this.song$()!);
   }
 
   setCurrentTime(time: number) {
