@@ -50,6 +50,7 @@ export class PlayerService {
         this.status$.set(PlayerStatus.Loading);
         await this.retryError();
       } else {
+        this.isFirstError.set(true);
         this.status$.set(PlayerStatus.Error);
       }
     });
