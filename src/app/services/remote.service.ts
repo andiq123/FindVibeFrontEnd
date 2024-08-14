@@ -94,9 +94,6 @@ export class RemoteService {
           const finishedTime = new Date();
           const diff = finishedTime.getTime() - this.startedTime!.getTime();
           const newTime = (+time * 100 + diff) / 100;
-          console.log('old time', time);
-          console.log('new time', newTime);
-          console.log(diff);
           this.playerService.setCurrentTime(newTime);
           await this.playerService.play();
         } else {
