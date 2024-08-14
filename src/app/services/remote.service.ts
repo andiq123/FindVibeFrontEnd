@@ -107,11 +107,10 @@ export class RemoteService {
     this.connection?.on('SyncTime', async () => {
       const time = this.playerService.currentTime$();
 
-      let newTime = time + 0.05;
       if (this.startTime) {
         const diffMs = new Date().getTime() - this.startTime.getTime();
         const diffSeconds = diffMs / 1000;
-        newTime = time + diffSeconds;
+        const newTime = time + diffSeconds - 0.1;
         this.playerService.setCurrentTime(newTime);
         await this.playerService.play();
       }
