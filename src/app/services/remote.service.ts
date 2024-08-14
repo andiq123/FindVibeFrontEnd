@@ -1,9 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import {
-  HubConnection,
-  HubConnectionBuilder,
-  LogLevel,
-} from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { environment } from '../../environments/environment.development';
 import { Song } from '../songs/models/song.model';
 import { PlayerService } from './player.service';
