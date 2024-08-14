@@ -76,6 +76,8 @@ export class FullPlayerComponent {
     private remoteService: RemoteService
   ) {
     effect(async () => {
+      console.log(this.playerService.status$());
+      await Promise.resolve();
       if (this.playerService.status$() === PlayerStatus.Ended) {
         await this.nextSong();
       }
