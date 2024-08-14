@@ -3,6 +3,7 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { environment } from '../../environments/environment.development';
 import { Song } from '../songs/models/song.model';
 import { PlayerService } from './player.service';
+import { delayCustom } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -69,8 +70,6 @@ export class RemoteService {
       if (this.otherSessions().length > 0) {
         this.startTime = new Date();
         this.playerService.pause();
-      } else {
-        this.startTime = undefined;
       }
 
       await this.connection?.invoke('UpdateTime', time, this.username());
@@ -99,11 +98,23 @@ export class RemoteService {
     this.connection?.on('UpdateTime', async (time: string) => {
       this.playerService.pause();
       this.playerService.setCurrentTime(+time);
+
+      await this.playerService.play();
+
       await this.syncTime();
     });
 
     this.connection?.on('SyncTime', async () => {
-      await this.playerService.play();
+      const time = this.playerService.currentTime$();
+
+      let newTime = time + 0.05;
+      if (this.startTime) {
+        const diffMs = new Date().getTime() - this.startTime.getTime();
+        const diffSeconds = diffMs / 1000;
+        newTime = time + diffSeconds;
+        this.playerService.setCurrentTime(newTime);
+        await this.playerService.play();
+      }
     });
   }
 }
