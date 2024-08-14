@@ -63,9 +63,13 @@ export class RemoteService {
     }
   }
 
+  startTime?: Date;
   async updateTime(time: string) {
     if (this.isConnected()) {
-      if (this.otherSessions().length > 0) this.playerService.pause();
+      if (this.otherSessions().length > 0) {
+        this.startTime = new Date();
+        this.playerService.pause();
+      }
 
       await this.connection?.invoke('UpdateTime', time, false, this.username());
     }
@@ -88,7 +92,11 @@ export class RemoteService {
       'UpdateTime',
       async (time: string, isSynced: boolean) => {
         if (isSynced) {
-          const newTime = (+time * 100 + 50) / 100;
+          let newTime = (+time * 100 + 50) / 100;
+          if (this.startTime) {
+            const diff = new Date().getTime() - this.startTime.getTime();
+            newTime = (+time * 100 + diff) / 100;
+          }
           this.playerService.setCurrentTime(newTime);
           await this.playerService.play();
         } else {
