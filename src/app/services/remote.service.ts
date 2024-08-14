@@ -87,6 +87,7 @@ export class RemoteService {
       'UpdateTime',
       async (time: string, isSynced: boolean) => {
         if (isSynced) {
+          this.playerService.setCurrentTime(+time + 1);
           await this.playerService.play();
         } else {
           this.playerService.pause();
