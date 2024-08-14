@@ -64,8 +64,9 @@ export class RemoteService {
   }
 
   async updateTime(time: string) {
+    this.playerService.pause();
     if (this.isConnected()) {
-      await this.connection?.invoke('UpdateTime', time, this.username());
+      await this.connection?.invoke('UpdateTime', time, false, this.username());
     }
   }
 
@@ -82,8 +83,17 @@ export class RemoteService {
       await this.playerService.setSong(song);
     });
 
-    this.connection?.on('UpdateTime', (time: string) => {
-      this.playerService.setCurrentTime(+time + 1);
-    });
+    this.connection?.on(
+      'UpdateTime',
+      async (time: string, isSynced: boolean) => {
+        if (isSynced) {
+          await this.playerService.play();
+        } else {
+          this.playerService.pause();
+          this.playerService.setCurrentTime(+time);
+          this.connection?.invoke('UpdateTime', time, true, this.username());
+        }
+      }
+    );
   }
 }
