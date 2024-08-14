@@ -88,7 +88,7 @@ export class RemoteService {
       'UpdateTime',
       async (time: string, isSynced: boolean) => {
         if (isSynced) {
-          const newTime = (+time * 100 + 80) / 100;
+          const newTime = (+time * 100 + 50) / 100;
           this.playerService.setCurrentTime(newTime);
           await this.playerService.play();
         } else {
