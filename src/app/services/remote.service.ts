@@ -73,7 +73,13 @@ export class RemoteService {
         this.startTime = undefined;
       }
 
-      await this.connection?.invoke('UpdateTime', time, false, this.username());
+      await this.connection?.invoke('UpdateTime', time, this.username());
+    }
+  }
+
+  async syncTime() {
+    if (this.isConnected()) {
+      await this.connection?.invoke('SyncTime', this.username());
     }
   }
 
@@ -90,27 +96,14 @@ export class RemoteService {
       await this.playerService.setSong(song);
     });
 
-    this.connection?.on(
-      'UpdateTime',
-      async (time: string, isSynced: boolean) => {
-        if (isSynced) {
-          let newTime = (+time * 100 + 50) / 100;
-          if (this.startTime) {
-            const diff = new Date().getTime() - this.startTime.getTime();
-            newTime = (+time * 100 + diff) / 100;
-          }
-          this.playerService.setCurrentTime(newTime);
-          await this.playerService.play();
-        } else {
-          this.playerService.setCurrentTime(+time);
-          await this.connection?.invoke(
-            'UpdateTime',
-            time,
-            true,
-            this.username()
-          );
-        }
-      }
-    );
+    this.connection?.on('UpdateTime', async (time: string) => {
+      this.playerService.pause();
+      this.playerService.setCurrentTime(+time);
+      await this.syncTime();
+    });
+
+    this.connection?.on('SyncTime', async () => {
+      await this.playerService.play();
+    });
   }
 }
