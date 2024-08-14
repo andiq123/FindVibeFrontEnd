@@ -91,7 +91,12 @@ export class RemoteService {
         } else {
           this.playerService.pause();
           this.playerService.setCurrentTime(+time);
-          this.connection?.invoke('UpdateTime', time, true, this.username());
+          await this.connection?.invoke(
+            'UpdateTime',
+            time,
+            true,
+            this.username()
+          );
         }
       }
     );
