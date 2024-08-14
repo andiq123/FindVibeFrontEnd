@@ -69,6 +69,8 @@ export class RemoteService {
       if (this.otherSessions().length > 0) {
         this.startTime = new Date();
         this.playerService.pause();
+      } else {
+        this.startTime = undefined;
       }
 
       await this.connection?.invoke('UpdateTime', time, false, this.username());
