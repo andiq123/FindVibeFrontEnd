@@ -87,7 +87,7 @@ export class RemoteService {
     });
 
     this.connection?.on('UpdateTime', (time: string) => {
-      this.playerService.setCurrentTime(+time);
+      this.playerService.setCurrentTime(+time + 1);
     });
   }
 }
