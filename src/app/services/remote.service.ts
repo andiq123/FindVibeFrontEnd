@@ -92,14 +92,8 @@ export class RemoteService {
     this.connection?.on(
       'UpdateTime',
       async (time: string, startTimeInMS: number) => {
-        console.log('time', time);
-        console.log('startTimeInMS', startTimeInMS);
         const diffMS = Date.now() - startTimeInMS;
-        console.log('diffMs', diffMS);
         const difference = diffMS / 1000;
-        console.log('difference', difference);
-        console.log('time + difference', +time + difference);
-
         this.playerService.setCurrentTime(+time + difference);
       }
     );
