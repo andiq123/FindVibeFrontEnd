@@ -93,8 +93,6 @@ export class RemoteService {
       const diffMS = Date.now() - startTimeInMS;
       const difference = diffMS / 1000 - 0.1;
       this.playerService.setCurrentTime(+time + difference);
-
-      this.playerService.play();
     });
   }
 }
