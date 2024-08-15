@@ -5,6 +5,14 @@
   #playerRef
   appSwipeDown
 >
+  @if(sessions().length > 1) {
+  <div class="mx-auto w-fit py-3 -mb-10">
+    <p class="text-red-400">
+      {{ sessions().length - 1 }} other sessions available
+    </p>
+  </div>
+  }
+
   <div
     class="flex flex-col items-center justify-center h-full px-10 gap-3 max-w-sm mx-auto"
   >

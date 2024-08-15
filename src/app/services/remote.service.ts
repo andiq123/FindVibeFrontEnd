@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment.development';
 import { Song } from '../songs/models/song.model';
 import { PlayerService } from './player.service';
 import { delayCustom } from '../utils/utils';
+import { Session } from '../models/session.model';
 
 @Injectable({
   providedIn: 'root',
@@ -11,8 +12,9 @@ import { delayCustom } from '../utils/utils';
 export class RemoteService {
   baseUrl = environment.API_URL;
   connection?: HubConnection;
+  connectionId = signal<string>('');
   username = signal<string>('');
-  otherSessions = signal<string[]>([]);
+  sessions = signal<Session[]>([]);
   isAndroid = signal<boolean>(false);
   isIOS = signal<boolean>(false);
   isWindows = signal<boolean>(false);
@@ -31,21 +33,21 @@ export class RemoteService {
       .withUrl(this.baseUrl + '/player')
       .build();
 
-    this.connection.on('OtherSessionConnected', (sessionId: string) => {
-      this.otherSessions.update((prev) => [...prev, sessionId]);
+    this.connection.on('OtherSessionConnected', (sessions: Session[]) => {
+      this.sessions.set(sessions);
     });
 
-    this.connection.on('OtherSessionDisconnected', (sessionId: string) => {
-      this.otherSessions.update((prev) =>
-        prev.filter((id) => id !== sessionId)
-      );
+    this.connection.on('OtherSessionDisconnected', (sessions: Session[]) => {
+      this.sessions.set(sessions);
     });
 
     this.registerEvents();
 
     await this.connection.start();
     await this.connection.invoke('Connect', this.username());
+
     this.isConnected.set(this.connection.state === 'Connected');
+    this.connectionId.set(this.connection.connectionId!);
   }
 
   async disconnectFromServer() {
