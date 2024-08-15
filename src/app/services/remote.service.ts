@@ -100,7 +100,10 @@ export class RemoteService {
       const diffMS = Date.now() - startTimeInMS;
       let difference = diffMS / 1000;
       if (this.isAndroid()) {
-        difference -= 0.1;
+        difference -= 0.11;
+      }
+      if (this.isWindows()) {
+        difference -= 0.15;
       }
       this.playerService.setCurrentTime(+time + difference);
     });
