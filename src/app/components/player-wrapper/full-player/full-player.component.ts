@@ -108,7 +108,7 @@ export class FullPlayerComponent {
   async seekTime(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.playerService.setCurrentTime(+value);
-    await this.remoteService.updateTime(value);
+    this.remoteService.updateTime(value);
   }
 
   async nextSong() {
