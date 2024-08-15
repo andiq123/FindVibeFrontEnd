@@ -1,12 +1,14 @@
 import {
   Component,
   computed,
-  effect,
+  DestroyRef,
   ElementRef,
+  OnInit,
   output,
   signal,
   viewChild,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { convertTime } from '../../../utils/utils';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
@@ -74,15 +76,7 @@ export class FullPlayerComponent {
     private playerService: PlayerService,
     private settingsService: SettingsService,
     private remoteService: RemoteService
-  ) {
-    effect(async () => {
-      console.log(this.playerService.status$());
-      await Promise.resolve();
-      if (this.playerService.status$() === PlayerStatus.Ended) {
-        await this.nextSong();
-      }
-    });
-  }
+  ) {}
 
   convertTime(timeToConvert: number): string {
     return convertTime(timeToConvert);
@@ -113,7 +107,9 @@ export class FullPlayerComponent {
 
   async nextSong() {
     const song = await this.playerService.setNextSong();
-    await this.remoteService.setSong(song!);
+    if (song) {
+      await this.remoteService.setSong(song);
+    }
   }
 
   async previousSong() {
