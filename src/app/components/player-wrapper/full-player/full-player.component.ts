@@ -115,7 +115,9 @@ export class FullPlayerComponent {
 
   async previousSong() {
     const song = await this.playerService.setPreviousSong();
-    await this.remoteService.setSong(song!);
+    if (song) {
+      await this.remoteService.setSong(song);
+    }
   }
 
   toggleRepeat() {

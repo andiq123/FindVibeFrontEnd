@@ -124,13 +124,11 @@ export class AppComponent implements OnInit {
     });
 
     navigator.mediaSession.setActionHandler('nexttrack', async () => {
-      const song = await this.playerService.setNextSong();
-      await this.remoteService.setSong(song!);
+      await this.playerService.setNextSong();
     });
 
     navigator.mediaSession.setActionHandler('previoustrack', async () => {
-      const song = await this.playerService.setPreviousSong();
-      await this.remoteService.setSong(song!);
+      await this.playerService.setPreviousSong();
     });
 
     navigator.mediaSession.setActionHandler('play', async () => {
