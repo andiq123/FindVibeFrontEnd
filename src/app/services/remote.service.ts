@@ -91,7 +91,7 @@ export class RemoteService {
 
     this.connection?.on('UpdateTime', (time: string, startTimeInMS: number) => {
       const diffMS = Date.now() - startTimeInMS;
-      const difference = diffMS / 1000 - 0.05;
+      const difference = diffMS / 1000 - 0.1;
       this.playerService.setCurrentTime(+time + difference);
 
       this.playerService.play();
