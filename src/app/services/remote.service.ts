@@ -13,9 +13,16 @@ export class RemoteService {
   connection?: HubConnection;
   username = signal<string>('');
   otherSessions = signal<string[]>([]);
+  isAndroid = signal<boolean>(false);
+  isIOS = signal<boolean>(false);
+  isWindows = signal<boolean>(false);
   private isConnected = signal<boolean>(false);
 
-  constructor(private playerService: PlayerService) {}
+  constructor(private playerService: PlayerService) {
+    this.isAndroid.set(/Android/i.test(navigator.userAgent));
+    this.isIOS.set(/iPhone|iPad|iPod/i.test(navigator.userAgent));
+    this.isWindows.set(/Windows/i.test(navigator.userAgent));
+  }
 
   async connectToServer(username: string) {
     this.username.set(username);
@@ -91,7 +98,10 @@ export class RemoteService {
 
     this.connection?.on('UpdateTime', (time: string, startTimeInMS: number) => {
       const diffMS = Date.now() - startTimeInMS;
-      const difference = diffMS / 1000 - 0.1;
+      let difference = diffMS / 1000;
+      if (this.isAndroid()) {
+        difference -= 0.1;
+      }
       this.playerService.setCurrentTime(+time + difference);
     });
   }
