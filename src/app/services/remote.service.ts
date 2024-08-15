@@ -64,21 +64,15 @@ export class RemoteService {
     }
   }
 
-  startTime?: Date;
   async updateTime(time: string) {
     if (this.isConnected()) {
-      if (this.otherSessions().length > 0) {
-        this.startTime = new Date();
-        this.playerService.pause();
-      }
-
-      await this.connection?.invoke('UpdateTime', time, this.username());
-    }
-  }
-
-  async syncTime() {
-    if (this.isConnected()) {
-      await this.connection?.invoke('SyncTime', this.username());
+      const startTime = Date.now();
+      await this.connection?.invoke(
+        'UpdateTime',
+        time,
+        startTime,
+        this.username()
+      );
     }
   }
 
@@ -95,25 +89,16 @@ export class RemoteService {
       await this.playerService.setSong(song);
     });
 
-    this.connection?.on('UpdateTime', async (time: string) => {
-      this.playerService.pause();
-      this.playerService.setCurrentTime(+time);
+    this.connection?.on(
+      'UpdateTime',
+      async (time: string, startTimeInMS: number) => {
+        const diffMS = Date.now() - startTimeInMS;
+        const difference = diffMS / 1000;
 
-      await this.playerService.play();
+        this.playerService.setCurrentTime(+time + difference);
 
-      await this.syncTime();
-    });
-
-    this.connection?.on('SyncTime', async () => {
-      const time = this.playerService.currentTime$();
-
-      if (this.startTime) {
-        const diffMs = new Date().getTime() - this.startTime.getTime();
-        const diffSeconds = diffMs / 100;
-        const newTime = time + diffSeconds;
-        this.playerService.setCurrentTime(newTime);
         await this.playerService.play();
       }
-    });
+    );
   }
 }
