@@ -101,8 +101,6 @@ export class RemoteService {
         console.log('time + difference', +time + difference);
 
         this.playerService.setCurrentTime(+time + difference);
-
-        await this.playerService.play();
       }
     );
   }
