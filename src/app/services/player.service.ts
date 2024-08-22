@@ -114,14 +114,13 @@ export class PlayerService {
 
     const previousSong = this.playlistService.previousSong;
     await this.setSong(previousSong);
-    await this.play();
     return previousSong;
   }
 
   async setNextSong() {
     if (this.settingsService.isRepeat$()) {
       this.player().currentTime = 0;
-      this.play();
+      await this.play();
       return;
     }
 
