@@ -77,7 +77,9 @@ export class PlayerService {
       const blob = await offlineLink.blob();
       this.player().src = URL.createObjectURL(blob);
     } else {
-      this.player().src = addProxyLink(song.link);
+      const response = await fetch(addProxyLink(song.link));
+      const blob = await response.blob();
+      this.player().src = URL.createObjectURL(blob);
     }
   }
 
