@@ -70,10 +70,6 @@ export class PlayerService {
     this.alreadyAddedInRecents.set(false);
     this.status$.set(PlayerStatus.Loading);
 
-    if (this.player().paused) {
-      this.player().pause();
-    }
-
     this.playlistService.setCurrentSong(song);
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
 
