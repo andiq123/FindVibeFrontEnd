@@ -86,7 +86,7 @@ export class PlayerService {
       this.player().src = URL.createObjectURL(blob);
     }
 
-    this.player().play();
+    await this.player().play();
   }
 
   setCurrentTime(time: number) {
