@@ -5,6 +5,7 @@ import { SettingsService } from './settings.service';
 import { RecentService } from '../recent/services/recent.service';
 import { PlaylistService } from './playlist.service';
 import { StorageService } from '../library/services/storage.service';
+import { addProxyLink } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -41,18 +42,14 @@ export class PlayerService {
     });
 
     this.player().addEventListener('error', async () => {
-      const retryIng = () => {
-        if (this.retries() >= this.maxRetries) {
-          return;
-        }
-        this.retries.update((prev) => prev + 1);
-        return this.setSong(this.song$()!);
-      };
-
-      if (!retryIng()) {
+      if (this.retries() >= this.maxRetries) {
         this.status$.set(PlayerStatus.Error);
         this.retries.set(0);
+        return;
       }
+
+      this.retries.update((prev) => prev + 1);
+      this.setSong(this.song$()!);
     });
 
     this.player().addEventListener('timeupdate', () => {
@@ -83,7 +80,7 @@ export class PlayerService {
       const blob = await offlineLink.blob();
       this.player().src = URL.createObjectURL(blob);
     } else {
-      this.player().src = song.link;
+      this.player().src = addProxyLink(song.link);
     }
 
     this.player().play();
