@@ -68,9 +68,13 @@ export class PlayerService {
   async setSong(song: Song) {
     this.retries.set(0);
     this.alreadyAddedInRecents.set(false);
+
+    if (this.status$() === PlayerStatus.Playing) {
+      this.pause();
+    }
+
     this.status$.set(PlayerStatus.Loading);
 
-    this.playlistService.setCurrentSong(song);
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
 
     if (offlineLink) {
@@ -81,6 +85,7 @@ export class PlayerService {
       const blob = await response.blob();
       this.player().src = URL.createObjectURL(blob);
     }
+    this.playlistService.setCurrentSong(song);
   }
 
   setCurrentTime(time: number) {
