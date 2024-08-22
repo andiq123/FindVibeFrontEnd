@@ -68,12 +68,12 @@ export class PlayerService {
   async setSong(song: Song) {
     this.retries.set(0);
     this.alreadyAddedInRecents.set(false);
-
-    if (this.status$() === PlayerStatus.Playing) {
+    if (this.player().played) {
       this.pause();
     }
 
     this.status$.set(PlayerStatus.Loading);
+    this.playlistService.setCurrentSong(song);
 
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
 
@@ -85,7 +85,8 @@ export class PlayerService {
       const blob = await response.blob();
       this.player().src = URL.createObjectURL(blob);
     }
-    this.playlistService.setCurrentSong(song);
+
+    this.player().play();
   }
 
   setCurrentTime(time: number) {
@@ -127,7 +128,6 @@ export class PlayerService {
     const songToBePlayed = this.playlistService.nextSong;
     if (songToBePlayed === undefined || songToBePlayed === null) return;
     await this.setSong(songToBePlayed);
-    await this.play();
     return songToBePlayed;
   }
 
