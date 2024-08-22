@@ -109,6 +109,7 @@ export class PlayerService {
   async setPreviousSong() {
     if (this.playlistService.needToReplay(this.currentTime$())) {
       this.player().currentTime = 0;
+      await this.play();
       return;
     }
 
