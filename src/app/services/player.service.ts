@@ -68,10 +68,6 @@ export class PlayerService {
   async setSong(song: Song) {
     this.retries.set(0);
     this.alreadyAddedInRecents.set(false);
-    if (this.player().played) {
-      this.pause();
-    }
-
     this.playlistService.setCurrentSong(song);
     this.status$.set(PlayerStatus.Loading);
 

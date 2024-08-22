@@ -3,6 +3,7 @@ import {
   computed,
   DestroyRef,
   ElementRef,
+  input,
   OnInit,
   output,
   signal,
@@ -30,6 +31,7 @@ import { SwipeDownDirective } from '../directives/swipe-down.directive';
 import { HoldClickDirective } from '../directives/hold-click.directive';
 import { PlayerService } from '../../../services/player.service';
 import { RemoteService } from '../../../services/remote.service';
+import { Song } from '../../../songs/models/song.model';
 
 @Component({
   selector: 'app-full-player',
@@ -47,8 +49,8 @@ import { RemoteService } from '../../../services/remote.service';
   styleUrl: './full-player.component.scss',
 })
 export class FullPlayerComponent {
-  song = computed(() => this.playerService.song$());
-  status = computed(() => this.playerService.status$());
+  song = input.required<Song>();
+  status = input.required<PlayerStatus>();
   currentTime = computed(() => this.playerService.currentTime$());
   duration = computed(() => this.playerService.duration$());
   isRepeat = computed(() => this.settingsService.isRepeat$());

@@ -1,4 +1,4 @@
-import { Component, computed, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { PlayerStatus } from '../models/player.model';
@@ -6,6 +6,7 @@ import { PlayerButtonComponent } from '../../../shared/player-button/player-butt
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
 import { NgOptimizedImage } from '@angular/common';
 import { PlayerService } from '../../../services/player.service';
+import { Song } from '../../../songs/models/song.model';
 
 @Component({
   selector: 'app-mini-player',
@@ -20,15 +21,13 @@ import { PlayerService } from '../../../services/player.service';
   styleUrl: './mini-player.component.scss',
 })
 export class MiniPlayerComponent {
-  song = computed(() => this.playerService.song$());
-  status = computed(() => this.playerService.status$());
+  song = input.required<Song>();
+  status = input.required<PlayerStatus>();
   onToggleSize = output<void>();
 
   playerStatus = PlayerStatus;
 
   faArrowUp = faArrowUp;
-
-  constructor(private playerService: PlayerService) {}
 
   toggleSize() {
     this.onToggleSize.emit();

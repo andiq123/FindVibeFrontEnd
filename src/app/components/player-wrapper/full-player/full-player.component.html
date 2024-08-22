@@ -17,7 +17,7 @@
     class="flex flex-col items-center justify-center h-full px-10 gap-3 max-w-sm mx-auto"
   >
     <img
-      [ngSrc]="song()!.image"
+      [ngSrc]="song().image"
       alt="Song Art BG"
       class="absolute -z-10 opacity-30 blur-xl scale-110"
       fill
@@ -52,7 +52,7 @@
       </div>
       }
       <img
-        [ngSrc]="song()!.image"
+        [ngSrc]="song().image"
         alt="Song Art"
         style="width: 100%; height: auto"
         width="300"
@@ -67,19 +67,19 @@
     <div class="w-full flex justify-between items-center mt-3">
       <div class="mr-auto">
         <app-moving-title
-          [title]="song()!.title"
+          [title]="song().title"
           [isActive]="true"
           classes="max-w-60"
         />
         <app-moving-title
-          [title]="song()!.artist"
+          [title]="song().artist"
           [isActive]="true"
           classes="max-w-60"
           [isRedirect]="true"
           (closePlayer)="toggleSize()"
         />
       </div>
-      <app-favorite-button [song]="song()!" [forPlayer]="true" />
+      <app-favorite-button [song]="song()" [forPlayer]="true" />
     </div>
 
     <div class="w-full">
