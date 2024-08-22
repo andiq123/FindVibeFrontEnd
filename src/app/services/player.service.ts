@@ -66,6 +66,7 @@ export class PlayerService {
   }
 
   async setSong(song: Song) {
+    this.retries.set(0);
     this.alreadyAddedInRecents.set(false);
     this.status$.set(PlayerStatus.Loading);
 
