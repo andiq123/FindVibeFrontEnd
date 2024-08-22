@@ -72,8 +72,8 @@ export class PlayerService {
       this.pause();
     }
 
-    this.status$.set(PlayerStatus.Loading);
     this.playlistService.setCurrentSong(song);
+    this.status$.set(PlayerStatus.Loading);
 
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
 
