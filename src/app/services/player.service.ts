@@ -79,8 +79,6 @@ export class PlayerService {
     } else {
       this.player().src = addProxyLink(song.link);
     }
-
-    this.player().play();
   }
 
   setCurrentTime(time: number) {
@@ -108,7 +106,7 @@ export class PlayerService {
 
     const previousSong = this.playlistService.previousSong;
     await this.setSong(previousSong);
-    this.play();
+    await this.play();
     return previousSong;
   }
 
@@ -122,7 +120,7 @@ export class PlayerService {
     const songToBePlayed = this.playlistService.nextSong;
     if (songToBePlayed === undefined || songToBePlayed === null) return;
     await this.setSong(songToBePlayed);
-    this.play();
+    await this.play();
     return songToBePlayed;
   }
 

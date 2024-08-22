@@ -76,7 +76,6 @@ export class SongComponent {
     await this.remoteService.setSong(this.song());
 
     await this.playerService.play();
-    await this.remoteService.play();
   }
 
   async pause() {

@@ -83,6 +83,7 @@ export class RemoteService {
 
     this.connection?.on('SetSong', async (song: Song) => {
       await this.playerService.setSong(song);
+      await this.playerService.play();
     });
 
     this.connection?.on('UpdateTime', (time: string, startTimeInMS: number) => {
