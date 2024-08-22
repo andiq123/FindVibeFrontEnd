@@ -66,10 +66,10 @@ export class PlayerService {
   }
 
   async setSong(song: Song) {
-    this.retries.set(0);
-    this.alreadyAddedInRecents.set(false);
     this.playlistService.setCurrentSong(song);
     this.status$.set(PlayerStatus.Loading);
+    this.retries.set(0);
+    this.alreadyAddedInRecents.set(false);
 
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
 

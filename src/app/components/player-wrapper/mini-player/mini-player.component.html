@@ -9,8 +9,8 @@
       </div>
       <img
         class="object-fill w-full h-full"
-        [ngSrc]="song()!.image"
-        [alt]="song()!.artist"
+        [ngSrc]="song().image"
+        [alt]="song().artist"
         width="100"
         height="100"
         referrerpolicy="no-referrer"
@@ -19,12 +19,12 @@
 
     <div>
       <app-moving-title
-        [title]="song()!.title"
+        [title]="song().title"
         [isActive]="true"
         classes="max-w-60"
       />
       <app-moving-title
-        [title]="song()!.artist"
+        [title]="song().artist"
         [isActive]="true"
         classes="text-xs max-w-60"
       />
