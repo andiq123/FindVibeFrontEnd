@@ -5,7 +5,7 @@ import { SettingsService } from './settings.service';
 import { RecentService } from '../recent/services/recent.service';
 import { PlaylistService } from './playlist.service';
 import { StorageService } from '../library/services/storage.service';
-import { addProxyLink } from '../utils/utils';
+import { addProxyLink, delayCustom } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -17,8 +17,6 @@ export class PlayerService {
   currentTime$ = signal<number>(0);
   duration$ = signal<number>(0);
   alreadyAddedInRecents = signal<boolean>(false);
-  retries = signal<number>(0);
-  private maxRetries = 15;
 
   constructor(
     private settingsService: SettingsService,
@@ -30,11 +28,11 @@ export class PlayerService {
   registerEvents() {
     this.player().addEventListener('playing', () => {
       this.status$.set(PlayerStatus.Playing);
-      this.retries.set(0);
     });
 
     this.player().addEventListener('pause', () => {
-      this.status$.set(PlayerStatus.Paused);
+      if (this.status$() !== PlayerStatus.Loading)
+        this.status$.set(PlayerStatus.Paused);
     });
 
     this.player().addEventListener('ended', async () => {
@@ -42,14 +40,7 @@ export class PlayerService {
     });
 
     this.player().addEventListener('error', async () => {
-      if (this.retries() >= this.maxRetries) {
-        this.status$.set(PlayerStatus.Error);
-        this.retries.set(0);
-        return;
-      }
-
-      this.retries.update((prev) => prev + 1);
-      this.setSong(this.song$()!);
+      this.status$.set(PlayerStatus.Error);
     });
 
     this.player().addEventListener('timeupdate', () => {
@@ -61,26 +52,28 @@ export class PlayerService {
         this.recentService.addSongToRecents(this.song$()!);
       }
     });
-
-    this.player().controls = false;
   }
 
   async setSong(song: Song) {
     this.playlistService.setCurrentSong(song);
+    this.player().pause();
+    this.player().currentTime = 0;
     this.status$.set(PlayerStatus.Loading);
-    this.retries.set(0);
     this.alreadyAddedInRecents.set(false);
 
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
-
     if (offlineLink) {
-      const blob = await offlineLink.blob();
+      const arrayBuffer = await offlineLink.arrayBuffer();
+      const blob = new Blob([arrayBuffer]);
       this.player().src = URL.createObjectURL(blob);
-    } else {
-      const response = await fetch(addProxyLink(song.link));
-      const blob = await response.blob();
-      this.player().src = URL.createObjectURL(blob);
+      await this.player().play();
+      return;
     }
+
+    const response = await fetch(addProxyLink(song.link));
+    const arrayBuffer = await response.arrayBuffer();
+    const blob = new Blob([arrayBuffer]);
+    this.player().src = URL.createObjectURL(blob);
 
     await this.player().play();
   }

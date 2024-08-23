@@ -28,21 +28,13 @@
     <div
       class="rounded-md overflow-hidden shadow-2xl shadow-black cool3dArtworkAnimation relative"
     >
-      @if (status() === playerStatus.Loading) { @if(errorRetries()> 0){
-      <div
-        class="absolute h-full w-full z-10 bg-base-200 bg-opacity-30 backdrop-blur-sm flex flex-col justify-center items-center"
-      >
-        <p class="font-bold text-red-300">
-          Trying again {{ errorRetries() }}/15
-        </p>
-      </div>
-      }@else {
+      @if (status() === playerStatus.Loading) {
       <div
         class="absolute h-full w-full z-10 bg-base-200 bg-opacity-30 backdrop-blur-sm flex flex-col justify-center items-center"
       >
         <span class="loading loading-ring loading-lg scale-150"></span>
       </div>
-      } } @if(status()===playerStatus.Error){
+      } @if(status() === playerStatus.Error){
       <div
         class="absolute h-full w-full z-10 bg-base-200 bg-opacity-30 backdrop-blur-sm flex flex-col justify-center items-center"
       >

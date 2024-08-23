@@ -5,7 +5,6 @@ import { PlayerStatus } from '../models/player.model';
 import { PlayerButtonComponent } from '../../../shared/player-button/player-button.component';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
 import { NgOptimizedImage } from '@angular/common';
-import { PlayerService } from '../../../services/player.service';
 import { Song } from '../../../songs/models/song.model';
 
 @Component({
