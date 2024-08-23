@@ -63,18 +63,15 @@ export class PlayerService {
 
     const offlineLink = await this.storageService.isAvalaibleOffline(song.link);
     if (offlineLink) {
-      const arrayBuffer = await offlineLink.arrayBuffer();
-      const blob = new Blob([arrayBuffer]);
+      const blob = await offlineLink.blob();
       this.player().src = URL.createObjectURL(blob);
       await this.player().play();
       return;
     }
 
     const response = await fetch(addProxyLink(song.link));
-    const arrayBuffer = await response.arrayBuffer();
-    const blob = new Blob([arrayBuffer]);
+    const blob = await response.blob();
     this.player().src = URL.createObjectURL(blob);
-
     await this.player().play();
   }
 
