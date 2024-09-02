@@ -14,6 +14,7 @@ import { NavigationComponent } from './components/navigation/navigation.componen
 import { LibraryService } from './library/services/library.service';
 import { PlayerService } from './services/player.service';
 import { RemoteService } from './services/remote.service';
+import { PlaylistService } from './services/playlist.service';
 
 @Component({
   selector: 'app-root',
@@ -36,15 +37,16 @@ export class AppComponent implements OnInit {
   constructor(
     private title: Title,
     private playerService: PlayerService,
+    private playlistService: PlaylistService,
     private wakeService: WakeService,
     private userService: UserService,
     private settingsService: SettingsService,
     private libraryService: LibraryService,
     private swUpdate: SwUpdate,
-    private remoteService: RemoteService
+    private remoteService: RemoteService,
   ) {
     effect(() => {
-      const song = this.playerService.song$();
+      const song = this.playlistService.currentSong();
       this.title.setTitle(song?.title || 'FindVibe');
     });
 
@@ -111,11 +113,11 @@ export class AppComponent implements OnInit {
     // Media Session
     effect(() => {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: this.playerService.song$()?.title,
-        artist: this.playerService.song$()?.artist,
+        title: this.playlistService.currentSong()?.title,
+        artist: this.playlistService.currentSong()?.artist,
         artwork: [
           {
-            src: this.playerService.song$()?.image || '',
+            src: this.playlistService.currentSong()?.image || '',
             sizes: '512x512',
             type: 'image/png',
           },
@@ -132,7 +134,7 @@ export class AppComponent implements OnInit {
     });
 
     navigator.mediaSession.setActionHandler('play', async () => {
-      this.playerService.play();
+      await this.playerService.play();
       await this.remoteService.play();
     });
 

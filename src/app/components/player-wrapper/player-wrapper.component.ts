@@ -7,6 +7,7 @@ import { FullPlayerComponent } from './full-player/full-player.component';
 import { RemoteService } from '../../services/remote.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { PlayerStatus } from './models/player.model';
+import { PlaylistService } from '../../services/playlist.service';
 
 @Component({
   selector: 'app-player-wrapper',
@@ -17,12 +18,13 @@ import { PlayerStatus } from './models/player.model';
 })
 export class PlayerWrapperComponent implements OnInit {
   isMiniPlayer = computed(() => this.settingsService.isMiniPlayer$());
-  song = computed(() => this.playerService.song$());
+  song = computed(() => this.playlistService.currentSong());
   status = computed(() => this.playerService.status$());
   statusObservable = toObservable(this.status);
 
   constructor(
     private playerService: PlayerService,
+    private playlistService:PlaylistService,
     private settingsService: SettingsService,
     private remoteService: RemoteService
   ) {}

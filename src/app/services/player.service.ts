@@ -5,13 +5,14 @@ import { SettingsService } from './settings.service';
 import { RecentService } from '../recent/services/recent.service';
 import { PlaylistService } from './playlist.service';
 import { StorageService } from '../library/services/storage.service';
-import { addProxyLink, delayCustom } from '../utils/utils';
+import { addProxyLink, delayCustom, getBlobedUrl } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlayerService {
   private player = signal<HTMLAudioElement>(new Audio());
+  private isFirstError = signal<boolean>(true);
   song$ = computed(() => this.playlistService.currentSong());
   status$ = signal<PlayerStatus>(PlayerStatus.Stopped);
   currentTime$ = signal<number>(0);
@@ -23,7 +24,7 @@ export class PlayerService {
     private recentService: RecentService,
     private playlistService: PlaylistService,
     private storageService: StorageService
-  ) {}
+  ) { }
 
   registerEvents() {
     this.player().addEventListener('playing', () => {
@@ -35,11 +36,17 @@ export class PlayerService {
         this.status$.set(PlayerStatus.Paused);
     });
 
-    this.player().addEventListener('ended', async () => {
+    this.player().addEventListener('ended', () => {
       this.status$.set(PlayerStatus.Ended);
     });
 
     this.player().addEventListener('error', async () => {
+      if (this.isFirstError()) {
+        this.isFirstError.set(false);
+        const blob = await getBlobedUrl(this.song$()!.link);
+        this.player().src = blob;
+        return;
+      }
       this.status$.set(PlayerStatus.Error);
     });
 
@@ -55,6 +62,7 @@ export class PlayerService {
   }
 
   async setSong(song: Song) {
+    this.isFirstError.set(true);
     this.playlistService.setCurrentSong(song);
     this.player().pause();
     this.player().currentTime = 0;
@@ -69,9 +77,7 @@ export class PlayerService {
       return;
     }
 
-    const response = await fetch(addProxyLink(song.link));
-    const blob = await response.blob();
-    this.player().src = URL.createObjectURL(blob);
+    this.player().src = song.link;
     await this.player().play();
   }
 
