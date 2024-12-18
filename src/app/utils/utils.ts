@@ -19,7 +19,7 @@ export const getBlobedUrl = async (link: string) => {
   const response = await fetch(addProxyLink(link));
   const blob = await response.blob();
   return URL.createObjectURL(blob);
-}
+};
 
 export const bytesToGB = (bytes: number): number => {
   return parseFloat((bytes / 1024 ** 3).toFixed(2));
