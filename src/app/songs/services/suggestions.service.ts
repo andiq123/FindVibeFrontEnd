@@ -7,18 +7,18 @@ import { environment } from '../../../environments/environment.development';
   providedIn: 'root',
 })
 export class SuggestionsService {
-  baseUrl = environment.API_URL + '/api/suggestions?searchQuery=';
+  baseUrl = environment.API_URL + '/suggestions?q=';
 
   private suggestions = signal<string[]>([]);
   suggestions$ = this.suggestions.asReadonly();
 
   constructor(private httpClient: HttpClient) {}
 
-  getSuggestions(term: string): Observable<{ results: string[] }> {
-    return this.httpClient.get<{ results: string[] }>(this.baseUrl + term).pipe(
+  getSuggestions(term: string): Observable<string[]> {
+    return this.httpClient.get<string[]>(this.baseUrl + term).pipe(
       timeout(1000),
-      tap((suggestions) => {
-        this.suggestions.set(suggestions.results);
+      tap((result) => {
+        this.suggestions.set(result);
       })
     );
   }

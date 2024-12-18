@@ -10,43 +10,41 @@ import { Reorder } from '../models/reorder.model';
   providedIn: 'root',
 })
 export class LibraryBackService {
-  private baseUrl = environment.API_URL + '/api';
+  private baseUrl = environment.API_URL + '/favorites/';
 
   constructor(private httpClient: HttpClient) {}
 
-  getFavoritesSong(userId: string): Observable<{ songs: Song[] }> {
+  getFavoritesSong(userId: string): Observable<Song[]> {
     return new Observable((observer) => {
       const songsFromStorage = this.getLibraryFromLocalStorage();
 
       if (songsFromStorage.length > 0) {
-        observer.next({ songs: songsFromStorage });
+        observer.next(songsFromStorage);
       }
 
       this.httpClient
-        .get<{ songs: Song[] }>(
-          this.baseUrl + '/songs/get-favorites?userId=' + userId
-        )
+        .get<Song[]>(this.baseUrl + userId)
         .pipe(
           catchError((e) => {
             if (e.status === 404) {
               this.setLibraryToLocalStorage([]);
-              observer.next({ songs: [] });
+              observer.next([]);
             }
             observer.complete();
             return [];
           }),
-          map((data) => {
-            return { songs: data.songs.sort((a, b) => a.order - b.order) };
+          map((songs) => {
+            return songs.sort((a, b) => a.order - b.order);
           }),
-          tap((data) => {
-            this.setLibraryToLocalStorage(data.songs);
-            observer.next(data);
+          tap((songs) => {
+            this.setLibraryToLocalStorage(songs);
+            observer.next(songs);
             observer.complete();
           })
         )
         .pipe(
-          map((data) => {
-            return { songs: data.songs.sort((a, b) => a.order - b.order) };
+          map((songs) => {
+            return songs.sort((a, b) => a.order - b.order);
           })
         )
         .subscribe();
@@ -54,24 +52,15 @@ export class LibraryBackService {
   }
 
   reorderSongs(reorders: Reorder[]) {
-    const reorderRequest = {
-      reorders,
-    };
-
-    return this.httpClient.post(
-      this.baseUrl + '/songs/reorder',
-      reorderRequest
-    );
+    return this.httpClient.put(this.baseUrl, reorders);
   }
 
-  addToFavorites(song: SongToAddFavorite) {
-    return this.httpClient.post(this.baseUrl + '/songs/add-favorite', song);
+  addToFavorites(song: SongToAddFavorite, userId: string) {
+    return this.httpClient.post(this.baseUrl + userId, song);
   }
 
   removeFromFavorites(songId: string) {
-    return this.httpClient.delete(
-      this.baseUrl + '/songs/remove-favorite?songId=' + songId
-    );
+    return this.httpClient.delete(this.baseUrl + songId);
   }
 
   setLibraryToLocalStorage(songs: Song[]) {

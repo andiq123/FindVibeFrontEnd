@@ -28,7 +28,7 @@ export class UserFormComponent implements OnInit {
     this.userService.registerUser(this.name()).subscribe({
       next: (user) => {
         this.loadingSubmiting.set(false);
-        this.remoteService.connectToServer(user.name);
+        this.remoteService.connectToServer(user.username);
       },
     });
   }

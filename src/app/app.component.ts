@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
     private settingsService: SettingsService,
     private libraryService: LibraryService,
     private swUpdate: SwUpdate,
-    private remoteService: RemoteService,
+    private remoteService: RemoteService
   ) {
     effect(() => {
       const song = this.playlistService.currentSong();
@@ -68,7 +68,7 @@ export class AppComponent implements OnInit {
     const userId = this.userService.loadUserIdFromStorage();
     if (userId) {
       this.loadLibrary(userId).subscribe();
-      const username = this.userService.user$()!.name;
+      const username = this.userService.user$()!.username;
       if (username != '') {
         await this.remoteService.connectToServer(username);
       }

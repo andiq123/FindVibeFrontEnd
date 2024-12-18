@@ -15,7 +15,6 @@ import { PlaylistService } from '../services/playlist.service';
   selector: 'app-library',
   standalone: true,
   imports: [
-    SongComponent,
     UserFormComponent,
     TitleCasePipe,
     StorageInfoComponent,
@@ -33,7 +32,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   loadingReorder = signal<boolean>(false);
 
   isLoggedIn = computed(() => !!this.userService.user$());
-  username = computed(() => this.userService.user$()?.name || '');
+  username = computed(() => this.userService.user$()?.username || '');
   userId = computed(() => this.userService.user$()?.id || '');
 
   loadingSongs = signal<boolean>(true);

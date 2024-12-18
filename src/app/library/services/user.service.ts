@@ -8,7 +8,7 @@ import { Subject, tap } from 'rxjs';
   providedIn: 'root',
 })
 export class UserService {
-  private baseUrl = environment.API_URL + '/api';
+  private baseUrl = environment.API_URL + '/auth/';
   private user = signal<User | null>(null);
   user$ = this.user.asReadonly();
   userLoggedIn = new Subject();
@@ -26,17 +26,15 @@ export class UserService {
 
   registerUser(userName: string) {
     userName = userName.toLocaleLowerCase();
-    return this.httpClient
-      .post<User>(this.baseUrl + '/users', { userName })
-      .pipe(
-        tap({
-          next: (user: User) => {
-            this.user.set(user);
-            this.setUserToLocalStorage(user);
-            this.userLoggedIn.next(true);
-          },
-        })
-      );
+    return this.httpClient.get<User>(this.baseUrl + userName).pipe(
+      tap({
+        next: (user: User) => {
+          this.user.set(user);
+          this.setUserToLocalStorage(user);
+          this.userLoggedIn.next(true);
+        },
+      })
+    );
   }
 
   resetUser() {

@@ -10,26 +10,24 @@ import { environment } from '../../../environments/environment.development';
 export class SongsService {
   private songs = signal<Song[]>([]);
   private searchStatus = signal<SearchStatus>(SearchStatus.None);
-  private baseApi = environment.API_URL + '/api/songs/search?searchQuery=';
+  private baseApi = environment.API_URL + '/music-finder?q=';
   songs$ = this.songs.asReadonly();
   status$ = this.searchStatus.asReadonly();
 
   constructor(private httpService: HttpClient) {}
 
-  searchSongs(searchTerm: string): Observable<{ songs: Song[] }> {
+  searchSongs(searchTerm: string): Observable<Song[]> {
     this.setStatusLoading();
-    return this.httpService
-      .get<{ songs: Song[] }>(this.baseApi + searchTerm)
-      .pipe(
-        tap((list) => {
-          this.songs.set(list.songs);
-          this.setStatusFinished();
-        }),
-        catchError(() => {
-          this.setStatusError();
-          return [];
-        })
-      );
+    return this.httpService.get<Song[]>(this.baseApi + searchTerm).pipe(
+      tap((songs) => {
+        this.songs.set(songs);
+        this.setStatusFinished();
+      }),
+      catchError(() => {
+        this.setStatusError();
+        return [];
+      })
+    );
   }
 
   private setStatusFinished() {

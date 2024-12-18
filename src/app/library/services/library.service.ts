@@ -33,8 +33,8 @@ export class LibraryService {
   updateLibrarySongs(userId: string) {
     return this.libraryBackService.getFavoritesSong(userId).pipe(
       tap({
-        next: (data) => {
-          this.songs$.set(data.songs);
+        next: (songs) => {
+          this.songs$.set(songs);
         },
       })
     );
@@ -52,11 +52,10 @@ export class LibraryService {
       artist: song.artist,
       image: song.image,
       link: song.link,
-      userId: userId,
       order: composeOrder,
     };
 
-    return this.libraryBackService.addToFavorites(favoriteSong).pipe(
+    return this.libraryBackService.addToFavorites(favoriteSong, userId).pipe(
       tap({
         next: () => {
           this.songs$.update((prevSongs) => [...prevSongs, song]);

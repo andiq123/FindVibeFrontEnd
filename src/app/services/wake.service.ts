@@ -7,10 +7,10 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class WakeService {
-  private baseApi = environment.API_URL + '/api';
+  private baseApi = environment.API_URL;
   constructor(private httpClient: HttpClient) {}
 
   wakeServer(): Observable<void> {
-    return this.httpClient.get<void>(this.baseApi + '/wake');
+    return this.httpClient.get<void>(this.baseApi + '/ping');
   }
 }
