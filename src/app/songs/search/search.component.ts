@@ -40,12 +40,16 @@ export class SearchComponent implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
 
-    if (this.searchTerm() === '') this.suggestionsService.reset();
-    else this.searchSuggestion();
+    if (this.searchTerm() === '') {
+      this.suggestionsService.reset();
 
-    setTimeout(() => {
-      if (this.suggestions().length > 0) this.suggestionsService.reset();
-    }, 300);
+      setTimeout(() => {
+        if (this.suggestions().length > 0) this.suggestionsService.reset();
+      }, 500);
+
+      return;
+    }
+    this.searchSuggestion();
   }
 
   async submit() {
@@ -56,12 +60,12 @@ export class SearchComponent implements OnInit {
       return;
     }
 
+    await this.setQueryParamsToCurrentSearchTerm();
+
     this.songsService.searchSongs(this.searchTerm()).subscribe({
       next: () => this.suggestionsService.reset(),
       error: () => this.suggestionsService.reset(),
     });
-
-    await this.setQueryParamsToCurrentSearchTerm();
   }
 
   private async setQueryParamsToCurrentSearchTerm() {
@@ -78,6 +82,9 @@ export class SearchComponent implements OnInit {
     if (this.query() === '' || this.query() === undefined) return;
 
     this.searchTerm.set(this.query() || '');
-    this.songsService.searchSongs(this.searchTerm()).subscribe();
+    this.songsService.searchSongs(this.searchTerm()).subscribe({
+      next: () => this.suggestionsService.reset(),
+      error: () => this.suggestionsService.reset(),
+    });
   }
 }
