@@ -42,6 +42,10 @@ export class SearchComponent implements OnInit {
 
     if (this.searchTerm() === '') this.suggestionsService.reset();
     else this.searchSuggestion();
+
+    setTimeout(() => {
+      if (this.suggestions().length > 0) this.suggestionsService.reset();
+    }, 300);
   }
 
   async submit() {
