@@ -36,9 +36,12 @@ export class StorageInfoComponent implements OnInit {
   }
 
   async downloadAll() {
-    this.loadingDownloading.set(true);
-    await this.storageService.cacheAllSongs(this.libraryService.songs$());
-    this.loadingDownloading.set(false);
+    try {
+      this.loadingDownloading.set(true);
+      await this.storageService.cacheAllSongs(this.libraryService.songs$());
+    } finally {
+      this.loadingDownloading.set(false);
+    }
   }
 
   async removeCache() {

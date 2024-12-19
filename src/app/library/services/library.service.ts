@@ -62,6 +62,7 @@ export class LibraryService {
           this.libraryBackService.setLibraryToLocalStorage([...this.songs$()]);
           this.removeSongFromLoadingFavorites(song.id);
         },
+        error: () => this.removeSongFromLoadingFavorites(song.id),
       })
     );
   }
@@ -82,6 +83,7 @@ export class LibraryService {
           this.libraryBackService.setLibraryToLocalStorage([...this.songs$()]);
           this.removeSongFromLoadingFavorites(id);
         },
+        error: () => this.removeSongFromLoadingFavorites(id),
       })
     );
   }
