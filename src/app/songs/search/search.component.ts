@@ -49,7 +49,12 @@ export class SearchComponent implements OnInit {
   }
 
   async submit() {
-    if (this.searchTerm() === '') return;
+    if (this.searchTerm() === '') {
+      setTimeout(() => {
+        if (this.suggestions().length > 0) this.suggestionsService.reset();
+      }, 300);
+      return;
+    }
 
     this.songsService.searchSongs(this.searchTerm()).subscribe({
       next: () => this.suggestionsService.reset(),
@@ -57,9 +62,6 @@ export class SearchComponent implements OnInit {
     });
 
     await this.setQueryParamsToCurrentSearchTerm();
-    setTimeout(() => {
-      if (this.suggestions().length > 0) this.suggestionsService.reset();
-    }, 300);
   }
 
   private async setQueryParamsToCurrentSearchTerm() {
