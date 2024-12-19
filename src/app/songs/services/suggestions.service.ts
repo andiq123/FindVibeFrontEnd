@@ -25,5 +25,9 @@ export class SuggestionsService {
 
   reset() {
     this.suggestions.set([]);
+
+    setTimeout(() => {
+      if (this.suggestions().length > 0) this.suggestions.set([]);
+    }, 300);
   }
 }
