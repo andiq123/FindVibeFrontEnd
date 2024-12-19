@@ -4,7 +4,6 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { SongsService } from '../services/songs.service';
 import { SuggestionsService } from '../services/suggestions.service';
 
 @Component({
@@ -23,7 +22,6 @@ export class SearchComponent implements OnInit {
   timeOut: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
-    private songsService: SongsService,
     private suggestionsService: SuggestionsService,
     private router: Router
   ) {}
@@ -41,20 +39,14 @@ export class SearchComponent implements OnInit {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
 
-    if (this.searchTerm() === '') {
-      clearTimeout(this.timeOut);
-      setTimeout(() => {
-        this.suggestionsService.reset();
-      }, 300);
-    } else {
-      this.searchSuggestionByTimeOut();
-    }
+    if (this.searchTerm() === '') this.suggestionsService.reset();
+    else this.submitSearch();
   }
 
   async submit() {
     if (this.searchTerm() === '') return;
 
-    this.songsService.searchSongs(this.searchTerm()).subscribe();
+    this.submitSearch();
 
     await this.setQueryParamsToCurrentSearchTerm();
     setTimeout(() => {
@@ -66,20 +58,17 @@ export class SearchComponent implements OnInit {
     await this.router.navigate([`/songs/${this.searchTerm()}`]);
   }
 
-  private searchSuggestionByTimeOut() {
-    if (this.timeOut) {
-      clearTimeout(this.timeOut);
-    }
-
-    this.timeOut = setTimeout(() => {
-      this.suggestionsService.getSuggestions(this.searchTerm()).subscribe();
-    }, 100);
-  }
-
   private searchIfQueryPresent() {
     if (this.query() === '' || this.query() === undefined) return;
 
     this.searchTerm.set(this.query() || '');
-    this.songsService.searchSongs(this.searchTerm()).subscribe();
+    this.submitSearch();
+  }
+
+  private submitSearch() {
+    this.suggestionsService.getSuggestions(this.searchTerm()).subscribe({
+      next: () => this.suggestionsService.reset(),
+      error: () => this.suggestionsService.reset(),
+    });
   }
 }
