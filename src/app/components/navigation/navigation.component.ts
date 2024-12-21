@@ -5,7 +5,7 @@ import {
 } from '@fortawesome/angular-fontawesome';
 import {
   faClockRotateLeft,
-  faFolderOpen,
+  faBars,
   faMagnifyingGlass,
 } from '@fortawesome/free-solid-svg-icons';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -26,7 +26,7 @@ export class NavigationComponent {
     },
     {
       name: 'library',
-      icon: faFolderOpen,
+      icon: faBars,
       link: '/library',
     },
     {
