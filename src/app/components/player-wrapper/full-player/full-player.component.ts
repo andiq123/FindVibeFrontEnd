@@ -1,15 +1,12 @@
 import {
   Component,
   computed,
-  DestroyRef,
   ElementRef,
   input,
-  OnInit,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { convertTime } from '../../../utils/utils';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
@@ -43,7 +40,6 @@ import { Song } from '../../../songs/models/song.model';
     AsyncPipe,
     FavoriteButtonComponent,
     SwipeDownDirective,
-    HoldClickDirective,
   ],
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
