@@ -1,5 +1,4 @@
 import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
-import { SongComponent } from '../songs/song/song.component';
 import { LibraryService } from './services/library.service';
 import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
@@ -7,9 +6,14 @@ import { TitleCasePipe } from '@angular/common';
 import { StorageInfoComponent } from './components/storage-info/storage-info.component';
 import { catchError, Subscription, tap } from 'rxjs';
 import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.component';
-import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCheck,
+  faXmark,
+  faRightFromBracket,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlaylistService } from '../services/playlist.service';
+import { PreviousRouteService } from '../services/previous-route.service';
 
 @Component({
   selector: 'app-library',
@@ -28,30 +32,28 @@ export class LibraryComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   songs = computed(() => this.libraryService.songs$());
   orderHasChanged = computed(() => this.libraryService.orderHasChanged());
-
-  loadingReorder = signal<boolean>(false);
-
   isLoggedIn = computed(() => !!this.userService.user$());
   username = computed(() => this.userService.user$()?.username || '');
   userId = computed(() => this.userService.user$()?.id || '');
 
-  loadingSongs = signal<boolean>(true);
+  loadingReorder = signal(false);
+  loadingSongs = signal(true);
+  lastRouterIsRecents = computed(() => this.lastRoute.lastRouteWasRecents());
 
   faCheck = faCheck;
   faXmark = faXmark;
+  faRightFromBracket = faRightFromBracket;
 
   constructor(
     private libraryService: LibraryService,
     private userService: UserService,
-    private playlistService: PlaylistService
+    private playlistService: PlaylistService,
+    private lastRoute: PreviousRouteService
   ) {}
 
   ngOnInit(): void {
-    if (this.isLoggedIn()) {
-      this.loadLibrary();
-    } else {
-      this.registerWaitForNewUser();
-    }
+    if (this.isLoggedIn()) this.loadLibrary();
+    else this.registerWaitForNewUser();
   }
 
   onChangePlaylist() {

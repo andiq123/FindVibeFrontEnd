@@ -1,6 +1,4 @@
 import { Component, effect, HostListener, OnInit, signal } from '@angular/core';
-import { SongsComponent } from './songs/songs.component';
-import { SearchComponent } from './songs/search/search.component';
 import { PlayerWrapperComponent } from './components/player-wrapper/player-wrapper.component';
 import { Title } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
@@ -8,7 +6,6 @@ import { WakeService } from './services/wake.service';
 import { catchError, filter, interval, map, takeWhile, tap } from 'rxjs';
 import { UserService } from './library/services/user.service';
 import { SettingsService } from './services/settings.service';
-import { FullPlayerComponent } from './components/player-wrapper/full-player/full-player.component';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { LibraryService } from './library/services/library.service';
@@ -19,14 +16,7 @@ import { PlaylistService } from './services/playlist.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    SongsComponent,
-    SearchComponent,
-    PlayerWrapperComponent,
-    RouterOutlet,
-    FullPlayerComponent,
-    NavigationComponent,
-  ],
+  imports: [PlayerWrapperComponent, RouterOutlet, NavigationComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

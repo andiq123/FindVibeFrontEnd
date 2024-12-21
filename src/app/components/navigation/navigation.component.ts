@@ -8,13 +8,12 @@ import {
   faFolderOpen,
   faMagnifyingGlass,
 } from '@fortawesome/free-solid-svg-icons';
-import { TitleCasePipe } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-navigation',
   standalone: true,
-  imports: [FaIconComponent, TitleCasePipe, RouterLink, RouterLinkActive],
+  imports: [FaIconComponent, RouterLink, RouterLinkActive],
   templateUrl: './navigation.component.html',
   styleUrl: './navigation.component.scss',
 })

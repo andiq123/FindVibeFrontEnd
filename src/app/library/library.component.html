@@ -1,4 +1,8 @@
-<div class="w-[95%] mx-auto mt-3">
+<div
+  class="w-[95%] mx-auto mt-3"
+  [class.slideLeft]="lastRouterIsRecents()"
+  [class.slideRight]="!lastRouterIsRecents()"
+>
   @if (!isLoggedIn()) { <app-user-form />} @else{ @if(loadingSongs()){
   <div
     class="flex flex-col items-center justify-center w-fit mx-auto py-5 px-10"
@@ -24,7 +28,9 @@
           <fa-icon [icon]="faXmark" size="lg" />
         </button>
         }
-        <button class="btn" (click)="changeUser()">Change User</button>
+        <button class="btn" (click)="changeUser()">
+          <fa-icon [icon]="faRightFromBracket" size="lg" />
+        </button>
       </div>
     </div>
     <div class="mb-36 relative">
