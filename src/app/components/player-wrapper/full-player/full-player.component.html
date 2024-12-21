@@ -19,9 +19,8 @@
     <img
       [ngSrc]="song().image"
       alt="Song Art BG"
-      class="absolute -z-10 opacity-30 blur-2xl scale-110 object-fill w-screen h-screen"
-      width="500"
-      height="500"
+      class="absolute -z-10 opacity-30 blur-xl scale-110 object-cover"
+      fill
       priority
       referrerpolicy="no-referrer"
     />
@@ -95,7 +94,7 @@
       </div>
     </div>
 
-    <div class="flex gap-8 flex-wrap justify-center">
+    <div class="flex gap-8 flex-wrap justify-center bg-transparent">
       <button
         class="text-4xl btn bg-transparent btn-lg border-none w-16"
         (click)="previousSong()"
