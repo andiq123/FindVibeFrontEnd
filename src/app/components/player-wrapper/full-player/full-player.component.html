@@ -26,7 +26,7 @@
     />
 
     <div
-      class="rounded-md overflow-hidden shadow-2xl shadow-black cool3dArtworkAnimation relative"
+      class="rounded-md overflow-hidden shadow-2xl shadow-black cool3dArtworkAnimation relative w-64"
     >
       @if (status() === playerStatus.Loading) {
       <div
@@ -38,7 +38,7 @@
       <div
         class="absolute h-full w-full z-10 bg-base-200 bg-opacity-30 backdrop-blur-sm flex flex-col justify-center items-center"
       >
-        <p class="font-bold text-red-300">
+        <p class="font-bold text-red-300 p-5">
           Please try again later the song won't load...
         </p>
       </div>
@@ -47,11 +47,10 @@
         [ngSrc]="song().image"
         alt="Song Art"
         style="width: 100%; height: auto"
-        width="300"
-        height="300"
+        width="500"
+        height="500"
         priority="high"
         referrerpolicy="no-referrer"
-        appHoldClick
         (timerFinished)="downloadSong()"
       />
     </div>
