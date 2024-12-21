@@ -16,7 +16,6 @@
   </div>
   }@else {
   <div class="flex flex-col">
-    <app-storage-info />
     <div class="flex justify-between items-center my-2 pb-2">
       <h1 class="font-bold text-2xl">{{ username() | titlecase }}'s Library</h1>
       <div class="flex gap-2">
@@ -28,6 +27,7 @@
           <fa-icon [icon]="faXmark" size="lg" />
         </button>
         }
+        <app-storage-info />
         <button class="btn" (click)="changeUser()">
           <fa-icon [icon]="faRightFromBracket" size="lg" />
         </button>

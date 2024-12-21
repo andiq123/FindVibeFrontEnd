@@ -2,7 +2,7 @@ import { Component, computed, OnInit, Signal, signal } from '@angular/core';
 import { StorageService } from '../../services/storage.service';
 import { LibraryService } from '../../services/library.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faDownload, faX } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-storage-info',
@@ -12,6 +12,7 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
   styleUrl: './storage-info.component.scss',
 })
 export class StorageInfoComponent implements OnInit {
+  hidden = signal<boolean>(false);
   storageTotal!: Signal<number>;
   storageUsed!: Signal<number>;
   loadingDownloading = signal<boolean>(false);
@@ -21,6 +22,8 @@ export class StorageInfoComponent implements OnInit {
 
   libraryExists = signal<boolean>(false);
   faTrash = faTrash;
+  faDownload = faDownload;
+  faX = faX;
 
   constructor(
     private storageService: StorageService,

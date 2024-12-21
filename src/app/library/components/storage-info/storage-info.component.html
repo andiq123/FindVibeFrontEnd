@@ -1,9 +1,20 @@
-<div class="flex-col gap-3 absolute z-10 bg-base-200 p-5 w-full hidden">
-  <p class="text-xl font-bold">Storage info</p>
+<button class="btn" (click)="hidden.set(!hidden())">
+  <fa-icon [icon]="faDownload" size="lg" />
+</button>
+@if(hidden()){
+<div
+  class="flex flex-col gap-3 absolute z-10 bg-base-200 p-5 w-full inset-0 h-fit rounded-lg slideDown"
+>
+  <div class="flex justify-between items-center">
+    <p class="text-xl font-bold">Storage info</p>
+    <button class="btn" (click)="hidden.set(!hidden())">
+      <fa-icon [icon]="faX" size="lg" />
+    </button>
+  </div>
   <div class="flex items-center gap-3 justify-between">
     <div class="flex gap-3">
       <button
-        class="btn"
+        class="btn bg-base-300"
         (click)="downloadAll()"
         [disabled]="loadingDownloading()"
       >
@@ -29,3 +40,4 @@
     </div>
   </div>
 </div>
+}
