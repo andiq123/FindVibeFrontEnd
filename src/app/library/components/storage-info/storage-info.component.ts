@@ -2,7 +2,12 @@ import { Component, computed, OnInit, Signal, signal } from '@angular/core';
 import { StorageService } from '../../services/storage.service';
 import { LibraryService } from '../../services/library.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faTrash, faDownload, faX } from '@fortawesome/free-solid-svg-icons';
+import {
+  faTrash,
+  faDownload,
+  faX,
+  faCloudArrowDown,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-storage-info',
@@ -24,6 +29,7 @@ export class StorageInfoComponent implements OnInit {
   faTrash = faTrash;
   faDownload = faDownload;
   faX = faX;
+  faCloudArrowDown = faCloudArrowDown;
 
   constructor(
     private storageService: StorageService,
