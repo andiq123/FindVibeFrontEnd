@@ -3,7 +3,6 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { environment } from '../../environments/environment.development';
 import { Song } from '../songs/models/song.model';
 import { PlayerService } from './player.service';
-import { delayCustom } from '../utils/utils';
 import { Session } from '../models/session.model';
 
 @Injectable({

@@ -5,7 +5,7 @@ import { SettingsService } from './settings.service';
 import { RecentService } from '../recent/services/recent.service';
 import { PlaylistService } from './playlist.service';
 import { StorageService } from '../library/services/storage.service';
-import { addProxyLink, delayCustom, getBlobedUrl } from '../utils/utils';
+import { getBlobedUrl } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +24,7 @@ export class PlayerService {
     private recentService: RecentService,
     private playlistService: PlaylistService,
     private storageService: StorageService
-  ) { }
+  ) {}
 
   registerEvents() {
     this.player().addEventListener('playing', () => {
@@ -42,10 +42,13 @@ export class PlayerService {
 
     this.player().addEventListener('error', async () => {
       if (this.isFirstError()) {
+        await this.setSong(this.song$()!);
         this.isFirstError.set(false);
+      } else {
         const blob = await getBlobedUrl(this.song$()!.link);
         this.player().src = blob;
-        return;
+        await this.player().play();
+        this.isFirstError.set(true);
       }
       this.status$.set(PlayerStatus.Error);
     });
