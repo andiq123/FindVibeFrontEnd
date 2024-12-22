@@ -4,18 +4,12 @@ import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { PlayerStatus } from '../models/player.model';
 import { PlayerButtonComponent } from '../../../shared/player-button/player-button.component';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
-import { NgOptimizedImage } from '@angular/common';
 import { Song } from '../../../songs/models/song.model';
 
 @Component({
   selector: 'app-mini-player',
   standalone: true,
-  imports: [
-    FontAwesomeModule,
-    PlayerButtonComponent,
-    MovingTitleComponent,
-    NgOptimizedImage,
-  ],
+  imports: [FontAwesomeModule, PlayerButtonComponent, MovingTitleComponent],
   templateUrl: './mini-player.component.html',
   styleUrl: './mini-player.component.scss',
 })
