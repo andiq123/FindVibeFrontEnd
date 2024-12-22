@@ -43,8 +43,10 @@ export class RemoteService {
   }
 
   async disconnectFromServer() {
-    await this.connection?.invoke('Disconnect', this.username());
-    await this.connection?.stop();
+    if (this.isConnected()) {
+      await this.connection?.invoke('Disconnect', this.username());
+      await this.connection?.stop();
+    }
   }
 
   async setSong(song: Song) {
