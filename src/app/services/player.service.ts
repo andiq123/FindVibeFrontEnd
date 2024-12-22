@@ -28,6 +28,7 @@ export class PlayerService {
 
   registerEvents() {
     this.player().addEventListener('playing', () => {
+      this.isFirstError.set(true);
       this.status$.set(PlayerStatus.Playing);
     });
 
