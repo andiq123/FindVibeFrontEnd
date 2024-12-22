@@ -31,13 +31,12 @@ export class StorageService {
       try {
         await this.cacheSong(song, cachedLibrary);
         await this.setUpStorage();
+        this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
       } catch (error) {
       } finally {
         this.currentLoadingDownloadSongIds$.update((prev) =>
           prev.filter((id) => id !== song.id)
         );
-
-        this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
       }
     }
   }
