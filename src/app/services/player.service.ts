@@ -43,16 +43,16 @@ export class PlayerService {
 
     this.player().addEventListener('error', async () => {
       if (this.errorTries() < 2) {
-        await this.setSong(this.song$()!);
         this.errorTries.set(this.errorTries() + 1);
+        await this.setSong(this.song$()!);
       } else if (this.errorTries() > 2) {
+        this.errorTries.set(this.errorTries() + 1);
         const blob = await getBlobedUrl(this.song$()!.link);
         this.player().src = blob;
         await this.player().play();
-        this.errorTries.set(this.errorTries() + 1);
       } else {
-        this.status$.set(PlayerStatus.Error);
         this.errorTries.set(1);
+        this.status$.set(PlayerStatus.Error);
       }
     });
 
