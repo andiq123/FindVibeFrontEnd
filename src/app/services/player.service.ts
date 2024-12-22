@@ -28,6 +28,7 @@ export class PlayerService {
 
   registerEvents() {
     this.player().addEventListener('playing', () => {
+      this.errorTries.set(1);
       this.status$.set(PlayerStatus.Playing);
     });
 
@@ -67,7 +68,6 @@ export class PlayerService {
   }
 
   async setSong(song: Song) {
-    this.isFirstError.set(true);
     this.playlistService.setCurrentSong(song);
     this.player().pause();
     this.player().currentTime = 0;
