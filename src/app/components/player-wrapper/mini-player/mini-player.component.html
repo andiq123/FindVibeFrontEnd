@@ -8,13 +8,9 @@
         <app-player-button [status]="status()" />
       </div>
       <img
-        [ngSrc]="song().image"
-        alt="Song Art"
-        style="width: 100%; height: auto; object-fit: cover"
-        width="100"
-        height="100"
-        priority
-        referrerpolicy="no-referrer"
+        class="object-fill w-full h-full"
+        [src]="song().image"
+        alt="song Artist"
       />
     </div>
 

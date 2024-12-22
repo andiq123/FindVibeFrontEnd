@@ -28,17 +28,17 @@ export class StorageService {
       if (isAvailable) continue;
 
       this.currentLoadingDownloadSongIds$.update((prev) => [...prev, song.id]);
-      await this.cacheSong(song, cachedLibrary);
+      try {
+        await this.cacheSong(song, cachedLibrary);
+        await this.setUpStorage();
+      } catch (error) {
+      } finally {
+        this.currentLoadingDownloadSongIds$.update((prev) =>
+          prev.filter((id) => id !== song.id)
+        );
 
-      await this.setUpStorage();
-
-      await delayCustom(1000);
-
-      this.currentLoadingDownloadSongIds$.update((prev) =>
-        prev.filter((id) => id !== song.id)
-      );
-
-      this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
+        this.availableOfflineSongIds$.update((prev) => [...prev, song.id]);
+      }
     }
   }
 
