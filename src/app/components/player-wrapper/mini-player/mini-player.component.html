@@ -9,10 +9,8 @@
       </div>
       <img
         class="object-fill w-full h-full"
-        [ngSrc]="imageUrl()"
+        [src]="song().image"
         alt="song Artist"
-        height="100"
-        width="100"
       />
     </div>
 
@@ -27,7 +25,6 @@
         [isActive]="true"
         classes="text-xs max-w-60"
       />
-      {{ imageUrl() }}
     </div>
 
     <div class="text-white text-xl pr-5 ml-auto">
