@@ -12,7 +12,7 @@ import { getBlobedUrl } from '../utils/utils';
 })
 export class PlayerService {
   private player = signal<HTMLAudioElement>(new Audio());
-  private errorTries = signal(1);
+  private isFirstError = signal(true);
   song$ = computed(() => this.playlistService.currentSong());
   status$ = signal<PlayerStatus>(PlayerStatus.Stopped);
   currentTime$ = signal<number>(0);
@@ -28,7 +28,6 @@ export class PlayerService {
 
   registerEvents() {
     this.player().addEventListener('playing', () => {
-      this.errorTries.set(1);
       this.status$.set(PlayerStatus.Playing);
     });
 
@@ -42,16 +41,12 @@ export class PlayerService {
     });
 
     this.player().addEventListener('error', async () => {
-      if (this.errorTries() < 2) {
-        this.errorTries.set(this.errorTries() + 1);
-        await this.setSong(this.song$()!);
-      } else if (this.errorTries() > 2) {
-        this.errorTries.set(this.errorTries() + 1);
+      if (this.isFirstError()) {
+        this.isFirstError.set(false);
         const blob = await getBlobedUrl(this.song$()!.link);
         this.player().src = blob;
         await this.player().play();
       } else {
-        this.errorTries.set(1);
         this.status$.set(PlayerStatus.Error);
       }
     });
