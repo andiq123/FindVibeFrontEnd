@@ -23,6 +23,7 @@ export class MiniPlayerComponent {
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
   onToggleSize = output<void>();
+  imageUrl = computed(() => this.song().image);
 
   playerStatus = PlayerStatus;
 
