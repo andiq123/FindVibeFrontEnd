@@ -25,7 +25,6 @@ import { SettingsService } from '../../../services/settings.service';
 import { AsyncPipe, NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
 import { SwipeDownDirective } from '../directives/swipe-down.directive';
-import { HoldClickDirective } from '../directives/hold-click.directive';
 import { PlayerService } from '../../../services/player.service';
 import { RemoteService } from '../../../services/remote.service';
 import { Song } from '../../../songs/models/song.model';
