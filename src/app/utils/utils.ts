@@ -12,7 +12,7 @@ export const convertTime = (time: number) => {
 export const addProxyLink = (link: string) => {
   const corsProxy = environment.CORS_URL;
   const proxiedUrl = `${corsProxy}${link}`;
-  return proxiedUrl;
+  return link;
 };
 
 export const getBlobedUrl = async (link: string) => {
