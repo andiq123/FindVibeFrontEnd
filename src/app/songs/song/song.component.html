@@ -30,7 +30,7 @@
       </div>
       <img
         class="object-fill w-full h-full"
-        [ngSrc]="song().image"
+        [ngSrc]="song().image || 'no_album_art.jpg'"
         [alt]="song().artist"
         width="10"
         height="10"
