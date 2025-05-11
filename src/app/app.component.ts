@@ -61,6 +61,7 @@ export class AppComponent implements OnInit {
       const username = this.userService.user$()!.username;
       if (username != '') {
         await this.remoteService.connectToServer(username);
+        console.log('Connected to server');
       }
     }
   }

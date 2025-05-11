@@ -1,5 +1,4 @@
 import { Injectable, signal } from '@angular/core';
-import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { environment } from '../../environments/environment.development';
 import { Song } from '../songs/models/song.model';
 import { PlayerService } from './player.service';
@@ -9,9 +8,8 @@ import { Session } from '../models/session.model';
   providedIn: 'root',
 })
 export class RemoteService {
-  baseUrl = environment.API_URL;
-  connection?: HubConnection;
-  connectionId = signal<string>('');
+  baseUrl = environment.WS_URL;
+  ws?: WebSocket;
   username = signal<string>('');
   sessions = signal<Session[]>([]);
   private isConnected = signal<boolean>(false);
@@ -21,73 +19,74 @@ export class RemoteService {
   async connectToServer(username: string) {
     this.username.set(username);
 
-    this.connection = new HubConnectionBuilder()
-      .withUrl(this.baseUrl + '/player')
-      .build();
+    this.ws = new WebSocket(
+      `${this.baseUrl.replace(/^http(s?):/, 'ws$1:')}/player`
+    );
 
-    this.connection.on('OtherSessionConnected', (sessions: Session[]) => {
-      this.sessions.set(sessions);
-    });
+    this.ws.onopen = () => {
+      this.isConnected.set(true);
+      this.send('Connect', username);
+    };
 
-    this.connection.on('OtherSessionDisconnected', (sessions: Session[]) => {
-      this.sessions.set(sessions);
-    });
+    this.ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      switch (msg.method) {
+        case 'OtherSessionConnected':
+        case 'OtherSessionDisconnected':
+          this.sessions.set(msg.data);
+          break;
+        case 'Play':
+          this.playerService.play();
+          break;
+        case 'Pause':
+          this.playerService.pause();
+          break;
+        case 'SetSong':
+          this.playerService.setSong(msg.data);
+          break;
+        case 'UpdateTime':
+          this.playerService.setCurrentTime(+msg.data);
+          break;
+      }
+    };
 
-    this.registerEvents();
-
-    // await this.connection.start();
-    // await this.connection.invoke('Connect', this.username());
-
-    this.isConnected.set(this.connection.state === 'Connected');
-    this.connectionId.set(this.connection.connectionId!);
+    this.ws.onclose = () => {
+      this.isConnected.set(false);
+    };
   }
 
   async disconnectFromServer() {
     if (this.isConnected()) {
-      await this.connection?.invoke('Disconnect', this.username());
-      await this.connection?.stop();
+      this.send('Disconnect', this.username());
+      this.ws?.close();
     }
   }
 
   async setSong(song: Song) {
     if (this.isConnected()) {
-      await this.connection?.invoke('SetSong', song, this.username());
+      this.send('SetSong', song);
     }
   }
 
   async play() {
     if (this.isConnected()) {
-      await this.connection?.invoke('Play', this.username());
+      this.send('Play', this.username());
     }
   }
 
   async pause() {
     if (this.isConnected()) {
-      await this.connection?.invoke('Pause', this.username());
+      this.send('Pause', this.username());
     }
   }
 
   async updateTime(time: string) {
     if (this.isConnected()) {
-      await this.connection?.invoke('UpdateTime', time, this.username());
+      this.send('UpdateTime', time);
     }
   }
 
-  private registerEvents() {
-    this.connection?.on('Play', async () => {
-      await this.playerService.play();
-    });
-
-    this.connection?.on('Pause', () => {
-      this.playerService.pause();
-    });
-
-    this.connection?.on('SetSong', async (song: Song) => {
-      await this.playerService.setSong(song);
-    });
-
-    this.connection?.on('UpdateTime', (time: string, startTimeInMS: number) => {
-      this.playerService.setCurrentTime(+time);
-    });
+  private send(method: string, data: any) {
+    this.ws?.send(JSON.stringify({ method, data }));
   }
 }
