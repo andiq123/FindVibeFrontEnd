@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment.development';
   providedIn: 'root',
 })
 export class RemoteService {
-  baseUrl = environment.WS_URL;
+  baseUrl = environment.API_URL;
   ws?: WebSocket;
   username = signal<string>('');
   sessions = signal<Session[]>([]);

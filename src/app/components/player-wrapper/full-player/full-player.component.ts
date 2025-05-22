@@ -28,6 +28,7 @@ import { SwipeDownDirective } from '../directives/swipe-down.directive';
 import { PlayerService } from '../../../services/player.service';
 import { RemoteService } from '../../../services/remote.service';
 import { Song } from '../../../songs/models/song.model';
+import { HoldClickDirective } from '../directives/hold-click.directive';
 
 @Component({
   selector: 'app-full-player',
@@ -39,6 +40,7 @@ import { Song } from '../../../songs/models/song.model';
     AsyncPipe,
     FavoriteButtonComponent,
     SwipeDownDirective,
+    HoldClickDirective
   ],
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
