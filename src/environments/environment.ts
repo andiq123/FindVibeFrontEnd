@@ -1,3 +1,1 @@
-export const environment = {
-    WS_URL:"https://localhost:3000",
-};
+export const environment = {};
