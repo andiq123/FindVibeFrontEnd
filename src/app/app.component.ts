@@ -141,7 +141,7 @@ export class AppComponent implements OnInit {
     navigator.mediaSession.setActionHandler('seekto', async (details) => {
       this.playerService.setCurrentTime(details.seekTime!);
 
-      await this.remoteService.updateTime(details.seekTime!.toString());
+      await this.remoteService.updateTime(details.seekTime!);
     });
   }
 

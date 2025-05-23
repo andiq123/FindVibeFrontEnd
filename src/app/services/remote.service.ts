@@ -31,11 +31,6 @@ export class RemoteService {
 
     this.ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
-      const serverTime = msg.timestamp;
-      const currentTime = Date.now();
-      // Calculate time difference between server and client
-      const timeDiff = currentTime - serverTime;
-
       switch (msg.method) {
         case 'OtherSessionConnected':
         case 'OtherSessionDisconnected':
@@ -54,13 +49,24 @@ export class RemoteService {
           this.playerService.setSong(msg.data);
           break;
 
-        case 'UpdateTime':
+        case 'UpdateTime': {
           // Use server-provided latency for more accurate sync
-          const serverTimeValue = +msg.data;
-          const latency = msg.latency || 0;
-          const estimatedClientTime = serverTimeValue + latency;
-          this.playerService.setCurrentTime(estimatedClientTime);
+          let serverTimeValue: number;
+          if (typeof msg.data === 'object' && msg.data !== null && 'time' in msg.data) {
+            serverTimeValue = +msg.data.time;
+          } else {
+            serverTimeValue = +msg.data;
+          }
+          if (typeof msg.latency === 'number') {
+            const estimatedClientTime = serverTimeValue + msg.latency;
+            this.playerService.setCurrentTime(estimatedClientTime);
+          } else {
+            // Fallback: just use server time, log a warning
+            console.warn('No latency provided in UpdateTime message, falling back to server time only.');
+            this.playerService.setCurrentTime(serverTimeValue);
+          }
           break;
+        }
       }
     };
 
@@ -94,9 +100,9 @@ export class RemoteService {
     }
   }
 
-  async updateTime(time: string) {
+  async updateTime(time: number) {
     if (this.isConnected()) {
-      this.send('UpdateTime', time);
+      this.send('UpdateTime', { clientTime: Date.now(), time });
     }
   }
 
