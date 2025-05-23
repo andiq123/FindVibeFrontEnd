@@ -50,10 +50,12 @@ export class RemoteService {
           break;
 
         case 'UpdateTime': {
-          const serverTime = msg.data.time;
-          const latency = msg.latency || 0;
-          const estimatedTime = serverTime + latency;
-
+          const sourceTime = msg.data.time;
+          const eventTimestamp = msg.timestamp;
+          const now = Date.now();
+          const latency = (now - eventTimestamp) / 1000;
+          const estimatedTime = sourceTime - latency;
+          
           this.playerService.setCurrentTime(estimatedTime);
           break;
         }
@@ -92,7 +94,10 @@ export class RemoteService {
 
   async updateTime(time: number) {
     if (this.isConnected()) {
-      this.send('UpdateTime', { clientTime: Date.now(), time });
+      this.send('UpdateTime', { 
+        time,
+        timestamp: Date.now()
+      });
     }
   }
 
