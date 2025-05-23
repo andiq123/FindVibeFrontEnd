@@ -14,7 +14,7 @@ export class RemoteService {
   sessions = signal<Session[]>([]);
   private isConnected = signal<boolean>(false);
 
-  constructor(private playerService: PlayerService) {}
+  constructor(private playerService: PlayerService) { }
 
   async connectToServer(username: string) {
     this.username.set(username);
@@ -50,21 +50,11 @@ export class RemoteService {
           break;
 
         case 'UpdateTime': {
-          // Use server-provided latency for more accurate sync
-          let serverTimeValue: number;
-          if (typeof msg.data === 'object' && msg.data !== null && 'time' in msg.data) {
-            serverTimeValue = +msg.data.time;
-          } else {
-            serverTimeValue = +msg.data;
-          }
-          if (typeof msg.latency === 'number') {
-            const estimatedClientTime = serverTimeValue + msg.latency;
-            this.playerService.setCurrentTime(estimatedClientTime);
-          } else {
-            // Fallback: just use server time, log a warning
-            console.warn('No latency provided in UpdateTime message, falling back to server time only.');
-            this.playerService.setCurrentTime(serverTimeValue);
-          }
+          const serverTime = msg.data.time;
+          const latency = msg.latency || 0;
+          const estimatedTime = serverTime + latency;
+
+          this.playerService.setCurrentTime(estimatedTime);
           break;
         }
       }
@@ -107,8 +97,8 @@ export class RemoteService {
   }
 
   private send(method: string, data: any) {
-    this.ws?.send(JSON.stringify({ 
-      method, 
+    this.ws?.send(JSON.stringify({
+      method,
       data,
       timestamp: Date.now()
     }));
