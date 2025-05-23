@@ -1,8 +1,8 @@
 @if(allowReorder()){
 
 <div
-  class="rounded-lg py-1 px-2 flex justify-between items-center"
-  [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
+  class="rounded-2xl py-3 px-4 flex justify-between items-center transition-all duration-200 bg-base-100 shadow-xl border border-base-200 hover:scale-[1.015] hover:shadow-2xl cursor-pointer"
+  [class]="isActive() ? 'bg-primary/10 border-primary/40 shadow-2xl scale-[1.02]' : 'bg-base-100 border-base-200 shadow-xl'"
   appDragAndDrop
   (reorderSongs)="reorder($event)"
   [id]="song().id"
@@ -11,8 +11,8 @@
 </div>
 }@else {
 <div
-  class="rounded-lg py-1 px-2 flex justify-between items-center"
-  [class]="{ 'bg-base-200': isActive(), 'bg-base-300': !isActive() }"
+  class="rounded-2xl py-3 px-4 flex justify-between items-center transition-all duration-200 bg-base-100 shadow-xl border border-base-200 hover:scale-[1.015] hover:shadow-2xl cursor-pointer"
+  [class]="isActive() ? 'bg-primary/10 border-primary/40 shadow-2xl scale-[1.02]' : 'bg-base-100 border-base-200 shadow-xl'"
 >
   <ng-container *ngTemplateOutlet="default"></ng-container>
 </div>
@@ -21,44 +21,51 @@
 <ng-template #default>
   <div
     id="elToRemove"
-    class="grid grid-flow-col gap-3 items-center w-full justify-start cursor-pointer"
+    class="grid grid-flow-col gap-5 items-center w-full justify-start group"
     (click)="playOrPause()"
   >
-    <div class="w-14 rounded-lg overflow-hidden relative">
-      <div class="absolute inset-0 backdrop-brightness-50">
+    <!-- Album Art with Play Button -->
+    <div class="relative w-16 aspect-square rounded-xl overflow-hidden shadow-md ring-1 ring-base-200/60">
+      <div class="absolute inset-0 bg-gradient-to-b from-black/40 to-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <app-player-button [status]="status()" />
       </div>
       <img
-        class="object-fill w-full h-full"
+        class="w-full h-full object-cover"
         [ngSrc]="song().image || 'no_album_art.jpg'"
         [alt]="song().artist"
-        width="10"
-        height="10"
+        width="64"
+        height="64"
         referrerpolicy="no-referrer"
       />
     </div>
 
-    <div>
+    <!-- Song Info -->
+    <div class="min-w-0 flex-1">
       <app-moving-title
         [title]="song().title"
         [isActive]="isActive()"
-        [classes]="'w-' + width()"
+        [classes]="'font-semibold text-base'"
         [offset]="offset()"
       />
       <app-moving-title
         [title]="song().artist"
         [isActive]="isActive()"
-        classes="text-xs"
+        classes="text-xs text-base-content/60"
       />
     </div>
   </div>
 
+  <!-- Actions -->
   <div class="flex gap-3 items-center">
     @if(isDownloadingOffline()){
-    <span class="loading loading-spinner loading-xs"></span>
-    }@else{ @if(isAvaiableOffline()){
-    <fa-icon [icon]="faCloudArrowDown" />
-    } }
+      <span class="loading loading-spinner loading-xs text-primary"></span>
+    }@else{ 
+      @if(isAvaiableOffline()){
+        <div class="text-base-content/40 hover:text-primary transition-colors duration-200">
+          <fa-icon [icon]="faCloudArrowDown" />
+        </div>
+      }
+    }
 
     <app-favorite-button [song]="song()" />
   </div>

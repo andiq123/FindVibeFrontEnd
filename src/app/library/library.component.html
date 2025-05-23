@@ -1,53 +1,55 @@
 <div
-  class="w-[95%] mx-auto mt-3"
+  class="w-full max-w-2xl mx-auto mt-0 px-0 min-h-screen bg-base-100"
   [class.slideLeft]="lastRouterIsRecents()"
   [class.slideRight]="!lastRouterIsRecents()"
 >
-  @if (!isLoggedIn()) { <app-user-form />} @else{ @if(loadingSongs()){
-  <div
-    class="flex flex-col items-center justify-center w-fit mx-auto py-5 px-10"
-  >
-    <p class="text-center font-bold">Songs loading...</p>
-    <div>
-      <span class="loading loading-ball loading-lg"></span>
-      <span class="loading loading-ball loading-lg"></span>
-      <span class="loading loading-ball loading-lg"></span>
-    </div>
-  </div>
-  }@else {
-  <div class="flex flex-col">
-    <div class="flex justify-between items-center my-2 pb-2">
-      <h1 class="font-bold text-2xl">{{ username() | titlecase }}'s Library</h1>
-      <div class="flex gap-2">
-        @if(orderHasChanged()) {
-        <button class="btn btn-primary text-white" (click)="saveReorders()">
-          <fa-icon [icon]="faCheck" size="lg" />
-        </button>
-        <button class="btn btn-primary text-white" (click)="cancelReorders()">
-          <fa-icon [icon]="faXmark" size="lg" />
-        </button>
-        }
-        <app-storage-info />
-        <button class="btn" (click)="changeUser()">
-          <fa-icon [icon]="faRightFromBracket" size="lg" />
-        </button>
+  @if (!isLoggedIn()) { <app-user-form /> } @else {
+    @if(loadingSongs()){
+      <div class="flex flex-col items-center justify-center w-full py-16 px-4">
+        <p class="text-xl font-semibold mb-6 text-base-content/80">Loading your songs...</p>
+        <div class="flex gap-2">
+          <span class="loading loading-ball loading-lg text-primary"></span>
+          <span class="loading loading-ball loading-lg text-primary"></span>
+          <span class="loading loading-ball loading-lg text-primary"></span>
+        </div>
       </div>
-    </div>
-    <div class="mb-36 relative">
-      @if (loadingReorder()) {
-      <div
-        class="bg-base-300 bg-opacity-50 backdrop-blur-sm absolute w-full h-full inset-0 z-10 flex flex-col gap-3 items-center justify-center"
-      >
-        Applying reorder...
-        <span class="loading loading-md"></span>
+    }@else {
+      <div class="flex flex-col gap-0">
+        <!-- Sticky header/actions -->
+        <div class="sticky top-0 z-10 bg-base-100/95 backdrop-blur-md flex flex-col pt-4 pb-2 px-4">
+          <div class="flex justify-between items-center">
+            <h1 class="font-bold text-2xl tracking-tight text-base-content">{{ username() | titlecase }}'s Library</h1>
+            <div class="flex gap-2 items-center">
+              @if(orderHasChanged()) {
+                <button class="btn btn-circle btn-primary text-white" (click)="saveReorders()">
+                  <fa-icon [icon]="faCheck" size="lg" />
+                </button>
+                <button class="btn btn-circle btn-primary text-white" (click)="cancelReorders()">
+                  <fa-icon [icon]="faXmark" size="lg" />
+                </button>
+              }
+              <app-storage-info />
+              <button class="btn btn-circle btn-ghost border border-base-200" (click)="changeUser()">
+                <fa-icon [icon]="faRightFromBracket" size="lg" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="h-2"></div>
+        <div class="mb-36 relative px-0">
+          @if (loadingReorder()) {
+            <div class="bg-base-200/80 absolute w-full h-full inset-0 z-10 flex flex-col gap-3 items-center justify-center">
+              <span class="text-base font-medium text-base-content/70 mb-2">Applying reorder...</span>
+              <span class="loading loading-md text-primary"></span>
+            </div>
+          }
+          <app-songs-wrapper
+            [songs]="songs()"
+            (onReorderSongs)="reorderSongs($event)"
+            (onChangePlaylist)="onChangePlaylist()"
+          />
+        </div>
       </div>
-      }
-      <app-songs-wrapper
-        [songs]="songs()"
-        (onReorderSongs)="reorderSongs($event)"
-        (onChangePlaylist)="onChangePlaylist()"
-      />
-    </div>
-  </div>
-  } }
+    }
+  }
 </div>

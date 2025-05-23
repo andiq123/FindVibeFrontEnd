@@ -1,34 +1,37 @@
 <div
-  class="bg-base-200 rounded-t-2xl fixed bottom-16 left-1/2 slideUp w-full max-w-[500px] bg-opacity-60 backdrop-blur-lg"
+  class="bg-base-100/90 rounded-t-2xl fixed bottom-16 left-1/2 slideUp w-full max-w-[500px] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
   (click)="toggleSize()"
 >
-  <div class="flex gap-3 justify-start items-center cursor-pointer w-full p-3">
-    <div class="w-14 rounded-md overflow-hidden relative">
-      <div class="absolute inset-0 backdrop-brightness-50">
+  <div class="flex items-center gap-4 w-full p-3">
+    <!-- Album Art with Play Button -->
+    <div class="relative w-14 aspect-square rounded-lg overflow-hidden ring-1 ring-base-200/30">
+      <div class="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
         <app-player-button [status]="status()" />
       </div>
       <img
-        class="object-fill w-full h-full"
+        class="w-full h-full object-cover"
         [src]="song().image || 'no_album_art.jpg'"
-        alt="song Artist"
+        alt="Album Art"
       />
     </div>
 
-    <div>
+    <!-- Song Info -->
+    <div class="flex-1 min-w-0">
       <app-moving-title
         [title]="song().title"
         [isActive]="true"
-        classes="max-w-60"
+        classes="text-sm font-medium truncate"
       />
       <app-moving-title
         [title]="song().artist"
         [isActive]="true"
-        classes="text-xs max-w-60"
+        classes="text-xs text-base-content/50 truncate"
       />
     </div>
 
-    <div class="text-white text-xl pr-5 ml-auto">
-      <fa-icon [icon]="faArrowUp" />
-    </div>
+    <!-- Expand Button -->
+    <button class="btn btn-ghost btn-circle btn-sm text-base-content/50 hover:text-primary transition-colors duration-200">
+      <fa-icon [icon]="faArrowUp" class="text-base" />
+    </button>
   </div>
 </div>

@@ -1,33 +1,39 @@
 <form (ngSubmit)="submit()" class="relative">
-  <input
-    type="text"
-    placeholder="Search..."
-    name="searchTerm"
-    class="bg-base-300 px-5 py-3 w-full mx-auto my-5 outline-none shadow-md rounded-lg"
-    [value]="searchTerm()"
-    (input)="search($event)"
-    autocomplete="off"
-    autofocus
-  />
+  <div class="relative flex items-center w-full">
+    <div class="absolute left-4 text-base-content/30 pointer-events-none">
+      <fa-icon class="text-base" [icon]="faMagnifyingGlass"></fa-icon>
+    </div>
+    <input
+      type="text"
+      placeholder="Search for songs, artists..."
+      name="searchTerm"
+      class="bg-base-100/30 px-5 py-3 w-full my-4 outline-none rounded-full border border-base-200/30 focus:border-primary/30 focus:ring-1 focus:ring-primary/20 transition-all duration-200 pl-12"
+      [value]="searchTerm()"
+      (input)="search($event)"
+      autocomplete="off"
+      autofocus
+    />
+    <button
+      type="submit"
+      class="btn btn-ghost btn-sm ml-2 text-base-content/30 hover:text-primary transition-colors duration-200"
+      [disabled]="searchTerm() === ''"
+      style="margin-right: 0.25rem;"
+    >
+      <fa-icon class="text-base" [icon]="faMagnifyingGlass"></fa-icon>
+    </button>
+  </div>
 
-  <button
-    type="submit"
-    class="btn absolute right-0 bottom-5 rounded-r-lg"
-    [disabled]="searchTerm() === ''"
-  >
-    <fa-icon class="text-xl" [icon]="faMagnifyingGlass"></fa-icon>
-  </button>
   @if(suggestions().length>0){
   <ul
-    class="absolute bg-base-300 top-12 mt-5 p-3 w-full flex flex-col gap-1 rounded-lg slideDown z-50"
+    class="absolute bg-base-100 top-11 mt-4 p-3 w-full flex flex-col gap-2 rounded-2xl shadow-xl border border-base-200 slideDown z-50"
   >
     @for(suggestion of suggestions(); track i; let i = $index){
     <li
-      class="bg-base-200 rounded-lg p-3 cursor-pointer hover:bg-base-100 flex gap-3 items-center"
+      class="bg-base-100 hover:bg-base-200 rounded-xl p-3 cursor-pointer transition-colors duration-200 flex gap-3 items-center group"
       (click)="searchBySuggestion(suggestion)"
     >
-      <fa-icon class="text-xs" [icon]="faMagnifyingGlass"></fa-icon
-      >{{ suggestion | titlecase }}
+      <fa-icon class="text-sm text-base-content/40 group-hover:text-primary transition-colors duration-200" [icon]="faMagnifyingGlass"></fa-icon>
+      <span class="text-sm font-medium text-base-content/80 group-hover:text-base-content transition-colors duration-200">{{ suggestion | titlecase }}</span>
     </li>
     }
   </ul>

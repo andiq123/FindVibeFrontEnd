@@ -1,17 +1,32 @@
 <ul
-  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[500px] w-full z-10 bg-base-200 bg-opacity-60 backdrop-blur-lg"
+  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[500px] w-full z-20 bg-base-100 rounded-t-2xl"
 >
   @for (navItem of navList(); track navItem.name) {
   <li
-    class="flex flex-col p-1 items-center cursor-pointer py-5"
+    class="group relative flex flex-col items-center py-3 cursor-pointer transition-all duration-200"
     [routerLink]="navItem.link"
+    routerLinkActive="text-primary"
   >
+    <!-- Active Indicator: Thin underline -->
+    <div 
+      class="absolute left-1/2 -translate-x-1/2 -bottom-1 w-6 h-0.5 rounded-full bg-primary scale-x-0 group-[.text-primary]:scale-x-100 transition-transform duration-200"
+      routerLinkActive="scale-x-100"
+    ></div>
+
+    <!-- Icon -->
     <fa-icon
       [icon]="navItem.icon"
-      class="transition-all text-accent ease-in-out duration-100"
-      routerLinkActive="text-xl text-slate-50"
-      size="xl"
-    />
+      class="text-xl transition-all duration-200 group-hover:scale-110 text-base-content/60"
+      routerLinkActive="text-primary"
+    ></fa-icon>
+
+    <!-- Label -->
+    <span 
+      class="text-[10px] mt-1 font-medium transition-colors duration-200 text-base-content/40 tracking-wide"
+      routerLinkActive="text-primary"
+    >
+      {{ navItem.name }}
+    </span>
   </li>
   }
 </ul>

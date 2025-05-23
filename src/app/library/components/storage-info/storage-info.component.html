@@ -1,44 +1,51 @@
-<button class="btn" (click)="hidden.set(!hidden())">
+<button class="btn btn-circle btn-ghost border border-base-200" (click)="hidden.set(!hidden())" aria-label="Show storage info">
   <fa-icon [icon]="faDownload" size="lg" />
 </button>
 @if(hidden()){
+<!-- Backdrop overlay -->
+<div class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" (click)="hidden.set(false)"></div>
+<!-- Modal sheet: always bottom-anchored, full width, never centered or max-w -->
 <div
-  class="flex flex-col gap-3 absolute z-10 bg-base-200 p-5 w-full inset-0 h-fit rounded-lg slideDown shadow-2xl"
+  class="fixed left-0 bottom-50 w-full z-50 bg-base-100 rounded-t-2xl shadow-2xl border-t border-base-200 p-5 pt-3 flex flex-col gap-6 animate-slideUp"
+  style="touch-action: pan-y;"
 >
-  <div class="flex justify-between items-center">
-    <p class="text-xl font-bold">Storage info</p>
-    <button class="btn" (click)="hidden.set(!hidden())">
+  <!-- Drag handle -->
+  <div class="mx-auto w-12 h-1.5 rounded-full bg-base-200 mb-2"></div>
+  <div class="flex justify-between items-center mb-2">
+    <p class="text-lg font-semibold tracking-tight text-base-content">Storage Info</p>
+    <button class="btn btn-circle btn-ghost border border-base-200" (click)="hidden.set(!hidden())" aria-label="Close storage info">
       <fa-icon [icon]="faX" size="lg" />
     </button>
   </div>
-  <div class="flex items-center gap-3 justify-between">
-    <div class="flex gap-3">
-      <button
-        class="btn bg-base-300"
-        (click)="downloadAll()"
-        [disabled]="loadingDownloading()"
-      >
-        <fa-icon [icon]="faCloudArrowDown" size="lg" />
-        @if(loadingDownloading()){
-        <span class="loading loading-spinner loading-md"></span>
-        }
-      </button>
-      @if(showRemoveCacheButton()){
-      <button class="btn" (click)="removeCache()">
-        <fa-icon [icon]="faTrash" />
-      </button>
+  <div class="flex flex-col gap-4 items-center w-full">
+    <progress
+      class="progress progress-primary w-full h-2 rounded-full"
+      [value]="storageUsed()"
+      [max]="storageTotal()"
+    ></progress>
+    <p class="font-semibold text-sm text-base-content/70 text-center">
+      {{ storageUsed() }} GB / {{ storageTotal() }} GB
+    </p>
+  </div>
+  <div class="flex flex-col gap-3 w-full">
+    <button
+      class="btn btn-primary btn-lg w-full flex items-center justify-center gap-2"
+      (click)="downloadAll()"
+      [disabled]="loadingDownloading()"
+      aria-label="Download all"
+    >
+      <fa-icon [icon]="faCloudArrowDown" size="lg" />
+      <span>Download All</span>
+      @if(loadingDownloading()){
+        <span class="loading loading-spinner loading-xs ml-2"></span>
       }
-    </div>
-    <div class="flex flex-col gap-3 items-center">
-      <progress
-        class="progress progress-primary w-20"
-        [value]="storageUsed()"
-        [max]="storageTotal()"
-      ></progress>
-      <p class="font-bold text-xs">
-        {{ storageUsed() }} GB / {{ storageTotal() }} GB
-      </p>
-    </div>
+    </button>
+    @if(showRemoveCacheButton()){
+    <button class="btn btn-ghost btn-lg w-full flex items-center justify-center gap-2 border border-base-200" (click)="removeCache()" aria-label="Remove cache">
+      <fa-icon [icon]="faTrash" />
+      <span>Remove Cache</span>
+    </button>
+    }
   </div>
 </div>
 }
