@@ -69,10 +69,16 @@
             height="500"
             priority
             referrerpolicy="no-referrer"
-            appHoldClick
-            (timerFinished)="downloadSong()"
           />
         </div>
+        <!-- Download Button -->
+        <button
+          class="btn btn-circle btn-ghost absolute bottom-3 right-3 z-20 bg-base-100/80 hover:bg-primary/80 text-primary hover:text-white shadow-md"
+          (click)="downloadSong()"
+          aria-label="Download song"
+        >
+          <fa-icon [icon]="faCloudArrowDown" class="text-2xl" />
+        </button>
       </div>
 
       <!-- Song Info -->

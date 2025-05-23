@@ -38,14 +38,14 @@ export class RemoteService {
       const msg = JSON.parse(event.data);
       const serverTime = msg.timestamp;
       const currentTime = Date.now();
-      
       // Calculate time difference between server and client
       const timeDiff = currentTime - serverTime;
 
       switch (msg.method) {
         case 'Pong':
-          // Update latency measurement
-          this.latency.set(currentTime - this.lastPingTime);
+          // RTT calculation
+          const rtt = currentTime - this.lastPingTime;
+          this.latency.set(rtt / 2); // one-way latency
           break;
 
         case 'OtherSessionConnected':
@@ -55,7 +55,7 @@ export class RemoteService {
 
         case 'Play':
           // Calculate when to start playing based on latency
-          const playDelay = Math.max(0, this.latency() / 2);
+          const playDelay = Math.max(0, this.latency());
           setTimeout(() => {
             this.playerService.play();
           }, playDelay);
@@ -72,15 +72,10 @@ export class RemoteService {
           break;
 
         case 'UpdateTime':
-          // Calculate the target time considering latency
-          const targetTime = +msg.data + (this.latency() / 2);
-          const currentPlayerTime = this.playerService.getCurrentTime();
-          const timeDifference = targetTime - currentPlayerTime;
-          
-          // If the difference is significant, seek to the target time
-          if (Math.abs(timeDifference) > 100) { // 100ms threshold
-            this.playerService.setCurrentTime(targetTime);
-          }
+          // Use server time and measured latency for more accurate sync
+          const serverTimeValue = +msg.data;
+          const estimatedClientTime = serverTimeValue + this.latency();
+          this.playerService.setCurrentTime(estimatedClientTime);
           break;
       }
     };
