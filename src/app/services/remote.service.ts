@@ -13,10 +13,6 @@ export class RemoteService {
   username = signal<string>('');
   sessions = signal<Session[]>([]);
   private isConnected = signal<boolean>(false);
-  private latency = signal<number>(0);
-  private lastPingTime = 0;
-  private pingInterval: any;
-  private readonly PING_INTERVAL = 5000; // 5 seconds
 
   constructor(private playerService: PlayerService) {}
 
@@ -30,7 +26,6 @@ export class RemoteService {
     this.ws.onopen = () => {
       this.isConnected.set(true);
       this.send('Connect', username);
-      this.startPingPong();
       console.log('Connected to server');
     };
 
@@ -42,39 +37,28 @@ export class RemoteService {
       const timeDiff = currentTime - serverTime;
 
       switch (msg.method) {
-        case 'Pong':
-          // RTT calculation
-          const rtt = currentTime - this.lastPingTime;
-          this.latency.set(rtt / 2); // one-way latency
-          break;
-
         case 'OtherSessionConnected':
         case 'OtherSessionDisconnected':
           this.sessions.set(msg.data);
           break;
 
         case 'Play':
-          // Calculate when to start playing based on latency
-          const playDelay = Math.max(0, this.latency());
-          setTimeout(() => {
-            this.playerService.play();
-          }, playDelay);
+          this.playerService.play();
           break;
 
         case 'Pause':
-          // Apply pause immediately
           this.playerService.pause();
           break;
 
         case 'SetSong':
-          // Apply the song change immediately
           this.playerService.setSong(msg.data);
           break;
 
         case 'UpdateTime':
-          // Use server time and measured latency for more accurate sync
+          // Use server-provided latency for more accurate sync
           const serverTimeValue = +msg.data;
-          const estimatedClientTime = serverTimeValue + this.latency();
+          const latency = msg.latency || 0;
+          const estimatedClientTime = serverTimeValue + latency;
           this.playerService.setCurrentTime(estimatedClientTime);
           break;
       }
@@ -82,30 +66,12 @@ export class RemoteService {
 
     this.ws.onclose = () => {
       this.isConnected.set(false);
-      this.stopPingPong();
     };
-  }
-
-  private startPingPong() {
-    this.pingInterval = setInterval(() => {
-      if (this.isConnected()) {
-        this.lastPingTime = Date.now();
-        this.send('Ping', { clientTime: this.lastPingTime });
-      }
-    }, this.PING_INTERVAL);
-  }
-
-  private stopPingPong() {
-    if (this.pingInterval) {
-      clearInterval(this.pingInterval);
-      this.pingInterval = null;
-    }
   }
 
   async disconnectFromServer() {
     if (this.isConnected()) {
       this.send('Disconnect', this.username());
-      this.stopPingPong();
       this.ws?.close();
     }
   }
@@ -144,7 +110,6 @@ export class RemoteService {
 
   // Cleanup on service destruction
   ngOnDestroy() {
-    this.stopPingPong();
     if (this.ws) {
       this.ws.close();
     }
