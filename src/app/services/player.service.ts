@@ -86,6 +86,10 @@ export class PlayerService {
     this.player().currentTime = time;
   }
 
+  getCurrentTime(){
+    return this.player().currentTime;
+  }
+
   async play() {
     await this.player().play();
   }
