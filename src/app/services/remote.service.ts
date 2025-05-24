@@ -9,6 +9,24 @@ interface ConnectionInfo {
   sessionId: string;
 }
 
+interface PingMeasurement {
+  timestamp: number;
+  rtt: number; // Round-trip time in milliseconds
+}
+
+interface PlatformAudioDelays {
+  ios: number;
+  android: number;
+  web: number;
+  default: number;
+}
+
+interface TimeSync {
+  serverTime: number;
+  clientTime: number;
+  offset: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -21,27 +39,71 @@ export class RemoteService implements OnDestroy {
   private isConnected = signal<boolean>(false);
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectInterval = 1000; // Start with 1 second
+  private reconnectInterval = 1000;
   private pingInterval?: number;
   private reconnectTimeout?: number;
   private connectionConfirmed = false;
 
+  // Latency and sync management
+  private pingHistory: PingMeasurement[] = [];
+  private maxPingHistory = 10;
+  private currentLatency = 0;
+  private timeOffset = 0; // Difference between server and client time
+  private isCalibrating = false;
+  private calibrationPings = 0;
+  private maxCalibrationPings = 5;
+
+  // Platform-specific audio delays (in milliseconds)
+  private readonly audioDelays: PlatformAudioDelays = {
+    ios: 150,      // iOS has higher audio latency
+    android: 50,   // Android is generally faster
+    web: 30,       // Web audio is usually quick
+    default: 50    // Default fallback
+  };
+
+  private readonly platform = this.detectPlatform();
+
   constructor(private playerService: PlayerService) {}
+
+  private detectPlatform(): keyof PlatformAudioDelays {
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    if (/iphone|ipad|ipod/.test(userAgent)) {
+      return 'ios';
+    } else if (/android/.test(userAgent)) {
+      return 'android';
+    } else {
+      return 'web';
+    }
+  }
+
+  private getAudioDelay(): number {
+    return this.audioDelays[this.platform] || this.audioDelays.default;
+  }
 
   async connectToServer(username: string): Promise<void> {
     this.username.set(username);
     this.reconnectAttempts = 0;
     this.connectionConfirmed = false;
+    this.resetLatencyMeasurements();
     return this.establishConnection();
+  }
+
+  private resetLatencyMeasurements(): void {
+    this.pingHistory = [];
+    this.currentLatency = 0;
+    this.timeOffset = 0;
+    this.isCalibrating = false;
+    this.calibrationPings = 0;
   }
 
   private async establishConnection(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        // Clean up existing connection
         this.cleanup();
 
         const wsUrl = `${this.baseUrl.replace(/^http(s?):/, 'ws$1:')}/player`;
+        console.log('Connecting to WebSocket:', wsUrl);
         
         this.ws = new WebSocket(wsUrl);
 
@@ -51,9 +113,10 @@ export class RemoteService implements OnDestroy {
             this.ws?.close();
             reject(new Error('Connection timeout'));
           }
-        }, 10000); // 10 second timeout
+        }, 10000);
 
         this.ws.onopen = () => {
+          console.log('WebSocket opened, sending connect message');
           this.isConnected.set(true);
           this.send('Connect', this.username());
         };
@@ -61,14 +124,15 @@ export class RemoteService implements OnDestroy {
         this.ws.onmessage = (event) => {
           try {
             const msg = JSON.parse(event.data);
+            console.log('Received message:', msg);
             this.handleMessage(msg);
 
-            // If this is the connection confirmation, resolve the promise
             if (msg.method === 'Connected' && !this.connectionConfirmed) {
               this.connectionConfirmed = true;
               clearTimeout(connectionTimeout);
               this.reconnectAttempts = 0;
               this.startPingInterval();
+              this.startLatencyCalibration();
               resolve();
             }
           } catch (error) {
@@ -77,12 +141,12 @@ export class RemoteService implements OnDestroy {
         };
 
         this.ws.onclose = (event) => {
+          console.log('WebSocket closed:', event);
           clearTimeout(connectionTimeout);
           this.isConnected.set(false);
           this.connectionConfirmed = false;
           this.stopPingInterval();
           
-          // Only attempt reconnection if it wasn't a manual disconnect
           if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
             this.scheduleReconnect();
           } else if (!this.connectionConfirmed) {
@@ -105,7 +169,72 @@ export class RemoteService implements OnDestroy {
     });
   }
 
+  private startLatencyCalibration(): void {
+    this.isCalibrating = true;
+    this.calibrationPings = 0;
+    console.log('Starting latency calibration...');
+    
+    // Send initial calibration pings
+    this.sendCalibrationPing();
+  }
+
+  private sendCalibrationPing(): void {
+    if (this.calibrationPings < this.maxCalibrationPings) {
+      const pingTime = this.getHighResolutionTime();
+      this.send('LatencyPing', {
+        clientTime: pingTime,
+        calibration: true
+      });
+      this.calibrationPings++;
+      
+      // Schedule next ping
+      setTimeout(() => this.sendCalibrationPing(), 500);
+    } else {
+      this.isCalibrating = false;
+      console.log('Latency calibration completed');
+      console.log(`Average latency: ${this.currentLatency}ms`);
+      console.log(`Time offset: ${this.timeOffset}ms`);
+      console.log(`Platform: ${this.platform}, Audio delay: ${this.getAudioDelay()}ms`);
+    }
+  }
+
+  private getHighResolutionTime(): number {
+    return performance.now() + performance.timeOrigin;
+  }
+
+  private calculateLatency(clientSendTime: number, serverTime: number, clientReceiveTime: number): void {
+    const rtt = clientReceiveTime - clientSendTime;
+    const estimatedLatency = rtt / 2;
+    const serverClientOffset = serverTime - (clientSendTime + estimatedLatency);
+
+    // Add to ping history
+    this.pingHistory.push({
+      timestamp: Date.now(),
+      rtt: rtt
+    });
+
+    // Keep only recent measurements
+    if (this.pingHistory.length > this.maxPingHistory) {
+      this.pingHistory.shift();
+    }
+
+    // Calculate average latency from recent measurements
+    const recentPings = this.pingHistory.slice(-5); // Use last 5 measurements
+    this.currentLatency = recentPings.reduce((sum, ping) => sum + ping.rtt, 0) / recentPings.length / 2;
+    
+    // Update time offset (for clock synchronization)
+    this.timeOffset = serverClientOffset;
+
+    console.log(`Latency update - RTT: ${rtt.toFixed(2)}ms, Avg Latency: ${this.currentLatency.toFixed(2)}ms, Offset: ${this.timeOffset.toFixed(2)}ms`);
+  }
+
+  private getSynchronizedTime(): number {
+    return this.getHighResolutionTime() + this.timeOffset;
+  }
+
   private handleMessage(msg: any): void {
+    const receiveTime = this.getHighResolutionTime();
+
     switch (msg.method) {
       case 'Connected':
         console.log('Connection confirmed:', msg.data);
@@ -115,34 +244,58 @@ export class RemoteService implements OnDestroy {
         });
         break;
 
+      case 'LatencyPong':
+        if (msg.data && msg.data.clientTime && msg.data.serverTime) {
+          this.calculateLatency(msg.data.clientTime, msg.data.serverTime, receiveTime);
+        }
+        break;
+
       case 'OtherSessionConnected':
         console.log('Other sessions:', msg.data);
         this.sessions.set(msg.data || []);
         break;
 
       case 'Ping':
-        // Respond to server ping
-        this.send('Pong', null);
+        this.send('Pong', {
+          serverTime: msg.timestamp,
+          clientTime: this.getHighResolutionTime()
+        });
         break;
 
       case 'Play':
-        this.playerService.play();
+        console.log('Received play command');
+        // Apply audio delay compensation
+        const audioDelay = this.getAudioDelay();
+        if (audioDelay > 0) {
+          setTimeout(() => {
+            this.playerService.play();
+          }, audioDelay);
+        } else {
+          this.playerService.play();
+        }
         break;
 
       case 'Pause':
+        console.log('Received pause command');
         this.playerService.pause();
         break;
 
       case 'SetSong':
+        console.log('Received set song command:', msg.data);
         this.playerService.setSong(msg.data);
         break;
 
       case 'UpdateTime': {
+        console.log('Received time update:', msg.data);
         
-        // Handle both old and new data formats
         let sourceTime: number;
+        let eventTimestamp: number = msg.timestamp;
+
         if (typeof msg.data === 'object' && msg.data.time !== undefined) {
           sourceTime = msg.data.time;
+          if (msg.data.timestamp) {
+            eventTimestamp = msg.data.timestamp;
+          }
         } else if (typeof msg.data === 'number') {
           sourceTime = msg.data;
         } else {
@@ -150,12 +303,19 @@ export class RemoteService implements OnDestroy {
           return;
         }
 
-        const eventTimestamp = msg.timestamp;
-        const now = Date.now();
-        const latency = (now - eventTimestamp) / 1000;
-        const estimatedTime = Math.max(0, sourceTime + latency); // Ensure non-negative
+        // Calculate time with multiple compensation factors
+        const now = this.getSynchronizedTime();
+        const networkLatency = this.currentLatency / 1000; // Convert to seconds
+        const audioDelay = this.getAudioDelay() / 1000; // Convert to seconds
+        const timeSinceEvent = (now - eventTimestamp) / 1000;
         
-        this.playerService.setCurrentTime(estimatedTime);
+        // Compensate for network latency, audio delay, and time since event
+        const compensatedTime = sourceTime + networkLatency + audioDelay + timeSinceEvent;
+        const finalTime = Math.max(0, compensatedTime);
+        
+        console.log(`Time sync - Original: ${sourceTime.toFixed(2)}s, Network: +${networkLatency.toFixed(3)}s, Audio: +${(audioDelay).toFixed(3)}s, Event delay: +${timeSinceEvent.toFixed(3)}s, Final: ${finalTime.toFixed(2)}s`);
+        
+        this.playerService.setCurrentTime(finalTime);
         break;
       }
 
@@ -168,8 +328,11 @@ export class RemoteService implements OnDestroy {
     this.reconnectAttempts++;
     const delay = Math.min(this.reconnectInterval * Math.pow(2, this.reconnectAttempts - 1), 30000);
     
+    console.log(`Scheduling reconnect attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
+    
     this.reconnectTimeout = window.setTimeout(() => {
       if (this.username()) {
+        console.log(`Reconnect attempt ${this.reconnectAttempts}`);
         this.establishConnection().catch(error => {
           console.error('Reconnection failed:', error);
         });
@@ -179,12 +342,16 @@ export class RemoteService implements OnDestroy {
 
   private startPingInterval(): void {
     this.stopPingInterval();
-    // Send ping every 25 seconds (backend checks every 30 seconds)
     this.pingInterval = window.setInterval(() => {
       if (this.isConnected() && this.ws?.readyState === WebSocket.OPEN) {
-        this.send('Pong', null); // Send pong proactively to maintain connection
+        // Send latency measurement ping
+        const pingTime = this.getHighResolutionTime();
+        this.send('LatencyPing', {
+          clientTime: pingTime,
+          calibration: false
+        });
       }
-    }, 25000);
+    }, 10000); // Ping every 10 seconds for latency measurement
   }
 
   private stopPingInterval(): void {
@@ -208,9 +375,8 @@ export class RemoteService implements OnDestroy {
 
   async disconnectFromServer(): Promise<void> {
     if (this.isConnected()) {
+      console.log('Disconnecting from server');
       this.send('Disconnect', this.username());
-      
-      // Wait a bit for the message to be sent before closing
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     
@@ -220,10 +386,12 @@ export class RemoteService implements OnDestroy {
     this.connectionInfo.set(null);
     this.sessions.set([]);
     this.username.set('');
+    this.resetLatencyMeasurements();
   }
 
   async setSong(song: Song): Promise<void> {
     if (this.isConnected() && this.connectionConfirmed) {
+      console.log('Setting song:', song);
       this.send('SetSong', song);
     } else {
       console.warn('Cannot set song: not connected');
@@ -232,6 +400,7 @@ export class RemoteService implements OnDestroy {
 
   async play(): Promise<void> {
     if (this.isConnected() && this.connectionConfirmed) {
+      console.log('Sending play command');
       this.send('Play', this.username());
     } else {
       console.warn('Cannot play: not connected');
@@ -240,6 +409,7 @@ export class RemoteService implements OnDestroy {
 
   async pause(): Promise<void> {
     if (this.isConnected() && this.connectionConfirmed) {
+      console.log('Sending pause command');
       this.send('Pause', this.username());
     } else {
       console.warn('Cannot pause: not connected');
@@ -248,9 +418,12 @@ export class RemoteService implements OnDestroy {
 
   async updateTime(time: number): Promise<void> {
     if (this.isConnected() && this.connectionConfirmed) {
+      console.log('Updating time:', time);
       this.send('UpdateTime', { 
         time,
-        timestamp: Date.now()
+        timestamp: this.getSynchronizedTime(), // Use synchronized time
+        platform: this.platform,
+        audioDelay: this.getAudioDelay()
       });
     } else {
       console.warn('Cannot update time: not connected');
@@ -262,11 +435,12 @@ export class RemoteService implements OnDestroy {
       const message = {
         method,
         data,
-        timestamp: Date.now()
+        timestamp: this.getSynchronizedTime()
       };
       
       try {
         this.ws.send(JSON.stringify(message));
+        console.log('Sent message:', message);
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -275,7 +449,19 @@ export class RemoteService implements OnDestroy {
     }
   }
 
-  // Getters for reactive signals
+  // Public getters for debugging/monitoring
+  get currentLatencyMs(): number {
+    return this.currentLatency;
+  }
+
+  get currentPlatform(): string {
+    return this.platform;
+  }
+
+  get currentAudioDelay(): number {
+    return this.getAudioDelay();
+  }
+
   get isConnectedSignal() {
     return this.isConnected.asReadonly();
   }
@@ -292,7 +478,6 @@ export class RemoteService implements OnDestroy {
     return this.connectionInfo.asReadonly();
   }
 
-  // Cleanup on service destruction
   ngOnDestroy(): void {
     console.log('RemoteService destroyed, cleaning up');
     this.cleanup();
