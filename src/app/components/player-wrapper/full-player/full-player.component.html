@@ -38,11 +38,11 @@
   }
 
   <div
-    class="flex flex-col items-center justify-between h-full px-6 py-8 max-w-md mx-auto relative z-10"
+    class="flex flex-col items-center justify-between h-full px-4 sm:px-6 py-4 sm:py-8 max-w-[500px] mx-auto relative z-10"
   >
     <!-- Album Art Section -->
     <div class="w-full flex-1 flex flex-col items-center justify-center">
-      <div class="relative w-72 aspect-square mb-8">
+      <div class="relative w-full max-w-[280px] aspect-square mb-4 sm:mb-8">
         <div
           class="rounded-2xl overflow-hidden shadow-2xl shadow-black/30 cool3dArtworkAnimation relative w-full h-full"
         >
@@ -73,25 +73,25 @@
         </div>
         <!-- Download Button -->
         <button
-          class="btn btn-circle btn-ghost absolute bottom-3 right-3 z-20 bg-base-100/80 hover:bg-primary/80 text-primary hover:text-white shadow-md"
+          class="btn btn-circle btn-ghost absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-20 bg-base-100/80 hover:bg-primary/80 text-primary hover:text-white shadow-md"
           (click)="downloadSong()"
           aria-label="Download song"
         >
-          <fa-icon [icon]="faCloudArrowDown" class="text-2xl" />
+          <fa-icon [icon]="faCloudArrowDown" class="text-xl sm:text-2xl" />
         </button>
       </div>
 
       <!-- Song Info -->
-      <div class="w-full text-center mb-8">
+      <div class="w-full text-center mb-4 sm:mb-8 px-2">
         <app-moving-title
           [title]="song().title"
           [isActive]="true"
-          classes="text-xl font-bold mb-2"
+          classes="text-lg sm:text-xl font-bold mb-1 sm:mb-2"
         />
         <app-moving-title
           [title]="song().artist"
           [isActive]="true"
-          classes="text-base text-base-content/70"
+          classes="text-sm sm:text-base text-base-content/70"
           [isRedirect]="true"
           (closePlayer)="toggleSize()"
         />
@@ -99,9 +99,9 @@
     </div>
 
     <!-- Controls Section -->
-    <div class="w-full space-y-6">
+    <div class="w-full max-w-[400px] mx-auto space-y-4 sm:space-y-6">
       <!-- Progress Bar -->
-      <div class="space-y-2">
+      <div class="space-y-1 sm:space-y-2">
         <input
           type="range"
           min="0"
@@ -112,59 +112,59 @@
           [style]="{ '--range-shdw': dominantColor() | async }"
           class="range range-primary range-sm"
         />
-        <div class="flex justify-between text-sm text-base-content/70">
+        <div class="flex justify-between text-xs sm:text-sm text-base-content/70">
           <p>{{ convertTime(currentTime()) }}</p>
           <p>{{ convertTime(duration()) }}</p>
         </div>
       </div>
 
       <!-- Player Controls -->
-      <div class="flex items-center justify-between px-4">
+      <div class="flex items-center justify-between px-2 sm:px-4">
         <button
-          class="btn btn-ghost btn-circle"
+          class="btn btn-ghost btn-circle btn-sm sm:btn-md"
           (click)="toggleShuffle()"
           [class.text-primary]="isShuffle()"
         >
-          <fa-icon [icon]="faShuffle" class="text-xl" />
+          <fa-icon [icon]="faShuffle" class="text-lg sm:text-xl" />
         </button>
 
-        <button class="btn btn-ghost btn-circle" (click)="previousSong()">
-          <fa-icon [icon]="faStepBackward" class="text-2xl" />
+        <button class="btn btn-ghost btn-circle btn-sm sm:btn-md" (click)="previousSong()">
+          <fa-icon [icon]="faStepBackward" class="text-xl sm:text-2xl" />
         </button>
 
         @switch (status()) { @case (playerStatus.Playing) {
-        <button class="btn btn-circle btn-primary w-16 h-16" (click)="pause()">
-          <fa-icon [icon]="faPause" class="text-2xl" />
+        <button class="btn btn-circle btn-primary w-12 h-12 sm:w-16 sm:h-16" (click)="pause()">
+          <fa-icon [icon]="faPause" class="text-xl sm:text-2xl" />
         </button>
         } @default {
-        <button class="btn btn-circle btn-primary w-16 h-16" (click)="play()">
-          <fa-icon [icon]="faPlay" class="text-2xl" />
+        <button class="btn btn-circle btn-primary w-12 h-12 sm:w-16 sm:h-16" (click)="play()">
+          <fa-icon [icon]="faPlay" class="text-xl sm:text-2xl" />
         </button>
         }}
 
-        <button class="btn btn-ghost btn-circle" (click)="nextSong()">
-          <fa-icon [icon]="faStepForward" class="text-2xl" />
+        <button class="btn btn-ghost btn-circle btn-sm sm:btn-md" (click)="nextSong()">
+          <fa-icon [icon]="faStepForward" class="text-xl sm:text-2xl" />
         </button>
 
         <button
-          class="btn btn-ghost btn-circle"
+          class="btn btn-ghost btn-circle btn-sm sm:btn-md"
           (click)="toggleRepeat()"
           [class.text-primary]="isRepeat()"
         >
-          <fa-icon [icon]="faRepeat" class="text-xl" />
+          <fa-icon [icon]="faRepeat" class="text-lg sm:text-xl" />
         </button>
       </div>
 
       <!-- Bottom Actions -->
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between px-2 sm:px-4">
         <app-favorite-button [song]="song()" [forPlayer]="true" />
 
         <button
-          class="btn btn-circle btn-primary"
+          class="btn btn-circle btn-primary btn-sm sm:btn-md"
           (click)="toggleSize()"
           [style]="{ 'background-color': dominantColor() | async }"
         >
-          <fa-icon [icon]="faArrowDown" class="text-xl" />
+          <fa-icon [icon]="faArrowDown" class="text-lg sm:text-xl" />
         </button>
       </div>
     </div>
