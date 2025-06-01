@@ -1,62 +1,67 @@
 <div
-  class="h-screen fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-base-200 to-base-300 touch-none"
+  class="h-screen fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-base-200/90 to-base-300/90 touch-none transition-all duration-500 backdrop-blur-xl"
   [class.slideDown]="isClosingAnimation()"
   (onClose)="toggleSize()"
   #playerRef
   appSwipeDown
 >
-  <!-- Fullscreen blurred background art -->
-  <img
-    [ngSrc]="song().image || 'no_album_art.jpg'"
-    alt="Song Art BG"
-    class="absolute inset-0 w-full h-full object-cover -z-20 opacity-10 blur-lg select-none pointer-events-none"
-    width="800"
-    height="800"
-    priority
-    referrerpolicy="no-referrer"
-    draggable="false"
-  />
-  <!-- Gradient and vignette overlay -->
+  <!-- Modern blurred background art with enhanced effects -->
+  <div class="absolute inset-0 -z-20 overflow-hidden">
+    <img
+      [ngSrc]="song().image || 'no_album_art.jpg'"
+      alt="Song Art BG"
+      class="absolute inset-0 w-full h-full object-cover opacity-25 blur-3xl select-none pointer-events-none transition-all duration-700 scale-110"
+      width="800"
+      height="800"
+      priority
+      referrerpolicy="no-referrer"
+      draggable="false"
+    />
+    <div class="absolute inset-0 bg-gradient-to-b from-base-200/20 to-base-300/20"></div>
+  </div>
+
+  <!-- Modern gradient overlay with enhanced depth -->
   <div
     class="absolute inset-0 -z-10 pointer-events-none"
     style="
       background: radial-gradient(
-          ellipse at center,
-          rgba(0, 0, 0, 0.25) 60%,
-          rgba(0, 0, 0, 0.7) 100%
+          circle at center,
+          rgba(0, 0, 0, 0) 0%,
+          rgba(0, 0, 0, 0.2) 50%,
+          rgba(0, 0, 0, 0.5) 100%
         ),
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, transparent 60%);
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, transparent 40%);
     "
   ></div>
 
   @if(sessions().length > 1) {
-  <div class="mx-auto w-fit py-2">
-    <p class="text-red-400 text-sm font-medium">
+  <div class="mx-auto w-fit py-2 sm:py-3">
+    <p class="text-red-400 text-base sm:text-sm font-medium bg-base-100/30 backdrop-blur-md px-4 py-2 sm:px-5 sm:py-2 rounded-full border border-red-400/20 shadow-lg">
       {{ sessions().length - 1 }} other sessions available
     </p>
   </div>
   }
 
   <div
-    class="flex flex-col items-center justify-between h-full px-4 sm:px-6 py-4 sm:py-8 max-w-[500px] mx-auto relative z-10"
+    class="flex flex-col items-center justify-between h-full px-4 sm:px-8 py-4 sm:py-10 max-w-[500px] mx-auto relative z-10"
   >
-    <!-- Album Art Section -->
+    <!-- Modern Album Art Section -->
     <div class="w-full flex-1 flex flex-col items-center justify-center">
-      <div class="relative w-full max-w-[280px] aspect-square mb-4 sm:mb-8">
+      <div class="relative w-full max-w-[280px] sm:max-w-[300px] aspect-square mb-6 sm:mb-10">
         <div
-          class="rounded-2xl overflow-hidden shadow-2xl shadow-black/30 cool3dArtworkAnimation relative w-full h-full"
+          class="rounded-[1.75rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/30 cool3dArtworkAnimation relative w-full h-full transform transition-all duration-500 active:scale-[0.98] sm:hover:scale-[1.02] group"
         >
           @if (status() === playerStatus.Loading) {
           <div
-            class="absolute inset-0 z-10 bg-base-200/30 backdrop-blur-sm flex flex-col justify-center items-center"
+            class="absolute inset-0 z-10 bg-base-200/30 backdrop-blur-xl flex flex-col justify-center items-center"
           >
-            <span class="loading loading-ring loading-lg scale-150"></span>
+            <span class="loading loading-ring loading-lg scale-150 sm:scale-150 text-primary"></span>
           </div>
           } @if(status() === playerStatus.Error){
           <div
-            class="absolute inset-0 z-10 bg-base-200/30 backdrop-blur-sm flex flex-col justify-center items-center"
+            class="absolute inset-0 z-10 bg-base-200/30 backdrop-blur-xl flex flex-col justify-center items-center"
           >
-            <p class="font-medium text-red-300 p-5 text-center">
+            <p class="font-medium text-red-300 p-4 sm:p-5 text-center text-base sm:text-base">
               Please try again later the song won't load...
             </p>
           </div>
@@ -64,16 +69,17 @@
           <img
             [ngSrc]="song().image || 'no_album_art.jpg'"
             alt="Song Art"
-            class="w-full h-full object-cover"
+            class="w-full h-full object-cover transition-all duration-700 group-hover:brightness-110"
             width="500"
             height="500"
             priority
             referrerpolicy="no-referrer"
           />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
-        <!-- Download Button -->
+        <!-- Modern Download Button -->
         <button
-          class="btn btn-circle btn-ghost absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-20 bg-base-100/80 hover:bg-primary/80 text-primary hover:text-white shadow-md"
+          class="btn btn-circle btn-ghost absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20 bg-base-100/80 hover:bg-primary/90 text-primary hover:text-white shadow-lg transition-all duration-300 active:scale-95 sm:hover:scale-110 touch-manipulation backdrop-blur-md w-12 h-12 sm:w-12 sm:h-12"
           (click)="downloadSong()"
           aria-label="Download song"
         >
@@ -81,27 +87,27 @@
         </button>
       </div>
 
-      <!-- Song Info -->
-      <div class="w-full text-center mb-4 sm:mb-8 px-2">
+      <!-- Modern Song Info Section -->
+      <div class="w-full text-center mb-6 sm:mb-10 px-4 sm:px-4">
         <app-moving-title
           [title]="song().title"
           [isActive]="true"
-          classes="text-lg sm:text-xl font-bold mb-1 sm:mb-2"
+          classes="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
         />
         <app-moving-title
           [title]="song().artist"
           [isActive]="true"
-          classes="text-sm sm:text-base text-base-content/70"
+          classes="text-base sm:text-lg text-base-content/90 font-medium"
           [isRedirect]="true"
           (closePlayer)="toggleSize()"
         />
       </div>
     </div>
 
-    <!-- Controls Section -->
-    <div class="w-full max-w-[400px] mx-auto space-y-4 sm:space-y-6">
-      <!-- Progress Bar -->
-      <div class="space-y-1 sm:space-y-2">
+    <!-- Modern Controls Section -->
+    <div class="w-full max-w-[420px] sm:max-w-[450px] mx-auto space-y-6 sm:space-y-8">
+      <!-- Modern Progress Bar -->
+      <div class="space-y-2 sm:space-y-3">
         <input
           type="range"
           min="0"
@@ -110,61 +116,73 @@
           [value]="currentTime()"
           (input)="seekTime($event)"
           [style]="{ '--range-shdw': dominantColor() | async }"
-          class="range range-primary range-sm"
+          class="range range-primary range-md transition-all duration-300 touch-manipulation h-4 sm:h-4"
         />
-        <div class="flex justify-between text-xs sm:text-sm text-base-content/70">
+        <div class="flex justify-between text-sm sm:text-base text-base-content/90 font-medium">
           <p>{{ convertTime(currentTime()) }}</p>
           <p>{{ convertTime(duration()) }}</p>
         </div>
       </div>
 
-      <!-- Player Controls -->
-      <div class="flex items-center justify-between px-2 sm:px-4">
+      <!-- Modern Player Controls -->
+      <div class="flex items-center justify-between px-2 sm:px-6">
         <button
-          class="btn btn-ghost btn-circle btn-sm sm:btn-md"
+          class="btn btn-ghost btn-circle active:scale-95 sm:hover:scale-110 transition-all duration-300 touch-manipulation hover:bg-base-200/40 w-12 h-12 sm:w-12 sm:h-12"
           (click)="toggleShuffle()"
           [class.text-primary]="isShuffle()"
         >
-          <fa-icon [icon]="faShuffle" class="text-lg sm:text-xl" />
+          <fa-icon [icon]="faShuffle" class="text-xl sm:text-xl" />
         </button>
 
-        <button class="btn btn-ghost btn-circle btn-sm sm:btn-md" (click)="previousSong()">
-          <fa-icon [icon]="faStepBackward" class="text-xl sm:text-2xl" />
+        <button 
+          class="btn btn-ghost btn-circle active:scale-95 sm:hover:scale-110 transition-all duration-300 touch-manipulation hover:bg-base-200/40 w-12 h-12 sm:w-12 sm:h-12" 
+          (click)="previousSong()"
+        >
+          <fa-icon [icon]="faStepBackward" class="text-2xl sm:text-2xl" />
         </button>
 
         @switch (status()) { @case (playerStatus.Playing) {
-        <button class="btn btn-circle btn-primary w-12 h-12 sm:w-16 sm:h-16" (click)="pause()">
-          <fa-icon [icon]="faPause" class="text-xl sm:text-2xl" />
+        <button 
+          class="btn btn-circle btn-primary w-16 h-16 sm:w-20 sm:h-20 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 sm:hover:scale-105 touch-manipulation bg-gradient-to-br from-primary to-primary/90" 
+          (click)="pause()"
+        >
+          <fa-icon [icon]="faPause" class="text-3xl sm:text-3xl" />
         </button>
         } @default {
-        <button class="btn btn-circle btn-primary w-12 h-12 sm:w-16 sm:h-16" (click)="play()">
-          <fa-icon [icon]="faPlay" class="text-xl sm:text-2xl" />
+        <button 
+          class="btn btn-circle btn-primary w-16 h-16 sm:w-20 sm:h-20 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 sm:hover:scale-105 touch-manipulation bg-gradient-to-br from-primary to-primary/90" 
+          (click)="play()"
+        >
+          <fa-icon [icon]="faPlay" class="text-3xl sm:text-3xl" />
         </button>
         }}
 
-        <button class="btn btn-ghost btn-circle btn-sm sm:btn-md" (click)="nextSong()">
-          <fa-icon [icon]="faStepForward" class="text-xl sm:text-2xl" />
+        <button 
+          class="btn btn-ghost btn-circle active:scale-95 sm:hover:scale-110 transition-all duration-300 touch-manipulation hover:bg-base-200/40 w-12 h-12 sm:w-12 sm:h-12" 
+          (click)="nextSong()"
+        >
+          <fa-icon [icon]="faStepForward" class="text-2xl sm:text-2xl" />
         </button>
 
         <button
-          class="btn btn-ghost btn-circle btn-sm sm:btn-md"
+          class="btn btn-ghost btn-circle active:scale-95 sm:hover:scale-110 transition-all duration-300 touch-manipulation hover:bg-base-200/40 w-12 h-12 sm:w-12 sm:h-12"
           (click)="toggleRepeat()"
           [class.text-primary]="isRepeat()"
         >
-          <fa-icon [icon]="faRepeat" class="text-lg sm:text-xl" />
+          <fa-icon [icon]="faRepeat" class="text-xl sm:text-xl" />
         </button>
       </div>
 
-      <!-- Bottom Actions -->
-      <div class="flex items-center justify-between px-2 sm:px-4">
+      <!-- Modern Bottom Actions -->
+      <div class="flex items-center justify-between px-2 sm:px-6">
         <app-favorite-button [song]="song()" [forPlayer]="true" />
 
         <button
-          class="btn btn-circle btn-primary btn-sm sm:btn-md"
+          class="btn btn-circle btn-primary shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 sm:hover:scale-110 touch-manipulation bg-gradient-to-br from-primary to-primary/90 w-12 h-12 sm:w-12 sm:h-12"
           (click)="toggleSize()"
           [style]="{ 'background-color': dominantColor() | async }"
         >
-          <fa-icon [icon]="faArrowDown" class="text-lg sm:text-xl" />
+          <fa-icon [icon]="faArrowDown" class="text-xl sm:text-xl" />
         </button>
       </div>
     </div>
