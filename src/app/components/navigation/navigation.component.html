@@ -1,32 +1,33 @@
 <ul
-  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[500px] w-full z-20 bg-base-100 rounded-t-2xl"
+  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[500px] w-full z-20 bg-base-100 rounded-t-2xl shadow-lg"
 >
   @for (navItem of navList(); track navItem.name) {
   <li
-    class="group relative flex flex-col items-center py-3 cursor-pointer transition-all duration-200"
+    class="group relative flex flex-col items-center py-4 cursor-pointer transition-all duration-300 ease-in-out"
     [routerLink]="navItem.link"
     routerLinkActive="text-primary"
   >
-    <!-- Active Indicator: Thin underline -->
+    <!-- Active Indicator: Animated underline -->
     <div 
-      class="absolute left-1/2 -translate-x-1/2 -bottom-1 w-6 h-0.5 rounded-full bg-primary scale-x-0 group-[.text-primary]:scale-x-100 transition-transform duration-200"
+      class="absolute left-1/2 -translate-x-1/2 -bottom-1 w-6 h-0.5 rounded-full bg-primary scale-x-0 group-[.text-primary]:scale-x-100 transition-all duration-300 ease-out"
       routerLinkActive="scale-x-100"
     ></div>
 
-    <!-- Icon -->
-    <fa-icon
-      [icon]="navItem.icon"
-      class="text-xl transition-all duration-200 group-hover:scale-110 text-base-content/60"
-      routerLinkActive="text-primary"
-    ></fa-icon>
-
-    <!-- Label -->
-    <span 
-      class="text-[10px] mt-1 font-medium transition-colors duration-200 text-base-content/40 tracking-wide"
-      routerLinkActive="text-primary"
-    >
-      {{ navItem.name }}
-    </span>
+    <!-- Icon Container for additional animation effects -->
+    <div class="relative transform transition-all duration-300 ease-in-out group-hover:-translate-y-1">
+      <!-- Icon -->
+      <fa-icon
+        [icon]="navItem.icon"
+        class="text-2xl transition-all duration-300 ease-in-out group-hover:scale-110 text-base-content/70 group-hover:text-base-content/90"
+        routerLinkActive="text-primary"
+      ></fa-icon>
+      
+      <!-- Subtle glow effect when active -->
+      <div 
+        class="absolute inset-0 rounded-full bg-primary/20 scale-0 group-[.text-primary]:scale-150 transition-transform duration-300 ease-out blur-sm"
+        routerLinkActive="scale-150"
+      ></div>
+    </div>
   </li>
   }
 </ul>

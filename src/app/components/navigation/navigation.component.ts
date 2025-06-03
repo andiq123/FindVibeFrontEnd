@@ -4,9 +4,9 @@ import {
   IconDefinition,
 } from '@fortawesome/angular-fontawesome';
 import {
-  faClockRotateLeft,
-  faBars,
-  faMagnifyingGlass,
+  faMusic,
+  faBook,
+  faHistory,
 } from '@fortawesome/free-solid-svg-icons';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -21,17 +21,17 @@ export class NavigationComponent {
   navListSource = computed(() => [
     {
       name: 'search',
-      icon: faMagnifyingGlass,
+      icon: faMusic,
       link: '/songs',
     },
     {
       name: 'library',
-      icon: faBars,
+      icon: faBook,
       link: '/library',
     },
     {
       name: 'recent',
-      icon: faClockRotateLeft,
+      icon: faHistory,
       link: '/recent',
     },
   ]);

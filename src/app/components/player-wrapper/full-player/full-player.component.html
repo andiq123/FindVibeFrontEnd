@@ -109,32 +109,34 @@
       <!-- Modern Progress Bar -->
       <div class="space-y-2">
         <div class="relative group">
-          <!-- Background Track -->
-          <div class="absolute inset-0 h-6 rounded-[12px] bg-base-200/30 pointer-events-none"></div>
-          
-          <!-- Progress Track -->
-          <div 
-            class="absolute inset-y-0 h-6 rounded-[12px] bg-primary/60 transition-all duration-300 pointer-events-none"
-            [style]="{ width: (currentTime() / duration() * 100) + '%' }"
-          ></div>
-
-          <!-- Interactive Slider -->
-          <input
-            type="range"
-            min="0"
-            step="0.1"
-            [max]="duration()"
-            [value]="currentTime()"
-            (input)="seekTime($event)"
-            class="relative w-full h-6 appearance-none bg-transparent cursor-pointer z-10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-0 [&::-webkit-slider-thumb]:h-0 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-0 [&::-moz-range-thumb]:h-0 [&::-webkit-slider-runnable-track]:h-6 [&::-webkit-slider-runnable-track]:rounded-[12px] [&::-webkit-slider-runnable-track]:bg-transparent [&::-moz-range-track]:h-6 [&::-moz-range-track]:rounded-[12px] [&::-moz-range-track]:bg-transparent"
-          />
-
-          <!-- Hover Effect -->
-          <div class="absolute inset-0 h-6 rounded-[12px] bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+          <!-- Simple Modern Slider -->
+          <div class="relative h-8 bg-base-content/10 rounded-full overflow-hidden">
+            <!-- Progress Bar -->
+            <div 
+              class="absolute h-full bg-primary rounded-full transition-all duration-100"
+              [style.width.%]="(currentTime() / duration()) * 100"
+            ></div>
+            
+            <!-- Interactive Slider -->
+            <input
+              type="range"
+              min="0"
+              step="0.1"
+              [max]="duration()"
+              [value]="currentTime()"
+              (change)="seekTime($event)"
+              (input)="seekTime($event)"
+              class="absolute inset-0 w-full h-16 -top-4 cursor-pointer opacity-0 touch-manipulation"
+              [attr.aria-label]="'Seek to position in track'"
+              [attr.aria-valuemin]="0"
+              [attr.aria-valuemax]="duration()"
+              [attr.aria-valuenow]="currentTime()"
+            />
+          </div>
         </div>
 
         <!-- Time Display -->
-        <div class="flex justify-between text-base text-base-content/80 font-medium">
+        <div class="flex justify-between text-sm text-base-content/60 font-medium">
           <p>{{ convertTime(currentTime()) }}</p>
           <p>{{ convertTime(duration()) }}</p>
         </div>
