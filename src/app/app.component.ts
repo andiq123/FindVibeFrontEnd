@@ -12,11 +12,10 @@ import { MediaSessionService } from './core/services/media-session.service';
 import { catchError, tap, retry, timeout, of } from 'rxjs';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [AudioPlayerComponent, RouterOutlet, NavigationComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+    selector: 'app-root',
+    imports: [AudioPlayerComponent, RouterOutlet, NavigationComponent],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
   private title = inject(Title);

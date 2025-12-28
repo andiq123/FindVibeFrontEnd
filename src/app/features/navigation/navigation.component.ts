@@ -11,11 +11,10 @@ import {
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
-  selector: 'app-navigation',
-  standalone: true,
-  imports: [FaIconComponent, RouterLink, RouterLinkActive],
-  templateUrl: './navigation.component.html',
-  styleUrl: './navigation.component.scss',
+    selector: 'app-navigation',
+    imports: [FaIconComponent, RouterLink, RouterLinkActive],
+    templateUrl: './navigation.component.html',
+    styleUrl: './navigation.component.scss'
 })
 export class NavigationComponent {
   navListSource = computed(() => [

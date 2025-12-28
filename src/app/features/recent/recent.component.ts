@@ -5,11 +5,10 @@ import { SongComponent } from '../search/song/song.component';
 import { PlaylistService } from '../../core/services/playlist.service';
 
 @Component({
-  selector: 'app-recent',
-  standalone: true,
-  imports: [SongComponent],
-  templateUrl: './recent.component.html',
-  styleUrl: './recent.component.scss',
+    selector: 'app-recent',
+    imports: [SongComponent],
+    templateUrl: './recent.component.html',
+    styleUrl: './recent.component.scss'
 })
 export class RecentComponent implements OnInit {
   songs = signal<Song[]>([]);

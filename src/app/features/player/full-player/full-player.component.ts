@@ -31,18 +31,17 @@ import { PlayerService } from '../../../core/services/player.service';
 import { Song } from '../../../core/models/song.model';
 
 @Component({
-  selector: 'app-full-player',
-  standalone: true,
-  imports: [
-    FontAwesomeModule,
-    MovingTitleComponent,
-    NgOptimizedImage,
-    AsyncPipe,
-    FavoriteButtonComponent,
-    SwipeDownDirective,
-  ],
-  templateUrl: './full-player.component.html',
-  styleUrl: './full-player.component.scss',
+    selector: 'app-full-player',
+    imports: [
+        FontAwesomeModule,
+        MovingTitleComponent,
+        NgOptimizedImage,
+        AsyncPipe,
+        FavoriteButtonComponent,
+        SwipeDownDirective,
+    ],
+    templateUrl: './full-player.component.html',
+    styleUrl: './full-player.component.scss'
 })
 export class FullPlayerComponent {
   private playerService = inject(PlayerService);

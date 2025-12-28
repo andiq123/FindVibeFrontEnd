@@ -7,11 +7,10 @@ import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.
 import { Song } from '../../../core/models/song.model';
 
 @Component({
-  selector: 'app-mini-player',
-  standalone: true,
-  imports: [FontAwesomeModule, PlayerButtonComponent, MovingTitleComponent],
-  templateUrl: './mini-player.component.html',
-  styleUrl: './mini-player.component.scss',
+    selector: 'app-mini-player',
+    imports: [FontAwesomeModule, PlayerButtonComponent, MovingTitleComponent],
+    templateUrl: './mini-player.component.html',
+    styleUrl: './mini-player.component.scss'
 })
 export class MiniPlayerComponent {
   song = input.required<Song>();

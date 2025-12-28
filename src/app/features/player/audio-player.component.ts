@@ -9,11 +9,10 @@ import { PlayerStatus } from './models/player.model';
 import { PlaylistService } from '../../core/services/playlist.service';
 
 @Component({
-  selector: 'app-audio-player',
-  standalone: true,
-  imports: [MiniPlayerComponent, FullPlayerComponent],
-  templateUrl: './audio-player.component.html',
-  styleUrl: './audio-player.component.scss',
+    selector: 'app-audio-player',
+    imports: [MiniPlayerComponent, FullPlayerComponent],
+    templateUrl: './audio-player.component.html',
+    styleUrl: './audio-player.component.scss'
 })
 export class AudioPlayerComponent implements OnInit {
   private playerService = inject(PlayerService);

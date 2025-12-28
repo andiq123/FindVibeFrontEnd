@@ -12,19 +12,18 @@ import { DragAndDropDirective } from '../directives/drag-and-drop.directive';
 import { PlayerService } from '../../../core/services/player.service';
 
 @Component({
-  selector: 'app-song',
-  standalone: true,
-  imports: [
-    PlayerButtonComponent,
-    MovingTitleComponent,
-    NgOptimizedImage,
-    FavoriteButtonComponent,
-    FontAwesomeModule,
-    DragAndDropDirective,
-    NgTemplateOutlet,
-  ],
-  templateUrl: './song.component.html',
-  styleUrl: './song.component.scss',
+    selector: 'app-song',
+    imports: [
+        PlayerButtonComponent,
+        MovingTitleComponent,
+        NgOptimizedImage,
+        FavoriteButtonComponent,
+        FontAwesomeModule,
+        DragAndDropDirective,
+        NgTemplateOutlet,
+    ],
+    templateUrl: './song.component.html',
+    styleUrl: './song.component.scss'
 })
 export class SongComponent {
   private playerService = inject(PlayerService);

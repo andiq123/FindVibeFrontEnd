@@ -16,17 +16,16 @@ import { PlaylistService } from '../../core/services/playlist.service';
 import { PreviousRouteService } from '../../core/services/previous-route.service';
 
 @Component({
-  selector: 'app-library',
-  standalone: true,
-  imports: [
-    UserFormComponent,
-    TitleCasePipe,
-    StorageInfoComponent,
-    SongsWrapperComponent,
-    FontAwesomeModule,
-  ],
-  templateUrl: './library.component.html',
-  styleUrl: './library.component.scss',
+    selector: 'app-library',
+    imports: [
+        UserFormComponent,
+        TitleCasePipe,
+        StorageInfoComponent,
+        SongsWrapperComponent,
+        FontAwesomeModule,
+    ],
+    templateUrl: './library.component.html',
+    styleUrl: './library.component.scss'
 })
 export class LibraryComponent implements OnInit, OnDestroy {
   private libraryService = inject(LibraryService);

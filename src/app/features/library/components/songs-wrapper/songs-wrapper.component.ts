@@ -3,11 +3,10 @@ import { SongComponent } from '../../../search/song/song.component';
 import { Song } from '../../../../core/models/song.model';
 
 @Component({
-  selector: 'app-songs-wrapper',
-  standalone: true,
-  imports: [SongComponent],
-  templateUrl: './songs-wrapper.component.html',
-  styleUrl: './songs-wrapper.component.scss',
+    selector: 'app-songs-wrapper',
+    imports: [SongComponent],
+    templateUrl: './songs-wrapper.component.html',
+    styleUrl: './songs-wrapper.component.scss'
 })
 export class SongsWrapperComponent {
   songs = input<Song[]>();

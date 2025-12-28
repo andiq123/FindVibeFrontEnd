@@ -7,11 +7,10 @@ import { Song } from '../../core/models/song.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
-  selector: 'app-favorite-button',
-  standalone: true,
-  imports: [FontAwesomeModule],
-  templateUrl: './favorite-button.component.html',
-  styleUrl: './favorite-button.component.scss',
+    selector: 'app-favorite-button',
+    imports: [FontAwesomeModule],
+    templateUrl: './favorite-button.component.html',
+    styleUrl: './favorite-button.component.scss'
 })
 export class FavoriteButtonComponent {
   private userService = inject(UserService);

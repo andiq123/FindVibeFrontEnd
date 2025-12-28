@@ -2,11 +2,10 @@ import { Component, computed, input, output } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-moving-title',
-  standalone: true,
-  imports: [],
-  templateUrl: './moving-title.component.html',
-  styleUrl: './moving-title.component.scss',
+    selector: 'app-moving-title',
+    imports: [],
+    templateUrl: './moving-title.component.html',
+    styleUrl: './moving-title.component.scss'
 })
 export class MovingTitleComponent {
   title = input.required<string>();

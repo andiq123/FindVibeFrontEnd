@@ -7,11 +7,10 @@ import { Router } from '@angular/router';
 import { SearchService } from '../services/search.service';
 
 @Component({
-  selector: 'app-search-bar',
-  standalone: true,
-  imports: [FontAwesomeModule, FormsModule, TitleCasePipe],
-  templateUrl: './search-bar.component.html',
-  styleUrl: './search-bar.component.scss',
+    selector: 'app-search-bar',
+    imports: [FontAwesomeModule, FormsModule, TitleCasePipe],
+    templateUrl: './search-bar.component.html',
+    styleUrl: './search-bar.component.scss'
 })
 export class SearchBarComponent implements OnInit {
   query = input<string>('');

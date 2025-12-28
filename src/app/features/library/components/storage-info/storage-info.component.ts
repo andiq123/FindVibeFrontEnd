@@ -11,11 +11,10 @@ import {
 import { Song } from '../../../../core/models/song.model';
 
 @Component({
-  selector: 'app-storage-info',
-  standalone: true,
-  imports: [FontAwesomeModule],
-  templateUrl: './storage-info.component.html',
-  styleUrl: './storage-info.component.scss',
+    selector: 'app-storage-info',
+    imports: [FontAwesomeModule],
+    templateUrl: './storage-info.component.html',
+    styleUrl: './storage-info.component.scss'
 })
 export class StorageInfoComponent implements OnInit {
   private offlineStorageService = inject(OfflineStorageService);
