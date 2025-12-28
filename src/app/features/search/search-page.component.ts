@@ -56,7 +56,7 @@ export class SearchPageComponent {
   handleRefresh() {
     const q = this.query();
     if (q) {
-      this.songsService.searchSongs(q).subscribe();
+      this.songsService.searchSongs(q, true).subscribe();
     }
   }
 }

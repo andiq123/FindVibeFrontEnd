@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, Observable, tap } from 'rxjs';
+import { catchError, Observable, tap, of } from 'rxjs';
 import { SearchStatus, Song } from '../../../core/models/song.model';
 import { environment } from '../../../../environments/environment.development';
 
@@ -24,7 +24,12 @@ export class SearchService {
 
   private loadingTimeout?: ReturnType<typeof setTimeout>;
 
-  searchSongs(searchTerm: string): Observable<Song[]> {
+  searchSongs(searchTerm: string, force: boolean = false): Observable<Song[]> {
+    // Cache Check: If not forcing refresh, query matches last query, and we have data
+    if (!force && searchTerm === this._lastSearchQuery() && this._songs().length > 0) {
+        return of(this._songs());
+    }
+
     if (this.loadingTimeout) {
       clearTimeout(this.loadingTimeout);
     }

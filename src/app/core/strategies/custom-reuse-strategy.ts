@@ -6,7 +6,7 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
   private handlers: { [key: string]: DetachedRouteHandle } = {};
 
   // Routes we want to cache
-  private routesToCache: string[] = ['library', 'search', 'recent'];
+  private routesToCache: string[] = ['library', 'songs', 'songs/:query', 'recent'];
 
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
     // Only detach (cache) if the route path is in our list

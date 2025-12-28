@@ -1,8 +1,15 @@
+:host {
+  display: block;
+  background: transparent !important;
+}
+
 .fixed.h-\[100dvh\] {
   height: 100dvh;
   touch-action: none;
   will-change: transform;
   transform: translate3d(0, 0, 0);
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .pb-safe-bottom {
