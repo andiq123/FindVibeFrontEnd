@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { SongsComponent } from './songs/songs.component';
+import { SearchPageComponent } from './features/search/search-page.component';
 import { offlineGuard } from './shared/guards/offline.guard';
 
 export const routes: Routes = [
@@ -10,22 +10,22 @@ export const routes: Routes = [
   },
   {
     path: 'songs',
-    component: SongsComponent,
+    component: SearchPageComponent,
     canActivate: [offlineGuard],
   },
   {
     path: 'songs/:query',
-    component: SongsComponent,
+    component: SearchPageComponent,
     canActivate: [offlineGuard],
   },
   {
     path: 'library',
     loadComponent: () =>
-      import('./library/library.component').then((c) => c.LibraryComponent),
+      import('./features/library/library.component').then((c) => c.LibraryComponent),
   },
   {
     path: 'recent',
     loadComponent: () =>
-      import('./recent/recent.component').then((c) => c.RecentComponent),
+      import('./features/recent/recent.component').then((c) => c.RecentComponent),
   },
 ];

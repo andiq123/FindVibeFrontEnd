@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { PlayerStatus } from '../../components/player-wrapper/models/player.model';
+import { PlayerStatus } from '../../features/player/models/player.model';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
