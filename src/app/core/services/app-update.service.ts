@@ -12,9 +12,16 @@ export class AppUpdateService {
 
   readonly newUpdateAvailable = signal(false);
   readonly secondsToUpdate = signal(UPDATE_COUNTDOWN_SECONDS);
+  readonly updateLoading = signal(false);
 
   private readonly _ = effect(() => {
     if (!this.swUpdate.isEnabled) return;
+
+    // Initial check and periodic check every 6 hours
+    this.checkForUpdate();
+    interval(6 * 60 * 60 * 1000).pipe(
+      tap(() => this.checkForUpdate())
+    ).subscribe();
 
     this.swUpdate.versionUpdates.pipe(
       filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
@@ -23,11 +30,22 @@ export class AppUpdateService {
       tap((time) => {
         this.secondsToUpdate.set(time);
         if (time === 0) {
-          document.location.reload();
+          this.applyUpdate();
         }
       })
     ).subscribe();
   });
+
+  private checkForUpdate(): void {
+    if (this.swUpdate.isEnabled) {
+      this.swUpdate.checkForUpdate();
+    }
+  }
+
+  applyUpdate(): void {
+    this.updateLoading.set(true);
+    document.location.reload();
+  }
 
   private countdown(startTimer: number) {
     return interval(1000).pipe(
