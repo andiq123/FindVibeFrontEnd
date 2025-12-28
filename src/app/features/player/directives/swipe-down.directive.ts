@@ -45,7 +45,7 @@ export class SwipeDownDirective implements OnDestroy {
     this.topSignal.set(currentPixels - this.offsetPixels());
   }
 
-  @HostListener('touchend', ['$event'])
+  @HostListener('touchend')
   onSwipeEnd() {
     const closeSizeTrigger = 300;
     const timeCloseTrigger = 600;
