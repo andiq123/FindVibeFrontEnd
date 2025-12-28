@@ -1,42 +1,50 @@
-.scroll-text {
-  -moz-transform: translateX(100%);
-  -webkit-transform: translateX(100%);
-  transform: translateX(100%);
+.marquee-wrapper {
+  width: 100%;
+  overflow: hidden;
   white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
 
-  -moz-animation: my-animation 15s alternate infinite;
-  -webkit-animation: my-animation 15s alternate infinite;
-  animation: my-animation 15s alternate infinite;
-}
-
-@-moz-keyframes my-animation {
-  from {
-    -moz-transform: translateX(100%);
-  }
-  to {
-    -moz-transform: translateX(-100%);
-  }
-}
-
-/* for Chrome */
-@-webkit-keyframes my-animation {
-  from {
-    -webkit-transform: translateX(100%);
-  }
-  to {
-    -webkit-transform: translateX(-100%);
+  &.is-overflowing {
+    // Elegant fade effect on edges for a native look
+    mask-image: linear-gradient(to right,
+        transparent 0%,
+        black 5%,
+        black 95%,
+        transparent 100%);
   }
 }
 
-@keyframes my-animation {
-  from {
-    -moz-transform: translateX(100%);
-    -webkit-transform: translateX(100%);
-    transform: translateX(100%);
+.marquee-content {
+  display: inline-flex;
+  align-items: center;
+  will-change: transform;
+}
+
+.animate-marquee {
+  animation: marquee linear infinite;
+}
+
+.marquee-spacer {
+  display: inline-block;
+  width: 60px; // Slightly more air between loops
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
   }
-  to {
-    -moz-transform: translateX(-100%);
-    -webkit-transform: translateX(-100%);
-    transform: translateX(-100%);
+
+  20% {
+    transform: translateX(0); // Natural 20% pause at the start
+  }
+
+  80% {
+    transform: translateX(calc(-50% - 30px)); // Half width + half spacer
+  }
+
+  100% {
+    transform: translateX(calc(-50% - 30px)); // 20% pause at the end
   }
 }

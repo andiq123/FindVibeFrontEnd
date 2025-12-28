@@ -1,5 +1,5 @@
 <div
-  class="bg-base-100/90 rounded-t-2xl fixed bottom-16 left-1/2 slideUp w-full max-w-[500px] shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+  class="bg-base-100/95 rounded-2xl fixed bottom-[92px] left-1/2 -translate-x-1/2 slideUp w-[calc(100%-1.5rem)] max-w-[480px] shadow-premium backdrop-blur-3xl border border-glass-border z-40 cursor-pointer overflow-hidden p-0.5"
   (click)="toggleSize()"
 >
   <div class="flex items-center gap-4 w-full p-3">
@@ -19,13 +19,13 @@
     <div class="flex-1 min-w-0">
       <app-moving-title
         [title]="song().title"
-        [isActive]="true"
-        classes="text-sm font-medium truncate"
+        [isActive]="status() === playerStatus.Playing"
+        classes="text-sm font-medium block"
       />
       <app-moving-title
         [title]="song().artist"
-        [isActive]="true"
-        classes="text-xs text-base-content/50 truncate"
+        [isActive]="status() === playerStatus.Playing"
+        classes="text-xs text-base-content/50 block"
       />
     </div>
 

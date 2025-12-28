@@ -1,52 +1,72 @@
-import { Component, computed, input, output } from '@angular/core';
-import { Router } from '@angular/router';
+import {
+  Component,
+  input,
+  signal,
+  ElementRef,
+  viewChild,
+  AfterViewInit,
+  OnDestroy,
+  effect,
+} from '@angular/core';
 
 @Component({
-    selector: 'app-moving-title',
-    imports: [],
-    templateUrl: './moving-title.component.html',
-    styleUrl: './moving-title.component.scss'
+  selector: 'app-moving-title',
+  standalone: true,
+  imports: [],
+  templateUrl: './moving-title.component.html',
+  styleUrl: './moving-title.component.scss',
 })
-export class MovingTitleComponent {
+export class MovingTitleComponent implements AfterViewInit, OnDestroy {
   title = input.required<string>();
   classes = input<string>('text-md font-bold');
-  isActive = input<boolean>(false);
+  isActive = input<boolean>(true);
 
-  offset = input<number>(26);
-  isRedirect = input<boolean>(false);
-  closePlayer = output<void>();
+  // Direct DOM Access for overflow detection
+  container = viewChild<ElementRef<HTMLDivElement>>('container');
+  content = viewChild<ElementRef<HTMLDivElement>>('content');
 
-  constructor(private router: Router) {}
+  isOverflowing = signal<boolean>(false);
+  animationDuration = signal<number>(10);
+  
+  private resizeObserver?: ResizeObserver;
 
-  isLonger = computed(() => {
-    return this.title().length > this.offset();
-  });
+  constructor() {
+    // Re-check overflow when title changes
+    effect(() => {
+      this.title();
+      // Small delay to allow DOM update
+      setTimeout(() => this.checkOverflow(), 0);
+    });
+  }
 
-  trimmedTitle = computed(() => {
-    if (this.isLonger()) {
-      return this.title().slice(0, this.offset()) + '...';
-    } else return this.title();
-  });
-
-  titleToDisplay = computed(() => {
-    if (this.isActive() && this.isLonger()) {
-      return this.title();
+  ngAfterViewInit() {
+    this.checkOverflow();
+    
+    // Watch for container size changes
+    const containerEl = this.container()?.nativeElement;
+    if (containerEl && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.checkOverflow());
+      this.resizeObserver.observe(containerEl);
     }
-    if (this.isLonger()) {
-      return this.trimmedTitle();
-    }
-    return this.title();
-  });
+  }
 
-  async redirectToSearch() {
-    this.closePlayer.emit();
+  ngOnDestroy() {
+    this.resizeObserver?.disconnect();
+  }
 
-    const currentPath = document.URL.split('/')[3];
-    if (currentPath === 'songs') {
-      await this.router.navigate([`/library`]);
-      await this.router.navigate([`/songs/${this.title()}`]);
-    } else {
-      await this.router.navigate([`/songs/${this.title()}`]);
+  private checkOverflow() {
+    const containerEl = this.container()?.nativeElement;
+    const contentEl = this.content()?.nativeElement;
+
+    if (containerEl && contentEl) {
+      const hasOverflow = contentEl.scrollWidth > containerEl.clientWidth;
+      if (this.isOverflowing() !== hasOverflow) {
+        this.isOverflowing.set(hasOverflow);
+        // Adjust duration based on text length (approx 18px per second for a maximum premium, slower feel)
+        const scrollDistance = contentEl.scrollWidth / 2;
+        const duration = Math.max(12, scrollDistance / 18);
+        this.animationDuration.set(duration);
+      }
     }
   }
 }

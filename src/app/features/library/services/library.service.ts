@@ -68,7 +68,7 @@ export class LibraryService {
     return this.libraryApiService.removeFromFavorites(songId).pipe(
       tap({
         next: async () => {
-          await this.offlineStorageService.removeOneSongFromAvailableOfflineSongIds(
+          await this.offlineStorageService.removeSongFromCache(
             id,
             link
           );

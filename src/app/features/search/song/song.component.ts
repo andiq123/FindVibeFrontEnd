@@ -31,8 +31,6 @@ export class SongComponent {
 
   allowReorder = input<boolean>(false);
   onReorderSongs = output<{ from: string; to: string }>();
-  width = input<number>(56);
-  offset = input<number>(26);
   song = input.required<Song>();
   
   isActive = computed(() => this.playerService.song()?.link === this.song().link);

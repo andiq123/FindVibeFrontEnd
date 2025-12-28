@@ -1,199 +1,130 @@
 <div
-  class="h-screen fixed inset-0 z-50 overflow-hidden bg-gradient-to-b from-base-200 to-base-300 touch-none"
+  class="fixed bottom-0 left-0 right-0 h-full z-50 bg-base-100 flex flex-col slideUp overflow-hidden rounded-t-[2.5rem] shadow-2xl"
   [class.slideDown]="isClosingAnimation()"
-  (onClose)="toggleSize()"
   #playerRef
   appSwipeDown
 >
-  <!-- Modern blurred background art with enhanced effects -->
-  <div class="absolute inset-0 -z-20 overflow-hidden">
+  <!-- Native Grab Close Button - Enhanced Touch Area -->
+  <div class="w-full pt-4 pb-2 flex flex-col items-center justify-center shrink-0 relative z-20">
+    <button 
+      class="w-32 h-10 flex flex-col items-center justify-center group pressable-native"
+      (click)="toggleSize()"
+      aria-label="Close"
+    >
+      <div class="w-12 h-1.5 bg-white/20 rounded-full group-active:bg-white/40 group-hover:bg-white/30 transition-colors"></div>
+    </button>
+  </div>
+
+  <!-- Animated Mesh Background -->
+  <div class="absolute inset-0 -z-20 overflow-hidden bg-black">
     <img
       [ngSrc]="song().image || 'no_album_art.jpg'"
       alt="Song Art BG"
-      class="absolute inset-0 w-full h-full object-cover opacity-25 blur-3xl select-none pointer-events-none transition-all duration-700 scale-110"
+      class="absolute inset-0 w-full h-full object-cover blur-[100px] select-none pointer-events-none animate-bg-breathe"
       width="800"
       height="800"
       priority
       referrerpolicy="no-referrer"
       draggable="false"
     />
-    <div class="absolute inset-0 bg-gradient-to-b from-base-200/20 to-base-300/20"></div>
+    <div class="absolute inset-0 bg-black/60"></div>
   </div>
 
-  <!-- Modern gradient overlay with enhanced depth -->
   <div
-    class="absolute inset-0 -z-10 pointer-events-none"
-    style="
-      background: radial-gradient(
-          circle at center,
-          rgba(0, 0, 0, 0) 0%,
-          rgba(0, 0, 0, 0.2) 50%,
-          rgba(0, 0, 0, 0.5) 100%
-        ),
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, transparent 40%);
-    "
-  ></div>
-
-
-  <div
-    class="flex flex-col items-center justify-between h-full px-4 sm:px-8 py-4 sm:py-10 max-w-[500px] mx-auto relative z-10"
+    class="flex-1 flex flex-col items-center justify-start px-8 pb-10 pt-2 max-w-[600px] mx-auto relative z-10 w-full"
   >
-    <!-- Modern Album Art Section -->
-    <div class="w-full flex-1 flex flex-col items-center justify-center">
-      <div class="relative w-full max-w-[280px] sm:max-w-[300px] aspect-square mb-6 sm:mb-10">
-        <div
-          class="rounded-[1.75rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/30 cool3dArtworkAnimation relative w-full h-full transform transition-all duration-500 active:scale-[0.98] sm:hover:scale-[1.02] group"
-        >
+    <!-- Artwork Section - Fixed relative space -->
+    <div class="w-full flex-1 flex items-center justify-center artwork-container min-h-0">
+      <div 
+        class="relative w-full aspect-square max-w-[360px] group flex items-center justify-center artwork-wrapper"
+        [class.playing]="status() === playerStatus.Playing"
+      >
+        <div class="w-full h-full rounded-[2.5rem] overflow-hidden ios-artwork-shadow ring-1 ring-white/10 transition-transform duration-500 active:scale-95 shadow-2xl bg-white/5">
           @if (status() === playerStatus.Loading) {
-          <div
-            class="absolute inset-0 z-10 bg-base-200/30 backdrop-blur-xl flex flex-col justify-center items-center"
-          >
-            <span class="loading loading-ring loading-lg scale-150 sm:scale-150 text-primary"></span>
-          </div>
-          } @if(status() === playerStatus.Error){
-          <div
-            class="absolute inset-0 z-10 bg-base-200/30 backdrop-blur-xl flex flex-col justify-center items-center"
-          >
-            <p class="font-medium text-red-300 p-4 sm:p-5 text-center text-base sm:text-base">
-              Please try again later the song won't load...
-            </p>
-          </div>
+            <div class="absolute inset-0 z-10 bg-black/40 backdrop-blur-md flex items-center justify-center">
+              <span class="loading loading-spinner loading-lg text-white"></span>
+            </div>
           }
           <img
             [ngSrc]="song().image || 'no_album_art.jpg'"
             alt="Song Art"
-            class="w-full h-full object-cover transition-all duration-700 group-hover:brightness-110"
-            width="500"
-            height="500"
+            class="w-full h-full object-cover"
+            width="600"
+            height="600"
             priority
-            referrerpolicy="no-referrer"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
-        <!-- Modern Download Button -->
-        <button
-          class="btn btn-circle btn-ghost absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20 bg-base-100/80 hover:bg-primary/90 text-primary hover:text-white shadow-lg transition-all duration-300 active:scale-95 sm:hover:scale-110 touch-manipulation backdrop-blur-md w-12 h-12 sm:w-12 sm:h-12"
-          (click)="downloadSong()"
-          aria-label="Download song"
-        >
-          <fa-icon [icon]="faCloudArrowDown" class="text-xl sm:text-2xl" />
-        </button>
-      </div>
-
-      <!-- Modern Song Info Section -->
-      <div class="w-full text-center mb-6 sm:mb-10 px-4 sm:px-4">
-        <app-moving-title
-          [title]="song().title"
-          [isActive]="true"
-          classes="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
-        />
-        <app-moving-title
-          [title]="song().artist"
-          [isActive]="true"
-          classes="text-base sm:text-lg text-base-content/90 font-medium"
-          [isRedirect]="true"
-          (closePlayer)="toggleSize()"
-        />
       </div>
     </div>
 
-    <!-- Modern Controls Section -->
-    <div class="w-full max-w-[420px] sm:max-w-[450px] mx-auto space-y-6 sm:space-y-8">
-      <!-- Modern Progress Bar -->
-      <div class="space-y-2">
-        <div class="relative group">
-          <!-- Simple Modern Slider -->
-          <div class="relative h-8 bg-base-content/10 rounded-full overflow-hidden">
-            <!-- Progress Bar -->
+    <!-- Info & Controls Area - Locked heights -->
+    <div class="w-full shrink-0 space-y-8 pb-4">
+      <!-- Info Section with Favorite Button & Native Marquee -->
+      <div class="w-full px-2 h-20 flex items-center justify-between gap-4 shrink-0">
+        <div class="flex-1 text-left overflow-hidden">
+          <app-moving-title 
+            [title]="song().title" 
+            classes="text-3xl font-bold text-white tracking-tight leading-tight block w-full" 
+            [isActive]="status() === playerStatus.Playing"
+          />
+          <app-moving-title 
+            [title]="song().artist" 
+            classes="text-xl text-white/50 font-medium block w-full pt-1" 
+            [isActive]="status() === playerStatus.Playing"
+          />
+        </div>
+        <app-favorite-button [song]="song()" [forPlayer]="true" class="shrink-0 scale-125" />
+      </div>
+
+      <!-- iOS Style Seek Slider -->
+      <div class="space-y-3">
+        <div class="ios-slider-container">
+          <div class="slider-track">
             <div 
-              class="absolute h-full bg-primary rounded-full transition-all duration-100"
-              [style.width.%]="(currentTime() / duration()) * 100"
+              class="slider-fill"
+              #timeProgress
             ></div>
-            
-            <!-- Interactive Slider -->
-            <input
-              type="range"
-              min="0"
-              step="0.1"
-              [max]="duration()"
-              [value]="currentTime()"
-              (change)="seekTime($event)"
-              (input)="seekTime($event)"
-              class="absolute inset-0 w-full h-16 -top-4 cursor-pointer opacity-0 touch-manipulation"
-              [attr.aria-label]="'Seek to position in track'"
-              [attr.aria-valuemin]="0"
-              [attr.aria-valuemax]="duration()"
-              [attr.aria-valuenow]="currentTime()"
-            />
           </div>
+          <input
+            #timeSlider
+            type="range"
+            min="0"
+            step="0.1"
+            [max]="duration()"
+            [value]="isDraggingTime() ? visualTime() : currentTime()"
+            (input)="handleTimeInput($event)"
+            (change)="handleTimeChange($event)"
+          />
         </div>
-
-        <!-- Time Display -->
-        <div class="flex justify-between text-sm text-base-content/60 font-medium">
-          <p>{{ convertTime(currentTime()) }}</p>
-          <p>{{ convertTime(duration()) }}</p>
+        <div class="flex justify-between text-[11px] font-bold tracking-widest text-white/30 uppercase px-1">
+          <span>{{ convertTime(isDraggingTime() ? visualTime() : currentTime()) }}</span>
+          <span>{{ convertTime(duration()) }}</span>
         </div>
       </div>
 
-      <!-- Modern Player Controls -->
-      <div class="flex items-center justify-between px-2 sm:px-6">
-        <button
-          class="btn btn-ghost btn-circle active:scale-95 sm:hover:scale-110 transition-all duration-300 touch-manipulation hover:bg-base-200/40 w-14 h-14 sm:w-14 sm:h-14"
-          (click)="toggleShuffle()"
-          [class.text-primary]="isShuffle()"
-        >
-          <fa-icon [icon]="faShuffle" class="text-2xl sm:text-2xl" />
+      <!-- Playback Controls -->
+      <div class="flex items-center justify-between px-2">
+        <button class="w-10 h-10 flex items-center justify-center pressable-native" (click)="toggleShuffle()">
+          <fa-icon [icon]="faShuffle" [class.text-primary]="isShuffle()" class="text-xl text-white/40"></fa-icon>
+        </button>
+
+        <button class="w-14 h-14 flex items-center justify-center pressable-native text-white" (click)="previousSong()">
+          <fa-icon [icon]="faStepBackward" class="text-3xl"></fa-icon>
         </button>
 
         <button 
-          class="btn btn-ghost btn-circle active:scale-95 sm:hover:scale-110 transition-all duration-300 touch-manipulation hover:bg-base-200/40 w-14 h-14 sm:w-14 sm:h-14" 
-          (click)="previousSong()"
+          class="w-20 h-20 rounded-full bg-white flex items-center justify-center pressable-native shadow-2xl active:scale-95 transition-transform"
+          (click)="status() === playerStatus.Playing ? pause() : play()"
         >
-          <fa-icon [icon]="faStepBackward" class="text-2xl sm:text-2xl" />
+          <fa-icon [icon]="status() === playerStatus.Playing ? faPause : faPlay" class="text-3xl text-black"></fa-icon>
         </button>
 
-        @switch (status()) { @case (playerStatus.Playing) {
-        <button 
-          class="btn btn-circle btn-primary w-20 h-20 sm:w-24 sm:h-24 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 sm:hover:scale-105 touch-manipulation bg-gradient-to-br from-primary to-primary/90" 
-          (click)="pause()"
-        >
-          <fa-icon [icon]="faPause" class="text-4xl sm:text-4xl" />
-        </button>
-        } @default {
-        <button 
-          class="btn btn-circle btn-primary w-20 h-20 sm:w-24 sm:h-24 shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 sm:hover:scale-105 touch-manipulation bg-gradient-to-br from-primary to-primary/90" 
-          (click)="play()"
-        >
-          <fa-icon [icon]="faPlay" class="text-4xl sm:text-4xl" />
-        </button>
-        }}
-
-        <button 
-          class="btn btn-ghost btn-circle active:scale-95 sm:hover:scale-110 transition-all duration-300 touch-manipulation hover:bg-base-200/40 w-14 h-14 sm:w-14 sm:h-14" 
-          (click)="nextSong()"
-        >
-          <fa-icon [icon]="faStepForward" class="text-2xl sm:text-2xl" />
+        <button class="w-14 h-14 flex items-center justify-center pressable-native text-white" (click)="nextSong()">
+          <fa-icon [icon]="faStepForward" class="text-3xl"></fa-icon>
         </button>
 
-        <button
-          class="btn btn-ghost btn-circle active:scale-95 sm:hover:scale-110 transition-all duration-300 touch-manipulation hover:bg-base-200/40 w-14 h-14 sm:w-14 sm:h-14"
-          (click)="toggleRepeat()"
-          [class.text-primary]="isRepeat()"
-        >
-          <fa-icon [icon]="faRepeat" class="text-2xl sm:text-2xl" />
-        </button>
-      </div>
-
-      <!-- Modern Bottom Actions -->
-      <div class="flex items-center justify-between px-2 sm:px-6">
-        <app-favorite-button [song]="song()" [forPlayer]="true" />
-
-        <button
-          class="btn btn-circle btn-primary shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 sm:hover:scale-110 touch-manipulation bg-gradient-to-br from-primary to-primary/90 w-14 h-14 sm:w-14 sm:h-14"
-          (click)="toggleSize()"
-          [style]="{ 'background-color': dominantColor() | async }"
-        >
-          <fa-icon [icon]="faArrowDown" class="text-2xl sm:text-2xl" />
+        <button class="w-10 h-10 flex items-center justify-center pressable-native" (click)="toggleRepeat()">
+          <fa-icon [icon]="faRepeat" [class.text-primary]="isRepeat()" class="text-xl text-white/40"></fa-icon>
         </button>
       </div>
     </div>

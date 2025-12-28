@@ -4,12 +4,15 @@ import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
 import { TitleCasePipe } from '@angular/common';
 import { StorageInfoComponent } from './components/storage-info/storage-info.component';
+import { OfflineStorageService } from './services/offline-storage.service';
 import { catchError, Subscription, tap } from 'rxjs';
 import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.component';
 import {
   faCheck,
   faXmark,
   faRightFromBracket,
+  faArrowDown,
+  faCircleNotch,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlaylistService } from '../../core/services/playlist.service';
@@ -32,6 +35,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private playlistService = inject(PlaylistService);
   private lastRoute = inject(PreviousRouteService);
+  public offlineStorageService = inject(OfflineStorageService);
 
   private subscriptions: Subscription[] = [];
   songs = computed(() => this.libraryService.songs());
@@ -47,6 +51,13 @@ export class LibraryComponent implements OnInit, OnDestroy {
   faCheck = faCheck;
   faXmark = faXmark;
   faRightFromBracket = faRightFromBracket;
+  faArrowDown = faArrowDown;
+  faCircleNotch = faCircleNotch;
+
+  isDownloading = computed(() => this.offlineStorageService.currentLoadingDownloadSongIds().length > 0);
+  showStorageDot = computed(() => {
+    return this.offlineStorageService.availableOfflineSongIds().length > 0;
+  });
 
   ngOnInit(): void {
     if (this.isLoggedIn()) this.loadLibrary();

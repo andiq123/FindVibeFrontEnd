@@ -24,6 +24,11 @@ export class PlayerService {
   status = this.audioService.status;
   currentTime = this.audioService.currentTime;
   duration = this.audioService.duration;
+  volume = this.audioService.volume;
+
+  setVolume(value: number) {
+    this.audioService.setVolume(value);
+  }
 
   constructor() {
     this.setupRecentsEffect();
@@ -47,7 +52,7 @@ export class PlayerService {
     this.alreadyAddedInRecents.set(false);
     this.isFirstError.set(true);
 
-    const offlineLink = await this.offlineStorageService.isAvalaibleOffline(song.link);
+    const offlineLink = await this.offlineStorageService.isAvailableOffline(song.link);
     if (offlineLink) {
       const blob = await offlineLink.blob();
       this.audioService.setSource(URL.createObjectURL(blob));

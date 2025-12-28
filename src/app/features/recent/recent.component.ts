@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { Song } from '../../core/models/song.model';
 import { RecentService } from './services/recent.service';
 import { SongComponent } from '../search/song/song.component';
 import { PlaylistService } from '../../core/services/playlist.service';
+import { PlayerService } from '../../core/services/player.service';
 
 @Component({
     selector: 'app-recent',
@@ -11,12 +12,11 @@ import { PlaylistService } from '../../core/services/playlist.service';
     styleUrl: './recent.component.scss'
 })
 export class RecentComponent implements OnInit {
-  songs = signal<Song[]>([]);
+  private recentService = inject(RecentService);
+  private playlistService = inject(PlaylistService);
+  public playerService = inject(PlayerService);
 
-  constructor(
-    private recentService: RecentService,
-    private playlistService: PlaylistService
-  ) {}
+  songs = signal<Song[]>([]);
 
   ngOnInit(): void {
     this.songs.set(this.recentService.getRecentSongs());

@@ -34,8 +34,8 @@ export class AppUpdateService {
 
   private countdown(startTimer: number) {
     return interval(1000).pipe(
-      map(() => startTimer--),
-      takeWhile(() => startTimer > -1)
+      map(i => startTimer - i),
+      takeWhile(val => val >= 0)
     );
   }
 }

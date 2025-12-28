@@ -1,24 +1,39 @@
-<div class="w-[95%] mx-auto mt-3 slideRight">
-  <h1 class="font-bold text-2xl">Recently Played</h1>
-  <ul class="flex flex-col gap-1 mb-36 mt-5">
-    @for (song of songs(); track song.link) { @defer (on viewport){
-    <li>
-      <app-song
-        [song]="song"
-        [offset]="20"
-        (onChangePlaylist)="onChangePlaylist()"
-      />
-    </li>
-    }@placeholder {
-    <li>
-      <div class="py-5 px-3 bg-base-200 rounded-lg">
-        <p class="ml-16">Song is loading...</p>
-      </div>
-    </li>
-    } } @empty {
-    <li class="text-center">
-      When you listen to songs, last 20 will show here
-    </li>
-    }
-  </ul>
+<div class="w-full max-w-2xl mx-auto mt-0 pb-36 slideRight space-y-6">
+  <h1 class="font-bold text-3xl tracking-tight px-5 pt-4">History</h1>
+  
+  <div class="mx-5 bg-white/[0.03] rounded-[2.5rem] overflow-hidden border border-white/[0.05]">
+    <ul class="flex flex-col">
+      @for (song of songs(); track song.link) { 
+        @defer (on viewport){
+          <li 
+            class="group/item list-none transition-colors duration-200 hover:bg-white/[0.03] active:bg-white/[0.06] px-5"
+            [class.bg-primary/10]="playerService.song()?.link === song.link"
+          >
+            <app-song
+              [song]="song"
+              (onChangePlaylist)="onChangePlaylist()"
+            />
+          </li>
+        }@placeholder {
+          <li class="animate-pulse px-5">
+            <div class="py-3 flex items-center gap-4">
+              <div class="w-12 h-12 bg-base-300 rounded-lg shrink-0"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-3.5 bg-base-300 rounded w-3/4"></div>
+                <div class="h-2.5 bg-base-300 rounded w-1/2"></div>
+              </div>
+            </div>
+          </li>
+        } 
+      } @empty {
+        <li class="flex flex-col items-center justify-center py-12 px-8 text-center">
+          <div class="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
+            <span class="text-2xl">⏳</span>
+          </div>
+          <p class="text-base-content/70">No vibes yet</p>
+          <p class="text-base-content/50 text-sm mt-2">When you listen to songs, your last 20 will show up here</p>
+        </li>
+      }
+    </ul>
+  </div>
 </div>

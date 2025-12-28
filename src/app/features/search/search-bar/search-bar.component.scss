@@ -1,14 +1,37 @@
-.slideDown {
-  animation: slideDown 0.1s ease-in-out forwards;
+.animate-slideDown {
+  animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideDown {
   from {
-    transform: translateY(-5%);
+    transform: translateY(-12px) scale(0.98);
     opacity: 0;
   }
+
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
+}
+
+.suggestion-list {
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1);
+  will-change: transform, opacity;
+}
+
+.suggestion-item {
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// Improved accessibility and premium feel
+input::placeholder {
+  transition: opacity 0.2s ease;
+}
+
+input:focus::placeholder {
+  opacity: 0.5;
 }

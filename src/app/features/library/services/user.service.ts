@@ -20,7 +20,8 @@ export class UserService {
 
   loadUserIdFromStorage() {
     const user = this.storageService.getItem<User>('user');
-    if (user) {
+    console.log('Loading user from storage:', user);
+    if (user && user.id) {
       this._user.set(user);
       return user.id;
     }

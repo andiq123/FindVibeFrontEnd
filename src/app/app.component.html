@@ -1,13 +1,12 @@
-@if(newUpdateAvailable()){
+@if(!newUpdateAvailable()){
 <router-outlet />
 <app-audio-player />
 <app-navigation />
-
 }@else {
 <div
   class="bg-base-200 text-lg font-bold text-center h-[20vh] items-center shadow-lg rounded-b-xl justify-center flex flex-col"
 >
-  <p>New update available</p>
-  <p>Reddirecting in {{ secondsToUpdate() }} seconds...</p>
+  <p>Experience the latest Vibe</p>
+  <p>Reloading FindVibe in {{ secondsToUpdate() }} seconds...</p>
 </div>
 }

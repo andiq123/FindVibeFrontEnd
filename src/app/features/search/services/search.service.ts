@@ -47,6 +47,12 @@ export class SearchService {
     this._suggestions.set([]);
   }
 
+  resetSearch() {
+    this._songs.set([]);
+    this._searchStatus.set(SearchStatus.None);
+    this.resetSuggestions();
+  }
+
   private setStatusFinished() {
     this._searchStatus.set(SearchStatus.Finished);
   }

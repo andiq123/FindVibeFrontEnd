@@ -1,10 +1,11 @@
-import { Component, computed, input, OnInit, signal } from '@angular/core';
+import { Component, computed, input, OnInit, signal, OnDestroy, effect } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faMagnifyingGlass, faCircleXmark, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { SearchService } from '../services/search.service';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
     selector: 'app-search-bar',
@@ -12,20 +13,59 @@ import { SearchService } from '../services/search.service';
     templateUrl: './search-bar.component.html',
     styleUrl: './search-bar.component.scss'
 })
-export class SearchBarComponent implements OnInit {
+export class SearchBarComponent implements OnInit, OnDestroy {
   query = input<string>('');
   searchTerm = signal<string>('');
-  suggestions = computed(() => this.songsService.suggestions());
+  isFocused = signal<boolean>(false);
+  suggestions = computed(() => this.suggestionsService.suggestions());
+  
+  private searchSubject = new Subject<string>();
 
   faMagnifyingGlass = faMagnifyingGlass;
+  faCircleXmark = faCircleXmark;
+  faArrowUpLeft = faArrowUp; 
 
   constructor(
-    private songsService: SearchService,
+    public suggestionsService: SearchService,
     private router: Router
-  ) {}
+  ) {
+    // React to query input changes (e.g. from navigation)
+    effect(() => {
+      const q = this.query();
+      if (q) {
+        this.searchTerm.set(q);
+        this.submitSearchSongs();
+        this.suggestionsService.resetSuggestions();
+      } else {
+        // Handle empty query (reset state)
+        this.searchTerm.set('');
+        this.suggestionsService.resetSearch();
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.searchIfQueryPresent();
+    // Best Debounce Approach: RxJS Subject with 300ms window
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(term => {
+      if (term.trim()) {
+        this.searchSuggestion(term);
+      } else {
+        this.suggestionsService.resetSuggestions();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubject.complete();
+  }
+
+  fillSuggestion(suggestion: string, event: Event) {
+    event.stopPropagation();
+    this.searchTerm.set(suggestion);
+    this.searchSuggestion(suggestion);
   }
 
   async searchBySuggestion(suggestion: string) {
@@ -33,46 +73,47 @@ export class SearchBarComponent implements OnInit {
     await this.submit();
   }
 
-  search(event: Event) {
+  onInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
+    this.searchSubject.next(value);
+  }
 
-    if (this.searchTerm() === '') this.songsService.resetSuggestions();
-    else this.searchSuggestion();
+  clearSearch() {
+    this.searchTerm.set('');
+    this.searchSubject.next('');
+    this.suggestionsService.resetSuggestions();
+  }
+
+  cancelSearch() {
+    this.searchTerm.set('');
+    this.suggestionsService.resetSearch();
+    this.router.navigate(['/songs/']); // Reset route to search base
   }
 
   async submit() {
-    if (this.searchTerm() === '') {
+    if (this.searchTerm().trim() === '') {
       return;
     }
 
     await this.setQueryParamsToCurrentSearchTerm();
-
     this.submitSearchSongs();
-    this.songsService.resetSuggestions();
+    this.suggestionsService.resetSuggestions();
   }
 
   private async setQueryParamsToCurrentSearchTerm() {
     await this.router.navigate([`/songs/${this.searchTerm()}`]);
   }
 
-  private searchSuggestion() {
-    this.songsService.getSuggestions(this.searchTerm()).subscribe({
-      error: () => this.songsService.resetSuggestions(),
+  private searchSuggestion(term: string) {
+    this.suggestionsService.getSuggestions(term).subscribe({
+      error: () => this.suggestionsService.resetSuggestions(),
     });
   }
 
-  private searchIfQueryPresent() {
-    if (this.query() === '' || this.query() === undefined) return;
-
-    this.searchTerm.set(this.query() || '');
-    this.submitSearchSongs();
-    this.songsService.resetSuggestions();
-  }
-
   private submitSearchSongs() {
-    this.songsService.searchSongs(this.searchTerm()).subscribe({
-      error: () => this.songsService.resetSuggestions(),
+    this.suggestionsService.searchSongs(this.searchTerm()).subscribe({
+      error: () => this.suggestionsService.resetSuggestions(),
     });
   }
 }

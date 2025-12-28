@@ -1,18 +1,26 @@
 @if (isAbleToAddToFav()) {
 <button
-  class="btn btn-circle btn-ghost flex items-center justify-center transition-all duration-200"
-  [class]="forPlayer() ? 'btn btn-circle btn-lg bg-transparent border-none active:bg-base-200/40 hover:bg-base-200/40 disabled:bg-transparent' : 'btn btn-circle btn-sm bg-base-100 hover:bg-base-200 active:scale-95 border border-base-200'"
+  class="flex items-center justify-center transition-all duration-300 pressable-native outline-none select-none"
+  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform' : 'tap-target-44 w-11 h-11 rounded-full bg-white/[0.05] border border-white/[0.05] active:bg-white/[0.1]'"
   (click)="toggleAddToFavorite()"
   [disabled]="isLoadingFavorite()"
   aria-label="Toggle favorite"
 >
   @if(isLoadingFavorite()){
-    <span class="loading loading-spinner loading-xs mx-auto"></span>
+    <span class="loading loading-spinner loading-xs mx-auto text-primary"></span>
   }@else{ 
     @if (isFavorited()) {
-      <fa-icon [icon]="favoritedHeart" [size]="forPlayer() ? '2x' : 'lg'" class="text-primary transition-colors duration-200" />
+      <fa-icon 
+        [icon]="favoritedHeart" 
+        [size]="forPlayer() ? '2x' : 'lg'" 
+        class="text-primary animate-heart-pop" 
+      />
     } @else {
-      <fa-icon [icon]="unFavoritedHeart" [size]="forPlayer() ? '2x' : 'lg'" class="text-base-content/40 hover:text-primary transition-colors duration-200" />
+      <fa-icon 
+        [icon]="unFavoritedHeart" 
+        [size]="forPlayer() ? '2x' : 'lg'" 
+        class="text-white/40 active:text-primary transition-colors duration-200" 
+      />
     } 
   }
 </button>

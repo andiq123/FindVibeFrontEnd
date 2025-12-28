@@ -1,41 +1,69 @@
-<form (ngSubmit)="submit()" class="relative">
-  <div class="relative flex items-center w-full">
-    <div class="absolute left-4 text-base-content/30 pointer-events-none">
+<form (ngSubmit)="submit()" class="flex items-center gap-3 w-full group">
+  <div class="relative flex-1">
+    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none transition-colors" [class.text-primary/40]="isFocused()">
       <fa-icon class="text-base" [icon]="faMagnifyingGlass"></fa-icon>
     </div>
     <input
+      #searchInput
       type="text"
-      placeholder="Search for songs, artists..."
+      placeholder="Artists, songs, lyrics..."
       name="searchTerm"
-      class="bg-base-100/30 px-5 py-3 w-full my-4 outline-none rounded-full border border-base-200/30 focus:border-primary/30 focus:ring-1 focus:ring-primary/20 transition-all duration-200 pl-12"
-      [value]="searchTerm()"
-      (input)="search($event)"
+      class="bg-white/[0.04] px-5 py-2.5 w-full outline-none rounded-2xl border border-white/[0.05] focus:border-primary/20 focus:bg-white/[0.08] transition-all duration-300 pl-11 text-[17px] tracking-tight placeholder:text-white/20"
+      [ngModel]="searchTerm()"
+      (input)="onInput($event)"
+      (focus)="isFocused.set(true)"
+      (blur)="isFocused.set(false)"
       autocomplete="off"
-      autofocus
+      aria-label="Search"
     />
-    <button
-      type="submit"
-      class="btn btn-ghost btn-sm ml-2 text-base-content/30 hover:text-primary transition-colors duration-200"
-      [disabled]="searchTerm() === ''"
-      style="margin-right: 0.25rem;"
-    >
-      <fa-icon class="text-base" [icon]="faMagnifyingGlass"></fa-icon>
-    </button>
+    @if(searchTerm() !== '') {
+      <button 
+        type="button"
+        (click)="clearSearch()"
+        class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white/40 hover:text-white/60 transition-colors"
+      >
+        <fa-icon [icon]="faCircleXmark" class="text-xs" />
+      </button>
+    }
   </div>
 
-  @if(suggestions().length>0){
-  <ul
-    class="absolute bg-base-100 top-11 mt-4 p-3 w-full flex flex-col gap-2 rounded-2xl shadow-xl border border-base-200 slideDown z-50"
+  <button
+    type="button"
+    (click)="cancelSearch()"
+    class="text-primary font-medium text-[17px] px-1 hover:opacity-70 active:scale-95 transition-all w-0 overflow-hidden whitespace-nowrap opacity-0"
+    [class.!w-auto]="isFocused() || searchTerm() !== ''"
+    [class.!opacity-100]="isFocused() || searchTerm() !== ''"
   >
-    @for(suggestion of suggestions(); track i; let i = $index){
-    <li
-      class="bg-base-100 hover:bg-base-200 rounded-xl p-3 cursor-pointer transition-colors duration-200 flex gap-3 items-center group"
-      (click)="searchBySuggestion(suggestion)"
-    >
-      <fa-icon class="text-sm text-base-content/40 group-hover:text-primary transition-colors duration-200" [icon]="faMagnifyingGlass"></fa-icon>
-      <span class="text-sm font-medium text-base-content/80 group-hover:text-base-content transition-colors duration-200">{{ suggestion | titlecase }}</span>
-    </li>
-    }
-  </ul>
+    Cancel
+  </button>
+
+  @if(suggestions().length > 0) {
+    <div class="absolute top-12 left-0 w-full z-50 pt-3 animate-slideDown">
+      <ul class="suggestion-list bg-base-300/95 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl flex flex-col">
+        @for(suggestion of suggestions(); track suggestion) {
+          <li
+            class="suggestion-item group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-white/10 transition-colors relative"
+            (click)="searchBySuggestion(suggestion)"
+          >
+            <div class="flex items-center gap-4 min-w-0">
+              <fa-icon class="text-white/20 group-hover:text-primary/60 transition-colors" [icon]="faMagnifyingGlass"></fa-icon>
+              <span class="text-[17px] font-medium text-white/90 truncate">{{ suggestion | titlecase }}</span>
+            </div>
+            
+            <button 
+              type="button"
+              (click)="fillSuggestion(suggestion, $event)"
+              class="w-10 h-10 flex items-center justify-center -mr-2 text-white/20 hover:text-white/60 active:scale-90 transition-all"
+              aria-label="Fill suggestion"
+            >
+              <fa-icon [icon]="faArrowUpLeft" class="-rotate-45 text-sm" />
+            </button>
+
+            <!-- Hairline Divider -->
+            <div class="absolute bottom-0 left-12 right-0 h-[0.5px] bg-white/[0.06] group-last:hidden"></div>
+          </li>
+        }
+      </ul>
+    </div>
   }
 </form>

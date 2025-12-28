@@ -10,9 +10,17 @@ export class AudioService implements OnDestroy {
   status = signal<PlayerStatus>(PlayerStatus.Stopped);
   currentTime = signal<number>(0);
   duration = signal<number>(0);
+  volume = signal<number>(1);
 
   constructor() {
     this.setupListeners();
+    this.audio.volume = this.volume();
+  }
+
+  setVolume(value: number) {
+    const clampedValue = Math.max(0, Math.min(1, value));
+    this.audio.volume = clampedValue;
+    this.volume.set(clampedValue);
   }
 
   private setupListeners() {
