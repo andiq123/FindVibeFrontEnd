@@ -25,7 +25,6 @@ import {
   faStepForward,
 } from '@fortawesome/free-solid-svg-icons';
 import { PlayerStatus } from '../models/player.model';
-import { getDominantColor } from '@rtcoder/dominant-color';
 import { SettingsService } from '../../../core/services/settings.service';
 import { NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
@@ -80,8 +79,6 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   playerRef = viewChild<ElementRef<HTMLDivElement>>('playerRef');
   timeSlider = viewChild<ElementRef<HTMLInputElement>>('timeSlider');
   timeProgress = viewChild<ElementRef<HTMLDivElement>>('timeProgress');
-
-  dominantColor = computed(() => this.updateDominantColor());
 
   isDraggingTime = signal<boolean>(false);
   currentTime = computed(() => this.serviceCurrentTime());
@@ -178,22 +175,11 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
     this.settingsService.toggleShuffle();
   }
 
-  private async updateDominantColor(): Promise<string> {
-    const song = this.song();
-    if (!song?.image) return '#000000';
-
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = song.image;
-      img.onload = () => {
-        getDominantColor(img, {
-          downScaleFactor: 1,
-          skipPixels: 0,
-          colorFormat: 'hex',
-          callback: (color) => resolve(color),
-        });
-      };
-      img.onerror = () => resolve('#000000');
-    });
+  navigateToArtist() {
+    const artistName = this.song().artist;
+    if (artistName) {
+      this.toggleSize();
+      this.router.navigate(['/songs', artistName]);
+    }
   }
 }

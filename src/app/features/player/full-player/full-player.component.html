@@ -59,7 +59,12 @@
             fontSize="1.75rem"
             color="white"
           />
-          <p class="text-white/60 text-lg truncate mt-1">{{ song().artist }}</p>
+          <button 
+            class="text-white/60 text-lg truncate mt-1 hover:text-white/80 transition-colors text-left w-full"
+            (click)="navigateToArtist()"
+          >
+            {{ song().artist }}
+          </button>
         </div>
         <app-favorite-button [song]="song()" />
       </div>
@@ -94,8 +99,10 @@
 
       <div class="flex items-center justify-between pt-2">
         <button
-          class="p-4 text-white/40 hover:text-white transition-colors"
-          [class.text-primary]="isShuffle()"
+          class="p-4 transition-colors"
+          [class.text-white]="isShuffle()"
+          [class.text-white/40]="!isShuffle()"
+          [class.hover:text-white]="!isShuffle()"
           (click)="toggleShuffle()"
         >
           <fa-icon [icon]="faShuffle" size="lg" />
@@ -123,8 +130,10 @@
         </div>
 
         <button
-          class="p-4 text-white/40 hover:text-white transition-colors"
-          [class.text-primary]="isRepeat()"
+          class="p-4 transition-colors"
+          [class.text-white]="isRepeat()"
+          [class.text-white/40]="!isRepeat()"
+          [class.hover:text-white]="!isRepeat()"
           (click)="toggleRepeat()"
         >
           <fa-icon [icon]="faRepeat" size="lg" />
