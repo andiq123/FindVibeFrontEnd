@@ -1,5 +1,5 @@
 <div
-  class="fixed bottom-0 left-0 right-0 h-full z-50 bg-base-100 flex flex-col overflow-hidden rounded-t-[2.5rem] shadow-2xl"
+  class="fixed bottom-0 left-0 right-0 h-[100dvh] z-50 bg-base-100 flex flex-col overflow-hidden rounded-t-[2.5rem] shadow-2xl"
   [class.anim-slide-in-up-spring]="isOpeningAnimation()"
   [class.anim-slide-out-down]="isClosingAnimation()"
   #playerRef
@@ -30,11 +30,11 @@
   </div>
 
   <div
-    class="flex-1 flex flex-col items-center justify-start px-8 pb-10 pt-2 max-w-[600px] mx-auto relative z-10 w-full"
+    class="flex-1 flex flex-col items-center justify-start px-6 pb-safe-bottom pt-2 max-w-[600px] mx-auto relative z-10 w-full min-h-0"
   >
-    <div class="w-full flex-1 flex items-center justify-center artwork-container min-h-0">
+    <div class="w-full flex-1 flex items-center justify-center artwork-container min-h-0 py-4">
       <div 
-        class="relative w-full aspect-square max-w-[360px] group flex items-center justify-center artwork-wrapper"
+        class="relative w-full aspect-square max-w-[340px] group flex items-center justify-center artwork-wrapper"
         [class.playing]="status() === playerStatus.Playing"
       >
         <div class="absolute inset-0 rounded-2xl overflow-hidden ios-artwork-shadow">
@@ -50,7 +50,7 @@
       </div>
     </div>
 
-    <div class="w-full mt-6 space-y-8 shrink-0">
+    <div class="w-full mt-4 space-y-6 shrink-0">
       <div class="flex items-center justify-between gap-4">
         <div class="flex-1 min-w-0">
           <app-moving-title
@@ -108,7 +108,7 @@
           <fa-icon [icon]="faShuffle" size="lg" />
         </button>
 
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4">
           <button
             class="p-4 text-white hover:text-primary transition-colors"
             (click)="previous()"
@@ -116,10 +116,10 @@
             <fa-icon [icon]="faStepBackward" size="2xl" />
           </button>
           <button
-            class="w-20 h-20 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 active:scale-95 transition-transform shadow-xl"
+            class="w-16 h-16 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 active:scale-95 transition-transform shadow-xl"
             (click)="togglePlay()"
           >
-            <fa-icon [icon]="status() === playerStatus.Playing ? faPause : faPlay" size="2xl" />
+            <fa-icon [icon]="status() === playerStatus.Playing ? faPause : faPlay" size="xl" />
           </button>
           <button
             class="p-4 text-white hover:text-primary transition-colors"

@@ -28,6 +28,7 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   private isSwiping = false;
   private hasHitThreshold = false;
   private isDismissing = false;
+  private rafId: number | null = null;
 
   private boundOnStart = this.onStart.bind(this);
   private boundOnMove = this.onMove.bind(this);
@@ -44,6 +45,7 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.cancelRaf();
     const el = this.el.nativeElement;
     el.removeEventListener('touchstart', this.boundOnStart);
     document.removeEventListener('touchmove', this.boundOnMove);
@@ -68,7 +70,9 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     this.startY = event.touches[0].clientY;
     this.startTime = performance.now();
     this.isSwiping = true;
+    this.currentY = 0;
     this.hasHitThreshold = false;
+    this.cancelRaf();
 
     const style = this.el.nativeElement.style;
     style.setProperty('animation', 'none', 'important');
@@ -78,13 +82,30 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   onMove(event: TouchEvent) {
     if (!this.isSwiping || this.isDismissing) return;
 
-    const deltaY = event.touches[0].clientY - this.startY;
+    if (event.cancelable) event.preventDefault();
+    
+    // Calculate raw delta
+    let deltaY = event.touches[0].clientY - this.startY;
+
+    // Apply rubber-banding if dragging up (negative delta)
+    if (deltaY < 0) {
+      deltaY = this.calculateRubberBand(deltaY);
+    }
+
     this.currentY = deltaY;
 
-    if (event.cancelable) event.preventDefault();
+    // Use requestAnimationFrame for smooth 120Hz updates
+    if (this.rafId === null) {
+      this.rafId = requestAnimationFrame(this.updatePosition.bind(this));
+    }
+  }
+
+  private updatePosition() {
+    this.rafId = null;
     this.el.nativeElement.style.transform = `translate3d(0, ${this.currentY}px, 0)`;
 
-    const threshold = window.innerHeight * 0.1;
+    // Haptic feedback logic
+    const threshold = window.innerHeight * 0.15;
     if (this.currentY > threshold && !this.hasHitThreshold) {
       this.hasHitThreshold = true;
       this.hapticService.light();
@@ -94,16 +115,18 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   }
 
   onEnd() {
+    this.cancelRaf();
     this.ngZone.run(() => {
       if (!this.isSwiping || this.isDismissing) return;
       this.isSwiping = false;
 
       const duration = performance.now() - this.startTime;
       const velocity = duration > 0 ? this.currentY / duration : 0;
-      const threshold = window.innerHeight * 0.1;
-      const velocityThreshold = 0.5;
+      const threshold = window.innerHeight * 0.2; // 20% of screen to dismiss
+      const velocityThreshold = 0.6; // Higher velocity requirement
 
-      if (this.currentY > threshold || (velocity > velocityThreshold && this.currentY > 40)) {
+      // Dismiss if dragged far enough OR flicked fast enough downwards
+      if (this.currentY > threshold || (velocity > velocityThreshold && this.currentY > 50)) {
         this.performDismiss(velocity);
       } else {
         this.performSnapBack();
@@ -115,10 +138,20 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     this.isDismissing = true;
     const el = this.el.nativeElement;
 
-    const remainingDistance = window.innerHeight - this.currentY;
-    const duration = Math.min(0.18, Math.max(0.05, remainingDistance / (Math.abs(velocity) * 2000 + 1200)));
+    // Calculate natural duration based on velocity but clamp it for consistent feel
+    // iOS system animations usually feel best around 350-500ms
+    const baseDuration = 400; 
+    let duration = baseDuration;
+    
+    if (velocity > 1) {
+        duration = Math.max(250, baseDuration - (velocity * 50));
+    }
 
-    el.style.setProperty('transition', `transform ${duration}s cubic-bezier(0.33, 1, 0.68, 1)`, 'important');
+    // Convert ms to seconds
+    const durationSec = duration / 1000;
+
+    // Native iOS spring-like curve
+    el.style.setProperty('transition', `transform ${durationSec}s cubic-bezier(0.32, 0.72, 0, 1)`, 'important');
     el.style.transform = 'translate3d(0, 100%, 0)';
 
     setTimeout(() => {
@@ -126,12 +159,13 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
         this.closePanel.emit();
         this.isDismissing = false;
       });
-    }, duration * 1000);
+    }, duration);
   }
 
   private performSnapBack() {
     const el = this.el.nativeElement;
-    el.style.setProperty('transition', 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)', 'important');
+    // Spring-like snap back
+    el.style.setProperty('transition', 'transform 0.4s cubic-bezier(0.17, 0.89, 0.24, 1.1)', 'important');
     el.style.transform = 'translate3d(0, 0, 0)';
 
     const onTransitionEnd = (e: TransitionEvent) => {
@@ -146,5 +180,19 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     el.addEventListener('transitionend', onTransitionEnd);
     this.currentY = 0;
     this.hasHitThreshold = false;
+  }
+
+  // Apple's rubber-banding formula approximation
+  private calculateRubberBand(offset: number): number {
+      const dimension = window.innerHeight;
+      const constant = 0.55;
+      return (1.0 - (1.0 / ((Math.abs(offset) * constant / dimension) + 1.0))) * dimension * -1;
+  }
+
+  private cancelRaf() {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
   }
 }

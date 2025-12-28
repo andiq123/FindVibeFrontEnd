@@ -1,7 +1,12 @@
-.fixed.h-full {
+.fixed.h-\[100dvh\] {
+  height: 100dvh;
   touch-action: none;
   will-change: transform;
   transform: translate3d(0, 0, 0);
+}
+
+.pb-safe-bottom {
+  padding-bottom: max(2rem, env(safe-area-inset-bottom) + 1.5rem);
 }
 
 .artwork-container {

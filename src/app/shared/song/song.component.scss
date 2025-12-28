@@ -11,7 +11,8 @@
 }
 
 .song-container {
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+  touch-action: pan-y;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1),
     background-color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 
@@ -27,11 +28,24 @@
 
 .album-art {
   &.loading {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+    background-color: rgba(255, 255, 255, 0.03);
   }
 
   img {
     will-change: opacity;
+  }
+}
+
+/* Optimized Pulse Animation */
+@keyframes pulse-opacity {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
   }
 }
 
@@ -41,19 +55,7 @@
   .skeleton-image,
   .skeleton-title,
   .skeleton-artist {
-    position: relative;
-    overflow: hidden;
-
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(255, 255, 255, 0.05),
-          transparent);
-      animation: shimmer 1.5s infinite;
-    }
+    animation: pulse-opacity 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
 
@@ -74,18 +76,6 @@ app-favorite-button {
 .song-active {
   background: oklch(var(--p) / 0.1);
   box-shadow: inset 0 0 40px oklch(var(--p) / 0.05);
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: oklch(var(--p));
-    box-shadow: 2px 0 15px oklch(var(--p) / 0.6);
-    z-index: 10;
-  }
 }
 
 .song-container.song-active {
