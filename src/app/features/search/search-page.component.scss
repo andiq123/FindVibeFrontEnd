@@ -1,19 +1,8 @@
 // Using idiomatic animations and stagger pattern
 
-.results-container {
-    // Using: .anim-fade-in-slow
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 .song-item-staggered {
-    // Using: .anim-slide-fade-in-up with .anim-stagger on parent
-    opacity: 0;
-
-    @for $i from 1 through 20 {
-        &:nth-child(#{$i}) {
-            animation-delay: calc(#{$i} * 0.05s);
-        }
-    }
+    // Animation is handled by anim-slide-fade-in-up and anim-stagger on parent
+    will-change: transform, opacity;
 }
 
 .skeleton-item {

@@ -1,4 +1,4 @@
-import { Component, computed, OnDestroy, OnInit, signal, inject } from '@angular/core';
+import { Component, computed, OnDestroy, signal, inject } from '@angular/core';
 import { LibraryService } from './services/library.service';
 import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
@@ -7,6 +7,7 @@ import { StorageInfoComponent } from './components/storage-info/storage-info.com
 import { OfflineStorageService } from './services/offline-storage.service';
 import { catchError, Subscription, tap } from 'rxjs';
 import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.component';
+import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
 import {
   faCheck,
   faXmark,
@@ -16,6 +17,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlaylistService } from '../../core/services/playlist.service';
+import { SettingsService } from '../../core/services/settings.service';
 
 
 @Component({
@@ -26,14 +28,16 @@ import { PlaylistService } from '../../core/services/playlist.service';
         StorageInfoComponent,
         SongsWrapperComponent,
         FontAwesomeModule,
+        PullToRefreshDirective,
     ],
     templateUrl: './library.component.html',
     styleUrl: './library.component.scss'
 })
-export class LibraryComponent implements OnInit, OnDestroy {
+export class LibraryComponent implements OnDestroy {
   private libraryService = inject(LibraryService);
   private userService = inject(UserService);
   private playlistService = inject(PlaylistService);
+  private settingsService = inject(SettingsService);
 
   public offlineStorageService = inject(OfflineStorageService);
 
@@ -43,9 +47,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
   isLoggedIn = computed(() => !!this.userService.user());
   username = computed(() => this.userService.user()?.username || '');
   userId = computed(() => this.userService.user()?.id || '');
+  isOffline = this.settingsService.isOffline;
 
   loadingReorder = signal(false);
-  loadingSongs = signal(true);
+  loadingSongs = this.libraryService.loadingSongs;
 
 
   faCheck = faCheck;
@@ -59,24 +64,20 @@ export class LibraryComponent implements OnInit, OnDestroy {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
   });
 
-  ngOnInit(): void {
-    if (this.isLoggedIn()) this.loadLibrary();
-    else this.registerWaitForNewUser();
-  }
 
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
   }
 
-  loadLibrary() {
-    this.libraryService.updateLibrarySongs(this.userId()).subscribe(() => {
-      this.loadingSongs.set(false);
-    });
+  handleRefresh() {
+    if (this.userId()) {
+      this.libraryService.updateLibrarySongs(this.userId());
+    }
   }
 
   changeUser() {
+    this.playlistService.reset();
     this.userService.resetUser();
-    this.registerWaitForNewUser();
   }
 
   reorderSongs(data: { from: string; to: string }) {
@@ -105,13 +106,5 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
-  }
-
-  private registerWaitForNewUser() {
-    this.subscriptions.push(
-      this.userService.userLoggedIn.subscribe(() => {
-        this.loadLibrary();
-      })
-    );
   }
 }

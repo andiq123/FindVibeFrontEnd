@@ -1,4 +1,4 @@
-import { Directive, HostListener, output } from '@angular/core';
+import { Directive, HostListener, output, ElementRef, inject, Renderer2 } from '@angular/core';
 
 @Directive({
   selector: '[appDragAndDrop]',
@@ -8,85 +8,76 @@ import { Directive, HostListener, output } from '@angular/core';
   },
 })
 export class DragAndDropDirective {
+  private el = inject(ElementRef);
+  private renderer = inject(Renderer2);
+  private currentDropTarget: HTMLElement | null = null;
+  
   reorderSongs = output<{ from: string; to: string }>();
 
   @HostListener('dragstart', ['$event'])
-  onDragStart(event: DragEvent) {
-    const target = event.target as HTMLDivElement;
-    const initiatorId = target.id;
-
-    event.dataTransfer?.setData('id', initiatorId);
-    target.classList.add('dragging');
-
-    const elToRemove = target.querySelector('#elToRemove');
-    elToRemove?.classList.add('pointer-events-none');
+  onDragStart(event: DragEvent): void {
+    const target = this.el.nativeElement;
+    event.dataTransfer?.setData('id', target.id);
+    this.renderer.addClass(target, 'dragging');
   }
 
-  @HostListener('dragend', ['$event'])
-  onDragEnd(event: DragEvent) {
-    const target = event.target as HTMLDivElement;
-    target.classList.remove('dragging');
-    const elToRemove = target.querySelector('#elToRemove');
-    elToRemove?.classList.remove('pointer-events-none');
+  @HostListener('dragend')
+  onDragEnd(): void {
+    this.renderer.removeClass(this.el.nativeElement, 'dragging');
+    this.clearDropTarget();
   }
 
   @HostListener('dragenter', ['$event'])
-  onDragEnter(event: DragEvent) {
+  onDragEnter(event: DragEvent): void {
     event.preventDefault();
-    const target = event.target as HTMLDivElement;
-
-    const elToRemove = target.querySelector('#elToRemove');
-    elToRemove?.classList.add('pointer-events-none');
-
-    const draggable = target.attributes.getNamedItem('draggable');
-    if (draggable) {
-      target.classList.add('dragTarget');
+    event.stopPropagation();
+    const target = this.el.nativeElement;
+    if (target.id && !target.classList.contains('dragging')) {
+      this.setDropTarget(target);
     }
   }
 
   @HostListener('dragleave', ['$event'])
-  onDragLeave(event: DragEvent) {
+  onDragLeave(event: DragEvent): void {
     event.preventDefault();
-    const target = event.target as HTMLDivElement;
-
-    const elToRemove = target.querySelector('#elToRemove');
-    elToRemove?.classList.remove('pointer-events-none');
-
-    const draggable = target.attributes.getNamedItem('draggable');
-    if (draggable) {
-      target.classList.remove('dragTarget');
-    }
-  }
-
-  @HostListener('drop', ['$event'])
-  onDrop(event: DragEvent) {
-    event.preventDefault();
-    const target = event.target as HTMLDivElement;
-
-    const elToRemove = target.querySelector('#elToRemove');
-    elToRemove?.classList.remove('pointer-events-none');
-
-    const draggable = target.attributes.getNamedItem('draggable');
-    if (draggable) {
-      target.classList.remove('dragTarget');
-      const initiatorId = event.dataTransfer?.getData('id');
-      const title = target.id;
-      this.reorderSongs.emit({ from: initiatorId!, to: title });
+    event.stopPropagation();
+    const relatedTarget = event.relatedTarget as HTMLElement;
+    if (!this.el.nativeElement.contains(relatedTarget)) {
+      this.clearDropTarget();
     }
   }
 
   @HostListener('dragover', ['$event'])
-  onDragOver(event: DragEvent) {
+  onDragOver(event: DragEvent): void {
     event.preventDefault();
   }
 
-  private addPointerNone() {
-    const el = document.getElementById('elToRemove');
-    el?.classList.add('pointer-events-none');
+  @HostListener('drop', ['$event'])
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    const target = this.el.nativeElement;
+    const initiatorId = event.dataTransfer?.getData('id');
+    const targetId = target.id;
+    
+    if (initiatorId && targetId && initiatorId !== targetId) {
+      this.reorderSongs.emit({ from: initiatorId, to: targetId });
+    }
+    
+    this.clearDropTarget();
   }
 
-  private removePointerNone() {
-    const el = document.getElementById('elToRemove');
-    el?.classList.remove('pointer-events-none');
+  private setDropTarget(target: HTMLElement): void {
+    if (this.currentDropTarget !== target) {
+      this.clearDropTarget();
+      this.currentDropTarget = target;
+      this.renderer.addClass(target, 'dragTarget');
+    }
+  }
+
+  private clearDropTarget(): void {
+    if (this.currentDropTarget) {
+      this.renderer.removeClass(this.currentDropTarget, 'dragTarget');
+      this.currentDropTarget = null;
+    }
   }
 }

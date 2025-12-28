@@ -15,20 +15,41 @@ export class SearchService {
   private readonly _songs = signal<Song[]>([]);
   private readonly _searchStatus = signal<SearchStatus>(SearchStatus.None);
   private readonly _suggestions = signal<string[]>([]);
+  private readonly _lastSearchQuery = signal<string>('');
 
   readonly songs = this._songs.asReadonly();
   readonly status = this._searchStatus.asReadonly();
   readonly suggestions = this._suggestions.asReadonly();
+  readonly lastQuery = this._lastSearchQuery.asReadonly();
+
+  private loadingTimeout?: ReturnType<typeof setTimeout>;
 
   searchSongs(searchTerm: string): Observable<Song[]> {
-    this._searchStatus.set(SearchStatus.Loading);
+    if (this.loadingTimeout) {
+      clearTimeout(this.loadingTimeout);
+    }
+
+    this._songs.set([]);
+    
+    this.loadingTimeout = setTimeout(() => {
+      this._searchStatus.set(SearchStatus.Loading);
+    }, 250);
     
     return this.httpClient.get<Song[]>(`${BASE_API_URL}/search?q=${searchTerm}`).pipe(
       tap((songs: Song[]) => {
+        if (this.loadingTimeout) {
+          clearTimeout(this.loadingTimeout);
+          this.loadingTimeout = undefined;
+        }
         this._songs.set(songs);
         this._searchStatus.set(SearchStatus.Finished);
+        this._lastSearchQuery.set(searchTerm);
       }),
       catchError(() => {
+        if (this.loadingTimeout) {
+          clearTimeout(this.loadingTimeout);
+          this.loadingTimeout = undefined;
+        }
         this._searchStatus.set(SearchStatus.Error);
         return [];
       })
@@ -49,5 +70,6 @@ export class SearchService {
     this._songs.set([]);
     this._searchStatus.set(SearchStatus.None);
     this._suggestions.set([]);
+    this._lastSearchQuery.set('');
   }
 }

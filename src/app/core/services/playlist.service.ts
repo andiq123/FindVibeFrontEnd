@@ -1,16 +1,8 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { Song } from '../models/song.model';
+import { shuffleArray } from '../utils/utils';
 
 const TIME_OFFSET_SECONDS = 5;
-
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -87,5 +79,11 @@ export class PlaylistService {
     const prevIndex = (this.currentIndex() - 1 + q.length) % q.length;
     this.currentIndex.set(prevIndex);
     return q[prevIndex];
+  }
+
+  reset(): void {
+    this.originalList.set([]);
+    this.queue.set([]);
+    this.currentIndex.set(-1);
   }
 }

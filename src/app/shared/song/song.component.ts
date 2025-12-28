@@ -10,6 +10,12 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { OfflineStorageService } from '../../features/library/services/offline-storage.service';
 import { DragAndDropDirective } from '../../features/search/directives/drag-and-drop.directive';
 import { PlayerService } from '../../core/services/player.service';
+import { SettingsService } from '../../core/services/settings.service';
+import { HapticService } from '../../core/services/haptic.service';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { SwipeActionsDirective } from '../directives/swipe-actions.directive';
+import { PlaylistService } from '../../core/services/playlist.service';
+import { RecentService } from '../../features/recent/services/recent.service';
 
 @Component({
     selector: 'app-song',
@@ -21,6 +27,7 @@ import { PlayerService } from '../../core/services/player.service';
         FontAwesomeModule,
         DragAndDropDirective,
         NgTemplateOutlet,
+        SwipeActionsDirective
     ],
     templateUrl: './song.component.html',
     styleUrl: './song.component.scss'
@@ -28,8 +35,11 @@ import { PlayerService } from '../../core/services/player.service';
 export class SongComponent {
   private playerService = inject(PlayerService);
   private offlineStorageService = inject(OfflineStorageService);
+  private settingsService = inject(SettingsService);
+  private hapticService = inject(HapticService);
+  private playlistService = inject(PlaylistService);
+  private recentService = inject(RecentService);
 
-  // Inputs
   song = input.required<Song>();
   allowReorder = input<boolean>(false);
   loading = input<boolean>(false);
@@ -37,15 +47,12 @@ export class SongComponent {
   showOfflineIndicator = input<boolean>(true);
   isFavoritePage = input<boolean>(false);
   
-  // Outputs
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
   
-  // Image loading state
   imageLoading = signal(true);
   imageError = signal(false);
   
-  // Computed properties
   isActive = computed(() => this.playerService.song()?.link === this.song().link);
   
   status = computed(() => {
@@ -62,13 +69,15 @@ export class SongComponent {
   });
   
   isAvailableOffline = computed(() => {
-    return (
-      this.isFavoritePage() &&
-      this.offlineStorageService.availableOfflineSongIds().includes(this.song().id)
-    );
+    return this.offlineStorageService.availableOfflineSongIds().includes(this.song().id);
+  });
+
+  isUnavailable = computed(() => {
+    return this.settingsService.isOffline() && !this.isAvailableOffline();
   });
 
   faCloudArrowDown = faCloudArrowDown;
+  faPlayNext = faPlay;
 
   async play() {
     if (this.isActive()) {
@@ -84,11 +93,23 @@ export class SongComponent {
   }
 
   async playOrPause() {
+    if (this.isUnavailable()) return;
+    this.hapticService.light();
     if (this.status() === PlayerStatus.Paused) {
       await this.play();
     } else {
       await this.pause();
     }
+  }
+
+  onSwipeRight() {
+    this.hapticService.light();
+    // Quick Add to Queue logic
+  }
+
+  onSwipeLeft() {
+    this.hapticService.light();
+    // Reveal delete or favorite
   }
 
   emitReorder(data: { from: string; to: string }) {

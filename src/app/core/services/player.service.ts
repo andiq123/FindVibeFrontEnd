@@ -1,4 +1,4 @@
-import { computed, Injectable, signal, effect, inject } from '@angular/core';
+import { computed, Injectable, signal, effect, inject, OnDestroy } from '@angular/core';
 import { Song } from '../models/song.model';
 import { SettingsService } from './settings.service';
 import { RecentService } from '../../features/recent/services/recent.service';
@@ -9,7 +9,7 @@ import { AudioService } from './audio.service';
 @Injectable({
   providedIn: 'root',
 })
-export class PlayerService {
+export class PlayerService implements OnDestroy {
   private readonly settingsService = inject(SettingsService);
   private readonly recentService = inject(RecentService);
   private readonly playlistService = inject(PlaylistService);
@@ -25,7 +25,6 @@ export class PlayerService {
   readonly currentTime = this.audioService.currentTime;
   readonly duration = this.audioService.duration;
 
-  // Effects for side effects
   private readonly recentsEffect = effect(() => {
     const time = this.currentTime();
     const song = this.song();
@@ -45,24 +44,24 @@ export class PlayerService {
   });
 
   async setSong(song: Song): Promise<void> {
-    // Clean up previous object URL
-    if (this.currentObjectUrl) {
-      URL.revokeObjectURL(this.currentObjectUrl);
-      this.currentObjectUrl = null;
-    }
+    this.cleanupObjectUrl();
 
     this.playlistService.setCurrentSong(song);
     this.audioService.pause();
     this.audioService.seek(0);
     this.alreadyAddedInRecents.set(false);
 
-    // Check for offline version
     const offlineResponse = await this.offlineStorageService.isAvailableOffline(song.link);
+    
     if (offlineResponse) {
       const blob = await offlineResponse.blob();
       this.currentObjectUrl = URL.createObjectURL(blob);
       this.audioService.setSource(this.currentObjectUrl);
     } else {
+      if (this.settingsService.isOffline()) {
+        this.audioService.setSource('');
+        return;
+      }
       this.audioService.setSource(song.link);
     }
 
@@ -109,5 +108,23 @@ export class PlayerService {
       return nextSong;
     }
     return undefined;
+  }
+
+  private cleanupObjectUrl(): void {
+    if (this.currentObjectUrl) {
+      URL.revokeObjectURL(this.currentObjectUrl);
+      this.currentObjectUrl = null;
+    }
+  }
+
+  reset(): void {
+    this.audioService.pause();
+    this.audioService.setSource('');
+    this.playlistService.reset();
+    this.cleanupObjectUrl();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanupObjectUrl();
   }
 }

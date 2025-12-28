@@ -1,36 +1,51 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { bytesToGB } from '../../../core/utils/utils';
 import { Song } from '../../../core/models/song.model';
+import { inject } from '@angular/core';
+import { LibraryApiService } from './library-api.service';
 
-/**
- * Cache identifier for consistent access across the service
- */
 const CACHE_NAME = 'library-vault';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OfflineStorageService {
-  // State: Storage Metrics
   readonly storageTotal = signal<number>(0);
   readonly storageUsed = signal<number>(0);
 
-  // State: Tracking
   private readonly _currentLoadingDownloadSongIds = signal<string[]>([]);
   private readonly _availableOfflineSongIds = signal<string[]>([]);
+  private readonly libraryApiService = inject(LibraryApiService);
 
-  // Read-only exposures
   readonly currentLoadingDownloadSongIds = this._currentLoadingDownloadSongIds.asReadonly();
   readonly availableOfflineSongIds = this._availableOfflineSongIds.asReadonly();
   
-  /**
-   * Computed state to check if any download is in progress
-   */
   readonly isSyncing = computed(() => this._currentLoadingDownloadSongIds().length > 0);
 
-  /**
-   * Initializes storage estimates and refreshes usage data
-   */
+  private cachePromise?: Promise<Cache>;
+
+  initialize(): void {
+    this.setUpStorage();
+    this.syncOfflineSongs();
+  }
+
+  async syncOfflineSongs(): Promise<void> {
+    const songs = this.libraryApiService.getLibraryFromLocalStorage();
+    if (!songs.length) return;
+
+    const cache = await this.getCache();
+    const availableIds: string[] = [];
+
+    for (const song of songs) {
+      const match = await cache.match(song.link);
+      if (match) {
+        availableIds.push(song.id);
+      }
+    }
+
+    this._availableOfflineSongIds.set(availableIds);
+  }
+
   async setUpStorage(): Promise<void> {
     try {
       if (!navigator.storage?.estimate) return;
@@ -43,9 +58,6 @@ export class OfflineStorageService {
     }
   }
 
-  /**
-   * Caches a batch of songs sequentially to ensure stability
-   */
   async cacheAllSongs(songs: Song[]): Promise<void> {
     const cache = await this.getCache();
     
@@ -59,57 +71,48 @@ export class OfflineStorageService {
         await cache.add(song.link);
         this.addAvailableOfflineSongId(song.id);
         await this.setUpStorage();
-      } catch (error) {
-        console.warn(`[OfflineStorage] Failed to cache song ${song.title}:`, error);
+      } catch {
+        // Silently fail as requested (clean logic)
       } finally {
         this.trackProgress(song.id, false);
       }
     }
   }
 
-  /**
-   * Checks if a specific song link is available in the cache. 
-   * Returns the Response if found, allowing for data retrieval.
-   */
   async isAvailableOffline(songLink: string, existingCache?: Cache): Promise<Response | undefined> {
     const cache = existingCache ?? await this.getCache();
     return await cache.match(songLink);
   }
 
-  /**
-   * Wipes the entire library cache and resets state
-   */
   async removeCache(): Promise<void> {
-    try {
-      await caches.delete(CACHE_NAME);
-      this.emptyAvailableOfflineSongIds();
-      // Brief delay to allow the filesystem to reflect the deletion in usage estimates
-      await new Promise(resolve => setTimeout(resolve, 300));
+    await caches.delete(CACHE_NAME);
+    this.cachePromise = undefined;
+    this.emptyAvailableOfflineSongIds();
+    const maxRetries = 5;
+    const delayMs = 500;
+    
+    for (let i = 0; i < maxRetries; i++) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
       await this.setUpStorage();
-    } catch (error) {
-      console.error('[OfflineStorage] Error clearing cache:', error);
+      
+      if (this.storageUsed() < 0.01) {
+        break;
+      }
     }
+    
+    await this.setUpStorage();
   }
 
-  /**
-   * Manually adds a song ID to the offline list (used during initial hydration)
-   */
   addAvailableOfflineSongId(songId: string): void {
     this._availableOfflineSongIds.update(ids => 
       ids.includes(songId) ? ids : [...ids, songId]
     );
   }
 
-  /**
-   * Resets the tracked offline song IDs
-   */
   emptyAvailableOfflineSongIds(): void {
     this._availableOfflineSongIds.set([]);
   }
 
-  /**
-   * Removes a single song from cache and tracked state
-   */
   async removeSongFromCache(songId: string, songLink: string): Promise<void> {
     try {
       const cache = await this.getCache();
@@ -117,20 +120,23 @@ export class OfflineStorageService {
       
       this._availableOfflineSongIds.update(ids => ids.filter(id => id !== songId));
       await this.setUpStorage();
-    } catch (error) {
-      console.error(`[OfflineStorage] Failed to remove song ${songId}:`, error);
+    } catch {
+      // Silently fail
     }
   }
 
-  // --- Private Helpers ---
-
-  private async getCache(): Promise<Cache> {
-    return await caches.open(CACHE_NAME);
+  private getCache(): Promise<Cache> {
+    if (!this.cachePromise) {
+      this.cachePromise = caches.open(CACHE_NAME);
+    }
+    return this.cachePromise;
   }
 
-  private trackProgress(songId: string, isLoading: boolean): void {
-    this._currentLoadingDownloadSongIds.update(ids => 
-      isLoading ? [...ids, songId] : ids.filter(id => id !== songId)
+  private trackProgress(id: string, isLoading: boolean): void {
+    this._currentLoadingDownloadSongIds.update((prevIds: string[]) =>
+      isLoading 
+        ? (prevIds.includes(id) ? prevIds : [...prevIds, id])
+        : prevIds.filter((songId: string) => songId !== id)
     );
   }
 }

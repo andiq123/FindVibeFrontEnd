@@ -4,6 +4,7 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
 import { SearchStatus } from '../../core/models/song.model';
 import { Router } from '@angular/router';
 import { SearchService } from './services/search.service';
+import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
 import { SettingsService } from '../../core/services/settings.service';
 import { PlayerService } from '../../core/services/player.service';
 import { PlaylistService } from '../../core/services/playlist.service';
@@ -13,7 +14,7 @@ import { faMagnifyingGlass, faTriangleExclamation, faWaveSquare, faMusic } from 
 
 @Component({
     selector: 'app-search-page',
-    imports: [SongComponent, SearchBarComponent, FontAwesomeModule],
+    imports: [SongComponent, SearchBarComponent, FontAwesomeModule, PullToRefreshDirective],
     templateUrl: './search-page.component.html',
     styleUrl: './search-page.component.scss'
 })
@@ -36,10 +37,12 @@ export class SearchPageComponent {
   faTriangleExclamation = faTriangleExclamation;
   faWaveSquare = faWaveSquare;
   faMusic = faMusic;
+  
+  dummySong = { id: '', artist: '', title: '', image: '', link: '', order: 0 };
 
   constructor() {
     effect(() => {
-      if (this.settingsService.isServerDown()) {
+      if (this.settingsService.isServerDown() && this.router.url !== '/library') {
         this.router.navigate(['/library']);
       }
     });
@@ -47,5 +50,9 @@ export class SearchPageComponent {
 
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
+  }
+
+  handleRefresh() {
+    this.songsService.searchSongs(this.query());
   }
 }

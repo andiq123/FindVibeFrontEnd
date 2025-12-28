@@ -178,11 +178,12 @@
 
 /* Combined Animations */
 .anim-slide-fade-in-up {
-    animation: slide-fade-in-up var(--anim-duration-slower) var(--anim-ease-smooth) forwards;
+    opacity: 0;
+    animation: slide-fade-in-up var(--anim-duration-slower) var(--anim-ease-smooth) both;
 }
 
 .anim-slide-fade-in-down {
-    animation: slide-fade-in-down var(--anim-duration-slow) var(--anim-ease-smooth) forwards;
+    animation: slide-fade-in-down var(--anim-duration-slow) var(--anim-ease-smooth) both;
 }
 
 /* Special Animations */

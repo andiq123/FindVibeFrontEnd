@@ -1,39 +1,58 @@
-<div class="flex flex-col items-center justify-center min-h-[60vh] w-full px-4">
-  <div class="w-full max-w-xs flex flex-col gap-6">
-    <h3 class="text-2xl font-extrabold text-center tracking-tight text-base-content">FindVibe</h3>
-    <p class="text-base text-center text-base-content/70">Your library is synced by your name!</p>
+<div class="flex flex-col items-center justify-center min-h-[80vh] w-full px-6 anim-fade-in">
+  <div class="w-full max-w-sm login-card rounded-[2.5rem] p-10 flex flex-col gap-8 anim-slide-fade-in-up">
+    
+    <div class="flex flex-col items-center gap-4 anim-stagger">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center vibe-icon shadow-2xl">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-10 h-10">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-4h2v4zm0-6H9V7h2v3zm4 6h-2v-4h2v4zm0-6h-2V7h2v3z"/>
+        </svg>
+      </div>
+      <div class="text-center space-y-1">
+        <h1 class="text-2xl font-bold tracking-tight text-white">FindVibe</h1>
+        <p class="text-white/40 text-sm">Your personal music collection</p>
+      </div>
+    </div>
+
     <form
       (ngSubmit)="setUpUser()"
-      method="dialog"
-      class="flex flex-col gap-4 mt-2"
+      class="flex flex-col gap-6 anim-stagger"
     >
-      <label class="input input-bordered flex items-center gap-2 rounded-full px-4 py-3 bg-base-100 border border-base-200 focus-within:border-primary transition-all">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          fill="currentColor"
-          class="h-5 w-5 opacity-60"
-        >
-          <path
-            d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+      <div class="space-y-2">
+        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 ml-4 block">Identify Yourself</span>
+        <div class="input-container flex items-center gap-3 rounded-[2rem] px-6 py-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            class="h-5 w-5 text-white/20"
+          >
+            <path
+              d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+            />
+          </svg>
+          <input
+            name="username"
+            type="text"
+            class="grow bg-transparent outline-none border-none text-white text-lg placeholder:text-white/10"
+            placeholder="Name"
+            [(ngModel)]="name"
+            autocomplete="off"
           />
-        </svg>
-        <input
-          name="username"
-          type="text"
-          class="grow bg-transparent outline-none border-none text-base"
-          placeholder="Type your name..."
-          [(ngModel)]="name"
-          autocomplete="off"
-        />
-      </label>
+        </div>
+      </div>
+
       <button
-        class="btn btn-primary btn-lg w-full rounded-full text-lg font-semibold mt-2"
+        class="btn-premium h-16 rounded-[2rem] text-lg active:scale-95 transition-all flex items-center justify-center gap-3"
         type="submit"
         [disabled]="!name() || loadingSubmiting()"
       >
-        Save @if(loadingSubmiting()){
-        <span class="loading loading-spinner loading-md"></span>
+        <span>Continue</span>
+        @if(loadingSubmiting()){
+          <span class="loading loading-spinner loading-md"></span>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 opacity-40">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+          </svg>
         }
       </button>
     </form>

@@ -2,8 +2,7 @@
   <ul class="flex flex-col">
     @for (song of songs(); track song.id) {
     <li 
-      class="group/item list-none transition-colors duration-200 hover:bg-white/[0.03] active:bg-white/[0.06] px-5"
-      [class.bg-primary/10]="playerService.song()?.link === song.link"
+      class="group/item list-none"
     >
       <app-song
         [song]="song"

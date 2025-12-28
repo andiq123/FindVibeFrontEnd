@@ -1,5 +1,6 @@
-import { computed, Injectable, signal, inject } from '@angular/core';
+import { computed, Injectable, signal, inject, effect } from '@angular/core';
 import { LibraryApiService } from './library-api.service';
+import { UserService } from './user.service';
 import { tap } from 'rxjs';
 import { Song } from '../../../core/models/song.model';
 import { OfflineStorageService } from './offline-storage.service';
@@ -11,9 +12,26 @@ import { Reorder } from '../../../core/models/reorder.model';
 export class LibraryService {
   private readonly libraryApiService = inject(LibraryApiService);
   private readonly offlineStorageService = inject(OfflineStorageService);
+  private readonly userService = inject(UserService);
 
   readonly songs = signal<Song[]>([]);
   readonly currentLoadingFavoriteSongIds = signal<string[]>([]);
+  readonly loadingSongs = signal<boolean>(false);
+
+  private readonly userEffect = effect(() => {
+    const user = this.userService.user();
+    if (user) {
+      this.updateLibrarySongs(user.id).subscribe();
+    } else {
+      this.reset();
+    }
+  });
+
+  reset(): void {
+    this.songs.set([]);
+    this.currentLoadingFavoriteSongIds.set([]);
+    this.loadingSongs.set(false);
+  }
 
   readonly orderHasChanged = computed(() => {
     const localSongs = this.libraryApiService.getLibraryFromLocalStorage();
@@ -29,15 +47,20 @@ export class LibraryService {
   });
 
   updateLibrarySongs(userId: string) {
+    this.loadingSongs.set(true);
     return this.libraryApiService.getFavoritesSong(userId).pipe(
       tap({
-        next: (songs: Song[]) => this.songs.set(songs),
+        next: (songs: Song[]) => {
+          this.songs.set(songs);
+          this.loadingSongs.set(false);
+        },
+        error: () => this.loadingSongs.set(false),
       })
     );
   }
 
   addToFavorites(song: Song, userId: string) {
-    this.addSongToLoadingFavorites(song.id);
+    this.trackLoadingFavorite(song.id, true);
 
     const order = this.songs().length === 0 ? 1 : this.songs().length + 1;
     const favoriteSong: Song = { ...song, order };
@@ -47,15 +70,15 @@ export class LibraryService {
         next: () => {
           this.songs.update((prevSongs: Song[]) => [...prevSongs, favoriteSong]);
           this.libraryApiService.setLibraryToLocalStorage(this.songs());
-          this.removeSongFromLoadingFavorites(song.id);
+          this.trackLoadingFavorite(song.id, false);
         },
-        error: () => this.removeSongFromLoadingFavorites(song.id),
+        error: () => this.trackLoadingFavorite(song.id, false),
       })
     );
   }
 
   removeFromFavorites(id: string, link: string) {
-    this.addSongToLoadingFavorites(id);
+    this.trackLoadingFavorite(id, true);
     const songId = this.songs().find((x: Song) => x.link === link)!.id;
     
     return this.libraryApiService.removeFromFavorites(songId).pipe(
@@ -66,9 +89,9 @@ export class LibraryService {
             prevSongs.filter((song: Song) => song.link !== link)
           );
           this.libraryApiService.setLibraryToLocalStorage(this.songs());
-          this.removeSongFromLoadingFavorites(id);
+          this.trackLoadingFavorite(id, false);
         },
-        error: () => this.removeSongFromLoadingFavorites(id),
+        error: () => this.trackLoadingFavorite(id, false),
       })
     );
   }
@@ -108,15 +131,11 @@ export class LibraryService {
     this.songs.set(songs);
   }
 
-  private addSongToLoadingFavorites(id: string): void {
+  private trackLoadingFavorite(id: string, isLoading: boolean): void {
     this.currentLoadingFavoriteSongIds.update((prevSongIds: string[]) =>
-      prevSongIds.includes(id) ? prevSongIds : [...prevSongIds, id]
-    );
-  }
-
-  private removeSongFromLoadingFavorites(id: string): void {
-    this.currentLoadingFavoriteSongIds.update((prevSongIds: string[]) =>
-      prevSongIds.filter((songId: string) => songId !== id)
+      isLoading 
+        ? (prevSongIds.includes(id) ? prevSongIds : [...prevSongIds, id])
+        : prevSongIds.filter((songId: string) => songId !== id)
     );
   }
 }

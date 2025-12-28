@@ -2,11 +2,7 @@ import { Component, computed, OnInit, signal, inject, viewChild, ElementRef } fr
 import { OfflineStorageService } from '../../services/offline-storage.service';
 import { LibraryService } from '../../services/library.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import {
-  faTrash,
-  faCloudArrowDown,
-  faArrowDown,
-} from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { Song } from '../../../../core/models/song.model';
 
 @Component({
@@ -27,6 +23,7 @@ export class StorageInfoComponent implements OnInit {
   storageTotal = this.offlineStorageService.storageTotal;
   storageUsed = this.offlineStorageService.storageUsed;
   loadingDownloading = signal<boolean>(false);
+  loadingClearing = signal<boolean>(false);
   
   showRemoveCacheButton = computed(() => {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
@@ -34,14 +31,13 @@ export class StorageInfoComponent implements OnInit {
 
   faTrash = faTrash;
   faCloudArrowDown = faCloudArrowDown;
-  faArrowDown = faArrowDown;
 
   ngOnInit(): void {
     this.offlineStorageService.setUpStorage();
     this.populateAvailableOfflineSongs();
   }
 
-  toggle() {
+  toggle(): void {
     if (this.isVisible()) {
       this.dismiss();
     } else {
@@ -50,10 +46,8 @@ export class StorageInfoComponent implements OnInit {
     }
   }
 
-  dismiss() {
+  dismiss(): void {
     this.isClosing.set(true);
-    
-    // Listen for the slideDown animation completion
     const element = this.sheetRef()?.nativeElement;
     if (element) {
       element.addEventListener('animationend', () => {
@@ -61,33 +55,44 @@ export class StorageInfoComponent implements OnInit {
         this.isClosing.set(false);
       }, { once: true });
     } else {
-      // Fallback if element is not found
       this.isVisible.set(false);
       this.isClosing.set(false);
     }
   }
 
-  async downloadAll() {
+  async downloadAll(): Promise<void> {
     try {
       this.loadingDownloading.set(true);
       await this.offlineStorageService.cacheAllSongs(this.libraryService.songs());
+      this.populateAvailableOfflineSongs();
+    } catch (error) {
+      console.error('[StorageInfo] Failed to download songs:', error);
     } finally {
       this.loadingDownloading.set(false);
-      this.isVisible.set(false);
     }
   }
 
-  async removeCache() {
-    await this.offlineStorageService.removeCache();
-    this.offlineStorageService.emptyAvailableOfflineSongIds();
+  async removeCache(): Promise<void> {
+    try {
+      this.loadingClearing.set(true);
+      await this.offlineStorageService.removeCache();
+      this.populateAvailableOfflineSongs();
+    } catch (error) {
+      console.error('[StorageInfo] Failed to clear cache:', error);
+    } finally {
+      this.loadingClearing.set(false);
+    }
   }
 
-  private populateAvailableOfflineSongs() {
-    this.libraryService.songs().forEach(async (song: Song) => {
-      const isAvailable = await this.offlineStorageService.isAvailableOffline(song.link);
-      if (isAvailable) {
-        this.offlineStorageService.addAvailableOfflineSongId(song.id);
-      }
-    });
+  private async populateAvailableOfflineSongs(): Promise<void> {
+    const songs = this.libraryService.songs();
+    await Promise.all(
+      songs.map(async (song: Song) => {
+        const isAvailable = await this.offlineStorageService.isAvailableOffline(song.link);
+        if (isAvailable) {
+          this.offlineStorageService.addAvailableOfflineSongId(song.id);
+        }
+      })
+    );
   }
 }

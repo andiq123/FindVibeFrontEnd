@@ -9,6 +9,7 @@ import {
   inject,
   effect,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { convertTime } from '../../../core/utils/utils';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
@@ -44,11 +45,11 @@ import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.
 export class FullPlayerComponent {
   private playerService = inject(PlayerService);
   private settingsService = inject(SettingsService);
+  private router = inject(Router);
 
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
   
-  // Signals from service
   serviceCurrentTime = computed(() => this.playerService.currentTime());
   duration = computed(() => this.playerService.duration());
 
@@ -57,7 +58,6 @@ export class FullPlayerComponent {
 
   toggleSizeEvent = output<void>();
 
-  // Icons
   faStepBackward = faStepBackward;
   faStepForward = faStepForward;
   faPlay = faPlay;
@@ -69,31 +69,25 @@ export class FullPlayerComponent {
 
   isClosingAnimation = signal<boolean>(false);
   
-  // Direct DOM References
   playerRef = viewChild<ElementRef<HTMLDivElement>>('playerRef');
   timeSlider = viewChild<ElementRef<HTMLInputElement>>('timeSlider');
   timeProgress = viewChild<ElementRef<HTMLDivElement>>('timeProgress');
 
   dominantColor = computed(() => this.updateDominantColor());
 
-  // Local state
   isDraggingTime = signal<boolean>(false);
   currentTime = computed(() => this.serviceCurrentTime());
   
-  // Optimized Visual Time signal (only for text display)
   visualTime = signal<number>(0);
 
   constructor() {
-    // 1. Sync Time Slider (One-way binding from Service -> DOM)
     effect(() => {
       const time = this.serviceCurrentTime();
       const duration = this.duration();
       
-      // Update visual text if not dragging
       if (!this.isDraggingTime()) {
         this.visualTime.set(time);
         
-        // Direct DOM update for slider position
         const slider = this.timeSlider()?.nativeElement;
         const progress = this.timeProgress()?.nativeElement;
         
@@ -105,7 +99,6 @@ export class FullPlayerComponent {
       }
     });
 
-    // 2. Sync Volume Slider Logic Removed
   }
 
   convertTime(timeToConvert: number): string {
@@ -127,17 +120,14 @@ export class FullPlayerComponent {
     this.playerService.pause();
   }
 
-  // Optimized Time Input (Direct DOM)
   handleTimeInput(event: Event) {
     this.isDraggingTime.set(true);
     const slider = event.target as HTMLInputElement;
     const value = +slider.value;
     const duration = this.duration();
     
-    // 1. Update visual text signal
     this.visualTime.set(value);
     
-    // 2. Direct DOM update for progress bar (Zero Lag)
     const progress = this.timeProgress()?.nativeElement;
     if (progress && duration > 0) {
       const scale = value / duration;
@@ -148,7 +138,6 @@ export class FullPlayerComponent {
   handleTimeChange(event: Event) {
     const value = +(event.target as HTMLInputElement).value;
     this.playerService.seek(value);
-    // Add small delay to prevent jumping back
     setTimeout(() => {
       this.isDraggingTime.set(false);
     }, 50);
@@ -171,6 +160,14 @@ export class FullPlayerComponent {
 
   toggleShuffle() {
     this.settingsService.toggleShuffle();
+  }
+
+  async searchByArtist() {
+    const artist = this.song().artist;
+    if (artist) {
+      await this.router.navigate([`/songs/${artist}`]);
+      this.toggleSize();
+    }
   }
 
 

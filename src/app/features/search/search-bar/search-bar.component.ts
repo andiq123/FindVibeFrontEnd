@@ -1,4 +1,4 @@
-import { Component, computed, input, OnInit, signal, OnDestroy, effect, inject } from '@angular/core';
+import { Component, computed, input, OnInit, signal, OnDestroy, effect, inject, untracked } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faMagnifyingGlass, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FormsModule } from '@angular/forms';
@@ -28,23 +28,31 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
   constructor() {
-    // React to query input changes (e.g. from navigation)
     effect(() => {
       const q = this.query();
-      if (q) {
-        this.searchTerm.set(q);
-        this.submitSearchSongs();
-        this.suggestionsService.resetSuggestions();
-      } else {
-        // Handle empty query (reset state)
-        this.searchTerm.set('');
-        this.suggestionsService.resetSearch();
-      }
+      untracked(() => {
+        if (q) {
+          if (q !== this.suggestionsService.lastQuery()) {
+            this.searchTerm.set(q);
+            this.submitSearchSongs();
+          } else {
+            this.searchTerm.set(q);
+          }
+          this.suggestionsService.resetSuggestions();
+        } else {
+          const lastQ = this.suggestionsService.lastQuery();
+          if (lastQ) {
+            this.searchTerm.set(lastQ);
+            this.router.navigate([`/songs/${lastQ}`]);
+          } else {
+            this.searchTerm.set('');
+          }
+        }
+      });
     });
   }
 
   ngOnInit(): void {
-    // Best Debounce Approach: RxJS Subject with 300ms window
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged()
@@ -83,17 +91,21 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   cancelSearch() {
     this.searchTerm.set('');
     this.suggestionsService.resetSearch();
-    this.router.navigate(['/songs/']); // Reset route to search base
+    this.router.navigate(['/songs/']);
   }
 
   async submit() {
-    if (this.searchTerm().trim() === '') {
+    const term = this.searchTerm().trim();
+    if (term === '') {
       return;
     }
 
-    await this.setQueryParamsToCurrentSearchTerm();
-    this.submitSearchSongs();
-    this.suggestionsService.resetSuggestions();
+    if (this.query() === term) {
+      this.submitSearchSongs();
+      this.suggestionsService.resetSuggestions();
+    } else {
+      await this.setQueryParamsToCurrentSearchTerm();
+    }
   }
 
   private async setQueryParamsToCurrentSearchTerm() {

@@ -22,6 +22,9 @@ export class UserFormComponent {
       next: () => {
         this.loadingSubmiting.set(false);
       },
+      error: () => {
+        this.loadingSubmiting.set(false);
+      }
     });
   }
 }

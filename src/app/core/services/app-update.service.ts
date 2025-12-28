@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, effect } from '@angular/core';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { filter, interval, map, takeWhile, tap } from 'rxjs';
+import { filter, interval, map, switchMap, takeWhile, tap } from 'rxjs';
 
 const UPDATE_COUNTDOWN_SECONDS = 3;
 
@@ -13,19 +13,18 @@ export class AppUpdateService {
   readonly newUpdateAvailable = signal(false);
   readonly secondsToUpdate = signal(UPDATE_COUNTDOWN_SECONDS);
 
-  private readonly updateCheck = effect(() => {
+  private readonly _ = effect(() => {
     if (!this.swUpdate.isEnabled) return;
 
     this.swUpdate.versionUpdates.pipe(
       filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
-      tap(() => {
-        this.newUpdateAvailable.set(true);
-        this.countdown(UPDATE_COUNTDOWN_SECONDS).subscribe((time) => {
-          this.secondsToUpdate.set(time);
-          if (time === 0) {
-            document.location.reload();
-          }
-        });
+      tap(() => this.newUpdateAvailable.set(true)),
+      switchMap(() => this.countdown(UPDATE_COUNTDOWN_SECONDS)),
+      tap((time) => {
+        this.secondsToUpdate.set(time);
+        if (time === 0) {
+          document.location.reload();
+        }
       })
     ).subscribe();
   });

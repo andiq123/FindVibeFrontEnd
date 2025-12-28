@@ -1,7 +1,8 @@
 @if(loading()) {
   <!-- iOS-style Skeleton Loading State -->
-  <div class="flex justify-between items-center py-3 w-full skeleton-song anim-fade-in">
+  <div class="flex justify-between items-center py-3 w-full skeleton-song">
     <div class="grid grid-flow-col gap-4 items-center w-full justify-start">
+
       <!-- Skeleton Album Art -->
       <div class="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 skeleton-image">
         <div class="absolute inset-0 bg-white/[0.03]"></div>
@@ -17,15 +18,34 @@
 } @else {
   @if(allowReorder()){
   <div
-    class="flex justify-between items-center py-3 cursor-pointer w-full relative group/song song-container"
+    class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-300 relative overflow-hidden px-5 cursor-pointer w-full"
+    [class.song-active]="isActive()"
     appDragAndDrop
-    (reorderSongs)="emitReorder($event)"
+    (reorderSongs)="emitReorder($any($event))"
     [id]="song().id"
+    tabindex="0"
+    role="button"
+    [attr.aria-disabled]="isUnavailable()"
+    [class.opacity-50]="isUnavailable()"
+    (click)="playOrPause()"
+    (keydown.enter)="playOrPause()"
   >
     <ng-container *ngTemplateOutlet="default"></ng-container>
   </div>
   }@else {
-  <div class="flex justify-between items-center py-3 cursor-pointer w-full relative group/song song-container">
+  <div
+    class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-300 relative overflow-hidden px-5 cursor-pointer w-full"
+    [class.song-active]="isActive()"
+    appSwipeActions
+    (swipeRight)="onSwipeRight()"
+    (swipeLeft)="onSwipeLeft()"
+    (click)="playOrPause()"
+    (keydown.enter)="playOrPause()"
+    tabindex="0"
+    role="button"
+    [attr.aria-disabled]="isUnavailable()"
+    [class.opacity-50]="isUnavailable()"
+  >
     <ng-container *ngTemplateOutlet="default"></ng-container>
   </div>
   }
@@ -35,10 +55,7 @@
   <div
     id="elToRemove"
     class="grid grid-flow-col gap-4 items-center w-full justify-start transition-transform duration-200"
-    (click)="playOrPause()"
-    (keydown.enter)="playOrPause()"
-    tabindex="0"
-    role="button"
+    [class.unavailable]="isUnavailable()"
   >
     <!-- Album Art with Play Button -->
     <div class="relative w-12 h-12 rounded-lg overflow-hidden shadow-sm ring-1 ring-white/10 shrink-0 album-art"

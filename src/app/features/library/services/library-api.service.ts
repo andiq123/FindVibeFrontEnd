@@ -58,4 +58,8 @@ export class LibraryApiService {
   getLibraryFromLocalStorage(): Song[] {
     return this.storageService.getItem<Song[]>(LIBRARY_STORAGE_KEY) || [];
   }
+
+  clearLibraryFromLocalStorage(): void {
+    this.storageService.removeItem(LIBRARY_STORAGE_KEY);
+  }
 }

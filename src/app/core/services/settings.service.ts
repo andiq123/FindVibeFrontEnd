@@ -17,20 +17,25 @@ export class SettingsService {
   private readonly _isShuffle = signal(false);
   private readonly _isMiniPlayer = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
+  private readonly _isNavigatorOffline = signal(!navigator.onLine);
 
   readonly isRepeat = this._isRepeat.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
   readonly isServerDown = computed(() => this._serverStatus() === ServerStatus.Down);
   readonly isCheckedServer = computed(() => this._serverStatus() !== ServerStatus.Unchecked);
+  readonly isOffline = computed(() => this._isNavigatorOffline() || this.isServerDown());
 
-  private readonly loadSettings = void (() => {
+  initialize(): void {
+    window.addEventListener('online', () => this._isNavigatorOffline.set(false));
+    window.addEventListener('offline', () => this._isNavigatorOffline.set(true));
+
     const isRepeat = this.storageService.getItem<boolean>('isRepeat');
     const isShuffle = this.storageService.getItem<boolean>('isShuffle');
 
     if (isRepeat !== null) this._isRepeat.set(isRepeat);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
-  })();
+  }
 
   toggleMiniPlayer(): void {
     this._isMiniPlayer.set(!this._isMiniPlayer());

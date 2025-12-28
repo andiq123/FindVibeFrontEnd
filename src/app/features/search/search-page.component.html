@@ -13,19 +13,21 @@
 </div>
 }@else {
 <div class="w-full max-w-2xl mx-auto space-y-6 pb-36 px-0">
-  <!-- Search Section -->
   <div class="sticky top-0 z-10 bg-base-100/80 backdrop-blur-3xl py-4 px-5 border-b border-white/[0.03]">
     <app-search-bar [query]="query()" />
   </div>
 
-  <!-- Results Section -->
   <div class="space-y-4 px-0 pb-12 transition-all duration-300">
     <h1 class="font-bold text-3xl px-5 section-headline">Explore</h1>
     
-    <div class="mx-5 bg-white/[0.03] rounded-[2.5rem] overflow-hidden border border-white/[0.05] min-h-[100px] relative">
+    <div 
+      class="results-viewport mx-5 bg-white/[0.02] rounded-[2.5rem] overflow-hidden border border-white/[0.04] min-h-[400px] relative transition-all duration-500"
+      appPullToRefresh
+      (refresh)="handleRefresh()"
+    >
       @switch (status()) { 
         @case (searchStatus.None) {
-          <div class="flex flex-col items-center justify-center py-20 px-8 text-center anim-fade-in-slow">
+          <div class="flex flex-col items-center justify-center py-20 px-8 text-center absolute inset-0">
             <div class="w-20 h-20 rounded-3xl bg-base-200/50 flex items-center justify-center mb-6 ring-1 ring-white/5">
               <fa-icon [icon]="faMagnifyingGlass" class="text-3xl text-base-content/20" />
             </div>
@@ -35,21 +37,15 @@
         } 
         
         @case (searchStatus.Loading) {
-          <div class="flex flex-col divide-y divide-white/[0.03]">
-            @for (i of [1,2,3,4,5,6]; track i) {
-              <div class="p-5 flex items-center gap-4 skeleton-item">
-                <div class="w-12 h-12 bg-white/5 rounded-lg shrink-0"></div>
-                <div class="flex-1 space-y-2.5">
-                  <div class="h-3.5 bg-white/10 rounded w-2/3"></div>
-                  <div class="h-2.5 bg-white/5 rounded w-1/2"></div>
-                </div>
-              </div>
+          <div class="flex flex-col anim-stagger py-2">
+            @for (i of [1,2,3,4,5,6,7,8]; track i) {
+              <app-song [loading]="true" [song]="dummySong" class="anim-slide-fade-in-up block" />
             }
           </div>
         } 
         
         @case (searchStatus.Error) {
-          <div class="flex flex-col items-center justify-center py-20 px-8 text-center animate-fadeIn">
+          <div class="flex flex-col items-center justify-center py-20 px-8 text-center animate-fadeIn absolute inset-0">
             <div class="w-20 h-20 rounded-3xl bg-error/10 flex items-center justify-center mb-6 ring-1 ring-error/20">
               <fa-icon [icon]="faTriangleExclamation" class="text-3xl text-error" />
             </div>
@@ -59,19 +55,17 @@
         } 
         
         @case (searchStatus.Finished) {
-          <ul class="flex flex-col anim-stagger" [class.results-container]="songs().length > 0">
+          <ul class="flex flex-col anim-stagger py-2">
             @for (song of songs(); track song.id; let first = $first) { 
-              <li 
-                class="group/item list-none transition-colors duration-200 hover:bg-white/[0.03] active:bg-white/[0.06] px-5 song-item-staggered anim-slide-fade-in-up"
-                [class.bg-primary/10]="playerService.song()?.link === song.link"
-              >
+              <li class="group/item list-none song-item-staggered">
                 <app-song
                   [song]="song"
+                  class="anim-slide-fade-in-up block"
                   (playlistChange)="onChangePlaylist()"
                 />
               </li>
             } @empty {
-              <div class="flex flex-col items-center justify-center py-20 px-8 text-center animate-fadeIn">
+              <div class="flex flex-col items-center justify-center py-20 px-8 text-center animate-fadeIn absolute inset-0">
                 <div class="w-20 h-20 rounded-3xl bg-base-200/50 flex items-center justify-center mb-6 ring-1 ring-white/5">
                   <fa-icon [icon]="faMusic" class="text-3xl text-base-content/20" />
                 </div>

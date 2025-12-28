@@ -1,13 +1,14 @@
-<div class="w-full max-w-2xl mx-auto mt-0 pb-48 slideRight space-y-6">
+<div 
+  class="w-full max-w-2xl mx-auto mt-0 pb-48 slideRight space-y-6 overflow-y-auto"
+  appPullToRefresh
+  (refresh)="handleRefresh()"
+>
   <h1 class="font-bold text-3xl tracking-tight px-5 pt-4">History</h1>
   
   <div class="mx-5 bg-white/[0.03] rounded-[2.5rem] overflow-hidden border border-white/[0.05]">
     <ul class="flex flex-col">
       @for (song of songs(); track song.link) { 
-          <li 
-            class="group/item list-none transition-colors duration-200 hover:bg-white/[0.03] active:bg-white/[0.06] px-5"
-            [class.bg-primary/10]="playerService.song()?.link === song.link"
-          >
+          <li class="group/item list-none">
             <app-song
               [song]="song"
               (playlistChange)="onChangePlaylist()"

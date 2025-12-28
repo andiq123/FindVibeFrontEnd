@@ -15,13 +15,12 @@ import { Song } from '../../../core/models/song.model';
 export class MiniPlayerComponent {
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
-  progress = input<number>(0); // 0-100
+  progress = input<number>(0);
   toggleSizeEvent = output<void>();
 
   playerStatus = PlayerStatus;
   faArrowUp = faArrowUp;
 
-  // Computed properties for cleaner template
   isPlaying = computed(() => this.status() === PlayerStatus.Playing);
   
   toggleSize() {
