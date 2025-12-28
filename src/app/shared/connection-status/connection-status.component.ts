@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal, effect } from '@angular/core';
 import { SettingsService } from '../../core/services/settings.service';
 
 @Component({
@@ -13,9 +13,22 @@ export class ConnectionStatusComponent {
   readonly isCheckedServer = this.settingsService.isCheckedServer;
   readonly isServerDown = this.settingsService.isServerDown;
   
-  readonly isVisible = computed(() => 
-    !this.isCheckedServer() || this.isServerDown()
-  );
+  readonly shouldShow = signal(false);
   
   readonly isPending = computed(() => !this.isCheckedServer());
+  
+  constructor() {
+    effect((onCleanup) => {
+      const rawVisible = !this.isCheckedServer() || this.isServerDown();
+      
+      if (rawVisible) {
+        const timer = setTimeout(() => {
+          this.shouldShow.set(true);
+        }, 1000); 
+        onCleanup(() => clearTimeout(timer));
+      } else {
+        this.shouldShow.set(false);
+      }
+    });
+  }
 }

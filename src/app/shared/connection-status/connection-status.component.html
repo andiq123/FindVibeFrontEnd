@@ -1,4 +1,4 @@
-<div class="connection-status-wrapper" [class.visible]="isVisible()" [class.pending]="isPending()">
+<div class="connection-status-wrapper" [class.visible]="shouldShow()" [class.pending]="isPending()">
   <div class="status-content shadow-lg">
     @if (isPending()) {
       <svg class="spinner" viewBox="0 0 24 24">

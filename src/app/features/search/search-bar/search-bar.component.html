@@ -1,14 +1,20 @@
-<form (ngSubmit)="submit()" class="flex items-center gap-3 w-full group">
-  <div class="relative flex-1">
-    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none transition-colors" [class.text-primary/40]="isFocused()">
-      <fa-icon class="text-base" [icon]="faMagnifyingGlass"></fa-icon>
+<form (ngSubmit)="submit()" class="flex items-center gap-3 w-full group relative z-50">
+  <div class="relative flex-1 group/search">
+    <!-- Search Icon -->
+    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none transition-all duration-300 z-10" 
+         [class.text-base-content]="isFocused()"
+         [class.opacity-0]="isFocused() && searchTerm().length > 0">
+      <fa-icon class="text-[15px]" [icon]="faMagnifyingGlass"></fa-icon>
     </div>
+
+    <!-- Input Field -->
     <input
       #searchInput
       type="text"
-      placeholder="Artists, songs, lyrics..."
+      placeholder="Artists, songs, lyrics"
       name="searchTerm"
-      class="bg-white/[0.04] px-5 py-2.5 w-full outline-none rounded-2xl border border-white/[0.05] focus:border-primary/20 focus:bg-white/[0.08] transition-all duration-300 pl-11 text-[17px] tracking-tight placeholder:text-white/20"
+      class="w-full bg-base-200 text-[17px] leading-tight text-base-content placeholder:text-base-content/40 px-4 py-[9px] pl-10 rounded-[10px] border-none outline-none ring-0 transition-all duration-300"
+      [class.pl-9]="isFocused()"
       [ngModel]="searchTerm()"
       (input)="onInput($event)"
       (focus)="isFocused.set(true)"
@@ -17,43 +23,53 @@
       aria-label="Search"
     />
 
+    <!-- Clear Button (only visible when typing) -->
+     @if(searchTerm().length > 0) {
+      <button 
+        type="button"
+        (click)="searchTerm.set(''); onInput($any({target: {value: ''}})); searchInput.focus()"
+        class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-base-content/20 text-base-100 flex items-center justify-center transition-all hover:bg-base-content/40 active:scale-95"
+      >
+        <span class="text-[10px] font-bold">✕</span>
+      </button>
+     }
   </div>
 
+  <!-- Cancel Button -->
   <button
     type="button"
     (click)="cancelSearch()"
-    class="text-primary font-medium text-[17px] px-1 hover:opacity-70 active:scale-95 transition-all w-0 overflow-hidden whitespace-nowrap opacity-0"
-    [class.!w-auto]="isFocused() || searchTerm() !== ''"
-    [class.!opacity-100]="isFocused() || searchTerm() !== ''"
+    class="text-primary text-[17px] font-normal hover:opacity-80 active:opacity-50 transition-all duration-300 overflow-hidden whitespace-nowrap"
+    [class.w-0]="!isFocused() && searchTerm() === ''"
+    [class.opacity-0]="!isFocused() && searchTerm() === ''"
+    [class.mr-0]="!isFocused() && searchTerm() === ''"
+    [class.w-[54px]]="isFocused() || searchTerm() !== ''"
+    [class.opacity-100]="isFocused() || searchTerm() !== ''"
   >
     Cancel
   </button>
 
+  <!-- Suggestions Dropdown -->
   @if(suggestions().length > 0) {
-    <div class="absolute top-12 left-0 w-full z-50 pt-3 anim-slide-fade-in-down">
-      <ul class="suggestion-list bg-base-300/95 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl flex flex-col">
+    <div class="absolute top-full left-0 w-full mt-4 z-50 anim-slide-in">
+      <ul class="bg-base-200/80 backdrop-blur-xl rounded-[14px] overflow-hidden border border-white/5 shadow-2xl origin-top">
         @for(suggestion of suggestions(); track suggestion) {
           <li
-            class="suggestion-item group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-white/10 transition-colors relative"
+            class="group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-base-content/10 transition-colors relative border-b border-white/5 last:border-0"
             (click)="searchBySuggestion(suggestion)"
-            (keydown.enter)="searchBySuggestion(suggestion)"
-            tabindex="0"
           >
-            <div class="flex items-center gap-4 min-w-0">
-              <fa-icon class="text-white/20 group-hover:text-primary/60 transition-colors" [icon]="faMagnifyingGlass"></fa-icon>
-              <span class="text-[17px] font-medium text-white/90 truncate">{{ suggestion | titlecase }}</span>
+            <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <fa-icon class="text-base-content/40 text-[14px]" [icon]="faMagnifyingGlass"></fa-icon>
+              <span class="text-[17px] text-base-content/90 truncate font-normal">{{ suggestion | titlecase }}</span>
             </div>
 
             <button 
               type="button"
               (click)="fillSuggestion(suggestion, $event)"
-              class="w-10 h-10 flex items-center justify-center -mr-2 text-white/20 hover:text-white/60 active:scale-90 transition-all"
-              aria-label="Fill suggestion"
+              class="w-8 h-8 flex items-center justify-center -mr-2 text-primary active:scale-90 transition-transform"
             >
-              <fa-icon [icon]="faArrowUpLeft" class="-rotate-45 text-sm" />
+               <fa-icon [icon]="faArrowUpLeft" class="-rotate-45 text-sm" />
             </button>
-
-            <div class="absolute bottom-0 left-12 right-0 h-[0.5px] bg-white/[0.06] group-last:hidden"></div>
           </li>
         }
       </ul>
