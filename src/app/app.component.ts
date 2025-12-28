@@ -11,10 +11,11 @@ import { AudioService } from './core/services/audio.service';
 import { OfflineStorageService } from './features/library/services/offline-storage.service';
 import { GestureService } from './core/services/gesture.service';
 import { catchError, tap } from 'rxjs';
+import { ConnectionStatusComponent } from './shared/connection-status/connection-status.component';
 
 @Component({
   selector: 'app-root',
-  imports: [AudioPlayerComponent, RouterOutlet, NavigationComponent],
+  imports: [AudioPlayerComponent, RouterOutlet, NavigationComponent, ConnectionStatusComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
