@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -7,10 +7,10 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class WakeService {
-  private baseApi = environment.API_URL;
-  constructor(private httpClient: HttpClient) {}
+  private readonly httpClient = inject(HttpClient);
+  private readonly healthUrl = `${environment.API_URL}/health`;
 
   wakeServer(): Observable<void> {
-    return this.httpClient.get<void>(this.baseApi + '/health');
+    return this.httpClient.get<void>(this.healthUrl);
   }
 }

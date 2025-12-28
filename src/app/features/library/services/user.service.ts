@@ -5,44 +5,48 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment.development';
 import { Subject, tap } from 'rxjs';
 
+const USER_STORAGE_KEY = 'user';
+
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  private baseUrl = environment.API_URL;
-  private _user = signal<User | null>(null);
-  user = this._user.asReadonly();
-  userLoggedIn = new Subject();
+  private readonly storageService = inject(StorageService);
+  private readonly httpClient = inject(HttpClient);
 
-  private storageService = inject(StorageService);
+  private readonly _user = signal<User | null>(null);
+  
+  readonly user = this._user.asReadonly();
+  readonly userLoggedIn = new Subject<void>();
 
-  constructor(private httpClient: HttpClient) {}
-
-  loadUserIdFromStorage() {
-    const user = this.storageService.getItem<User>('user');
-    console.log('Loading user from storage:', user);
-    if (user && user.id) {
+  loadUserIdFromStorage(): string | null {
+    const user = this.storageService.getItem<User>(USER_STORAGE_KEY);
+    
+    if (user?.id) {
       this._user.set(user);
       return user.id;
     }
+    
     return null;
   }
 
   registerUser(userName: string) {
-    userName = userName.toLocaleLowerCase();
-    return this.httpClient.get<User>(this.baseUrl + '/' + userName).pipe(
+    const normalizedUserName = userName.toLowerCase();
+    const url = `${environment.API_URL}/${normalizedUserName}`;
+    
+    return this.httpClient.get<User>(url).pipe(
       tap({
         next: (user: User) => {
           this._user.set(user);
-          this.storageService.setItem('user', user);
-          this.userLoggedIn.next(true);
+          this.storageService.setItem(USER_STORAGE_KEY, user);
+          this.userLoggedIn.next();
         },
       })
     );
   }
 
-  resetUser() {
+  resetUser(): void {
     this._user.set(null);
-    this.storageService.removeItem('user');
+    this.storageService.removeItem(USER_STORAGE_KEY);
   }
 }

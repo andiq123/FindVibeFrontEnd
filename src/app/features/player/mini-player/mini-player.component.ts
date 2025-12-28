@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, input, output, computed } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { PlayerStatus } from '../models/player.model';
@@ -15,13 +15,16 @@ import { Song } from '../../../core/models/song.model';
 export class MiniPlayerComponent {
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
-  onToggleSize = output<void>();
+  progress = input<number>(0); // 0-100
+  toggleSizeEvent = output<void>();
 
   playerStatus = PlayerStatus;
-
   faArrowUp = faArrowUp;
 
+  // Computed properties for cleaner template
+  isPlaying = computed(() => this.status() === PlayerStatus.Playing);
+  
   toggleSize() {
-    this.onToggleSize.emit();
+    this.toggleSizeEvent.emit();
   }
 }

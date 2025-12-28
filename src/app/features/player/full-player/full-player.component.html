@@ -1,6 +1,6 @@
 <div
-  class="fixed bottom-0 left-0 right-0 h-full z-50 bg-base-100 flex flex-col slideUp overflow-hidden rounded-t-[2.5rem] shadow-2xl"
-  [class.slideDown]="isClosingAnimation()"
+  class="fixed bottom-0 left-0 right-0 h-full z-50 bg-base-100 flex flex-col anim-slide-in-up-spring overflow-hidden rounded-t-[2.5rem] shadow-2xl"
+  [class.anim-slide-out-down]="isClosingAnimation()"
   #playerRef
   appSwipeDown
 >
@@ -96,7 +96,7 @@
             (change)="handleTimeChange($event)"
           />
         </div>
-        <div class="flex justify-between text-[11px] font-bold tracking-widest text-white/30 uppercase px-1">
+        <div class="flex justify-between text-[11px] font-bold tracking-widest text-white/30 uppercase px-2">
           <span>{{ convertTime(isDraggingTime() ? visualTime() : currentTime()) }}</span>
           <span>{{ convertTime(duration()) }}</span>
         </div>
@@ -105,7 +105,7 @@
       <!-- Playback Controls -->
       <div class="flex items-center justify-between px-2">
         <button class="w-10 h-10 flex items-center justify-center pressable-native" (click)="toggleShuffle()">
-          <fa-icon [icon]="faShuffle" [class.text-primary]="isShuffle()" class="text-xl text-white/40"></fa-icon>
+          <fa-icon [icon]="faShuffle" class="text-xl" [class.text-white/40]="!isShuffle()" [class.text-primary]="isShuffle()"></fa-icon>
         </button>
 
         <button class="w-14 h-14 flex items-center justify-center pressable-native text-white" (click)="previousSong()">
@@ -124,7 +124,7 @@
         </button>
 
         <button class="w-10 h-10 flex items-center justify-center pressable-native" (click)="toggleRepeat()">
-          <fa-icon [icon]="faRepeat" [class.text-primary]="isRepeat()" class="text-xl text-white/40"></fa-icon>
+          <fa-icon [icon]="faRepeat" class="text-xl" [class.text-white/40]="!isRepeat()" [class.text-primary]="isRepeat()"></fa-icon>
         </button>
       </div>
     </div>

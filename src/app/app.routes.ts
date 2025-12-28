@@ -12,20 +12,24 @@ export const routes: Routes = [
     path: 'songs',
     component: SearchPageComponent,
     canActivate: [offlineGuard],
+    data: { animation: 1 },
   },
   {
     path: 'songs/:query',
     component: SearchPageComponent,
     canActivate: [offlineGuard],
+    data: { animation: 1 },
   },
   {
     path: 'library',
     loadComponent: () =>
       import('./features/library/library.component').then((c) => c.LibraryComponent),
+    data: { animation: 2 },
   },
   {
     path: 'recent',
     loadComponent: () =>
       import('./features/recent/recent.component').then((c) => c.RecentComponent),
+    data: { animation: 3 },
   },
 ];

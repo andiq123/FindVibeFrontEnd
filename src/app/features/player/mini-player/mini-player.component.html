@@ -1,37 +1,70 @@
 <div
-  class="bg-base-100/95 rounded-2xl fixed bottom-[92px] left-1/2 -translate-x-1/2 slideUp w-[calc(100%-1.5rem)] max-w-[480px] shadow-premium backdrop-blur-3xl border border-glass-border z-40 cursor-pointer overflow-hidden p-0.5"
+  class="mini-player-container bg-base-100/95 rounded-2xl fixed bottom-[92px] left-1/2 -translate-x-1/2 anim-bounce-in-up w-[calc(100%-1.5rem)] max-w-[480px] shadow-premium backdrop-blur-3xl border z-40 cursor-pointer overflow-hidden"
+  [class.border-primary/20]="isPlaying()"
+  [class.border-glass-border]="!isPlaying()"
   (click)="toggleSize()"
+  (keydown.enter)="toggleSize()"
+  tabindex="0"
+  role="button"
 >
-  <div class="flex items-center gap-4 w-full p-3">
-    <!-- Album Art with Play Button -->
-    <div class="relative w-14 aspect-square rounded-lg overflow-hidden ring-1 ring-base-200/30">
-      <div class="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
-        <app-player-button [status]="status()" />
+  <!-- Main Content -->
+  <div class="flex items-center gap-3 w-full p-3">
+    <!-- Album Art with Waveform -->
+    <div class="flex items-center gap-2">
+      <!-- Album Art -->
+      <div 
+        class="album-art relative w-14 aspect-square rounded-lg overflow-hidden ring-1 ring-base-200/30"
+        [class.album-art-playing]="isPlaying()"
+      >
+        <div class="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 z-10">
+          <app-player-button [status]="status()" />
+        </div>
+        <img
+          class="w-full h-full object-cover"
+          [src]="song().image || 'no_album_art.jpg'"
+          alt="Album Art"
+        />
       </div>
-      <img
-        class="w-full h-full object-cover"
-        [src]="song().image || 'no_album_art.jpg'"
-        alt="Album Art"
-      />
+
+      <!-- Waveform Indicator (only when playing) -->
+      @if(isPlaying()) {
+        <div class="waveform-indicator flex items-center gap-[3px] h-4 anim-fade-in">
+          <span class="waveform-bar"></span>
+          <span class="waveform-bar"></span>
+          <span class="waveform-bar"></span>
+        </div>
+      }
     </div>
 
     <!-- Song Info -->
     <div class="flex-1 min-w-0">
       <app-moving-title
         [title]="song().title"
-        [isActive]="status() === playerStatus.Playing"
-        classes="text-sm font-medium block"
+        [isActive]="isPlaying()"
+        [classes]="isPlaying() ? 'text-sm font-semibold block' : 'text-sm font-medium block'"
       />
       <app-moving-title
         [title]="song().artist"
-        [isActive]="status() === playerStatus.Playing"
+        [isActive]="isPlaying()"
         classes="text-xs text-base-content/50 block"
       />
     </div>
 
     <!-- Expand Button -->
-    <button class="btn btn-ghost btn-circle btn-sm text-base-content/50 hover:text-primary transition-colors duration-200">
+    <button 
+      class="btn btn-ghost btn-circle btn-sm transition-colors duration-200"
+      [class.text-primary]="isPlaying()"
+      [class.text-base-content/50]="!isPlaying()"
+    >
       <fa-icon [icon]="faArrowUp" class="text-base" />
     </button>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div 
+      class="progress-fill" 
+      [style.width.%]="progress()"
+    ></div>
   </div>
 </div>

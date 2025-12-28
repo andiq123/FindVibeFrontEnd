@@ -1,15 +1,15 @@
-import { Component, computed, input, output, inject } from '@angular/core';
-import { Song } from '../../../core/models/song.model';
-import { PlayerStatus } from '../../player/models/player.model';
-import { PlayerButtonComponent } from '../../../shared/player-button/player-button.component';
-import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
+import { Component, computed, input, output, inject, signal } from '@angular/core';
+import { Song } from '../../core/models/song.model';
+import { PlayerStatus } from '../../features/player/models/player.model';
+import { PlayerButtonComponent } from '../player-button/player-button.component';
+import { MovingTitleComponent } from '../moving-title/moving-title.component';
 import { NgOptimizedImage, NgTemplateOutlet } from '@angular/common';
-import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
+import { FavoriteButtonComponent } from '../favorite-button/favorite-button.component';
 import { faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { OfflineStorageService } from '../../library/services/offline-storage.service';
-import { DragAndDropDirective } from '../directives/drag-and-drop.directive';
-import { PlayerService } from '../../../core/services/player.service';
+import { OfflineStorageService } from '../../features/library/services/offline-storage.service';
+import { DragAndDropDirective } from '../../features/search/directives/drag-and-drop.directive';
+import { PlayerService } from '../../core/services/player.service';
 
 @Component({
     selector: 'app-song',
@@ -29,10 +29,23 @@ export class SongComponent {
   private playerService = inject(PlayerService);
   private offlineStorageService = inject(OfflineStorageService);
 
-  allowReorder = input<boolean>(false);
-  onReorderSongs = output<{ from: string; to: string }>();
+  // Inputs
   song = input.required<Song>();
+  allowReorder = input<boolean>(false);
+  loading = input<boolean>(false);
+  compact = input<boolean>(false);
+  showOfflineIndicator = input<boolean>(true);
+  isFavoritePage = input<boolean>(false);
   
+  // Outputs
+  reorder = output<{ from: string; to: string }>();
+  playlistChange = output<void>();
+  
+  // Image loading state
+  imageLoading = signal(true);
+  imageError = signal(false);
+  
+  // Computed properties
   isActive = computed(() => this.playerService.song()?.link === this.song().link);
   
   status = computed(() => {
@@ -42,22 +55,18 @@ export class SongComponent {
     return PlayerStatus.Paused;
   });
   
-  isFavoritePage = input<boolean>(false);
-  
   isDownloadingOffline = computed(() => {
     return this.offlineStorageService
       .currentLoadingDownloadSongIds()
       .includes(this.song().id);
   });
   
-  isAvaiableOffline = computed(() => {
+  isAvailableOffline = computed(() => {
     return (
       this.isFavoritePage() &&
       this.offlineStorageService.availableOfflineSongIds().includes(this.song().id)
     );
   });
-  
-  onChangePlaylist = output();
 
   faCloudArrowDown = faCloudArrowDown;
 
@@ -66,8 +75,7 @@ export class SongComponent {
       await this.playerService.play();
       return;
     }
-    this.onChangePlaylist.emit();
-
+    this.playlistChange.emit();
     await this.playerService.setSong(this.song());
   }
 
@@ -83,7 +91,17 @@ export class SongComponent {
     }
   }
 
-  reorder(data: { from: string; to: string }) {
-    this.onReorderSongs.emit(data);
+  emitReorder(data: { from: string; to: string }) {
+    this.reorder.emit(data);
+  }
+
+  onImageLoad() {
+    this.imageLoading.set(false);
+    this.imageError.set(false);
+  }
+
+  onImageError() {
+    this.imageLoading.set(false);
+    this.imageError.set(true);
   }
 }

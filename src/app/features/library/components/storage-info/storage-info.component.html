@@ -1,15 +1,18 @@
 @if(isVisible()){
   <div 
-    class="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-md fadeIn" 
-    [class.fadeOut]="isClosing()"
+    class="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-md anim-fade-in" 
+    [class.anim-fade-out]="isClosing()"
     (click)="dismiss()"
+    (keydown.escape)="dismiss()"
+    tabindex="0"
+    role="button"
   ></div>
 
   <!-- Minimalist iOS Sheet -->
   <div
     #sheetRef
-    class="fixed inset-x-0 bottom-0 z-[9999] bg-base-100/95 backdrop-blur-3xl flex flex-col items-center slideUp pb-12 rounded-t-[2.5rem] border-t border-white/[0.05]"
-    [class.slideDown]="isClosing()"
+    class="fixed inset-x-0 bottom-0 z-[9999] bg-base-100/95 backdrop-blur-3xl flex flex-col items-center anim-slide-in-up pb-12 rounded-t-[2.5rem] border-t border-white/[0.05]"
+    [class.anim-slide-out-down-slow]="isClosing()"
   >
     <!-- Grab Handle -->
     <div class="w-full pt-4 pb-2 flex flex-col items-center justify-center shrink-0 relative z-20">

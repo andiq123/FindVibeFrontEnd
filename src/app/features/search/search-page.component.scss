@@ -1,43 +1,13 @@
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideUpFade {
-    from {
-        opacity: 0;
-        transform: translateY(16px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%);
-    }
-
-    100% {
-        transform: translateX(100%);
-    }
-}
+// Using idiomatic animations and stagger pattern
 
 .results-container {
-    animation: fadeIn 0.4s ease-out;
+    // Using: .anim-fade-in-slow
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .song-item-staggered {
+    // Using: .anim-slide-fade-in-up with .anim-stagger on parent
     opacity: 0;
-    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
     @for $i from 1 through 20 {
         &:nth-child(#{$i}) {

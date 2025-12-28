@@ -1,6 +1,5 @@
 import { computed, Injectable, signal, effect, inject } from '@angular/core';
 import { Song } from '../models/song.model';
-import { PlayerStatus } from '../../features/player/models/player.model';
 import { SettingsService } from './settings.service';
 import { RecentService } from '../../features/recent/services/recent.service';
 import { PlaylistService } from './playlist.service';
@@ -11,106 +10,104 @@ import { AudioService } from './audio.service';
   providedIn: 'root',
 })
 export class PlayerService {
-  private settingsService = inject(SettingsService);
-  private recentService = inject(RecentService);
-  private playlistService = inject(PlaylistService);
-  private offlineStorageService = inject(OfflineStorageService);
-  private audioService = inject(AudioService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly recentService = inject(RecentService);
+  private readonly playlistService = inject(PlaylistService);
+  private readonly offlineStorageService = inject(OfflineStorageService);
+  private readonly audioService = inject(AudioService);
 
-  private isFirstError = signal(true);
-  private alreadyAddedInRecents = signal<boolean>(false);
+  private readonly alreadyAddedInRecents = signal<boolean>(false);
+  private currentObjectUrl: string | null = null;
 
-  song = computed(() => this.playlistService.currentSong());
-  status = this.audioService.status;
-  currentTime = this.audioService.currentTime;
-  duration = this.audioService.duration;
-  volume = this.audioService.volume;
+  // Public signals
+  readonly song = computed(() => this.playlistService.currentSong());
+  readonly status = this.audioService.status;
+  readonly currentTime = this.audioService.currentTime;
+  readonly duration = this.audioService.duration;
 
-  setVolume(value: number) {
-    this.audioService.setVolume(value);
-  }
+  // Effects for side effects
+  private readonly recentsEffect = effect(() => {
+    const time = this.currentTime();
+    const song = this.song();
+    
+    if (time > 7 && !this.alreadyAddedInRecents() && song) {
+      this.alreadyAddedInRecents.set(true);
+      this.recentService.addSongToRecents(song);
+    }
+  });
 
-  constructor() {
-    this.setupRecentsEffect();
-  }
+  private readonly shuffleEffect = effect(() => {
+    if (this.settingsService.isShuffle()) {
+      this.playlistService.enableShuffle();
+    } else {
+      this.playlistService.disableShuffle();
+    }
+  });
 
-  private setupRecentsEffect() {
-    effect(() => {
-      const time = this.currentTime();
-      const song = this.song();
-      if (time > 7 && !this.alreadyAddedInRecents() && song) {
-        this.alreadyAddedInRecents.set(true);
-        this.recentService.addSongToRecents(song);
-      }
-    });
-  }
+  async setSong(song: Song): Promise<void> {
+    // Clean up previous object URL
+    if (this.currentObjectUrl) {
+      URL.revokeObjectURL(this.currentObjectUrl);
+      this.currentObjectUrl = null;
+    }
 
-  async setSong(song: Song) {
     this.playlistService.setCurrentSong(song);
     this.audioService.pause();
     this.audioService.seek(0);
     this.alreadyAddedInRecents.set(false);
-    this.isFirstError.set(true);
 
-    const offlineLink = await this.offlineStorageService.isAvailableOffline(song.link);
-    if (offlineLink) {
-      const blob = await offlineLink.blob();
-      this.audioService.setSource(URL.createObjectURL(blob));
+    // Check for offline version
+    const offlineResponse = await this.offlineStorageService.isAvailableOffline(song.link);
+    if (offlineResponse) {
+      const blob = await offlineResponse.blob();
+      this.currentObjectUrl = URL.createObjectURL(blob);
+      this.audioService.setSource(this.currentObjectUrl);
     } else {
       this.audioService.setSource(song.link);
     }
-    
+
     await this.audioService.play();
   }
 
-  setCurrentTime(time: number) {
-    this.audioService.seek(time);
-  }
-
-  getCurrentTime() {
-    return this.audioService.currentTime();
-  }
-
-  async play() {
+  async play(): Promise<void> {
     await this.audioService.play();
   }
 
-  pause() {
+  pause(): void {
     this.audioService.pause();
   }
 
-  stop() {
-    this.audioService.stop();
+  seek(time: number): void {
+    this.audioService.seek(time);
   }
 
-  async setPreviousSong() {
+  async setPreviousSong(): Promise<Song | undefined> {
     if (this.playlistService.needToReplay(this.currentTime())) {
       this.audioService.seek(0);
       await this.play();
-      return;
+      return undefined;
     }
 
-    const previousSong = this.playlistService.previousSong;
-    await this.setSong(previousSong);
-    return previousSong;
+    const previousSong = this.playlistService.previous();
+    if (previousSong) {
+      await this.setSong(previousSong);
+      return previousSong;
+    }
+    return undefined;
   }
 
-  async setNextSong() {
+  async setNextSong(): Promise<Song | undefined> {
     if (this.settingsService.isRepeat()) {
       this.audioService.seek(0);
       await this.play();
-      return;
+      return undefined;
     }
 
-    let songToBePlayed: Song;
-    if (this.settingsService.isShuffle()) {
-      songToBePlayed = this.playlistService.getRandomSong();
-    } else {
-      songToBePlayed = this.playlistService.nextSong;
+    const nextSong = this.playlistService.next();
+    if (nextSong) {
+      await this.setSong(nextSong);
+      return nextSong;
     }
-
-    if (!songToBePlayed) return;
-    await this.setSong(songToBePlayed);
-    return songToBePlayed;
+    return undefined;
   }
 }

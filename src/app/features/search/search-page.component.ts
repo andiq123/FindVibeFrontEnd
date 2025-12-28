@@ -1,7 +1,7 @@
 import { Component, computed, effect, input, inject } from '@angular/core';
-import { SongComponent } from './song/song.component';
+import { SongComponent } from '../../shared/song/song.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
-import { SearchStatus, Song } from '../../core/models/song.model';
+import { SearchStatus } from '../../core/models/song.model';
 import { Router } from '@angular/router';
 import { SearchService } from './services/search.service';
 import { SettingsService } from '../../core/services/settings.service';

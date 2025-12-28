@@ -6,53 +6,56 @@ import { Song } from '../../../core/models/song.model';
 import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
 import { Reorder } from '../../../core/models/reorder.model';
 
+const LIBRARY_STORAGE_KEY = 'library';
+const BASE_API_URL = environment.API_URL;
+
 @Injectable({
   providedIn: 'root',
 })
 export class LibraryApiService {
-  private baseUrl = environment.API_URL + '/favorites/';
-
-  private storageService = inject(StorageService);
-
-  constructor(private httpClient: HttpClient) {}
+  private readonly storageService = inject(StorageService);
+  private readonly httpClient = inject(HttpClient);
 
   getFavoritesSong(userId: string): Observable<Song[]> {
-    const songsFromStorage = this.getLibraryFromLocalStorage();
-    
-    const apiCall = this.httpClient.get<Song[]>(this.baseUrl + userId).pipe(
-      catchError((e) => {
-        if (e.status === 404) {
+    const cachedSongs = this.getLibraryFromLocalStorage();
+    const apiCall = this.fetchFromApi(userId);
+
+    return cachedSongs.length > 0
+      ? of(cachedSongs).pipe(switchMap(() => apiCall))
+      : apiCall;
+  }
+
+  private fetchFromApi(userId: string): Observable<Song[]> {
+    return this.httpClient.get<Song[]>(`${BASE_API_URL}/favorites/${userId}`).pipe(
+      catchError((error) => {
+        if (error.status === 404) {
           this.setLibraryToLocalStorage([]);
           return of([]);
         }
-        return of(songsFromStorage);
+        return of(this.getLibraryFromLocalStorage());
       }),
       map(songs => songs.sort((a, b) => a.order - b.order)),
       tap(songs => this.setLibraryToLocalStorage(songs))
     );
-
-    return songsFromStorage.length > 0 
-      ? of(songsFromStorage).pipe(switchMap(() => apiCall))
-      : apiCall;
   }
 
-  reorderSongs(reorders: Reorder[]) {
-    return this.httpClient.put(environment.API_URL + '/favorites', reorders);
+  reorderSongs(reorders: Reorder[]): Observable<unknown> {
+    return this.httpClient.put(`${BASE_API_URL}/favorites`, reorders);
   }
 
-  addToFavorites(song: Song, userId: string) {
-    return this.httpClient.post(this.baseUrl + userId, song);
+  addToFavorites(song: Song, userId: string): Observable<unknown> {
+    return this.httpClient.post(`${BASE_API_URL}/favorites/${userId}`, song);
   }
 
-  removeFromFavorites(songId: string) {
-    return this.httpClient.delete(this.baseUrl + songId);
+  removeFromFavorites(songId: string): Observable<unknown> {
+    return this.httpClient.delete(`${BASE_API_URL}/favorites/${songId}`);
   }
 
-  setLibraryToLocalStorage(songs: Song[]) {
-    this.storageService.setItem('library', songs);
+  setLibraryToLocalStorage(songs: Song[]): void {
+    this.storageService.setItem(LIBRARY_STORAGE_KEY, songs);
   }
 
-  getLibraryFromLocalStorage() {
-    return this.storageService.getItem<Song[]>('library') || [];
+  getLibraryFromLocalStorage(): Song[] {
+    return this.storageService.getItem<Song[]>(LIBRARY_STORAGE_KEY) || [];
   }
 }

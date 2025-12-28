@@ -1,51 +1,91 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { Song } from '../models/song.model';
+
+const TIME_OFFSET_SECONDS = 5;
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlaylistService {
-  songs = signal<Song[]>([]);
-  currentSong = signal<Song | null>(null);
-  timeOffset = 5;
+  private readonly originalList = signal<Song[]>([]);
+  private readonly queue = signal<Song[]>([]);
+  private readonly currentIndex = signal<number>(-1);
 
-  setCurrentSong(song: Song | null) {
-    this.currentSong.set(song);
+  readonly currentSong = computed(() => {
+    const q = this.queue();
+    const i = this.currentIndex();
+    return (i >= 0 && i < q.length) ? q[i] : null;
+  });
+
+  setCurrentSong(song: Song | null): void {
+    if (!song) {
+      this.currentIndex.set(-1);
+      return;
+    }
+
+    const index = this.queue().findIndex(s => s.id === song.id);
+    this.currentIndex.set(index !== -1 ? index : -1);
   }
 
-  setCurrentPlaylist(songs: Song[]) {
-    this.songs.set(songs);
+  setCurrentPlaylist(songs: Song[]): void {
+    this.originalList.set(songs);
+    this.queue.set(songs);
+    this.currentIndex.set(-1);
+  }
+
+  enableShuffle(): void {
+    const current = this.currentSong();
+    let shuffled = shuffleArray(this.originalList());
+
+    if (current) {
+      shuffled = shuffled.filter(s => s.id !== current.id);
+      shuffled.unshift(current);
+    }
+
+    this.queue.set(shuffled);
+    this.currentIndex.set(0);
+  }
+
+  disableShuffle(): void {
+    const current = this.currentSong();
+    this.queue.set(this.originalList());
+
+    if (current) {
+      const index = this.originalList().findIndex(s => s.id === current.id);
+      this.currentIndex.set(index);
+    } else {
+      this.currentIndex.set(-1);
+    }
   }
 
   needToReplay(currentTime: number): boolean {
-    return currentTime > this.timeOffset;
+    return currentTime > TIME_OFFSET_SECONDS;
   }
 
-  get previousSong(): Song {
-    const songs = this.songs();
-    if (songs.length === 0) throw new Error('Playlist is empty');
-    
-    const currentIndex = songs.findIndex(s => s.id === this.currentSong()?.id);
-    if (currentIndex === -1) return songs[0];
+  next(): Song | null {
+    const q = this.queue();
+    if (q.length === 0) return null;
 
-    const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
-    return songs[prevIndex];
+    const nextIndex = (this.currentIndex() + 1) % q.length;
+    this.currentIndex.set(nextIndex);
+    return q[nextIndex];
   }
 
-  get nextSong(): Song {
-    const songs = this.songs();
-    if (songs.length === 0) throw new Error('Playlist is empty');
+  previous(): Song | null {
+    const q = this.queue();
+    if (q.length === 0) return null;
 
-    const currentIndex = songs.findIndex(s => s.id === this.currentSong()?.id);
-    if (currentIndex === -1) return songs[0];
-
-    const nextIndex = (currentIndex + 1) % songs.length;
-    return songs[nextIndex];
-  }
-
-  getRandomSong(): Song {
-    const songs = this.songs();
-    if (songs.length === 0) throw new Error('Playlist is empty');
-    return songs[Math.floor(Math.random() * songs.length)];
+    const prevIndex = (this.currentIndex() - 1 + q.length) % q.length;
+    this.currentIndex.set(prevIndex);
+    return q[prevIndex];
   }
 }

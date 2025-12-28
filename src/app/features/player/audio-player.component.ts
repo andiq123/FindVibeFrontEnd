@@ -22,6 +22,11 @@ export class AudioPlayerComponent implements OnInit {
   isMiniPlayer = computed(() => this.settingsService.isMiniPlayer());
   song = computed(() => this.playlistService.currentSong());
   status = computed(() => this.playerService.status());
+  progress = computed(() => {
+    const currentTime = this.playerService.currentTime();
+    const duration = this.playerService.duration();
+    return duration > 0 ? (currentTime / duration) * 100 : 0;
+  });
   statusObservable = toObservable(this.status);
 
   ngOnInit(): void {

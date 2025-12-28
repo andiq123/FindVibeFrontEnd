@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { AudioPlayerComponent } from './features/player/audio-player.component';
-import { Title } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
 import { NavigationComponent } from './features/navigation/navigation.component';
 import { UserService } from './features/library/services/user.service';
@@ -12,13 +11,12 @@ import { MediaSessionService } from './core/services/media-session.service';
 import { catchError, tap, retry, timeout, of } from 'rxjs';
 
 @Component({
-    selector: 'app-root',
-    imports: [AudioPlayerComponent, RouterOutlet, NavigationComponent],
-    templateUrl: './app.component.html',
-    styleUrl: './app.component.scss'
+  selector: 'app-root',
+  imports: [AudioPlayerComponent, RouterOutlet, NavigationComponent],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
-  private title = inject(Title);
   private userService = inject(UserService);
   private libraryService = inject(LibraryService);
   private wakeService = inject(WakeService);

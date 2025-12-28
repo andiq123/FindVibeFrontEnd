@@ -1,15 +1,115 @@
-.slideUp {
-  animation: slideUp 0.3s ease-in-out forwards;
+// iOS-Native Mini-Player Enhancements
+
+// Container with enhanced press feedback
+.mini-player-container {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.15s ease,
+        border-color 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+
+    &:active {
+        transform: translate(-50%, 0) scale(0.97);
+        box-shadow: 0 10px 15px -5px rgba(0, 0, 0, 0.2);
+    }
 }
 
-@keyframes slideUp {
-  0% {
-    transform: translate(-50%, 100%);
-  }
-  50% {
-    transform: translate(-50%, -10%);
-  }
-  100% {
-    transform: translate(-50%, 0);
-  }
+// Album art with playing state animation
+.album-art {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &.album-art-playing {
+        animation: pulse-glow 2s ease-in-out infinite;
+        box-shadow: 0 0 20px rgba(var(--fallback-p, oklch(var(--p))), 0.3);
+    }
+
+    img {
+        transition: opacity 0.3s ease;
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+// Waveform indicator
+.waveform-indicator {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 16px;
+}
+
+.waveform-bar {
+    width: 3px;
+    background: var(--fallback-p, oklch(var(--p)));
+    border-radius: 2px;
+    animation: waveform 0.8s ease-in-out infinite;
+    transform-origin: center;
+
+    &:nth-child(1) {
+        animation-delay: 0s;
+        height: 8px;
+    }
+
+    &:nth-child(2) {
+        animation-delay: 0.2s;
+        height: 12px;
+    }
+
+    &:nth-child(3) {
+        animation-delay: 0.4s;
+        height: 6px;
+    }
+}
+
+@keyframes waveform {
+
+    0%,
+    100% {
+        transform: scaleY(0.5);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+// Progress bar
+.progress-bar {
+    position: relative;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg,
+            var(--fallback-p, oklch(var(--p))),
+            var(--fallback-p, oklch(var(--p) / 0.8)));
+    transition: width 0.3s linear;
+    box-shadow: 0 0 8px rgba(var(--fallback-p, oklch(var(--p))), 0.5);
+}
+
+// Smooth transitions for all interactive elements
+.btn {
+    transition: color 0.2s ease, transform 0.15s ease;
+
+    &:active {
+        transform: scale(0.95);
+    }
 }

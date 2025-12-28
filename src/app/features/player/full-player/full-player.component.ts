@@ -51,12 +51,11 @@ export class FullPlayerComponent {
   // Signals from service
   serviceCurrentTime = computed(() => this.playerService.currentTime());
   duration = computed(() => this.playerService.duration());
-  serviceVolume = computed(() => this.playerService.volume());
 
   isRepeat = computed(() => this.settingsService.isRepeat());
   isShuffle = computed(() => this.settingsService.isShuffle());
 
-  onToggleSize = output<void>();
+  toggleSizeEvent = output<void>();
 
   // Icons
   faStepBackward = faStepBackward;
@@ -115,7 +114,7 @@ export class FullPlayerComponent {
 
   toggleSize() {
     this.playerRef()?.nativeElement.addEventListener('animationend', () => {
-      this.onToggleSize.emit();
+      this.toggleSizeEvent.emit();
     });
     this.isClosingAnimation.set(true);
   }
@@ -148,7 +147,7 @@ export class FullPlayerComponent {
 
   handleTimeChange(event: Event) {
     const value = +(event.target as HTMLInputElement).value;
-    this.playerService.setCurrentTime(value);
+    this.playerService.seek(value);
     // Add small delay to prevent jumping back
     setTimeout(() => {
       this.isDraggingTime.set(false);
@@ -180,7 +179,7 @@ export class FullPlayerComponent {
     const song = this.song();
     if (!song?.image) return '#000000';
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const htmlElementImage = document.createElement('img');
       htmlElementImage.src = song.image;
 

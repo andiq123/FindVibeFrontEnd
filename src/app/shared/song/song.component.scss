@@ -1,0 +1,63 @@
+// Drag and drop states
+.dragging {
+  opacity: 0.5;
+}
+
+.dragTarget {
+  opacity: 0.5;
+  border: 1px solid var(--fallback-p, oklch(var(--p)));
+}
+
+// iOS-like pressable feedback
+.song-container {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    transform: scale(0.98);
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+}
+
+// Album art loading states
+.album-art {
+  &.loading {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  }
+
+  img {
+    will-change: opacity;
+  }
+}
+
+// Skeleton loading shimmer
+.skeleton-song {
+  pointer-events: none;
+
+  .skeleton-image,
+  .skeleton-title,
+  .skeleton-artist {
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(255, 255, 255, 0.05),
+          transparent);
+      animation: shimmer 1.5s infinite;
+    }
+  }
+}
+
+// Smooth transitions
+.album-art img,
+.song-container,
+app-player-button,
+app-favorite-button {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}

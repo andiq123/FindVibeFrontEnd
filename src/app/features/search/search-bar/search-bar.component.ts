@@ -1,6 +1,6 @@
-import { Component, computed, input, OnInit, signal, OnDestroy, effect } from '@angular/core';
+import { Component, computed, input, OnInit, signal, OnDestroy, effect, inject } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faMagnifyingGlass, faCircleXmark, faArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { faMagnifyingGlass, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
@@ -22,13 +22,12 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
 
   faMagnifyingGlass = faMagnifyingGlass;
-  faCircleXmark = faCircleXmark;
   faArrowUpLeft = faArrowUp; 
 
-  constructor(
-    public suggestionsService: SearchService,
-    private router: Router
-  ) {
+  public suggestionsService = inject(SearchService);
+  private router = inject(Router);
+
+  constructor() {
     // React to query input changes (e.g. from navigation)
     effect(() => {
       const q = this.query();
@@ -79,11 +78,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.searchSubject.next(value);
   }
 
-  clearSearch() {
-    this.searchTerm.set('');
-    this.searchSubject.next('');
-    this.suggestionsService.resetSuggestions();
-  }
+
 
   cancelSearch() {
     this.searchTerm.set('');

@@ -16,12 +16,12 @@ export class SwipeDownDirective implements OnDestroy {
   topSignal = signal<number>(0);
   offsetPixels = signal<number>(0);
   startTime = signal<Date>(new Date());
-  onClose = output<void>();
+  closePanel = output<void>();
   swipeStartTrigger = signal<number>(450);
 
   @HostBinding('style.transform') translateY = 'translateY(0px)';
   @HostBinding('class.slideToZero') slideToZero = false;
-  @HostBinding('class.slideUp') slideUp = true;
+  @HostBinding('class.anim-slide-in-up-spring') slideInUp = true;
 
   constructor() {
     effect(() => {
@@ -35,7 +35,7 @@ export class SwipeDownDirective implements OnDestroy {
     this.offsetPixels.set(currentPixels);
     if (currentPixels > this.swipeStartTrigger()) return;
     this.startTime.set(new Date());
-    this.slideUp = false;
+    this.slideInUp = false;
   }
 
   @HostListener('touchmove', ['$event'])
@@ -52,7 +52,7 @@ export class SwipeDownDirective implements OnDestroy {
     const duration = new Date().getTime() - this.startTime().getTime();
 
     if (duration < timeCloseTrigger && this.topSignal() > closeSizeTrigger) {
-      this.onClose.emit();
+      this.closePanel.emit();
     } else {
       if (this.offsetPixels() < this.swipeStartTrigger()) {
         this.slideToZero = true;
@@ -75,6 +75,6 @@ export class SwipeDownDirective implements OnDestroy {
     this.topSignal.set(0);
     this.offsetPixels.set(0);
     this.slideToZero = false;
-    this.slideUp = true;
+    this.slideInUp = true;
   }
 }

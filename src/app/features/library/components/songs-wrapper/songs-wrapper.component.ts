@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { SongComponent } from '../../../search/song/song.component';
+import { SongComponent } from '../../../../shared/song/song.component';
 import { Song } from '../../../../core/models/song.model';
 import { PlayerService } from '../../../../core/services/player.service';
 import { inject } from '@angular/core';
@@ -12,16 +12,16 @@ import { inject } from '@angular/core';
 })
 export class SongsWrapperComponent {
   songs = input<Song[]>();
-  onReorderSongs = output<{ from: string; to: string }>();
-  onChangePlaylist = output();
+  reorder = output<{ from: string; to: string }>();
+  playlistChange = output<void>();
 
   public playerService = inject(PlayerService);
 
-  reorderSongs(data: { from: string; to: string }) {
-    this.onReorderSongs.emit(data);
+  emitReorder(data: { from: string; to: string }) {
+    this.reorder.emit(data);
   }
 
-  changePlaylist() {
-    this.onChangePlaylist.emit();
+  emitPlaylistChange() {
+    this.playlistChange.emit();
   }
 }

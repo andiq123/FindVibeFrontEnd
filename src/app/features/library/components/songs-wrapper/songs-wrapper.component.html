@@ -1,6 +1,6 @@
 <div class="mx-5 bg-white/[0.03] rounded-[2.5rem] overflow-hidden border border-white/[0.05]">
   <ul class="flex flex-col">
-    @for (song of songs(); track song.id) { @defer (on viewport){
+    @for (song of songs(); track song.id) {
     <li 
       class="group/item list-none transition-colors duration-200 hover:bg-white/[0.03] active:bg-white/[0.06] px-5"
       [class.bg-primary/10]="playerService.song()?.link === song.link"
@@ -9,21 +9,10 @@
         [song]="song"
         [isFavoritePage]="true"
         [allowReorder]="true"
-        (onReorderSongs)="reorderSongs($event)"
-        (onChangePlaylist)="changePlaylist()"
+        (reorder)="emitReorder($event)"
+        (playlistChange)="emitPlaylistChange()"
       />
-    </li>
-    }@placeholder {
-    <li class="animate-pulse px-5">
-      <div class="py-3 flex items-center gap-4">
-        <div class="w-12 h-12 bg-base-300 rounded-lg shrink-0"></div>
-        <div class="flex-1 space-y-2">
-          <div class="h-3.5 bg-base-300 rounded w-3/4"></div>
-          <div class="h-2.5 bg-base-300 rounded w-1/2"></div>
-        </div>
-      </div>
-    </li>
-    }} @empty {
+    </li>    } @empty {
     <li class="flex flex-col items-center justify-center py-12 px-8 text-center bg-transparent">
       <div class="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
         <span class="text-2xl">💫</span>

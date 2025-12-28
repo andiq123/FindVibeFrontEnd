@@ -1,4 +1,4 @@
-import { Component, computed, OnInit, signal, inject, effect, viewChild, ElementRef } from '@angular/core';
+import { Component, computed, OnInit, signal, inject, viewChild, ElementRef } from '@angular/core';
 import { OfflineStorageService } from '../../services/offline-storage.service';
 import { LibraryService } from '../../services/library.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';

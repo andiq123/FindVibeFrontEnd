@@ -1,5 +1,5 @@
 @if(!isCheckedServer()){
-<div class="w-full flex flex-col justify-center items-center gap-4 h-[60vh] slideDown">
+<div class="w-full flex flex-col justify-center items-center gap-4 h-[60vh]">
   <div class="text-center space-y-3">
     <div class="relative w-24 h-24 mx-auto mb-6">
       <div class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
@@ -12,7 +12,7 @@
   </div>
 </div>
 }@else {
-<div class="w-full max-w-2xl mx-auto slideLeft space-y-6 pb-36 px-0">
+<div class="w-full max-w-2xl mx-auto space-y-6 pb-36 px-0">
   <!-- Search Section -->
   <div class="sticky top-0 z-10 bg-base-100/80 backdrop-blur-3xl py-4 px-5 border-b border-white/[0.03]">
     <app-search-bar [query]="query()" />
@@ -25,7 +25,7 @@
     <div class="mx-5 bg-white/[0.03] rounded-[2.5rem] overflow-hidden border border-white/[0.05] min-h-[100px] relative">
       @switch (status()) { 
         @case (searchStatus.None) {
-          <div class="flex flex-col items-center justify-center py-20 px-8 text-center animate-fadeIn">
+          <div class="flex flex-col items-center justify-center py-20 px-8 text-center anim-fade-in-slow">
             <div class="w-20 h-20 rounded-3xl bg-base-200/50 flex items-center justify-center mb-6 ring-1 ring-white/5">
               <fa-icon [icon]="faMagnifyingGlass" class="text-3xl text-base-content/20" />
             </div>
@@ -59,15 +59,15 @@
         } 
         
         @case (searchStatus.Finished) {
-          <ul class="flex flex-col" [class.results-container]="songs().length > 0">
+          <ul class="flex flex-col anim-stagger" [class.results-container]="songs().length > 0">
             @for (song of songs(); track song.id; let first = $first) { 
               <li 
-                class="group/item list-none transition-colors duration-200 hover:bg-white/[0.03] active:bg-white/[0.06] px-5 song-item-staggered"
+                class="group/item list-none transition-colors duration-200 hover:bg-white/[0.03] active:bg-white/[0.06] px-5 song-item-staggered anim-slide-fade-in-up"
                 [class.bg-primary/10]="playerService.song()?.link === song.link"
               >
                 <app-song
                   [song]="song"
-                  (onChangePlaylist)="onChangePlaylist()"
+                  (playlistChange)="onChangePlaylist()"
                 />
               </li>
             } @empty {

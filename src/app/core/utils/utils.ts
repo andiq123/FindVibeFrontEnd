@@ -1,4 +1,4 @@
-import { environment } from '../../../environments/environment.development';
+
 
 export const convertTime = (time: number) => {
   const minutes = Math.floor(time / 60);

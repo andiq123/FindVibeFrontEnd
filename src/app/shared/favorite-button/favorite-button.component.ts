@@ -1,4 +1,4 @@
-import { Component, computed, input, inject, Signal } from '@angular/core';
+import { Component, computed, input, inject } from '@angular/core';
 import { faHeart as favoritedHeart } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as unFavoritedHeart } from '@fortawesome/free-regular-svg-icons';
 import { UserService } from '../../features/library/services/user.service';

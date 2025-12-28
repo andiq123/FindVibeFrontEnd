@@ -16,15 +16,7 @@
       autocomplete="off"
       aria-label="Search"
     />
-    @if(searchTerm() !== '') {
-      <button 
-        type="button"
-        (click)="clearSearch()"
-        class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white/40 hover:text-white/60 transition-colors"
-      >
-        <fa-icon [icon]="faCircleXmark" class="text-xs" />
-      </button>
-    }
+
   </div>
 
   <button
@@ -38,12 +30,14 @@
   </button>
 
   @if(suggestions().length > 0) {
-    <div class="absolute top-12 left-0 w-full z-50 pt-3 animate-slideDown">
+    <div class="absolute top-12 left-0 w-full z-50 pt-3 anim-slide-fade-in-down">
       <ul class="suggestion-list bg-base-300/95 backdrop-blur-3xl rounded-3xl overflow-hidden border border-white/5 shadow-2xl flex flex-col">
         @for(suggestion of suggestions(); track suggestion) {
           <li
             class="suggestion-item group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-white/10 transition-colors relative"
             (click)="searchBySuggestion(suggestion)"
+            (keydown.enter)="searchBySuggestion(suggestion)"
+            tabindex="0"
           >
             <div class="flex items-center gap-4 min-w-0">
               <fa-icon class="text-white/20 group-hover:text-primary/60 transition-colors" [icon]="faMagnifyingGlass"></fa-icon>

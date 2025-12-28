@@ -6,15 +6,15 @@ import { PlayerService } from './player.service';
   providedIn: 'root',
 })
 export class MediaSessionService {
-  private playlistService = inject(PlaylistService);
-  private playerService = inject(PlayerService);
+  private readonly playlistService = inject(PlaylistService);
+  private readonly playerService = inject(PlayerService);
 
   constructor() {
-    this.setupMediaMetadata();
+    this.setupMetadata();
     this.setupActionHandlers();
   }
 
-  private setupMediaMetadata() {
+  private setupMetadata(): void {
     effect(() => {
       const song = this.playlistService.currentSong();
       if (!song) return;
@@ -33,15 +33,15 @@ export class MediaSessionService {
     });
   }
 
-  private setupActionHandlers() {
+  private setupActionHandlers(): void {
     navigator.mediaSession.setActionHandler('nexttrack', () => this.playerService.setNextSong());
     navigator.mediaSession.setActionHandler('previoustrack', () => this.playerService.setPreviousSong());
     navigator.mediaSession.setActionHandler('play', () => this.playerService.play());
     navigator.mediaSession.setActionHandler('pause', () => this.playerService.pause());
-    navigator.mediaSession.setActionHandler('stop', () => this.playerService.stop());
+    navigator.mediaSession.setActionHandler('stop', () => this.playerService.pause());
     navigator.mediaSession.setActionHandler('seekto', (details) => {
       if (details.seekTime !== undefined) {
-        this.playerService.setCurrentTime(details.seekTime);
+        this.playerService.seek(details.seekTime);
       }
     });
   }

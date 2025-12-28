@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { Song } from '../../core/models/song.model';
 import { RecentService } from './services/recent.service';
-import { SongComponent } from '../search/song/song.component';
+import { SongComponent } from '../../shared/song/song.component';
 import { PlaylistService } from '../../core/services/playlist.service';
 import { PlayerService } from '../../core/services/player.service';
 

@@ -16,7 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlaylistService } from '../../core/services/playlist.service';
-import { PreviousRouteService } from '../../core/services/previous-route.service';
+
 
 @Component({
     selector: 'app-library',
@@ -34,19 +34,19 @@ export class LibraryComponent implements OnInit, OnDestroy {
   private libraryService = inject(LibraryService);
   private userService = inject(UserService);
   private playlistService = inject(PlaylistService);
-  private lastRoute = inject(PreviousRouteService);
+
   public offlineStorageService = inject(OfflineStorageService);
 
   private subscriptions: Subscription[] = [];
   songs = computed(() => this.libraryService.songs());
   orderHasChanged = computed(() => this.libraryService.orderHasChanged());
   isLoggedIn = computed(() => !!this.userService.user());
-  username = computed(() => this.userService.user()?.name || '');
+  username = computed(() => this.userService.user()?.username || '');
   userId = computed(() => this.userService.user()?.id || '');
 
   loadingReorder = signal(false);
   loadingSongs = signal(true);
-  lastRouterIsRecents = computed(() => this.lastRoute.lastRouteWasRecents());
+
 
   faCheck = faCheck;
   faXmark = faXmark;

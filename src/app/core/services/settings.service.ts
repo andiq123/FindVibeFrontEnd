@@ -1,77 +1,78 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { StorageService } from './storage.service';
+
+enum ServerStatus {
+  Unchecked = 'unchecked',
+  Up = 'up',
+  Down = 'down'
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class SettingsService {
-  private _isRepeat = signal<boolean>(false);
-  private _isShuffle = signal<boolean>(false);
-  private _isMiniPlayer = signal<boolean>(true);
-  private _isServerDown = signal<boolean>(false);
-  private _isCheckedServer = signal<boolean>(false);
-  isRepeat = this._isRepeat.asReadonly();
-  isShuffle = this._isShuffle.asReadonly();
-  isMiniPlayer = this._isMiniPlayer.asReadonly();
-  isServerDown = this._isServerDown.asReadonly();
-  isCheckedServer = this._isCheckedServer.asReadonly();
+  private readonly storageService = inject(StorageService);
 
-  private storageService = inject(StorageService);
+  private readonly _isRepeat = signal(false);
+  private readonly _isShuffle = signal(false);
+  private readonly _isMiniPlayer = signal(true);
+  private readonly _serverStatus = signal(ServerStatus.Unchecked);
 
-  constructor() {
-    this.setIsRepeatAndShuffle();
-  }
+  readonly isRepeat = this._isRepeat.asReadonly();
+  readonly isShuffle = this._isShuffle.asReadonly();
+  readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
+  readonly isServerDown = computed(() => this._serverStatus() === ServerStatus.Down);
+  readonly isCheckedServer = computed(() => this._serverStatus() !== ServerStatus.Unchecked);
 
-  toggleMiniPlayer() {
-    this._isMiniPlayer.set(!this._isMiniPlayer());
-  }
-
-  toggleRepeat() {
-    this._isRepeat.set(!this._isRepeat());
-    this.storageService.setItem('isRepeat', this._isRepeat());
-
-    if (this._isShuffle()) {
-      this._isShuffle.set(!this._isShuffle());
-      this.storageService.setItem('isShuffle', this._isShuffle());
-    }
-  }
-
-  toggleShuffle() {
-    this._isShuffle.set(!this._isShuffle());
-    this.storageService.setItem('isShuffle', this._isShuffle());
-
-    if (this._isRepeat()) {
-      this._isRepeat.set(!this._isRepeat());
-      this.storageService.setItem('isRepeat', this._isRepeat());
-    }
-  }
-
-  private setIsRepeatAndShuffle() {
+  private readonly loadSettings = void (() => {
     const isRepeat = this.storageService.getItem<boolean>('isRepeat');
     const isShuffle = this.storageService.getItem<boolean>('isShuffle');
 
-    if (isRepeat !== null) {
-      this._isRepeat.set(isRepeat);
+    if (isRepeat !== null) this._isRepeat.set(isRepeat);
+    if (isShuffle !== null) this._isShuffle.set(isShuffle);
+  })();
+
+  toggleMiniPlayer(): void {
+    this._isMiniPlayer.set(!this._isMiniPlayer());
+  }
+
+  toggleRepeat(): void {
+    const newValue = !this._isRepeat();
+    this._isRepeat.set(newValue);
+    this.storageService.setItem('isRepeat', newValue);
+
+    if (this._isShuffle()) {
+      this._isShuffle.set(false);
+      this.storageService.setItem('isShuffle', false);
     }
+  }
 
-    if (isShuffle !== null) {
-      this._isShuffle.set(isShuffle);
+  toggleShuffle(): void {
+    const newValue = !this._isShuffle();
+    this._isShuffle.set(newValue);
+    this.storageService.setItem('isShuffle', newValue);
+
+    if (this._isRepeat()) {
+      this._isRepeat.set(false);
+      this.storageService.setItem('isRepeat', false);
     }
   }
 
-  setServerUp() {
-    this._isServerDown.set(false);
+  setServerUp(): void {
+    this._serverStatus.set(ServerStatus.Up);
   }
 
-  setServerDown() {
-    this._isServerDown.set(true);
+  setServerDown(): void {
+    this._serverStatus.set(ServerStatus.Down);
   }
 
-  setIsCheckedServerDone() {
-    this._isCheckedServer.set(true);
+  setIsCheckedServerDone(): void {
+    if (this._serverStatus() === ServerStatus.Unchecked) {
+      this._serverStatus.set(ServerStatus.Up);
+    }
   }
 
-  setIsCheckedServerPending() {
-    this._isCheckedServer.set(false);
+  setIsCheckedServerPending(): void {
+    this._serverStatus.set(ServerStatus.Unchecked);
   }
 }

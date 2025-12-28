@@ -2,7 +2,7 @@
   <div 
     class="marquee-content" 
     #content 
-    [class.animate-marquee]="isOverflowing() && isActive()"
+    [class.anim-marquee]="isOverflowing() && isActive()"
     [style.animation-duration]="animationDuration() + 's'"
   >
     <span [class]="classes()">{{ title() }}</span>
