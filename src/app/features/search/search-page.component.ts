@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, inject } from '@angular/core';
+import { Component, computed, effect, input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SongComponent } from '../../shared/song/song.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
 import { SearchStatus } from '../../core/models/song.model';
@@ -16,7 +16,8 @@ import { faMagnifyingGlass, faTriangleExclamation, faWaveSquare, faMusic } from 
     selector: 'app-search-page',
     imports: [SongComponent, SearchBarComponent, FontAwesomeModule, PullToRefreshDirective],
     templateUrl: './search-page.component.html',
-    styleUrl: './search-page.component.scss'
+    styleUrl: './search-page.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchPageComponent {
   private router = inject(Router);

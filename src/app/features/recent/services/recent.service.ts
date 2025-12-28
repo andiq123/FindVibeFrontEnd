@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { StorageService } from '../../../core/services/storage.service';
 import { Song } from '../../../core/models/song.model';
 
@@ -11,19 +11,28 @@ const RECENT_SONGS_LIMIT = 20;
 export class RecentService {
   private readonly storageService = inject(StorageService);
 
+  private readonly _songs = signal<Song[]>(this.getRecentSongsFromStorage());
+  readonly songs = this._songs.asReadonly();
+
   addSongToRecents(song: Song): void {
-    let songs = this.getRecentSongs();
-    const alreadyExists = songs.find((s) => s.link === song.link);
+    let currentSongs = this._songs();
+    const alreadyExists = currentSongs.find((s: Song) => s.link === song.link);
 
     if (alreadyExists) {
-      songs = songs.filter((s) => s.link !== song.link);
+      currentSongs = currentSongs.filter((s: Song) => s.link !== song.link);
     }
 
-    songs.unshift(song);
-    this.storageService.setItem(RECENT_SONGS_KEY, songs.slice(0, RECENT_SONGS_LIMIT));
+    const updatedSongs = [song, ...currentSongs].slice(0, RECENT_SONGS_LIMIT);
+    
+    this._songs.set(updatedSongs);
+    this.storageService.setItem(RECENT_SONGS_KEY, updatedSongs);
   }
 
-  getRecentSongs(): Song[] {
-    return this.storageService.getItem<Song[]>(RECENT_SONGS_KEY) || [];
+  private getRecentSongsFromStorage(): Song[] {
+     return this.storageService.getItem<Song[]>(RECENT_SONGS_KEY) || [];
+  }
+
+  refreshRecentSongs() {
+    this._songs.set(this.getRecentSongsFromStorage());
   }
 }

@@ -1,4 +1,4 @@
-import { Component, computed, OnDestroy, signal, inject } from '@angular/core';
+import { Component, computed, OnDestroy, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { LibraryService } from './services/library.service';
 import { UserService } from './services/user.service';
 import { UserFormComponent } from './components/user-form/user-form.component';
@@ -30,7 +30,8 @@ import { SettingsService } from '../../core/services/settings.service';
         PullToRefreshDirective,
     ],
     templateUrl: './library.component.html',
-    styleUrl: './library.component.scss'
+    styleUrl: './library.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibraryComponent implements OnDestroy {
   private libraryService = inject(LibraryService);

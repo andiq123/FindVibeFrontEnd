@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Song } from '../../core/models/song.model';
 import { RecentService } from './services/recent.service';
 import { SongComponent } from '../../shared/song/song.component';
@@ -10,24 +10,21 @@ import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.
     selector: 'app-recent',
     imports: [SongComponent, PullToRefreshDirective],
     templateUrl: './recent.component.html',
-    styleUrl: './recent.component.scss'
+    styleUrl: './recent.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RecentComponent implements OnInit {
+export class RecentComponent {
   private recentService = inject(RecentService);
   private playlistService = inject(PlaylistService);
   public playerService = inject(PlayerService);
 
-  songs = signal<Song[]>([]);
-
-  ngOnInit(): void {
-    this.songs.set(this.recentService.getRecentSongs());
-  }
+  songs = this.recentService.songs;
 
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
   }
 
   handleRefresh() {
-    this.songs.set(this.recentService.getRecentSongs());
+    this.recentService.refreshRecentSongs();
   }
 }

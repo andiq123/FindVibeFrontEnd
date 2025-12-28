@@ -21,7 +21,9 @@ export class LibraryService {
   private readonly userEffect = effect(() => {
     const user = this.userService.user();
     if (user) {
-      this.updateLibrarySongs(user.id).subscribe();
+      if (this.songs().length === 0) {
+        this.updateLibrarySongs(user.id).subscribe();
+      }
     } else {
       this.reset();
     }
