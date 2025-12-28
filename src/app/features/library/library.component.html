@@ -16,7 +16,7 @@
       </div>
     }@else {
       <div class="flex flex-col gap-0">
-        <!-- Sticky header/actions - Dynamic z-index to stay on top of library content when modal is open -->
+
         <div 
           class="sticky top-0 z-20 bg-base-100/80 backdrop-blur-3xl pt-7 pb-5 px-5 border-b border-white/[0.03] transition-all duration-300"
         >
@@ -33,7 +33,7 @@
                 }
               </h1>
             </div>
-            
+
             <div class="flex gap-2.5 items-center shrink-0">
               @if(orderHasChanged()) {
                 <div class="flex gap-1.5 items-center mr-1">
@@ -45,8 +45,7 @@
                   </button>
                 </div>
               }
-              
-              <!-- Refined Storage Trigger -->
+
               <button 
                 class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/40 flex items-center justify-center relative active:scale-90 transition-all" 
                 (click)="storageMenu.toggle()"
@@ -82,5 +81,4 @@
   }
 </div>
 
-<!-- Root-Level Storage Modal: Escaping nested stacking contexts -->
 <app-storage-info #storageMenu />

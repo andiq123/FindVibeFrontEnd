@@ -25,7 +25,6 @@
   }
 }
 
-// Album art loading states
 .album-art {
   &.loading {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
@@ -36,7 +35,6 @@
   }
 }
 
-// Skeleton loading shimmer
 .skeleton-song {
   pointer-events: none;
 
@@ -59,7 +57,6 @@
   }
 }
 
-// Smooth transitions
 .album-art img,
 .song-container,
 app-player-button,
@@ -91,7 +88,6 @@ app-favorite-button {
   }
 }
 
-// Ensure the divider is hidden for the active song to avoid "cutting" the glow
 .song-container.song-active {
   .absolute.-bottom-3 {
     display: none;

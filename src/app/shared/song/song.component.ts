@@ -14,8 +14,6 @@ import { SettingsService } from '../../core/services/settings.service';
 import { HapticService } from '../../core/services/haptic.service';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { SwipeActionsDirective } from '../directives/swipe-actions.directive';
-import { PlaylistService } from '../../core/services/playlist.service';
-import { RecentService } from '../../features/recent/services/recent.service';
 
 @Component({
     selector: 'app-song',
@@ -37,8 +35,6 @@ export class SongComponent {
   private offlineStorageService = inject(OfflineStorageService);
   private settingsService = inject(SettingsService);
   private hapticService = inject(HapticService);
-  private playlistService = inject(PlaylistService);
-  private recentService = inject(RecentService);
 
   song = input.required<Song>();
   allowReorder = input<boolean>(false);
@@ -46,28 +42,28 @@ export class SongComponent {
   compact = input<boolean>(false);
   showOfflineIndicator = input<boolean>(true);
   isFavoritePage = input<boolean>(false);
-  
+
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
-  
+
   imageLoading = signal(true);
   imageError = signal(false);
-  
+
   isActive = computed(() => this.playerService.song()?.link === this.song().link);
-  
+
   status = computed(() => {
     if (this.isActive()) {
       return this.playerService.status();
     }
     return PlayerStatus.Paused;
   });
-  
+
   isDownloadingOffline = computed(() => {
     return this.offlineStorageService
       .currentLoadingDownloadSongIds()
       .includes(this.song().id);
   });
-  
+
   isAvailableOffline = computed(() => {
     return this.offlineStorageService.availableOfflineSongIds().includes(this.song().id);
   });
@@ -104,12 +100,12 @@ export class SongComponent {
 
   onSwipeRight() {
     this.hapticService.light();
-    // Quick Add to Queue logic
+
   }
 
   onSwipeLeft() {
     this.hapticService.light();
-    // Reveal delete or favorite
+
   }
 
   emitReorder(data: { from: string; to: string }) {

@@ -1,28 +1,27 @@
 <div
-  class="fixed bottom-0 left-0 right-0 h-full z-50 bg-base-100 flex flex-col anim-slide-in-up-spring overflow-hidden rounded-t-[2.5rem] shadow-2xl"
+  class="fixed bottom-0 left-0 right-0 h-full z-50 bg-base-100 flex flex-col overflow-hidden rounded-t-[2.5rem] shadow-2xl"
+  [class.anim-slide-in-up-spring]="isOpeningAnimation()"
   [class.anim-slide-out-down]="isClosingAnimation()"
   #playerRef
   appSwipeDown
+  [handleSelector]="'.artwork-wrapper, .pressable-native'"
+  (closePanel)="toggleSize(true)"
 >
-  <!-- Native Grab Close Button - Enhanced Touch Area -->
   <div class="w-full pt-4 pb-2 flex flex-col items-center justify-center shrink-0 relative z-20">
     <button 
-      class="w-32 h-10 flex flex-col items-center justify-center group pressable-native"
+      class="group w-full flex flex-col items-center justify-center -mt-2 pressable-native"
       (click)="toggleSize()"
-      aria-label="Close"
     >
       <div class="w-12 h-1.5 bg-white/20 rounded-full group-active:bg-white/40 group-hover:bg-white/30 transition-colors"></div>
     </button>
   </div>
 
-  <!-- Animated Mesh Background -->
   <div class="absolute inset-0 -z-20 overflow-hidden bg-black">
     <img
       [ngSrc]="song().image || 'no_album_art.jpg'"
       alt="Song Art BG"
       class="absolute inset-0 w-full h-full object-cover blur-[100px] select-none pointer-events-none animate-bg-breathe"
-      width="800"
-      height="800"
+      fill
       priority
       referrerpolicy="no-referrer"
       draggable="false"
@@ -33,64 +32,43 @@
   <div
     class="flex-1 flex flex-col items-center justify-start px-8 pb-10 pt-2 max-w-[600px] mx-auto relative z-10 w-full"
   >
-    <!-- Artwork Section - Fixed relative space -->
     <div class="w-full flex-1 flex items-center justify-center artwork-container min-h-0">
       <div 
         class="relative w-full aspect-square max-w-[360px] group flex items-center justify-center artwork-wrapper"
         [class.playing]="status() === playerStatus.Playing"
       >
-        <div class="w-full h-full rounded-[2.5rem] overflow-hidden ios-artwork-shadow ring-1 ring-white/10 transition-transform duration-500 active:scale-95 shadow-2xl bg-white/5">
-          @if (status() === playerStatus.Loading) {
-            <div class="absolute inset-0 z-10 bg-black/40 backdrop-blur-md flex items-center justify-center">
-              <span class="loading loading-spinner loading-lg text-white"></span>
-            </div>
-          }
+        <div class="absolute inset-0 rounded-2xl overflow-hidden ios-artwork-shadow">
           <img
             [ngSrc]="song().image || 'no_album_art.jpg'"
-            alt="Song Art"
-            class="w-full h-full object-cover"
-            width="600"
-            height="600"
+            [alt]="song().title"
+            fill
             priority
+            class="object-cover"
+            referrerpolicy="no-referrer"
           />
         </div>
       </div>
     </div>
 
-    <!-- Info & Controls Area - Locked heights -->
-    <div class="w-full shrink-0 space-y-8 pb-4">
-      <!-- Info Section with Favorite Button & Native Marquee -->
-      <div class="w-full px-2 h-20 flex items-center justify-between gap-4 shrink-0">
-        <div class="flex-1 text-left overflow-hidden">
-          <app-moving-title 
-            [title]="song().title" 
-            classes="text-3xl font-bold text-white tracking-tight leading-tight block w-full" 
-            [isActive]="status() === playerStatus.Playing"
+    <div class="w-full mt-6 space-y-8 shrink-0">
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex-1 min-w-0">
+          <app-moving-title
+            [title]="song().title"
+            [isBold]="true"
+            fontSize="1.75rem"
+            color="white"
           />
-          <div 
-            class="cursor-pointer active:opacity-60 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-lg px-1 -mx-1"
-            (click)="searchByArtist()"
-            (keydown.enter)="searchByArtist()"
-            tabindex="0"
-            role="button"
-            aria-label="Search more songs by this artist"
-          >
-            <app-moving-title 
-              [title]="song().artist" 
-              classes="text-xl text-white/50 font-medium block w-full pt-1" 
-              [isActive]="status() === playerStatus.Playing"
-            />
-          </div>
+          <p class="text-white/60 text-lg truncate mt-1">{{ song().artist }}</p>
         </div>
-        <app-favorite-button [song]="song()" [forPlayer]="true" class="shrink-0 scale-125" />
+        <app-favorite-button [song]="song()" />
       </div>
 
-      <!-- iOS Style Seek Slider -->
-      <div class="space-y-3">
+      <div class="space-y-4">
         <div class="ios-slider-container">
           <div class="slider-track">
             <div 
-              class="slider-fill"
+              class="slider-fill" 
               #timeProgress
             ></div>
           </div>
@@ -98,42 +76,58 @@
             #timeSlider
             type="range"
             min="0"
+            [max]="duration() || 0"
             step="0.1"
-            [max]="duration()"
-            [value]="isDraggingTime() ? visualTime() : currentTime()"
-            (input)="handleTimeInput($event)"
-            (change)="handleTimeChange($event)"
+            [value]="visualTime()"
+            (input)="onTimeChange($event)"
+            (touchstart)="onTimeDragStart()"
+            (mousedown)="onTimeDragStart()"
+            (touchend)="onTimeDragEnd($event)"
+            (mouseup)="onTimeDragEnd($event)"
           />
         </div>
-        <div class="flex justify-between text-[11px] font-bold tracking-widest text-white/30 uppercase px-2">
-          <span>{{ convertTime(isDraggingTime() ? visualTime() : currentTime()) }}</span>
-          <span>{{ convertTime(duration()) }}</span>
+        <div class="flex justify-between text-xs font-medium text-white/40 tabular-nums">
+          <span>{{ formatTime(visualTime()) }}</span>
+          <span>{{ formatTime(duration()) }}</span>
         </div>
       </div>
 
-      <!-- Playback Controls -->
-      <div class="flex items-center justify-between px-2">
-        <button class="w-10 h-10 flex items-center justify-center pressable-native" (click)="toggleShuffle()">
-          <fa-icon [icon]="faShuffle" class="text-xl" [class.text-white/40]="!isShuffle()" [class.text-primary]="isShuffle()"></fa-icon>
-        </button>
-
-        <button class="w-14 h-14 flex items-center justify-center pressable-native text-white" (click)="previousSong()">
-          <fa-icon [icon]="faStepBackward" class="text-3xl"></fa-icon>
-        </button>
-
-        <button 
-          class="w-20 h-20 rounded-full bg-white flex items-center justify-center pressable-native shadow-2xl active:scale-95 transition-transform"
-          (click)="status() === playerStatus.Playing ? pause() : play()"
+      <div class="flex items-center justify-between pt-2">
+        <button
+          class="p-4 text-white/40 hover:text-white transition-colors"
+          [class.text-primary]="isShuffle()"
+          (click)="toggleShuffle()"
         >
-          <fa-icon [icon]="status() === playerStatus.Playing ? faPause : faPlay" class="text-3xl text-black"></fa-icon>
+          <fa-icon [icon]="faShuffle" size="lg" />
         </button>
 
-        <button class="w-14 h-14 flex items-center justify-center pressable-native text-white" (click)="nextSong()">
-          <fa-icon [icon]="faStepForward" class="text-3xl"></fa-icon>
-        </button>
+        <div class="flex items-center gap-6">
+          <button
+            class="p-4 text-white hover:text-primary transition-colors"
+            (click)="previous()"
+          >
+            <fa-icon [icon]="faStepBackward" size="2xl" />
+          </button>
+          <button
+            class="w-20 h-20 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 active:scale-95 transition-transform shadow-xl"
+            (click)="togglePlay()"
+          >
+            <fa-icon [icon]="status() === playerStatus.Playing ? faPause : faPlay" size="2xl" />
+          </button>
+          <button
+            class="p-4 text-white hover:text-primary transition-colors"
+            (click)="next()"
+          >
+            <fa-icon [icon]="faStepForward" size="2xl" />
+          </button>
+        </div>
 
-        <button class="w-10 h-10 flex items-center justify-center pressable-native" (click)="toggleRepeat()">
-          <fa-icon [icon]="faRepeat" class="text-xl" [class.text-white/40]="!isRepeat()" [class.text-primary]="isRepeat()"></fa-icon>
+        <button
+          class="p-4 text-white/40 hover:text-white transition-colors"
+          [class.text-primary]="isRepeat()"
+          (click)="toggleRepeat()"
+        >
+          <fa-icon [icon]="faRepeat" size="lg" />
         </button>
       </div>
     </div>

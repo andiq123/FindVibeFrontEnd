@@ -17,14 +17,14 @@ export class StorageInfoComponent implements OnInit {
 
   isVisible = signal<boolean>(false);
   isClosing = signal<boolean>(false);
-  
+
   sheetRef = viewChild<ElementRef<HTMLDivElement>>('sheetRef');
 
   storageTotal = this.offlineStorageService.storageTotal;
   storageUsed = this.offlineStorageService.storageUsed;
   loadingDownloading = signal<boolean>(false);
   loadingClearing = signal<boolean>(false);
-  
+
   showRemoveCacheButton = computed(() => {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
   });

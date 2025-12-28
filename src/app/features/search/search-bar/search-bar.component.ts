@@ -18,7 +18,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   searchTerm = signal<string>('');
   isFocused = signal<boolean>(false);
   suggestions = computed(() => this.suggestionsService.suggestions());
-  
+
   private searchSubject = new Subject<string>();
 
   faMagnifyingGlass = faMagnifyingGlass;
@@ -85,8 +85,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.searchTerm.set(value);
     this.searchSubject.next(value);
   }
-
-
 
   cancelSearch() {
     this.searchTerm.set('');

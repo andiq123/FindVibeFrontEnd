@@ -1,80 +1,150 @@
 import {
   Directive,
-  effect,
-  HostBinding,
-  HostListener,
+  ElementRef,
   output,
-  signal,
+  inject,
+  input,
+  NgZone,
+  OnInit,
   OnDestroy
 } from '@angular/core';
+import { HapticService } from '../../../core/services/haptic.service';
 
 @Directive({
   selector: '[appSwipeDown]',
   standalone: true,
 })
-export class SwipeDownDirective implements OnDestroy {
-  topSignal = signal<number>(0);
-  offsetPixels = signal<number>(0);
-  startTime = signal<Date>(new Date());
+export class SwipeDownDirective implements OnInit, OnDestroy {
+  private el = inject(ElementRef);
+  private hapticService = inject(HapticService);
+  private ngZone = inject(NgZone);
+
+  handleSelector = input<string>('');
   closePanel = output<void>();
-  swipeStartTrigger = signal<number>(450);
 
-  @HostBinding('style.transform') translateY = 'translateY(0px)';
-  @HostBinding('class.slideToZero') slideToZero = false;
-  @HostBinding('class.anim-slide-in-up-spring') slideInUp = true;
+  private startY = 0;
+  private currentY = 0;
+  private startTime = 0;
+  private isSwiping = false;
+  private hasHitThreshold = false;
+  private isDismissing = false;
 
-  constructor() {
-    effect(() => {
-      this.translateY = `translateY(${this.topSignal()}px)`;
+  private boundOnStart = this.onStart.bind(this);
+  private boundOnMove = this.onMove.bind(this);
+  private boundOnEnd = this.onEnd.bind(this);
+
+  ngOnInit() {
+    this.ngZone.runOutsideAngular(() => {
+      const el = this.el.nativeElement;
+      el.addEventListener('touchstart', this.boundOnStart, { passive: false });
+      document.addEventListener('touchmove', this.boundOnMove, { passive: false });
+      document.addEventListener('touchend', this.boundOnEnd, { passive: true });
+      document.addEventListener('touchcancel', this.boundOnEnd, { passive: true });
     });
   }
 
-  @HostListener('touchstart', ['$event'])
-  onSwipeStart(event: TouchEvent) {
-    const currentPixels = event.touches[0].clientY;
-    this.offsetPixels.set(currentPixels);
-    if (currentPixels > this.swipeStartTrigger()) return;
-    this.startTime.set(new Date());
-    this.slideInUp = false;
-  }
-
-  @HostListener('touchmove', ['$event'])
-  onSwipeMove(event: TouchEvent) {
-    const currentPixels = event.touches[0].clientY;
-    if (this.offsetPixels() > this.swipeStartTrigger()) return;
-    this.topSignal.set(currentPixels - this.offsetPixels());
-  }
-
-  @HostListener('touchend')
-  onSwipeEnd() {
-    const closeSizeTrigger = 300;
-    const timeCloseTrigger = 600;
-    const duration = new Date().getTime() - this.startTime().getTime();
-
-    if (duration < timeCloseTrigger && this.topSignal() > closeSizeTrigger) {
-      this.closePanel.emit();
-    } else {
-      if (this.offsetPixels() < this.swipeStartTrigger()) {
-        this.slideToZero = true;
-      }
-    }
-
-    this.offsetPixels.set(0);
-  }
-
-  @HostListener('animationend', ['$event'])
-  onAnimationEnd(e: AnimationEvent) {
-    const isSlideToZero = e.animationName.includes('slideToZero');
-    if (isSlideToZero) {
-      this.slideToZero = false;
-      this.topSignal.set(0);
-    }
-  }
-
   ngOnDestroy() {
-    this.topSignal.set(0);
-    this.offsetPixels.set(0);
-    this.slideToZero = false;
-    this.slideInUp = true;
+    const el = this.el.nativeElement;
+    el.removeEventListener('touchstart', this.boundOnStart);
+    document.removeEventListener('touchmove', this.boundOnMove);
+    document.removeEventListener('touchend', this.boundOnEnd);
+    document.removeEventListener('touchcancel', this.boundOnEnd);
+  }
+
+  onStart(event: TouchEvent) {
+    if (this.isDismissing) return;
+
+    const target = event.target as HTMLElement;
+    const selector = this.handleSelector();
+    const isGrabBar = !!target.closest('.pressable-native');
+    const isInteractive = !!target.closest('button, input, a, [role="button"], .ios-slider-container');
+
+    if (selector) {
+      if (!target.closest(selector)) return;
+    } else {
+      if (isInteractive && !isGrabBar) return;
+    }
+
+    this.startY = event.touches[0].clientY;
+    this.startTime = performance.now();
+    this.isSwiping = true;
+    this.hasHitThreshold = false;
+
+    const style = this.el.nativeElement.style;
+    style.setProperty('animation', 'none', 'important');
+    style.setProperty('transition', 'none', 'important');
+  }
+
+  onMove(event: TouchEvent) {
+    if (!this.isSwiping || this.isDismissing) return;
+
+    const deltaY = event.touches[0].clientY - this.startY;
+    this.currentY = deltaY;
+
+    if (event.cancelable) event.preventDefault();
+    this.el.nativeElement.style.transform = `translate3d(0, ${this.currentY}px, 0)`;
+
+    const threshold = window.innerHeight * 0.1;
+    if (this.currentY > threshold && !this.hasHitThreshold) {
+      this.hasHitThreshold = true;
+      this.hapticService.light();
+    } else if (this.currentY <= threshold && this.hasHitThreshold) {
+      this.hasHitThreshold = false;
+    }
+  }
+
+  onEnd() {
+    this.ngZone.run(() => {
+      if (!this.isSwiping || this.isDismissing) return;
+      this.isSwiping = false;
+
+      const duration = performance.now() - this.startTime;
+      const velocity = duration > 0 ? this.currentY / duration : 0;
+      const threshold = window.innerHeight * 0.1;
+      const velocityThreshold = 0.5;
+
+      if (this.currentY > threshold || (velocity > velocityThreshold && this.currentY > 40)) {
+        this.performDismiss(velocity);
+      } else {
+        this.performSnapBack();
+      }
+    });
+  }
+
+  private performDismiss(velocity: number) {
+    this.isDismissing = true;
+    const el = this.el.nativeElement;
+
+    const remainingDistance = window.innerHeight - this.currentY;
+    const duration = Math.min(0.18, Math.max(0.05, remainingDistance / (Math.abs(velocity) * 2000 + 1200)));
+
+    el.style.setProperty('transition', `transform ${duration}s cubic-bezier(0.33, 1, 0.68, 1)`, 'important');
+    el.style.transform = 'translate3d(0, 100%, 0)';
+
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        this.closePanel.emit();
+        this.isDismissing = false;
+      });
+    }, duration * 1000);
+  }
+
+  private performSnapBack() {
+    const el = this.el.nativeElement;
+    el.style.setProperty('transition', 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)', 'important');
+    el.style.transform = 'translate3d(0, 0, 0)';
+
+    const onTransitionEnd = (e: TransitionEvent) => {
+      if (e.propertyName !== 'transform') return;
+      el.removeEventListener('transitionend', onTransitionEnd);
+      if (!this.isSwiping && !this.isDismissing) {
+        el.style.removeProperty('animation');
+        el.style.removeProperty('transition');
+        el.style.removeProperty('transform');
+      }
+    };
+    el.addEventListener('transitionend', onTransitionEnd);
+    this.currentY = 0;
+    this.hasHitThreshold = false;
   }
 }

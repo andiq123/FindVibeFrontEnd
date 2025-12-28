@@ -13,7 +13,7 @@ export class GestureService implements OnDestroy {
   private lastX = 0;
   private lastY = 0;
   private lastZ = 0;
-  private readonly SHAKE_THRESHOLD = 800; // Sensitivity 
+  private readonly SHAKE_THRESHOLD = 800;  
   private lastShakeTime = 0;
   private readonly COOL_DOWN = 1000;
 
@@ -21,8 +21,7 @@ export class GestureService implements OnDestroy {
 
   initialize(): void {
     if (typeof window !== 'undefined' && 'DeviceMotionEvent' in window) {
-      // Note: iOS Safari requires explicit permission for DeviceMotion
-      // We'll attempt to listen, knowing it might be silent on iOS without a user-triggered permission check
+
       window.addEventListener('devicemotion', this.boundDeviceMotionHandler, false);
     }
   }

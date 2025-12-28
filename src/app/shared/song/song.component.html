@@ -1,14 +1,12 @@
 @if(loading()) {
-  <!-- iOS-style Skeleton Loading State -->
+
   <div class="flex justify-between items-center py-3 w-full skeleton-song">
     <div class="grid grid-flow-col gap-4 items-center w-full justify-start">
 
-      <!-- Skeleton Album Art -->
       <div class="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 skeleton-image">
         <div class="absolute inset-0 bg-white/[0.03]"></div>
       </div>
 
-      <!-- Skeleton Text -->
       <div class="min-w-0 flex-1 space-y-2">
         <div class="skeleton-title h-4 w-32 rounded bg-white/[0.05]"></div>
         <div class="skeleton-artist h-3 w-24 rounded bg-white/[0.03]"></div>
@@ -57,22 +55,20 @@
     class="grid grid-flow-col gap-4 items-center w-full justify-start transition-transform duration-200"
     [class.unavailable]="isUnavailable()"
   >
-    <!-- Album Art with Play Button -->
+
     <div class="relative w-12 h-12 rounded-lg overflow-hidden shadow-sm ring-1 ring-white/10 shrink-0 album-art"
          [class.loading]="imageLoading()">
-      <!-- Loading Indicator -->
+
       @if(imageLoading()) {
         <div class="absolute inset-0 bg-white/[0.02] flex items-center justify-center">
           <div class="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin"></div>
         </div>
       }
-      
-      <!-- Play Button Overlay -->
+
       <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/song:opacity-100 transition-opacity duration-200 z-10">
         <app-player-button [status]="status()" />
       </div>
-      
-      <!-- Album Image -->
+
       <img
         class="w-full h-full object-cover transition-opacity duration-300"
         [class.opacity-0]="imageLoading()"
@@ -84,8 +80,7 @@
         (load)="onImageLoad()"
         (error)="onImageError()"
       />
-      
-      <!-- Error State -->
+
       @if(imageError()) {
         <div class="absolute inset-0 bg-white/[0.03] flex items-center justify-center">
           <svg class="w-5 h-5 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +90,6 @@
       }
     </div>
 
-    <!-- Song Info & Divider -->
     <div class="min-w-0 flex-1 relative py-1">
       <app-moving-title
         [title]="song().title"
@@ -107,13 +101,11 @@
         [isActive]="isActive()"
         classes="text-xs text-base-content/50 block"
       />
-      
-      <!-- iOS Hairline Divider (Offset past image) -->
+
       <div class="absolute -bottom-3 left-0 right-[-100px] h-[0.5px] bg-white/[0.06] group-last/item:hidden"></div>
     </div>
   </div>
 
-  <!-- Actions -->
   <div class="flex gap-4 items-center relative z-10 pr-1">
     @if(showOfflineIndicator()) {
       @if(isDownloadingOffline()){

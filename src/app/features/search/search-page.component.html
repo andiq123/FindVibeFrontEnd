@@ -19,7 +19,7 @@
 
   <div class="space-y-4 px-0 pb-12 transition-all duration-300">
     <h1 class="font-bold text-3xl px-5 section-headline">Explore</h1>
-    
+
     <div 
       class="results-viewport mx-5 bg-white/[0.02] rounded-[2.5rem] overflow-hidden border border-white/[0.04] min-h-[400px] relative transition-all duration-500"
       appPullToRefresh
@@ -35,7 +35,7 @@
             <p class="text-base-content/40 text-sm max-w-[240px]">Search for vibes, artists, or specific songs across the entire library.</p>
           </div>
         } 
-        
+
         @case (searchStatus.Loading) {
           <div class="flex flex-col anim-stagger py-2">
             @for (i of [1,2,3,4,5,6,7,8]; track i) {
@@ -43,7 +43,7 @@
             }
           </div>
         } 
-        
+
         @case (searchStatus.Error) {
           <div class="flex flex-col items-center justify-center py-20 px-8 text-center animate-fadeIn absolute inset-0">
             <div class="w-20 h-20 rounded-3xl bg-error/10 flex items-center justify-center mb-6 ring-1 ring-error/20">
@@ -53,7 +53,7 @@
             <p class="text-base-content/50 text-sm max-w-[280px]">We couldn't find any vibes matching your search. Please check the spelling or try different keywords.</p>
           </div>
         } 
-        
+
         @case (searchStatus.Finished) {
           <ul class="flex flex-col anim-stagger py-2">
             @for (song of songs(); track song.id; let first = $first) { 

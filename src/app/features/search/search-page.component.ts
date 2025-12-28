@@ -37,7 +37,7 @@ export class SearchPageComponent {
   faTriangleExclamation = faTriangleExclamation;
   faWaveSquare = faWaveSquare;
   faMusic = faMusic;
-  
+
   dummySong = { id: '', artist: '', title: '', image: '', link: '', order: 0 };
 
   constructor() {
@@ -53,6 +53,9 @@ export class SearchPageComponent {
   }
 
   handleRefresh() {
-    this.songsService.searchSongs(this.query());
+    const q = this.query();
+    if (q) {
+      this.songsService.searchSongs(q).subscribe();
+    }
   }
 }

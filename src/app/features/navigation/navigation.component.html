@@ -7,7 +7,7 @@
     [routerLink]="navItem.link"
     routerLinkActive="active-tab"
   >
-    <!-- Icon -->
+
     <div class="relative flex items-center justify-center transition-transform duration-300 group-[.active-tab]:-translate-y-0.5">
       <fa-icon
         [icon]="navItem.icon"
@@ -15,7 +15,6 @@
       ></fa-icon>
     </div>
 
-    <!-- Label -->
     <span class="text-[10px] font-semibold tracking-wider mt-1.5 text-base-content/30 transition-colors duration-300 group-[.active-tab]:text-primary">
       {{ navItem.name }}
     </span>

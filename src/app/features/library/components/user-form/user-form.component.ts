@@ -14,8 +14,6 @@ export class UserFormComponent {
 
   private userService = inject(UserService);
 
-
-
   setUpUser() {
     this.loadingSubmiting.set(true);
     this.userService.registerUser(this.name()).subscribe({

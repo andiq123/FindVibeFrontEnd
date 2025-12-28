@@ -1,4 +1,4 @@
-// Using idiomatic animation: .anim-slide-fade-in-down
+
 
 .suggestion-list {
   box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1);
@@ -13,7 +13,6 @@
   }
 }
 
-// Improved accessibility and premium feel
 input::placeholder {
   transition: opacity 0.2s ease;
 }

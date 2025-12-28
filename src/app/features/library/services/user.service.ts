@@ -19,7 +19,7 @@ export class UserService {
   private readonly offlineStorageService = inject(OfflineStorageService);
 
   private readonly _user = signal<User | null>(null);
-  
+
   readonly user = this._user.asReadonly();
   readonly userLoggedIn = new Subject<void>();
 
@@ -29,19 +29,19 @@ export class UserService {
 
   loadUserIdFromStorage(): string | null {
     const user = this.storageService.getItem<User>(USER_STORAGE_KEY);
-    
+
     if (user?.id) {
       this._user.set(user);
       return user.id;
     }
-    
+
     return null;
   }
 
   registerUser(userName: string) {
     const normalizedUserName = userName.toLowerCase();
     const url = `${environment.API_URL}/${normalizedUserName}`;
-    
+
     return this.httpClient.get<User>(url).pipe(
       tap({
         next: (user: User) => {

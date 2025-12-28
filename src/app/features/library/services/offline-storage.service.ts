@@ -19,7 +19,7 @@ export class OfflineStorageService {
 
   readonly currentLoadingDownloadSongIds = this._currentLoadingDownloadSongIds.asReadonly();
   readonly availableOfflineSongIds = this._availableOfflineSongIds.asReadonly();
-  
+
   readonly isSyncing = computed(() => this._currentLoadingDownloadSongIds().length > 0);
 
   private cachePromise?: Promise<Cache>;
@@ -49,7 +49,7 @@ export class OfflineStorageService {
   async setUpStorage(): Promise<void> {
     try {
       if (!navigator.storage?.estimate) return;
-      
+
       const { quota, usage } = await navigator.storage.estimate();
       this.storageTotal.set(bytesToGB(quota ?? 0));
       this.storageUsed.set(bytesToGB(usage ?? 0));
@@ -60,19 +60,19 @@ export class OfflineStorageService {
 
   async cacheAllSongs(songs: Song[]): Promise<void> {
     const cache = await this.getCache();
-    
+
     for (const song of songs) {
       const exists = await this.isAvailableOffline(song.link, cache);
       if (exists) continue;
 
       this.trackProgress(song.id, true);
-      
+
       try {
         await cache.add(song.link);
         this.addAvailableOfflineSongId(song.id);
         await this.setUpStorage();
       } catch {
-        // Silently fail as requested (clean logic)
+
       } finally {
         this.trackProgress(song.id, false);
       }
@@ -90,16 +90,16 @@ export class OfflineStorageService {
     this.emptyAvailableOfflineSongIds();
     const maxRetries = 5;
     const delayMs = 500;
-    
+
     for (let i = 0; i < maxRetries; i++) {
       await new Promise(resolve => setTimeout(resolve, delayMs));
       await this.setUpStorage();
-      
+
       if (this.storageUsed() < 0.01) {
         break;
       }
     }
-    
+
     await this.setUpStorage();
   }
 
@@ -117,11 +117,11 @@ export class OfflineStorageService {
     try {
       const cache = await this.getCache();
       await cache.delete(songLink);
-      
+
       this._availableOfflineSongIds.update(ids => ids.filter(id => id !== songId));
       await this.setUpStorage();
     } catch {
-      // Silently fail
+
     }
   }
 

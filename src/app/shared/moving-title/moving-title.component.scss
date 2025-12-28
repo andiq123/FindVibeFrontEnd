@@ -7,7 +7,7 @@
   align-items: center;
 
   &.is-overflowing {
-    // Elegant fade effect on edges for a native look
+
     mask-image: linear-gradient(to right,
         transparent 0%,
         black 5%,
@@ -28,7 +28,7 @@
 
 .marquee-spacer {
   display: inline-block;
-  width: 60px; // Slightly more air between loops
+  width: 60px;  
 }
 
 @keyframes marquee {
@@ -37,14 +37,14 @@
   }
 
   20% {
-    transform: translateX(0); // Natural 20% pause at the start
+    transform: translateX(0);  
   }
 
   80% {
-    transform: translateX(calc(-50% - 30px)); // Half width + half spacer
+    transform: translateX(calc(-50% - 30px));  
   }
 
   100% {
-    transform: translateX(calc(-50% - 30px)); // 20% pause at the end
+    transform: translateX(calc(-50% - 30px));  
   }
 }

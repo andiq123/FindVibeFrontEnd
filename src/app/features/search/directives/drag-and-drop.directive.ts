@@ -11,7 +11,7 @@ export class DragAndDropDirective {
   private el = inject(ElementRef);
   private renderer = inject(Renderer2);
   private currentDropTarget: HTMLElement | null = null;
-  
+
   reorderSongs = output<{ from: string; to: string }>();
 
   @HostListener('dragstart', ['$event'])
@@ -58,11 +58,11 @@ export class DragAndDropDirective {
     const target = this.el.nativeElement;
     const initiatorId = event.dataTransfer?.getData('id');
     const targetId = target.id;
-    
+
     if (initiatorId && targetId && initiatorId !== targetId) {
       this.reorderSongs.emit({ from: initiatorId, to: targetId });
     }
-    
+
     this.clearDropTarget();
   }
 

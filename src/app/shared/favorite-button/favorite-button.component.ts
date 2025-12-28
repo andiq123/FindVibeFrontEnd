@@ -18,7 +18,7 @@ export class FavoriteButtonComponent {
 
   forPlayer = input<boolean>(false);
   song = input.required<Song>();
-  
+
   unFavoritedHeart = unFavoritedHeart;
   favoritedHeart = favoritedHeart;
 

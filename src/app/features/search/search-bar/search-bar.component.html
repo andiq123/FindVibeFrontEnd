@@ -43,7 +43,7 @@
               <fa-icon class="text-white/20 group-hover:text-primary/60 transition-colors" [icon]="faMagnifyingGlass"></fa-icon>
               <span class="text-[17px] font-medium text-white/90 truncate">{{ suggestion | titlecase }}</span>
             </div>
-            
+
             <button 
               type="button"
               (click)="fillSuggestion(suggestion, $event)"
@@ -53,7 +53,6 @@
               <fa-icon [icon]="faArrowUpLeft" class="-rotate-45 text-sm" />
             </button>
 
-            <!-- Hairline Divider -->
             <div class="absolute bottom-0 left-12 right-0 h-[0.5px] bg-white/[0.06] group-last:hidden"></div>
           </li>
         }

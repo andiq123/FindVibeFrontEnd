@@ -1,8 +1,4 @@
-// Using idiomatic animations:
-// .anim-slide-in-up for slideUp
-// .anim-slide-out-down-slow for slideDown
-// .anim-fade-in for fadeIn
-// .anim-fade-out for fadeOut
+
 
 .pressable-native {
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;

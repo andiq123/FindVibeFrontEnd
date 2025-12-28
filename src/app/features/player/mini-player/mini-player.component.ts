@@ -22,7 +22,7 @@ export class MiniPlayerComponent {
   faArrowUp = faArrowUp;
 
   isPlaying = computed(() => this.status() === PlayerStatus.Playing);
-  
+
   toggleSize() {
     this.toggleSizeEvent.emit();
   }

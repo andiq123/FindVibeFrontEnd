@@ -7,11 +7,11 @@
   tabindex="0"
   role="button"
 >
-  <!-- Main Content -->
+
   <div class="flex items-center gap-3 w-full p-3">
-    <!-- Album Art with Waveform -->
+
     <div class="flex items-center gap-2">
-      <!-- Album Art -->
+
       <div 
         class="album-art relative w-14 aspect-square rounded-lg overflow-hidden ring-1 ring-base-200/30"
         [class.album-art-playing]="isPlaying()"
@@ -26,7 +26,6 @@
         />
       </div>
 
-      <!-- Waveform Indicator (only when playing) -->
       @if(isPlaying()) {
         <div class="waveform-indicator flex items-center gap-[3px] h-4 anim-fade-in">
           <span class="waveform-bar"></span>
@@ -36,7 +35,6 @@
       }
     </div>
 
-    <!-- Song Info -->
     <div class="flex-1 min-w-0">
       <app-moving-title
         [title]="song().title"
@@ -50,7 +48,6 @@
       />
     </div>
 
-    <!-- Expand Button -->
     <button 
       class="btn btn-ghost btn-circle btn-sm transition-colors duration-200"
       [class.text-primary]="isPlaying()"
@@ -60,7 +57,6 @@
     </button>
   </div>
 
-  <!-- Progress Bar -->
   <div class="progress-bar">
     <div 
       class="progress-fill" 

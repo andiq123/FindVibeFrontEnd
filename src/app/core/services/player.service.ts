@@ -19,7 +19,6 @@ export class PlayerService implements OnDestroy {
   private readonly alreadyAddedInRecents = signal<boolean>(false);
   private currentObjectUrl: string | null = null;
 
-  // Public signals
   readonly song = computed(() => this.playlistService.currentSong());
   readonly status = this.audioService.status;
   readonly currentTime = this.audioService.currentTime;
@@ -28,7 +27,7 @@ export class PlayerService implements OnDestroy {
   private readonly recentsEffect = effect(() => {
     const time = this.currentTime();
     const song = this.song();
-    
+
     if (time > 7 && !this.alreadyAddedInRecents() && song) {
       this.alreadyAddedInRecents.set(true);
       this.recentService.addSongToRecents(song);
@@ -52,7 +51,7 @@ export class PlayerService implements OnDestroy {
     this.alreadyAddedInRecents.set(false);
 
     const offlineResponse = await this.offlineStorageService.isAvailableOffline(song.link);
-    
+
     if (offlineResponse) {
       const blob = await offlineResponse.blob();
       this.currentObjectUrl = URL.createObjectURL(blob);

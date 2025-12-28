@@ -1,6 +1,5 @@
-// iOS-Native Mini-Player Enhancements
 
-// Container with enhanced press feedback
+
 .mini-player-container {
     transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.15s ease,
@@ -14,7 +13,6 @@
     }
 }
 
-// Album art with playing state animation
 .album-art {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 
@@ -40,7 +38,6 @@
     }
 }
 
-// Waveform indicator
 .waveform-indicator {
     display: flex;
     align-items: center;
@@ -85,7 +82,6 @@
     }
 }
 
-// Progress bar
 .progress-bar {
     position: relative;
     height: 2px;
@@ -105,7 +101,6 @@
     box-shadow: 0 0 8px rgba(var(--fallback-p, oklch(var(--p))), 0.5);
 }
 
-// Smooth transitions for all interactive elements
 .btn {
     transition: color 0.2s ease, transform 0.15s ease;
 

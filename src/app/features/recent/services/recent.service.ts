@@ -14,11 +14,11 @@ export class RecentService {
   addSongToRecents(song: Song): void {
     let songs = this.getRecentSongs();
     const alreadyExists = songs.find((s) => s.link === song.link);
-    
+
     if (alreadyExists) {
       songs = songs.filter((s) => s.link !== song.link);
     }
-    
+
     songs.unshift(song);
     this.storageService.setItem(RECENT_SONGS_KEY, songs.slice(0, RECENT_SONGS_LIMIT));
   }

@@ -30,11 +30,11 @@ export class SearchService {
     }
 
     this._songs.set([]);
-    
+
     this.loadingTimeout = setTimeout(() => {
       this._searchStatus.set(SearchStatus.Loading);
     }, 250);
-    
+
     return this.httpClient.get<Song[]>(`${BASE_API_URL}/search?q=${searchTerm}`).pipe(
       tap((songs: Song[]) => {
         if (this.loadingTimeout) {

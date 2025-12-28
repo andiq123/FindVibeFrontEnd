@@ -41,7 +41,7 @@ export class MediaSessionService {
   private readonly positionStateEffect = effect(() => {
     const currentTime = this.playerService.currentTime();
     const duration = this.playerService.duration();
-    
+
     if (!('mediaSession' in navigator) || !('setPositionState' in navigator.mediaSession)) return;
 
     if (duration > 0 && currentTime <= duration) {
@@ -59,7 +59,7 @@ export class MediaSessionService {
 
   initialize(): void {
     if (!('mediaSession' in navigator)) return;
-    
+
     navigator.mediaSession.setActionHandler('nexttrack', () => this.playerService.setNextSong());
     navigator.mediaSession.setActionHandler('previoustrack', () => this.playerService.setPreviousSong());
     navigator.mediaSession.setActionHandler('play', () => this.playerService.play());

@@ -19,7 +19,6 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlaylistService } from '../../core/services/playlist.service';
 import { SettingsService } from '../../core/services/settings.service';
 
-
 @Component({
     selector: 'app-library',
     imports: [
@@ -52,7 +51,6 @@ export class LibraryComponent implements OnDestroy {
   loadingReorder = signal(false);
   loadingSongs = this.libraryService.loadingSongs;
 
-
   faCheck = faCheck;
   faXmark = faXmark;
   faRightFromBracket = faRightFromBracket;
@@ -64,14 +62,13 @@ export class LibraryComponent implements OnDestroy {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
   });
 
-
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
   }
 
   handleRefresh() {
     if (this.userId()) {
-      this.libraryService.updateLibrarySongs(this.userId());
+      this.libraryService.updateLibrarySongs(this.userId()).subscribe();
     }
   }
 

@@ -1,7 +1,7 @@
-// Using idiomatic animations and stagger pattern
+
 
 .song-item-staggered {
-    // Animation is handled by anim-slide-fade-in-up and anim-stagger on parent
+
     will-change: transform, opacity;
 }
 
@@ -21,7 +21,6 @@
     }
 }
 
-// Enhance the "Explore" title
 .section-headline {
     letter-spacing: -0.02em;
     background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.7));

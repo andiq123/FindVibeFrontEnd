@@ -36,13 +36,13 @@ export class LibraryService {
   readonly orderHasChanged = computed(() => {
     const localSongs = this.libraryApiService.getLibraryFromLocalStorage();
     const currentSongs = this.songs();
-    
+
     if (localSongs.length !== currentSongs.length) return true;
 
     for (let i = 0; i < currentSongs.length; i++) {
       if (currentSongs[i].id !== localSongs[i]?.id) return true;
     }
-    
+
     return false;
   });
 
@@ -80,7 +80,7 @@ export class LibraryService {
   removeFromFavorites(id: string, link: string) {
     this.trackLoadingFavorite(id, true);
     const songId = this.songs().find((x: Song) => x.link === link)!.id;
-    
+
     return this.libraryApiService.removeFromFavorites(songId).pipe(
       tap({
         next: async () => {
@@ -101,7 +101,7 @@ export class LibraryService {
       songId: x.id,
       order: x.order,
     }));
-    
+
     return this.libraryApiService.reorderSongs(reorders).pipe(
       tap(() => {
         this.libraryApiService.setLibraryToLocalStorage(this.songs());
@@ -119,7 +119,7 @@ export class LibraryService {
 
       prevSongs[index1] = song2;
       prevSongs[index2] = song1;
-      
+
       return prevSongs.map((song: Song, i: number) => ({ ...song, order: i + 1 }));
     });
   }

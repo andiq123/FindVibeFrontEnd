@@ -8,7 +8,11 @@ import {
   viewChild,
   inject,
   effect,
+  OnInit,
+  OnDestroy,
+  Renderer2,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { convertTime } from '../../../core/utils/utils';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -32,6 +36,7 @@ import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.
 
 @Component({
   selector: 'app-full-player',
+  standalone: true,
   imports: [
     FontAwesomeModule,
     NgOptimizedImage,
@@ -42,14 +47,16 @@ import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
 })
-export class FullPlayerComponent {
+export class FullPlayerComponent implements OnInit, OnDestroy {
   private playerService = inject(PlayerService);
   private settingsService = inject(SettingsService);
   private router = inject(Router);
+  private renderer = inject(Renderer2);
+  private document = inject(DOCUMENT);
 
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
-  
+
   serviceCurrentTime = computed(() => this.playerService.currentTime());
   duration = computed(() => this.playerService.duration());
 
@@ -68,7 +75,8 @@ export class FullPlayerComponent {
   playerStatus = PlayerStatus;
 
   isClosingAnimation = signal<boolean>(false);
-  
+  isOpeningAnimation = signal<boolean>(true);
+
   playerRef = viewChild<ElementRef<HTMLDivElement>>('playerRef');
   timeSlider = viewChild<ElementRef<HTMLInputElement>>('timeSlider');
   timeProgress = viewChild<ElementRef<HTMLDivElement>>('timeProgress');
@@ -77,20 +85,20 @@ export class FullPlayerComponent {
 
   isDraggingTime = signal<boolean>(false);
   currentTime = computed(() => this.serviceCurrentTime());
-  
+
   visualTime = signal<number>(0);
 
   constructor() {
     effect(() => {
       const time = this.serviceCurrentTime();
       const duration = this.duration();
-      
+
       if (!this.isDraggingTime()) {
         this.visualTime.set(time);
-        
+
         const slider = this.timeSlider()?.nativeElement;
         const progress = this.timeProgress()?.nativeElement;
-        
+
         if (slider && progress && duration > 0) {
           slider.value = time.toString();
           const scale = time / duration;
@@ -98,59 +106,67 @@ export class FullPlayerComponent {
         }
       }
     });
-
   }
 
-  convertTime(timeToConvert: number): string {
-    return convertTime(timeToConvert);
+  ngOnInit() {
+    this.renderer.setStyle(this.document.body, 'overflow', 'hidden');
+    setTimeout(() => this.isOpeningAnimation.set(false), 600);
   }
 
-  toggleSize() {
+  ngOnDestroy() {
+    this.renderer.removeStyle(this.document.body, 'overflow');
+  }
+
+  formatTime(time: number): string {
+    return convertTime(time);
+  }
+
+  toggleSize(isImmediate = false) {
+    if (isImmediate) {
+      this.toggleSizeEvent.emit();
+      return;
+    }
     this.playerRef()?.nativeElement.addEventListener('animationend', () => {
       this.toggleSizeEvent.emit();
-    });
+    }, { once: true });
     this.isClosingAnimation.set(true);
   }
 
-  async play() {
-    await this.playerService.play();
+  async togglePlay() {
+    if (this.status() === PlayerStatus.Playing) {
+      this.playerService.pause();
+    } else {
+      await this.playerService.play();
+    }
   }
 
-  async pause() {
-    this.playerService.pause();
-  }
-
-  handleTimeInput(event: Event) {
+  onTimeDragStart() {
     this.isDraggingTime.set(true);
-    const slider = event.target as HTMLInputElement;
-    const value = +slider.value;
-    const duration = this.duration();
-    
+  }
+
+  onTimeChange(event: Event) {
+    const value = +(event.target as HTMLInputElement).value;
     this.visualTime.set(value);
-    
+
     const progress = this.timeProgress()?.nativeElement;
+    const duration = this.duration();
     if (progress && duration > 0) {
       const scale = value / duration;
       progress.style.transform = `scaleX(${scale})`;
     }
   }
 
-  handleTimeChange(event: Event) {
+  onTimeDragEnd(event: Event) {
     const value = +(event.target as HTMLInputElement).value;
     this.playerService.seek(value);
-    setTimeout(() => {
-      this.isDraggingTime.set(false);
-    }, 50);
+    setTimeout(() => this.isDraggingTime.set(false), 50);
   }
 
-  // Volume methods removed
-
-
-  async nextSong() {
+  async next() {
     await this.playerService.setNextSong();
   }
 
-  async previousSong() {
+  async previous() {
     await this.playerService.setPreviousSong();
   }
 
@@ -162,36 +178,22 @@ export class FullPlayerComponent {
     this.settingsService.toggleShuffle();
   }
 
-  async searchByArtist() {
-    const artist = this.song().artist;
-    if (artist) {
-      await this.router.navigate([`/songs/${artist}`]);
-      this.toggleSize();
-    }
-  }
-
-
-
   private async updateDominantColor(): Promise<string> {
     const song = this.song();
     if (!song?.image) return '#000000';
 
     return new Promise((resolve) => {
-      const htmlElementImage = document.createElement('img');
-      htmlElementImage.src = song.image;
-
-      htmlElementImage.addEventListener('load', () => {
-        getDominantColor(htmlElementImage, {
+      const img = new Image();
+      img.src = song.image;
+      img.onload = () => {
+        getDominantColor(img, {
           downScaleFactor: 1,
           skipPixels: 0,
           colorFormat: 'hex',
           callback: (color) => resolve(color),
         });
-      });
-
-      htmlElementImage.addEventListener('error', () => {
-        resolve('#000000'); // Fallback instead of reject
-      });
+      };
+      img.onerror = () => resolve('#000000');
     });
   }
 }

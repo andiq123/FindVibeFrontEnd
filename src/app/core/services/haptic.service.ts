@@ -27,7 +27,7 @@ export class HapticService {
       try {
         navigator.vibrate(pattern);
       } catch {
-        // Silently fail on restricted/older browsers
+
       }
     }
   }
