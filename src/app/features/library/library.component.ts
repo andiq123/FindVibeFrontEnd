@@ -17,6 +17,7 @@ import {
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PlaylistService } from '../../core/services/playlist.service';
 import { SettingsService } from '../../core/services/settings.service';
+import { LoadingBallsComponent } from '../../shared/loading-balls/loading-balls.component';
 
 @Component({
     selector: 'app-library',
@@ -26,6 +27,7 @@ import { SettingsService } from '../../core/services/settings.service';
         StorageInfoComponent,
         SongsWrapperComponent,
         FontAwesomeModule,
+        LoadingBallsComponent,
     ],
     templateUrl: './library.component.html',
     styleUrl: './library.component.scss',

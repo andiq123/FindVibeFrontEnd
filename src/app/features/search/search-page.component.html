@@ -25,13 +25,11 @@
     >
       @switch (status()) { 
         @case (searchStatus.None) {
-          <div class="flex flex-col items-center justify-center py-20 px-8 text-center absolute inset-0">
-            <div class="w-20 h-20 rounded-3xl bg-base-200/50 flex items-center justify-center mb-6 ring-1 ring-white/5">
-              <fa-icon [icon]="faMagnifyingGlass" class="text-3xl text-base-content/20" />
-            </div>
-            <h2 class="text-xl font-semibold mb-2">Find your next favorite</h2>
-            <p class="text-base-content/40 text-sm max-w-[240px]">Search for vibes, artists, or specific songs across the entire library.</p>
-          </div>
+          <app-empty-state
+            [icon]="faMagnifyingGlass"
+            title="Find your next favorite"
+            description="Search for vibes, artists, or specific songs across the entire library."
+          />
         } 
 
         @case (searchStatus.Loading) {
@@ -43,13 +41,12 @@
         } 
 
         @case (searchStatus.Error) {
-          <div class="flex flex-col items-center justify-center py-20 px-8 text-center animate-fadeIn absolute inset-0">
-            <div class="w-20 h-20 rounded-3xl bg-error/10 flex items-center justify-center mb-6 ring-1 ring-error/20">
-              <fa-icon [icon]="faTriangleExclamation" class="text-3xl text-error" />
-            </div>
-            <h2 class="text-xl font-semibold text-error mb-2">No results found</h2>
-            <p class="text-base-content/50 text-sm max-w-[280px]">We couldn't find any vibes matching your search. Please check the spelling or try different keywords.</p>
-          </div>
+          <app-empty-state
+            [icon]="faTriangleExclamation"
+            title="No results found"
+            description="We couldn't find any vibes matching your search. Please check the spelling or try different keywords."
+            variant="error"
+          />
         } 
 
         @case (searchStatus.Finished) {
@@ -64,13 +61,11 @@
                 />
               </li>
             } @empty {
-              <div class="flex flex-col items-center justify-center py-20 px-8 text-center animate-fadeIn absolute inset-0">
-                <div class="w-20 h-20 rounded-3xl bg-base-200/50 flex items-center justify-center mb-6 ring-1 ring-white/5">
-                  <fa-icon [icon]="faMusic" class="text-3xl text-base-content/20" />
-                </div>
-                <h2 class="text-xl font-semibold mb-2">The vault is silent</h2>
-                <p class="text-base-content/40 text-sm max-w-[240px]">We couldn't find any songs for that search. Try something else!</p>
-              </div>
+              <app-empty-state
+                [icon]="faMusic"
+                title="The vault is silent"
+                description="We couldn't find any songs for that search. Try something else!"
+              />
             }
           </ul>
         }

@@ -7,13 +7,14 @@ import { SearchService } from './services/search.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { PlayerService } from '../../core/services/player.service';
 import { PlaylistService } from '../../core/services/playlist.service';
+import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faMagnifyingGlass, faTriangleExclamation, faWaveSquare, faMusic } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-search-page',
-    imports: [SongComponent, SearchBarComponent, FontAwesomeModule],
+    imports: [SongComponent, SearchBarComponent, FontAwesomeModule, EmptyStateComponent],
     templateUrl: './search-page.component.html',
     styleUrl: './search-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

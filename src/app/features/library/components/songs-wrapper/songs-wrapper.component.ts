@@ -1,19 +1,22 @@
-import { Component, input, output } from '@angular/core';
-import { SongComponent } from '../../../../shared/song/song.component';
+import { Component, input, output, inject } from '@angular/core';
 import { Song } from '../../../../core/models/song.model';
+import { SongComponent } from '../../../../shared/song/song.component';
 import { PlayerService } from '../../../../core/services/player.service';
-import { inject } from '@angular/core';
+import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component';
+import { faMusic } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-songs-wrapper',
-    imports: [SongComponent],
+    imports: [SongComponent, EmptyStateComponent],
     templateUrl: './songs-wrapper.component.html',
     styleUrl: './songs-wrapper.component.scss'
 })
 export class SongsWrapperComponent {
-  songs = input<Song[]>();
+  songs = input.required<Song[]>();
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
+  
+  faMusic = faMusic;
 
   public playerService = inject(PlayerService);
 

@@ -51,3 +51,26 @@ html {
 * {
   -webkit-overflow-scrolling: touch;
 }
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-container {
+  margin-left: 1.25rem;
+  margin-right: 1.25rem;
+  background-color: rgb(255 255 255 / 0.03);
+  border-radius: 2.5rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.05);
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: rgb(var(--b1) / 0.8);
+  backdrop-filter: blur(48px);
+}
