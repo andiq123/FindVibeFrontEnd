@@ -11,9 +11,7 @@ import { OfflineStorageService } from '../../features/library/services/offline-s
 import { DragAndDropDirective } from '../../features/search/directives/drag-and-drop.directive';
 import { PlayerService } from '../../core/services/player.service';
 import { SettingsService } from '../../core/services/settings.service';
-import { HapticService } from '../../core/services/haptic.service';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
-import { SwipeActionsDirective } from '../directives/swipe-actions.directive';
 
 @Component({
     selector: 'app-song',
@@ -24,8 +22,7 @@ import { SwipeActionsDirective } from '../directives/swipe-actions.directive';
         FavoriteButtonComponent,
         FontAwesomeModule,
         DragAndDropDirective,
-        NgTemplateOutlet,
-        SwipeActionsDirective
+        NgTemplateOutlet
     ],
     templateUrl: './song.component.html',
     styleUrl: './song.component.scss',
@@ -35,7 +32,6 @@ export class SongComponent {
   private playerService = inject(PlayerService);
   private offlineStorageService = inject(OfflineStorageService);
   private settingsService = inject(SettingsService);
-  private hapticService = inject(HapticService);
 
   song = input.required<Song>();
   allowReorder = input<boolean>(false);
@@ -91,22 +87,11 @@ export class SongComponent {
 
   async playOrPause() {
     if (this.isUnavailable()) return;
-    this.hapticService.light();
     if (this.status() === PlayerStatus.Paused) {
       await this.play();
     } else {
       await this.pause();
     }
-  }
-
-  onSwipeRight() {
-    this.hapticService.light();
-
-  }
-
-  onSwipeLeft() {
-    this.hapticService.light();
-
   }
 
   emitReorder(data: { from: string; to: string }) {

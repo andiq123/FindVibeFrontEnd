@@ -1,10 +1,9 @@
-import { Component, computed, effect, input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, effect, input, inject, ChangeDetectionStrategy, signal, AfterViewInit } from '@angular/core';
 import { SongComponent } from '../../shared/song/song.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
 import { SearchStatus } from '../../core/models/song.model';
 import { Router } from '@angular/router';
 import { SearchService } from './services/search.service';
-import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
 import { SettingsService } from '../../core/services/settings.service';
 import { PlayerService } from '../../core/services/player.service';
 import { PlaylistService } from '../../core/services/playlist.service';
@@ -14,12 +13,12 @@ import { faMagnifyingGlass, faTriangleExclamation, faWaveSquare, faMusic } from 
 
 @Component({
     selector: 'app-search-page',
-    imports: [SongComponent, SearchBarComponent, FontAwesomeModule, PullToRefreshDirective],
+    imports: [SongComponent, SearchBarComponent, FontAwesomeModule],
     templateUrl: './search-page.component.html',
     styleUrl: './search-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SearchPageComponent {
+export class SearchPageComponent implements AfterViewInit {
   private router = inject(Router);
   private songsService = inject(SearchService);
   private settingsService = inject(SettingsService);
@@ -33,6 +32,8 @@ export class SearchPageComponent {
   isCheckedServer = computed(() => this.settingsService.isCheckedServer());
 
   searchStatus = SearchStatus;
+  hasAnimated = signal(false);
+  shouldAnimate = computed(() => !this.hasAnimated() && this.status() !== SearchStatus.None);
 
   faMagnifyingGlass = faMagnifyingGlass;
   faTriangleExclamation = faTriangleExclamation;
@@ -47,16 +48,21 @@ export class SearchPageComponent {
         this.router.navigate(['/library']);
       }
     });
+
+    effect(() => {
+      if (this.status() === SearchStatus.Finished && this.songs().length > 0) {
+        this.hasAnimated.set(true);
+      }
+    });
+  }
+
+  ngAfterViewInit() {
+    if (this.status() === SearchStatus.Finished && this.songs().length > 0) {
+      this.hasAnimated.set(true);
+    }
   }
 
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
-  }
-
-  handleRefresh() {
-    const q = this.query();
-    if (q) {
-      this.songsService.searchSongs(q, true).subscribe();
-    }
   }
 }

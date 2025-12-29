@@ -179,11 +179,12 @@
 /* Combined Animations */
 .anim-slide-fade-in-up {
     opacity: 0;
-    animation: slide-fade-in-up var(--anim-duration-slower) var(--anim-ease-smooth) both;
+    will-change: transform, opacity;
+    animation: slide-fade-in-up var(--anim-duration-normal) var(--anim-ease-smooth) both;
 }
 
 .anim-slide-fade-in-down {
-    animation: slide-fade-in-down var(--anim-duration-slow) var(--anim-ease-smooth) both;
+    animation: slide-fade-in-down var(--anim-duration-normal) var(--anim-ease-smooth) both;
 }
 
 /* Special Animations */
@@ -198,8 +199,12 @@
 /* ============================================
    STAGGER UTILITIES
    ============================================ */
-@for $i from 1 through 20 {
+.anim-stagger {
+    will-change: contents;
+}
+
+@for $i from 1 through 12 {
     .anim-stagger>*:nth-child(#{$i}) {
-        animation-delay: calc(#{$i} * 0.05s);
+        animation-delay: calc(#{$i} * 0.03s);
     }
 }

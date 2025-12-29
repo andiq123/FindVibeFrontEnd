@@ -8,7 +8,6 @@ import {
   OnInit,
   OnDestroy
 } from '@angular/core';
-import { HapticService } from '../../../core/services/haptic.service';
 
 @Directive({
   selector: '[appSwipeDown]',
@@ -16,7 +15,6 @@ import { HapticService } from '../../../core/services/haptic.service';
 })
 export class SwipeDownDirective implements OnInit, OnDestroy {
   private el = inject(ElementRef);
-  private hapticService = inject(HapticService);
   private ngZone = inject(NgZone);
 
   handleSelector = input<string>('');
@@ -108,7 +106,6 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     const threshold = window.innerHeight * 0.15;
     if (this.currentY > threshold && !this.hasHitThreshold) {
       this.hasHitThreshold = true;
-      this.hapticService.light();
     } else if (this.currentY <= threshold && this.hasHitThreshold) {
       this.hasHitThreshold = false;
     }

@@ -24,7 +24,7 @@ export class SearchService {
 
   private loadingTimeout?: ReturnType<typeof setTimeout>;
 
-  searchSongs(searchTerm: string, force: boolean = false): Observable<Song[]> {
+  searchSongs(searchTerm: string, force = false): Observable<Song[]> {
     // Cache Check: If not forcing refresh, query matches last query, and we have data
     if (!force && searchTerm === this._lastSearchQuery() && this._songs().length > 0) {
         return of(this._songs());

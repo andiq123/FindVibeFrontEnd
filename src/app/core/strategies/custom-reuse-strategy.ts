@@ -1,45 +1,86 @@
 import { ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy } from '@angular/router';
 import { Injectable } from '@angular/core';
 
+interface StoredRoute {
+  handle: DetachedRouteHandle;
+  scrollPosition?: number;
+}
+
 @Injectable()
 export class CustomReuseStrategy implements RouteReuseStrategy {
-  private handlers: { [key: string]: DetachedRouteHandle } = {};
-
-  // Routes we want to cache
+  private handlers = new Map<string, StoredRoute>();
+  
   private routesToCache: string[] = ['library', 'songs', 'songs/:query', 'recent'];
 
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
-    // Only detach (cache) if the route path is in our list
-    const path = this.getPath(route);
-    return this.routesToCache.includes(path);
+    const path = this.getRoutePath(route);
+    return this.shouldCacheRoute(path);
   }
 
-  store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle): void {
-    const path = this.getPath(route);
-    this.handlers[path] = handle;
+  store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle | null): void {
+    if (!handle) return;
+    
+    const path = this.getRoutePath(route);
+    const scrollPosition = window.scrollY;
+    
+    this.handlers.set(path, { handle, scrollPosition });
   }
 
   shouldAttach(route: ActivatedRouteSnapshot): boolean {
-    const path = this.getPath(route);
-    return !!this.handlers[path];
+    const path = this.getRoutePath(route);
+    return this.handlers.has(path);
   }
 
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
-    const path = this.getPath(route);
-    if (!path) return null;
-    return this.handlers[path] || null;
+    const path = this.getRoutePath(route);
+    const stored = this.handlers.get(path);
+    
+    if (stored) {
+      setTimeout(() => {
+        if (stored.scrollPosition !== undefined) {
+          window.scrollTo(0, stored.scrollPosition);
+        }
+      }, 0);
+      
+      return stored.handle;
+    }
+    
+    return null;
   }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
-    // Standard behavior: reuse if same route configuration
     return future.routeConfig === curr.routeConfig;
   }
 
-  private getPath(route: ActivatedRouteSnapshot): string {
-    // Helper to get the full path from the snapshot
-    if (route.routeConfig && route.routeConfig.path) {
-      return route.routeConfig.path;
+  private getRoutePath(route: ActivatedRouteSnapshot): string {
+    if (!route.routeConfig?.path) return '';
+    
+    let path = route.routeConfig.path;
+    
+    if (route.params && Object.keys(route.params).length > 0) {
+      Object.keys(route.params).forEach(key => {
+        path = path.replace(`:${key}`, route.params[key]);
+      });
     }
-    return '';
+    
+    return path;
+  }
+
+  private shouldCacheRoute(path: string): boolean {
+    return this.routesToCache.some(cachedPath => {
+      if (cachedPath.includes(':')) {
+        const regex = new RegExp('^' + cachedPath.replace(/:[^/]+/g, '[^/]+') + '$');
+        return regex.test(path);
+      }
+      return path === cachedPath;
+    });
+  }
+
+  clearCache(path?: string): void {
+    if (path) {
+      this.handlers.delete(path);
+    } else {
+      this.handlers.clear();
+    }
   }
 }

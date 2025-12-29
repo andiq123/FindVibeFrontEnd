@@ -71,8 +71,8 @@ export class OfflineStorageService {
         await cache.add(song.link);
         this.addAvailableOfflineSongId(song.id);
         await this.setUpStorage();
-      } catch {
-
+      } catch (error) {
+        console.error('Failed to cache song:', error);
       } finally {
         this.trackProgress(song.id, false);
       }
@@ -120,8 +120,8 @@ export class OfflineStorageService {
 
       this._availableOfflineSongIds.update(ids => ids.filter(id => id !== songId));
       await this.setUpStorage();
-    } catch {
-
+    } catch (error) {
+      console.error('Failed to remove song from cache:', error);
     }
   }
 

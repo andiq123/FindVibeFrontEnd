@@ -22,8 +22,6 @@
 
     <div 
       class="results-viewport mx-5 bg-white/[0.02] rounded-[2.5rem] overflow-hidden border border-white/[0.04] min-h-[400px] relative transition-all duration-500"
-      appPullToRefresh
-      (refresh)="handleRefresh()"
     >
       @switch (status()) { 
         @case (searchStatus.None) {
@@ -37,9 +35,9 @@
         } 
 
         @case (searchStatus.Loading) {
-          <div class="flex flex-col anim-stagger py-2">
+          <div class="flex flex-col py-2" [class.anim-stagger]="shouldAnimate()">
             @for (i of [1,2,3,4,5,6,7,8]; track i) {
-              <app-song [loading]="true" [song]="dummySong" class="anim-slide-fade-in-up block" />
+              <app-song [loading]="true" [song]="dummySong" class="block" [class.anim-slide-fade-in-up]="shouldAnimate()" />
             }
           </div>
         } 
@@ -55,12 +53,13 @@
         } 
 
         @case (searchStatus.Finished) {
-          <ul class="flex flex-col anim-stagger py-2">
+          <ul class="flex flex-col py-2" [class.anim-stagger]="shouldAnimate()">
             @for (song of songs(); track song.id; let first = $first) { 
               <li class="group/item list-none song-item-staggered">
                 <app-song
                   [song]="song"
-                  class="anim-slide-fade-in-up block"
+                  class="block"
+                  [class.anim-slide-fade-in-up]="shouldAnimate()"
                   (playlistChange)="onChangePlaylist()"
                 />
               </li>

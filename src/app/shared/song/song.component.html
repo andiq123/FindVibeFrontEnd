@@ -32,9 +32,6 @@
   <div
     class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-300 relative overflow-hidden px-5 cursor-pointer w-full"
     [class.song-active]="isActive()"
-    appSwipeActions
-    (swipeRight)="onSwipeRight()"
-    (swipeLeft)="onSwipeLeft()"
     (click)="playOrPause()"
     (keydown.enter)="playOrPause()"
     tabindex="0"

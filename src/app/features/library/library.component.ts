@@ -7,7 +7,6 @@ import { StorageInfoComponent } from './components/storage-info/storage-info.com
 import { OfflineStorageService } from './services/offline-storage.service';
 import { catchError, Subscription, tap } from 'rxjs';
 import { SongsWrapperComponent } from './components/songs-wrapper/songs-wrapper.component';
-import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
 import {
   faCheck,
   faXmark,
@@ -27,7 +26,6 @@ import { SettingsService } from '../../core/services/settings.service';
         StorageInfoComponent,
         SongsWrapperComponent,
         FontAwesomeModule,
-        PullToRefreshDirective,
     ],
     templateUrl: './library.component.html',
     styleUrl: './library.component.scss',
@@ -65,12 +63,6 @@ export class LibraryComponent implements OnDestroy {
 
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
-  }
-
-  handleRefresh() {
-    if (this.userId()) {
-      this.libraryService.updateLibrarySongs(this.userId()).subscribe();
-    }
   }
 
   changeUser() {

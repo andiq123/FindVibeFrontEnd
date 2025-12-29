@@ -52,10 +52,11 @@
   <!-- Suggestions Dropdown -->
   @if(suggestions().length > 0) {
     <div class="absolute top-full left-0 w-full mt-4 z-50 anim-slide-in">
-      <ul class="bg-base-200/80 backdrop-blur-xl rounded-[14px] overflow-hidden border border-white/5 shadow-2xl origin-top">
+      <div class="bg-base-200/80 backdrop-blur-xl rounded-[14px] overflow-hidden border border-white/5 shadow-2xl origin-top">
         @for(suggestion of suggestions(); track suggestion) {
-          <li
-            class="group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-base-content/10 transition-colors relative border-b border-white/5 last:border-0"
+          <button
+            type="button"
+            class="group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-base-content/10 transition-colors relative border-b border-white/5 last:border-0 w-full text-left"
             (click)="searchBySuggestion(suggestion)"
           >
             <div class="flex items-center gap-3.5 min-w-0 flex-1">
@@ -70,9 +71,9 @@
             >
                <fa-icon [icon]="faArrowUpLeft" class="-rotate-45 text-sm" />
             </button>
-          </li>
+          </button>
         }
-      </ul>
+      </div>
     </div>
   }
 </form>

@@ -15,7 +15,18 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(),
       withRouterConfig({ paramsInheritanceStrategy: 'always' }),
-      withViewTransitions()
+      withViewTransitions({
+        skipInitialTransition: true,
+        onViewTransitionCreated: ({ transition, from, to }) => {
+          const cachedRoutes = ['library', 'songs', 'songs/:query', 'recent'];
+          const toPath = to?.routeConfig?.path || '';
+          const fromPath = from?.routeConfig?.path || '';
+          
+          if (cachedRoutes.includes(toPath) || cachedRoutes.includes(fromPath)) {
+            transition.skipTransition();
+          }
+        }
+      })
     ),
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
     provideHttpClient(withInterceptors([ngrokInterceptor])),

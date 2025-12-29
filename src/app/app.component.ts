@@ -9,7 +9,6 @@ import { AppUpdateService } from './core/services/app-update.service';
 import { MediaSessionService } from './core/services/media-session.service';
 import { AudioService } from './core/services/audio.service';
 import { OfflineStorageService } from './features/library/services/offline-storage.service';
-import { GestureService } from './core/services/gesture.service';
 import { catchError, tap } from 'rxjs';
 import { ConnectionStatusComponent } from './shared/connection-status/connection-status.component';
 import { UpdateOverlayComponent } from './shared/update-overlay/update-overlay.component';
@@ -28,7 +27,6 @@ export class AppComponent implements OnInit {
   private mediaSessionService = inject(MediaSessionService);
   private audioService = inject(AudioService);
   private offlineStorageService = inject(OfflineStorageService);
-  private gestureService = inject(GestureService);
 
   newUpdateAvailable = this.updateService.newUpdateAvailable;
   secondsToUpdate = this.updateService.secondsToUpdate;
