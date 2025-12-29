@@ -3,9 +3,9 @@ import { ApplicationConfig, provideZoneChangeDetection, isDevMode } from '@angul
 import { provideRouter, withComponentInputBinding, withRouterConfig, withViewTransitions, RouteReuseStrategy } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { provideServiceWorker } from '@angular/service-worker';
-import { ngrokInterceptor } from './shared/interceptors/ngrok.interceptor';
+
 import { CustomReuseStrategy } from './core/strategies/custom-reuse-strategy';
 
 export const appConfig: ApplicationConfig = {
@@ -29,7 +29,7 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
-    provideHttpClient(withInterceptors([ngrokInterceptor])),
+    provideHttpClient(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'

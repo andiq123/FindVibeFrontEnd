@@ -37,7 +37,6 @@ export class AppComponent implements OnInit {
   }
 
   private initializeServices(): void {
-    this.userService.initialize();
     this.audioService.initialize();
     this.settingsService.initialize();
     this.mediaSessionService.initialize();

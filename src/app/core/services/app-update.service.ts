@@ -14,26 +14,28 @@ export class AppUpdateService {
   readonly secondsToUpdate = signal(UPDATE_COUNTDOWN_SECONDS);
   readonly updateLoading = signal(false);
 
-  private readonly _ = effect(() => {
-    if (!this.swUpdate.isEnabled) return;
+  constructor() {
+    effect(() => {
+      if (!this.swUpdate.isEnabled) return;
 
-    this.checkForUpdate();
-    interval(6 * 60 * 60 * 1000).pipe(
-      tap(() => this.checkForUpdate())
-    ).subscribe();
+      this.checkForUpdate();
+      interval(6 * 60 * 60 * 1000).pipe(
+        tap(() => this.checkForUpdate())
+      ).subscribe();
 
-    this.swUpdate.versionUpdates.pipe(
-      filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
-      tap(() => this.newUpdateAvailable.set(true)),
-      switchMap(() => this.countdown(UPDATE_COUNTDOWN_SECONDS)),
-      tap((time) => {
-        this.secondsToUpdate.set(time);
-        if (time === 0) {
-          this.applyUpdate();
-        }
-      })
-    ).subscribe();
-  });
+      this.swUpdate.versionUpdates.pipe(
+        filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
+        tap(() => this.newUpdateAvailable.set(true)),
+        switchMap(() => this.countdown(UPDATE_COUNTDOWN_SECONDS)),
+        tap((time) => {
+          this.secondsToUpdate.set(time);
+          if (time === 0) {
+            this.applyUpdate();
+          }
+        })
+      ).subscribe();
+    });
+  }
 
   private checkForUpdate(): void {
     if (this.swUpdate.isEnabled) {

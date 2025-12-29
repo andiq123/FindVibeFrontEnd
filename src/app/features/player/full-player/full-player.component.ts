@@ -11,6 +11,7 @@ import {
   OnInit,
   OnDestroy,
   Renderer2,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
@@ -46,6 +47,7 @@ import { TimeFormatPipe } from '../../../shared/pipes/time-format.pipe';
   ],
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FullPlayerComponent implements OnInit, OnDestroy {
   private playerService = inject(PlayerService);

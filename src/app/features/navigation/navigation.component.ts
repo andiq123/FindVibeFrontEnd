@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   FaIconComponent,
   IconDefinition,
@@ -14,7 +14,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     selector: 'app-navigation',
     imports: [FaIconComponent, RouterLink, RouterLinkActive],
     templateUrl: './navigation.component.html',
-    styleUrl: './navigation.component.scss'
+    styleUrl: './navigation.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavigationComponent {
   navListSource = computed(() => [

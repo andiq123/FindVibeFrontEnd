@@ -10,52 +10,54 @@ export class MediaSessionService {
   private readonly playlistService = inject(PlaylistService);
   private readonly playerService = inject(PlayerService);
 
-  private readonly metadataEffect = effect(() => {
-    const song = this.playlistService.currentSong();
-    if (!song) return;
+  constructor() {
+    effect(() => {
+      const song = this.playlistService.currentSong();
+      if (!song) return;
 
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: song.title,
-      artist: song.artist,
-      artwork: [
-        {
-          src: song.image || '',
-          sizes: '512x512',
-          type: 'image/png',
-        },
-      ],
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song.title,
+        artist: song.artist,
+        artwork: [
+          {
+            src: song.image || '',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+        ],
+      });
     });
-  });
 
-  private readonly playbackStateEffect = effect(() => {
-    const status = this.playerService.status();
-    if (!('mediaSession' in navigator)) return;
+    effect(() => {
+      const status = this.playerService.status();
+      if (!('mediaSession' in navigator)) return;
 
-    if (status === PlayerStatus.Playing) {
-      navigator.mediaSession.playbackState = 'playing';
-    } else {
-      navigator.mediaSession.playbackState = 'paused';
-    }
-  });
-
-  private readonly positionStateEffect = effect(() => {
-    const currentTime = this.playerService.currentTime();
-    const duration = this.playerService.duration();
-
-    if (!('mediaSession' in navigator) || !('setPositionState' in navigator.mediaSession)) return;
-
-    if (duration > 0 && currentTime <= duration) {
-      try {
-        navigator.mediaSession.setPositionState({
-          duration: duration,
-          playbackRate: 1,
-          position: currentTime,
-        });
-      } catch (error) {
-        console.error('Error setting media session position state:', error);
+      if (status === PlayerStatus.Playing) {
+        navigator.mediaSession.playbackState = 'playing';
+      } else {
+        navigator.mediaSession.playbackState = 'paused';
       }
-    }
-  });
+    });
+
+    effect(() => {
+      const currentTime = this.playerService.currentTime();
+      const duration = this.playerService.duration();
+
+      if (!('mediaSession' in navigator) || !('setPositionState' in navigator.mediaSession)) return;
+
+      if (duration > 0 && currentTime <= duration) {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: duration,
+            playbackRate: 1,
+            position: currentTime,
+          });
+        } catch (error) {
+          console.error('Error setting media session position state:', error);
+        }
+      }
+    });
+  }
 
   initialize(): void {
     if (!('mediaSession' in navigator)) return;

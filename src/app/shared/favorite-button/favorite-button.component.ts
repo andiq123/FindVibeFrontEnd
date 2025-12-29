@@ -1,4 +1,4 @@
-import { Component, computed, input, inject } from '@angular/core';
+import { Component, computed, input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { faHeart as favoritedHeart } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as unFavoritedHeart } from '@fortawesome/free-regular-svg-icons';
 import { UserService } from '../../features/library/services/user.service';
@@ -10,7 +10,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     selector: 'app-favorite-button',
     imports: [FontAwesomeModule],
     templateUrl: './favorite-button.component.html',
-    styleUrl: './favorite-button.component.scss'
+    styleUrl: './favorite-button.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FavoriteButtonComponent {
   private userService = inject(UserService);

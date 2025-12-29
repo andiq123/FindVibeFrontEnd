@@ -23,18 +23,21 @@ export class UserService {
   readonly user = this._user.asReadonly();
   readonly userLoggedIn = new Subject<void>();
 
-  initialize(): void {
+  constructor() {
     this.loadUserIdFromStorage();
   }
 
-  loadUserIdFromStorage(): string | null {
-    const user = this.storageService.getItem<User>(USER_STORAGE_KEY);
-
-    if (user?.id) {
-      this._user.set(user);
-      return user.id;
+  private loadUserIdFromStorage(): string | null {
+    try {
+      const user = this.storageService.getItem<User>(USER_STORAGE_KEY);
+      if (user?.id) {
+        this._user.set(user);
+        return user.id;
+      }
+    } catch (error) {
+      console.error('[UserService] Failed to parse user from storage:', error);
+      this.storageService.removeItem(USER_STORAGE_KEY);
     }
-
     return null;
   }
 

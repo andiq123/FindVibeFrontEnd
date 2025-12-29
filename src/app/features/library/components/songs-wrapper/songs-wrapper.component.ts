@@ -1,4 +1,4 @@
-import { Component, input, output, inject } from '@angular/core';
+import { Component, input, output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Song } from '../../../../core/models/song.model';
 import { SongComponent } from '../../../../shared/song/song.component';
 import { PlayerService } from '../../../../core/services/player.service';
@@ -9,7 +9,8 @@ import { faMusic } from '@fortawesome/free-solid-svg-icons';
     selector: 'app-songs-wrapper',
     imports: [SongComponent, EmptyStateComponent],
     templateUrl: './songs-wrapper.component.html',
-    styleUrl: './songs-wrapper.component.scss'
+    styleUrl: './songs-wrapper.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SongsWrapperComponent {
   songs = input.required<Song[]>();

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
@@ -14,7 +14,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
       <h2 [class]="'text-xl font-semibold mb-2 ' + titleColorClass">{{ title }}</h2>
       <p class="text-base-content/40 text-sm max-w-[240px]">{{ description }}</p>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EmptyStateComponent {
   @Input() icon!: IconDefinition;

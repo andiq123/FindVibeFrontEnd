@@ -1,4 +1,4 @@
-import { Component, computed, input, OnInit, signal, OnDestroy, effect, inject, untracked } from '@angular/core';
+import { Component, computed, input, OnInit, signal, OnDestroy, effect, inject, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faMagnifyingGlass, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,8 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
     selector: 'app-search-bar',
     imports: [FontAwesomeModule, FormsModule, TitleCasePipe],
     templateUrl: './search-bar.component.html',
-    styleUrl: './search-bar.component.scss'
+    styleUrl: './search-bar.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchBarComponent implements OnInit, OnDestroy {
   query = input<string>('');

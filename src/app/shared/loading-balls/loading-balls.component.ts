@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-loading-balls',
@@ -9,6 +9,7 @@ import { Component } from '@angular/core';
       <span class="loading loading-ball loading-md text-primary opacity-60"></span>
       <span class="loading loading-ball loading-md text-primary opacity-30"></span>
     </div>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoadingBallsComponent {}

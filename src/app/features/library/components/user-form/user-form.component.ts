@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
 
@@ -6,7 +6,8 @@ import { FormsModule } from '@angular/forms';
     selector: 'app-user-form',
     imports: [FormsModule],
     templateUrl: './user-form.component.html',
-    styleUrl: './user-form.component.scss'
+    styleUrl: './user-form.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserFormComponent {
   name = signal<string>('');

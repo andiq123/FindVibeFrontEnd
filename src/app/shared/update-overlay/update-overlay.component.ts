@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AppUpdateService } from '../../core/services/app-update.service';
 
 @Component({
@@ -6,7 +6,8 @@ import { AppUpdateService } from '../../core/services/app-update.service';
   standalone: true,
   imports: [],
   templateUrl: './update-overlay.component.html',
-  styleUrl: './update-overlay.component.scss'
+  styleUrl: './update-overlay.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UpdateOverlayComponent {
   private readonly appUpdateService = inject(AppUpdateService);

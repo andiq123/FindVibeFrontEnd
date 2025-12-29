@@ -1,4 +1,5 @@
-import { Component, computed, OnInit, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { SettingsService } from '../../core/services/settings.service';
 import { PlayerService } from '../../core/services/player.service';
@@ -12,9 +13,10 @@ import { PlaylistService } from '../../core/services/playlist.service';
     selector: 'app-audio-player',
     imports: [MiniPlayerComponent, FullPlayerComponent],
     templateUrl: './audio-player.component.html',
-    styleUrl: './audio-player.component.scss'
+    styleUrl: './audio-player.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AudioPlayerComponent implements OnInit {
+export class AudioPlayerComponent {
   private playerService = inject(PlayerService);
   private playlistService = inject(PlaylistService);
   private settingsService = inject(SettingsService);
@@ -29,8 +31,8 @@ export class AudioPlayerComponent implements OnInit {
   });
   statusObservable = toObservable(this.status);
 
-  ngOnInit(): void {
-    this.statusObservable.subscribe(async (status) => {
+  constructor() {
+    this.statusObservable.pipe(takeUntilDestroyed()).subscribe(async (status) => {
       if (status === PlayerStatus.Ended) {
         await this.nextSong();
       }

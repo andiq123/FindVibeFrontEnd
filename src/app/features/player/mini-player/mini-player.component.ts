@@ -1,4 +1,4 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { PlayerStatus } from '../models/player.model';
@@ -10,7 +10,8 @@ import { Song } from '../../../core/models/song.model';
     selector: 'app-mini-player',
     imports: [FontAwesomeModule, PlayerButtonComponent, MovingTitleComponent],
     templateUrl: './mini-player.component.html',
-    styleUrl: './mini-player.component.scss'
+    styleUrl: './mini-player.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MiniPlayerComponent {
   song = input.required<Song>();
