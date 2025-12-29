@@ -21,7 +21,10 @@
         </div>
         <img
           class="w-full h-full object-cover"
-          [src]="song().image || 'no_album_art.jpg'"
+          [ngSrc]="song().image || 'no_album_art.jpg'"
+          width="56"
+          height="56"
+          priority
           alt="Album Art"
         />
       </div>

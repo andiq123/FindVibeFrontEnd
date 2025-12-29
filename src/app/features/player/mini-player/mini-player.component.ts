@@ -6,9 +6,11 @@ import { PlayerButtonComponent } from '../../../shared/player-button/player-butt
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
 import { Song } from '../../../core/models/song.model';
 
+import { NgOptimizedImage } from '@angular/common';
+
 @Component({
     selector: 'app-mini-player',
-    imports: [FontAwesomeModule, PlayerButtonComponent, MovingTitleComponent],
+    imports: [FontAwesomeModule, PlayerButtonComponent, MovingTitleComponent, NgOptimizedImage],
     templateUrl: './mini-player.component.html',
     styleUrl: './mini-player.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

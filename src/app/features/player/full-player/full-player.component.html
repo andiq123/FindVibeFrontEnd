@@ -23,6 +23,7 @@
       alt="Song Art BG"
       class="absolute inset-0 w-full h-full object-cover blur-[100px] select-none pointer-events-none animate-bg-breathe"
       fill
+      sizes="100vw"
       priority
       referrerpolicy="no-referrer"
       draggable="false"
@@ -43,6 +44,7 @@
             [ngSrc]="song().image || 'no_album_art.jpg'"
             [alt]="song().title"
             fill
+            sizes="(max-width: 768px) 100vw, 340px"
             priority
             class="object-cover"
             referrerpolicy="no-referrer"

@@ -2,7 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { bytesToGB } from '../../../core/utils/utils';
 import { Song } from '../../../core/models/song.model';
 import { inject } from '@angular/core';
-import { LibraryApiService } from './library-api.service';
+import { StorageService } from '../../../core/services/storage.service';
 import { trackLoadingState } from '../../../core/utils/loading-state.util';
 
 const CACHE_NAME = 'library-vault';
@@ -16,7 +16,7 @@ export class OfflineStorageService {
 
   private readonly _currentLoadingDownloadSongIds = signal<string[]>([]);
   private readonly _availableOfflineSongIds = signal<string[]>([]);
-  private readonly libraryApiService = inject(LibraryApiService);
+  private readonly storageService = inject(StorageService);
 
   readonly currentLoadingDownloadSongIds = this._currentLoadingDownloadSongIds.asReadonly();
   readonly availableOfflineSongIds = this._availableOfflineSongIds.asReadonly();
@@ -31,7 +31,7 @@ export class OfflineStorageService {
   }
 
   async syncOfflineSongs(): Promise<void> {
-    const songs = this.libraryApiService.getLibraryFromLocalStorage();
+    const songs = this.storageService.getItem<Song[]>('library') || [];
     if (!songs.length) return;
 
     const cache = await this.getCache();

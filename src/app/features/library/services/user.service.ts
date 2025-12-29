@@ -4,7 +4,7 @@ import { User } from '../../../core/models/user.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment.development';
 import { Subject, tap } from 'rxjs';
-import { LibraryApiService } from './library-api.service';
+
 import { OfflineStorageService } from './offline-storage.service';
 
 const USER_STORAGE_KEY = 'user';
@@ -15,7 +15,7 @@ const USER_STORAGE_KEY = 'user';
 export class UserService {
   private readonly storageService = inject(StorageService);
   private readonly httpClient = inject(HttpClient);
-  private readonly libraryApiService = inject(LibraryApiService);
+
   private readonly offlineStorageService = inject(OfflineStorageService);
 
   private readonly _user = signal<User | null>(null);
@@ -59,7 +59,7 @@ export class UserService {
   resetUser(): void {
     this._user.set(null);
     this.storageService.removeItem(USER_STORAGE_KEY);
-    this.libraryApiService.clearLibraryFromLocalStorage();
+    this.storageService.removeItem('library');
     this.offlineStorageService.removeCache().catch(err => 
       console.error('[UserService] Failed to clear offline storage:', err)
     );

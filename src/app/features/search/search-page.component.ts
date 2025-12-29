@@ -41,7 +41,7 @@ export class SearchPageComponent implements AfterViewInit {
   faWaveSquare = faWaveSquare;
   faMusic = faMusic;
 
-  dummySong = { id: '', artist: '', title: '', image: '', link: '', order: 0 };
+  readonly dummySong = { id: '', artist: '', title: '', image: '', link: '', order: 0, isFavorite: false };
 
   constructor() {
     effect(() => {

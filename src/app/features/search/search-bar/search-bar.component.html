@@ -60,7 +60,7 @@
       aria-label="Search suggestions"
     >
       @for(suggestion of suggestions(); track suggestion) {
-        <li role="option">
+        <li role="option" aria-selected="false">
           <button
             type="button"
             class="group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-base-content/10 transition-colors relative border-b border-white/5 last:border-0 w-full text-left"

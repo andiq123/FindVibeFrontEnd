@@ -1,11 +1,12 @@
 import { computed, Injectable, signal, inject, effect } from '@angular/core';
 import { LibraryApiService } from './library-api.service';
 import { UserService } from './user.service';
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Song } from '../../../core/models/song.model';
 import { OfflineStorageService } from './offline-storage.service';
 import { Reorder } from '../../../core/models/reorder.model';
 import { trackLoadingState } from '../../../core/utils/loading-state.util';
+import { StorageService } from '../../../core/services/storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,12 +15,19 @@ export class LibraryService {
   private readonly libraryApiService = inject(LibraryApiService);
   private readonly offlineStorageService = inject(OfflineStorageService);
   private readonly userService = inject(UserService);
+  private readonly storageService = inject(StorageService);
 
-  readonly songs = signal<Song[]>([]);
+  private readonly LIBRARY_STORAGE_KEY = 'library';
+
+  readonly songs = signal<Song[]>(this.storageService.getItem<Song[]>(this.LIBRARY_STORAGE_KEY) || []);
   readonly currentLoadingFavoriteSongIds = signal<string[]>([]);
   readonly loadingSongs = signal<boolean>(false);
 
   constructor() {
+    effect(() => {
+      this.storageService.setItem(this.LIBRARY_STORAGE_KEY, this.songs());
+    });
+
     effect(() => {
       const user = this.userService.user();
       if (user) {
@@ -34,18 +42,10 @@ export class LibraryService {
     this.songs.set([]);
     this.currentLoadingFavoriteSongIds.set([]);
     this.loadingSongs.set(false);
+    this.storageService.removeItem(this.LIBRARY_STORAGE_KEY);
   }
 
   readonly orderHasChanged = computed(() => {
-    const localSongs = this.libraryApiService.getLibraryFromLocalStorage();
-    const currentSongs = this.songs();
-
-    if (localSongs.length !== currentSongs.length) return true;
-
-    for (let i = 0; i < currentSongs.length; i++) {
-      if (currentSongs[i].id !== localSongs[i]?.id) return true;
-    }
-
     return false;
   });
 
@@ -78,8 +78,7 @@ export class LibraryService {
     return this.libraryApiService.addToFavorites(favoriteSong, userId).pipe(
       tap({
         next: () => {
-          this.songs.update((prevSongs: Song[]) => [...prevSongs, favoriteSong]);
-          this.libraryApiService.setLibraryToLocalStorage(this.songs());
+          this.songs.update((prev) => [...prev, favoriteSong]);
           this.trackLoadingFavorite(song.id, false);
         },
         error: () => this.trackLoadingFavorite(song.id, false),
@@ -89,16 +88,17 @@ export class LibraryService {
 
   removeFromFavorites(id: string, link: string) {
     this.trackLoadingFavorite(id, true);
-    const songId = this.songs().find((x: Song) => x.link === link)!.id;
+    const song = this.songs().find((x) => x.link === link);
+    if (!song) {
+       this.trackLoadingFavorite(id, false);
+       return new Observable();
+    }
 
-    return this.libraryApiService.removeFromFavorites(songId).pipe(
+    return this.libraryApiService.removeFromFavorites(song.id).pipe(
       tap({
         next: async () => {
           await this.offlineStorageService.removeSongFromCache(id, link);
-          this.songs.update((prevSongs: Song[]) =>
-            prevSongs.filter((song: Song) => song.link !== link)
-          );
-          this.libraryApiService.setLibraryToLocalStorage(this.songs());
+          this.songs.update((prev) => prev.filter((s) => s.link !== link));
           this.trackLoadingFavorite(id, false);
         },
         error: () => this.trackLoadingFavorite(id, false),
@@ -107,38 +107,37 @@ export class LibraryService {
   }
 
   saveReorders() {
-    const reorders: Reorder[] = this.songs().map((x: Song) => ({
+    const reorders: Reorder[] = this.songs().map((x) => ({
       songId: x.id,
       order: x.order,
     }));
 
     return this.libraryApiService.reorderSongs(reorders).pipe(
       tap(() => {
-        this.libraryApiService.setLibraryToLocalStorage(this.songs());
-        this.resetReorder();
       })
     );
   }
 
   changePlaces(id1: string, id2: string): void {
-    this.songs.update((prevSongs: Song[]) => {
-      const song1 = prevSongs.find((x: Song) => x.id === id1)!;
-      const song2 = prevSongs.find((x: Song) => x.id === id2)!;
-      const index1 = prevSongs.findIndex((x: Song) => x.id === id1);
-      const index2 = prevSongs.findIndex((x: Song) => x.id === id2);
+    this.songs.update((prevSongs) => {
+      const index1 = prevSongs.findIndex((x) => x.id === id1);
+      const index2 = prevSongs.findIndex((x) => x.id === id2);
+      
+      if (index1 === -1 || index2 === -1) return prevSongs;
 
-      prevSongs[index1] = song2;
-      prevSongs[index2] = song1;
+      const newSongs = [...prevSongs];
+      const song1 = newSongs[index1];
+      const song2 = newSongs[index2];
 
-      return prevSongs.map((song: Song, i: number) => ({ ...song, order: i + 1 }));
+      newSongs[index1] = song2;
+      newSongs[index2] = song1;
+
+      return newSongs.map((song, i) => ({ ...song, order: i + 1 }));
     });
   }
 
   resetReorder(): void {
-    const songs = this.libraryApiService
-      .getLibraryFromLocalStorage()
-      .sort((a: Song, b: Song) => a.order - b.order);
-    this.songs.set(songs);
+     this.songs.update(songs => [...songs].sort((a, b) => a.order - b.order));
   }
 
   private trackLoadingFavorite(id: string, isLoading: boolean): void {
