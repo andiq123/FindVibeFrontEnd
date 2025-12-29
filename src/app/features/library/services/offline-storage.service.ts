@@ -3,6 +3,7 @@ import { bytesToGB } from '../../../core/utils/utils';
 import { Song } from '../../../core/models/song.model';
 import { inject } from '@angular/core';
 import { LibraryApiService } from './library-api.service';
+import { trackLoadingState } from '../../../core/utils/loading-state.util';
 
 const CACHE_NAME = 'library-vault';
 
@@ -133,10 +134,6 @@ export class OfflineStorageService {
   }
 
   private trackProgress(id: string, isLoading: boolean): void {
-    this._currentLoadingDownloadSongIds.update((prevIds: string[]) =>
-      isLoading 
-        ? (prevIds.includes(id) ? prevIds : [...prevIds, id])
-        : prevIds.filter((songId: string) => songId !== id)
-    );
+    trackLoadingState(this._currentLoadingDownloadSongIds, id, isLoading);
   }
 }

@@ -41,3 +41,13 @@ html {
   /* Elevation */
   --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
 }
+
+.scrollable-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+* {
+  -webkit-overflow-scrolling: touch;
+}

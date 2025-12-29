@@ -17,7 +17,6 @@ export class AppUpdateService {
   private readonly _ = effect(() => {
     if (!this.swUpdate.isEnabled) return;
 
-    // Initial check and periodic check every 6 hours
     this.checkForUpdate();
     interval(6 * 60 * 60 * 1000).pipe(
       tap(() => this.checkForUpdate())

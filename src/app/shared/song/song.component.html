@@ -12,35 +12,35 @@
     </div>
   </div>
 } @else {
-  @if(allowReorder()){
-  <div
-    class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-300 relative overflow-hidden px-5 cursor-pointer w-full"
-    [class.song-active]="isActive()"
-    appDragAndDrop
-    (reorderSongs)="emitReorder($any($event))"
-    [id]="song().id"
-    tabindex="0"
-    role="button"
-    [attr.aria-disabled]="isUnavailable()"
-    [class.opacity-50]="isUnavailable()"
-    (click)="playOrPause()"
-    (keydown.enter)="playOrPause()"
-  >
-    <ng-container *ngTemplateOutlet="default"></ng-container>
-  </div>
-  }@else {
-  <div
-    class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-300 relative overflow-hidden px-5 cursor-pointer w-full"
-    [class.song-active]="isActive()"
-    (click)="playOrPause()"
-    (keydown.enter)="playOrPause()"
-    tabindex="0"
-    role="button"
-    [attr.aria-disabled]="isUnavailable()"
-    [class.opacity-50]="isUnavailable()"
-  >
-    <ng-container *ngTemplateOutlet="default"></ng-container>
-  </div>
+  @if(allowReorder()) {
+    <div
+      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-300 relative overflow-hidden px-5 cursor-pointer w-full"
+      [class.song-active]="isActive()"
+      [class.opacity-50]="isUnavailable()"
+      appDragAndDrop
+      [id]="song().id"
+      (reorderSongs)="emitReorder($any($event))"
+      (click)="playOrPause()"
+      (keydown.enter)="playOrPause()"
+      tabindex="0"
+      role="button"
+      [attr.aria-disabled]="isUnavailable()"
+    >
+      <ng-container *ngTemplateOutlet="default"></ng-container>
+    </div>
+  } @else {
+    <div
+      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-300 relative overflow-hidden px-5 cursor-pointer w-full"
+      [class.song-active]="isActive()"
+      [class.opacity-50]="isUnavailable()"
+      (click)="playOrPause()"
+      (keydown.enter)="playOrPause()"
+      tabindex="0"
+      role="button"
+      [attr.aria-disabled]="isUnavailable()"
+    >
+      <ng-container *ngTemplateOutlet="default"></ng-container>
+    </div>
   }
 }
 
@@ -71,6 +71,8 @@
         [ngSrc]="song().image || 'no_album_art.jpg'"
         [alt]="song().artist"
         fill
+        loading="lazy"
+        decoding="async"
         referrerpolicy="no-referrer"
         (load)="onImageLoad()"
         (error)="onImageError()"

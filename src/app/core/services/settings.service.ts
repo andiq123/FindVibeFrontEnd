@@ -42,24 +42,26 @@ export class SettingsService {
   }
 
   toggleRepeat(): void {
-    const newValue = !this._isRepeat();
-    this._isRepeat.set(newValue);
-    this.storageService.setItem('isRepeat', newValue);
-
-    if (this._isShuffle()) {
-      this._isShuffle.set(false);
-      this.storageService.setItem('isShuffle', false);
-    }
+    this.toggleMutuallyExclusive(this._isRepeat, this._isShuffle, 'isRepeat', 'isShuffle');
   }
 
   toggleShuffle(): void {
-    const newValue = !this._isShuffle();
-    this._isShuffle.set(newValue);
-    this.storageService.setItem('isShuffle', newValue);
+    this.toggleMutuallyExclusive(this._isShuffle, this._isRepeat, 'isShuffle', 'isRepeat');
+  }
 
-    if (this._isRepeat()) {
-      this._isRepeat.set(false);
-      this.storageService.setItem('isRepeat', false);
+  private toggleMutuallyExclusive(
+    primary: typeof this._isRepeat,
+    secondary: typeof this._isShuffle,
+    primaryKey: string,
+    secondaryKey: string
+  ): void {
+    const newValue = !primary();
+    primary.set(newValue);
+    this.storageService.setItem(primaryKey, newValue);
+
+    if (secondary()) {
+      secondary.set(false);
+      this.storageService.setItem(secondaryKey, false);
     }
   }
 

@@ -82,17 +82,14 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
 
     if (event.cancelable) event.preventDefault();
     
-    // Calculate raw delta
     let deltaY = event.touches[0].clientY - this.startY;
 
-    // Apply rubber-banding if dragging up (negative delta)
     if (deltaY < 0) {
       deltaY = this.calculateRubberBand(deltaY);
     }
 
     this.currentY = deltaY;
 
-    // Use requestAnimationFrame for smooth 120Hz updates
     if (this.rafId === null) {
       this.rafId = requestAnimationFrame(this.updatePosition.bind(this));
     }
@@ -102,12 +99,18 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     this.rafId = null;
     this.el.nativeElement.style.transform = `translate3d(0, ${this.currentY}px, 0)`;
 
-    // Haptic feedback logic
     const threshold = window.innerHeight * 0.15;
     if (this.currentY > threshold && !this.hasHitThreshold) {
       this.hasHitThreshold = true;
+      this.triggerHaptic();
     } else if (this.currentY <= threshold && this.hasHitThreshold) {
       this.hasHitThreshold = false;
+    }
+  }
+
+  private triggerHaptic(): void {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(10);
     }
   }
 
@@ -119,10 +122,9 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
 
       const duration = performance.now() - this.startTime;
       const velocity = duration > 0 ? this.currentY / duration : 0;
-      const threshold = window.innerHeight * 0.2; // 20% of screen to dismiss
-      const velocityThreshold = 0.6; // Higher velocity requirement
+      const threshold = window.innerHeight * 0.2;
+      const velocityThreshold = 0.6;
 
-      // Dismiss if dragged far enough OR flicked fast enough downwards
       if (this.currentY > threshold || (velocity > velocityThreshold && this.currentY > 50)) {
         this.performDismiss(velocity);
       } else {
@@ -135,8 +137,6 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     this.isDismissing = true;
     const el = this.el.nativeElement;
 
-    // Calculate natural duration based on velocity but clamp it for consistent feel
-    // iOS system animations usually feel best around 350-500ms
     const baseDuration = 400; 
     let duration = baseDuration;
     
@@ -144,10 +144,8 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
         duration = Math.max(250, baseDuration - (velocity * 50));
     }
 
-    // Convert ms to seconds
     const durationSec = duration / 1000;
 
-    // Native iOS spring-like curve
     el.style.setProperty('transition', `transform ${durationSec}s cubic-bezier(0.32, 0.72, 0, 1)`, 'important');
     el.style.transform = 'translate3d(0, 100%, 0)';
 
@@ -161,7 +159,6 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
 
   private performSnapBack() {
     const el = this.el.nativeElement;
-    // Spring-like snap back
     el.style.setProperty('transition', 'transform 0.4s cubic-bezier(0.17, 0.89, 0.24, 1.1)', 'important');
     el.style.transform = 'translate3d(0, 0, 0)';
 
@@ -179,7 +176,6 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     this.hasHitThreshold = false;
   }
 
-  // Apple's rubber-banding formula approximation
   private calculateRubberBand(offset: number): number {
       const dimension = window.innerHeight;
       const constant = 0.55;

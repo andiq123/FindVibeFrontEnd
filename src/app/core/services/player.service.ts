@@ -24,23 +24,25 @@ export class PlayerService implements OnDestroy {
   readonly currentTime = this.audioService.currentTime;
   readonly duration = this.audioService.duration;
 
-  private readonly recentsEffect = effect(() => {
-    const time = this.currentTime();
-    const song = this.song();
+  constructor() {
+    effect(() => {
+      const time = this.currentTime();
+      const song = this.song();
 
-    if (time > 7 && !this.alreadyAddedInRecents() && song) {
-      this.alreadyAddedInRecents.set(true);
-      this.recentService.addSongToRecents(song);
-    }
-  });
+      if (time > 7 && !this.alreadyAddedInRecents() && song) {
+        this.alreadyAddedInRecents.set(true);
+        this.recentService.addSongToRecents(song);
+      }
+    });
 
-  private readonly shuffleEffect = effect(() => {
-    if (this.settingsService.isShuffle()) {
-      this.playlistService.enableShuffle();
-    } else {
-      this.playlistService.disableShuffle();
-    }
-  });
+    effect(() => {
+      if (this.settingsService.isShuffle()) {
+        this.playlistService.enableShuffle();
+      } else {
+        this.playlistService.disableShuffle();
+      }
+    });
+  }
 
   async setSong(song: Song): Promise<void> {
     this.cleanupObjectUrl();
@@ -81,9 +83,7 @@ export class PlayerService implements OnDestroy {
 
   async setPreviousSong(): Promise<Song | undefined> {
     if (this.playlistService.needToReplay(this.currentTime())) {
-      this.audioService.seek(0);
-      await this.play();
-      return undefined;
+      return this.replayCurrentSong();
     }
 
     const previousSong = this.playlistService.previous();
@@ -96,9 +96,7 @@ export class PlayerService implements OnDestroy {
 
   async setNextSong(): Promise<Song | undefined> {
     if (this.settingsService.isRepeat()) {
-      this.audioService.seek(0);
-      await this.play();
-      return undefined;
+      return this.replayCurrentSong();
     }
 
     const nextSong = this.playlistService.next();
@@ -106,6 +104,12 @@ export class PlayerService implements OnDestroy {
       await this.setSong(nextSong);
       return nextSong;
     }
+    return undefined;
+  }
+
+  private async replayCurrentSong(): Promise<undefined> {
+    this.audioService.seek(0);
+    await this.play();
     return undefined;
   }
 

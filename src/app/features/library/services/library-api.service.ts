@@ -3,7 +3,7 @@ import { StorageService } from '../../../core/services/storage.service';
 import { environment } from '../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { Song } from '../../../core/models/song.model';
-import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
+import { catchError, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { Reorder } from '../../../core/models/reorder.model';
 
 const LIBRARY_STORAGE_KEY = 'library';
@@ -30,7 +30,7 @@ export class LibraryApiService {
       catchError((error) => {
         if (error.status === 404) {
           this.setLibraryToLocalStorage([]);
-          return of([]);
+          return throwError(() => ({ status: 404, message: 'User not found' }));
         }
         return of(this.getLibraryFromLocalStorage());
       }),

@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
-import { convertTime } from '../../../core/utils/utils';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faPause,
@@ -32,6 +31,7 @@ import { SwipeDownDirective } from '../directives/swipe-down.directive';
 import { PlayerService } from '../../../core/services/player.service';
 import { Song } from '../../../core/models/song.model';
 import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
+import { TimeFormatPipe } from '../../../shared/pipes/time-format.pipe';
 
 @Component({
   selector: 'app-full-player',
@@ -42,6 +42,7 @@ import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.
     FavoriteButtonComponent,
     SwipeDownDirective,
     MovingTitleComponent,
+    TimeFormatPipe,
   ],
   templateUrl: './full-player.component.html',
   styleUrl: './full-player.component.scss',
@@ -114,9 +115,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
     this.renderer.removeStyle(this.document.body, 'overflow');
   }
 
-  formatTime(time: number): string {
-    return convertTime(time);
-  }
+
 
   toggleSize(isImmediate = false) {
     if (isImmediate) {

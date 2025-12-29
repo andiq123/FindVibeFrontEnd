@@ -15,14 +15,9 @@ export class RecentService {
   readonly songs = this._songs.asReadonly();
 
   addSongToRecents(song: Song): void {
-    let currentSongs = this._songs();
-    const alreadyExists = currentSongs.find((s: Song) => s.link === song.link);
-
-    if (alreadyExists) {
-      currentSongs = currentSongs.filter((s: Song) => s.link !== song.link);
-    }
-
-    const updatedSongs = [song, ...currentSongs].slice(0, RECENT_SONGS_LIMIT);
+    const currentSongs = this._songs();
+    const filtered = currentSongs.filter((s: Song) => s.link !== song.link);
+    const updatedSongs = [song, ...filtered].slice(0, RECENT_SONGS_LIMIT);
     
     this._songs.set(updatedSongs);
     this.storageService.setItem(RECENT_SONGS_KEY, updatedSongs);

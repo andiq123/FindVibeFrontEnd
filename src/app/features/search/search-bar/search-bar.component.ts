@@ -17,15 +17,15 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   query = input<string>('');
   searchTerm = signal<string>('');
   isFocused = signal<boolean>(false);
-  suggestions = computed(() => this.suggestionsService.suggestions());
 
   private searchSubject = new Subject<string>();
+  private suggestionsService = inject(SearchService);
+  private router = inject(Router);
+
+  suggestions = computed(() => this.suggestionsService.suggestions());
 
   faMagnifyingGlass = faMagnifyingGlass;
-  faArrowUpLeft = faArrowUp; 
-
-  public suggestionsService = inject(SearchService);
-  private router = inject(Router);
+  faArrowUpLeft = faArrowUp;
 
   constructor() {
     effect(() => {

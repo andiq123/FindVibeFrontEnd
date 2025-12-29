@@ -5,6 +5,7 @@ import { tap } from 'rxjs';
 import { Song } from '../../../core/models/song.model';
 import { OfflineStorageService } from './offline-storage.service';
 import { Reorder } from '../../../core/models/reorder.model';
+import { trackLoadingState } from '../../../core/utils/loading-state.util';
 
 @Injectable({
   providedIn: 'root',
@@ -56,7 +57,12 @@ export class LibraryService {
           this.songs.set(songs);
           this.loadingSongs.set(false);
         },
-        error: () => this.loadingSongs.set(false),
+        error: (error) => {
+          this.loadingSongs.set(false);
+          if (error.status === 404) {
+            this.userService.resetUser();
+          }
+        },
       })
     );
   }
@@ -134,10 +140,6 @@ export class LibraryService {
   }
 
   private trackLoadingFavorite(id: string, isLoading: boolean): void {
-    this.currentLoadingFavoriteSongIds.update((prevSongIds: string[]) =>
-      isLoading 
-        ? (prevSongIds.includes(id) ? prevSongIds : [...prevSongIds, id])
-        : prevSongIds.filter((songId: string) => songId !== id)
-    );
+    trackLoadingState(this.currentLoadingFavoriteSongIds, id, isLoading);
   }
 }

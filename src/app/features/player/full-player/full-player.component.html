@@ -92,8 +92,8 @@
           />
         </div>
         <div class="flex justify-between text-xs font-medium text-white/40 tabular-nums">
-          <span>{{ formatTime(visualTime()) }}</span>
-          <span>{{ formatTime(duration()) }}</span>
+          <span>{{ visualTime() | timeFormat }}</span>
+          <span>{{ duration() | timeFormat }}</span>
         </div>
       </div>
 
@@ -103,6 +103,8 @@
           [class.text-white]="isShuffle()"
           [class.text-white/40]="!isShuffle()"
           [class.hover:text-white]="!isShuffle()"
+          [attr.aria-label]="isShuffle() ? 'Disable shuffle' : 'Enable shuffle'"
+          [attr.aria-pressed]="isShuffle()"
           (click)="toggleShuffle()"
         >
           <fa-icon [icon]="faShuffle" size="lg" />
@@ -111,18 +113,21 @@
         <div class="flex items-center gap-4">
           <button
             class="p-4 text-white hover:text-primary transition-colors"
+            aria-label="Previous track"
             (click)="previous()"
           >
             <fa-icon [icon]="faStepBackward" size="2xl" />
           </button>
           <button
             class="w-16 h-16 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 active:scale-95 transition-transform shadow-xl"
+            [attr.aria-label]="status() === playerStatus.Playing ? 'Pause' : 'Play'"
             (click)="togglePlay()"
           >
             <fa-icon [icon]="status() === playerStatus.Playing ? faPause : faPlay" size="xl" />
           </button>
           <button
             class="p-4 text-white hover:text-primary transition-colors"
+            aria-label="Next track"
             (click)="next()"
           >
             <fa-icon [icon]="faStepForward" size="2xl" />
@@ -134,6 +139,8 @@
           [class.text-white]="isRepeat()"
           [class.text-white/40]="!isRepeat()"
           [class.hover:text-white]="!isRepeat()"
+          [attr.aria-label]="isRepeat() ? 'Disable repeat' : 'Enable repeat'"
+          [attr.aria-pressed]="isRepeat()"
           (click)="toggleRepeat()"
         >
           <fa-icon [icon]="faRepeat" size="lg" />
