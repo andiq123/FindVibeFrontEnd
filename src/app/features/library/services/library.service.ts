@@ -60,7 +60,9 @@ export class LibraryService {
         error: (error) => {
           this.loadingSongs.set(false);
           if (error.status === 404) {
-            this.userService.resetUser();
+            setTimeout(() => {
+              this.userService.resetUser();
+            }, 100);
           }
         },
       })

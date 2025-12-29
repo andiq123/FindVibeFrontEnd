@@ -71,6 +71,7 @@ html {
   position: sticky;
   top: 0;
   z-index: 20;
-  background-color: rgb(var(--b1) / 0.8);
+  background-color: transparent;
   backdrop-filter: blur(48px);
+  -webkit-backdrop-filter: blur(48px);
 }
