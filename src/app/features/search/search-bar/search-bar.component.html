@@ -1,91 +1,130 @@
-<form (ngSubmit)="submit()" class="flex items-center gap-3 w-full group relative z-50">
+<form
+  (ngSubmit)="submit()"
+  class="flex items-center gap-3 w-full group relative z-50"
+>
   <div class="relative flex-1 group/search">
     <!-- Search Icon -->
-    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none transition-all duration-300 z-10" 
-         [class.text-base-content]="isFocused()"
-         [class.opacity-0]="isFocused() && searchTerm().length > 0">
+    <div
+      class="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none transition-all duration-300 z-10"
+      [class.text-base-content]="isFocused()"
+      [class.opacity-0]="isFocused() && searchTerm().length > 0"
+    >
       <fa-icon class="text-[15px]" [icon]="faMagnifyingGlass"></fa-icon>
     </div>
 
     <!-- Input Field -->
     <input
       #searchInput
-      type="text"
+      type="search"
       placeholder="Artists, songs, lyrics"
       name="searchTerm"
-      class="w-full bg-base-200 text-[17px] leading-tight text-base-content placeholder:text-base-content/40 px-4 py-[9px] pl-10 rounded-[10px] border-none outline-none ring-0 transition-all duration-300"
+      class="w-full bg-base-200 text-[17px] leading-[22px] -tracking-[0.41px] text-base-content placeholder:text-base-content/40 px-4 py-[10px] pl-10 rounded-[10px] border-none outline-none ring-0 transition-all duration-200 ease-out touch-manipulation"
       [class.pl-9]="isFocused()"
       [ngModel]="searchTerm()"
       (input)="onInput($event)"
       (focus)="isFocused.set(true)"
       (blur)="isFocused.set(false)"
       autocomplete="off"
-      aria-label="Search"
+      aria-label="Search for artists, songs, or lyrics"
+      [attr.aria-expanded]="suggestions().length > 0 || suggestionsLoading()"
+      [attr.aria-controls]="
+        suggestions().length > 0 ? 'search-suggestions' : null
+      "
+      aria-autocomplete="list"
+      role="combobox"
     />
 
     <!-- Clear Button (only visible when typing) -->
-     @if(searchTerm().length > 0) {
-      <button 
+    @if (searchTerm().length > 0) {
+      <button
         type="button"
-        (click)="searchTerm.set(''); onInput($any({target: {value: ''}})); searchInput.focus()"
-        class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center transition-all hover:bg-base-content/5 active:scale-95 rounded-full"
+        (click)="
+          searchTerm.set('');
+          onInput($any({ target: { value: '' } }));
+          searchInput.focus()
+        "
+        class="absolute right-2 top-1/2 -translate-y-1/2 w-[22px] h-[22px] flex items-center justify-center transition-all active:scale-90 rounded-full touch-manipulation"
         aria-label="Clear search"
       >
-        <span class="w-4 h-4 rounded-full bg-base-content/20 text-base-100 flex items-center justify-center hover:bg-base-content/40 transition-colors">
-          <span class="text-[10px] font-bold">✕</span>
+        <span
+          class="w-[18px] h-[18px] rounded-full bg-base-content/25 text-base-100 flex items-center justify-center active:bg-base-content/35 transition-all duration-150"
+        >
+          <span class="text-[11px] font-semibold leading-none">✕</span>
         </span>
       </button>
-     }
+    }
   </div>
 
   <!-- Cancel Button -->
   <button
     type="button"
     (click)="cancelSearch()"
-    class="text-primary text-[17px] font-normal hover:opacity-80 active:opacity-50 transition-all duration-300 overflow-hidden whitespace-nowrap"
+    class="text-primary text-[17px] leading-[22px] -tracking-[0.41px] font-normal active:opacity-60 transition-all duration-200 overflow-hidden whitespace-nowrap touch-manipulation"
     [class.w-0]="!isFocused() && searchTerm() === ''"
     [class.opacity-0]="!isFocused() && searchTerm() === ''"
     [class.mr-0]="!isFocused() && searchTerm() === ''"
     [class.w-[54px]]="isFocused() || searchTerm() !== ''"
     [class.opacity-100]="isFocused() || searchTerm() !== ''"
+    aria-label="Cancel search"
   >
     Cancel
   </button>
 
   <!-- Suggestions Dropdown -->
-  @if(suggestions().length > 0 || (suggestionsLoading() && searchTerm().length > 0)) {
-    <ul 
-      role="listbox" 
-      class="absolute top-full left-0 w-full mt-4 z-50 anim-slide-in bg-base-200/80 backdrop-blur-xl rounded-[14px] overflow-hidden border border-white/5 shadow-2xl origin-top"
+  @if (
+    suggestions().length > 0 ||
+    (suggestionsLoading() && searchTerm().length > 0)
+  ) {
+    <ul
+      id="search-suggestions"
+      role="listbox"
+      class="absolute top-full left-0 w-full mt-2 z-50 anim-slide-in-ios bg-base-200/95 backdrop-blur-2xl rounded-[12px] overflow-hidden shadow-ios border border-base-content/[0.06] origin-top"
       aria-label="Search suggestions"
+      [attr.aria-busy]="suggestionsLoading()"
     >
-      @if(suggestionsLoading()) {
-        <div class="w-full h-[160px] flex items-center justify-center">
-            <span class="loading loading-spinner loading-md text-primary"></span>
+      @if (suggestionsLoading()) {
+        <div
+          class="w-full h-[140px] flex items-center justify-center"
+          role="status"
+          aria-live="polite"
+        >
+          <span
+            class="loading loading-spinner loading-md text-primary"
+            aria-label="Loading suggestions"
+          ></span>
         </div>
       } @else {
-        @for(suggestion of suggestions(); track suggestion) {
-            <li role="option" aria-selected="false">
+        @for (suggestion of suggestions(); track suggestion; let idx = $index) {
+          <li role="option" [attr.aria-selected]="false">
             <button
-                type="button"
-                class="group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-base-content/10 transition-colors relative border-b border-white/5 last:border-0 w-full text-left"
-                (click)="searchBySuggestion(suggestion)"
+              type="button"
+              class="group flex items-center justify-between px-4 py-[11px] cursor-pointer hover:bg-base-content/[0.04] active:bg-base-content/[0.08] transition-all duration-150 relative border-b border-base-content/[0.06] last:border-0 w-full text-left touch-manipulation"
+              (click)="searchBySuggestion(suggestion)"
             >
-                <div class="flex items-center gap-3.5 min-w-0 flex-1">
-                <fa-icon class="text-base-content/40 text-[14px]" [icon]="faMagnifyingGlass"></fa-icon>
-                <span class="text-[17px] text-base-content/90 truncate font-normal">{{ suggestion | titlecase }}</span>
-                </div>
+              <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                <fa-icon
+                  class="text-base-content/40 text-[15px] transition-colors group-hover:text-base-content/50"
+                  [icon]="faMagnifyingGlass"
+                ></fa-icon>
+                <span
+                  class="text-[17px] leading-[22px] text-base-content font-normal truncate -tracking-[0.41px]"
+                  >{{ suggestion | titlecase }}</span
+                >
+              </div>
 
-                <button 
+              <button
                 type="button"
                 (click)="fillSuggestion(suggestion, $event)"
-                class="w-8 h-8 flex items-center justify-center -mr-2 text-primary active:scale-90 transition-transform"
-                aria-label="Fill search with {{ suggestion }}"
-                >
-                <fa-icon [icon]="faArrowUpLeft" class="-rotate-45 text-sm" />
-                </button>
+                class="w-9 h-9 flex items-center justify-center -mr-1.5 text-primary hover:bg-primary/10 active:bg-primary/20 rounded-full transition-all duration-150 active:scale-95 touch-manipulation"
+                [attr.aria-label]="'Fill search with ' + suggestion"
+              >
+                <fa-icon
+                  [icon]="faArrowUpLeft"
+                  class="-rotate-45 text-[15px]"
+                />
+              </button>
             </button>
-            </li>
+          </li>
         }
       }
     </ul>

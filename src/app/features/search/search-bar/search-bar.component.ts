@@ -1,30 +1,49 @@
-import { Component, computed, input, OnInit, signal, OnDestroy, effect, inject, untracked, ChangeDetectionStrategy, HostListener } from '@angular/core';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faMagnifyingGlass, faArrowUp } from '@fortawesome/free-solid-svg-icons';
-import { FormsModule } from '@angular/forms';
-import { TitleCasePipe } from '@angular/common';
-import { Router } from '@angular/router';
-import { SearchService } from '../services/search.service';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import {
+  Component,
+  computed,
+  input,
+  OnInit,
+  signal,
+  OnDestroy,
+  effect,
+  inject,
+  untracked,
+  ChangeDetectionStrategy,
+  HostListener,
+  ElementRef,
+} from "@angular/core";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import {
+  faMagnifyingGlass,
+  faArrowUp,
+} from "@fortawesome/free-solid-svg-icons";
+import { FormsModule } from "@angular/forms";
+import { TitleCasePipe } from "@angular/common";
+import { Router } from "@angular/router";
+import { SearchService } from "../services/search.service";
+import { Subject, debounceTime, distinctUntilChanged } from "rxjs";
 
 @Component({
-    selector: 'app-search-bar',
-    imports: [FontAwesomeModule, FormsModule, TitleCasePipe],
-    templateUrl: './search-bar.component.html',
-    styleUrl: './search-bar.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: "app-search-bar",
+  imports: [FontAwesomeModule, FormsModule, TitleCasePipe],
+  templateUrl: "./search-bar.component.html",
+  styleUrl: "./search-bar.component.scss",
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchBarComponent implements OnInit, OnDestroy {
-  query = input<string>('');
-  searchTerm = signal<string>('');
+  query = input<string>("");
+  searchTerm = signal<string>("");
   isFocused = signal<boolean>(false);
 
   private searchSubject = new Subject<string>();
   private suggestionsService = inject(SearchService);
   private router = inject(Router);
+  private elementRef = inject(ElementRef);
 
   suggestions = computed(() => this.suggestionsService.suggestions());
-  suggestionsLoading = computed(() => this.suggestionsService.suggestionsLoading());
+  suggestionsLoading = computed(() =>
+    this.suggestionsService.suggestionsLoading(),
+  );
 
   faMagnifyingGlass = faMagnifyingGlass;
   faArrowUpLeft = faArrowUp;
@@ -35,7 +54,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       untracked(() => {
         if (!q) {
           const lastQ = this.suggestionsService.lastQuery();
-          this.searchTerm.set(lastQ || '');
+          this.searchTerm.set(lastQ || "");
           if (lastQ) this.router.navigate([`/songs/${lastQ}`]);
           return;
         }
@@ -50,20 +69,20 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.searchSubject.pipe(
-      debounceTime(150),
-      distinctUntilChanged()
-    ).subscribe(term => {
-      if (term.trim()) {
-        this.searchSuggestion(term);
-      } else {
-        this.suggestionsService.resetSuggestions();
-      }
-    });
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe((term) => {
+        if (term.trim()) {
+          this.searchSuggestion(term);
+        } else {
+          this.suggestionsService.resetSuggestions();
+        }
+      });
   }
 
   ngOnDestroy(): void {
     this.searchSubject.complete();
+    this.suggestionsService.resetSuggestions();
   }
 
   fillSuggestion(suggestion: string, event: Event) {
@@ -84,14 +103,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   cancelSearch() {
-    this.searchTerm.set('');
+    this.searchTerm.set("");
     this.suggestionsService.resetSearch();
-    this.router.navigate(['/songs/']);
+    this.router.navigate(["/songs/"]);
   }
 
   async submit() {
     const term = this.searchTerm().trim();
-    if (term === '') {
+    if (term === "") {
       return;
     }
 
@@ -103,9 +122,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('window:scroll', [])
-  onScroll() {
-    if (this.suggestions().length > 0 || this.suggestionsLoading()) {
+  @HostListener("document:click", ["$event"])
+  onClickOutside(event: Event) {
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+    if (
+      !clickedInside &&
+      (this.suggestions().length > 0 || this.suggestionsLoading())
+    ) {
       this.suggestionsService.resetSuggestions();
     }
   }

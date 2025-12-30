@@ -1,15 +1,27 @@
 :root {
     --anim-duration-instant: 0.1s;
     --anim-duration-fast: 0.15s;
-    --anim-duration-normal: 0.25s;
+    --anim-duration-normal: 0.2s;
     --anim-duration-slow: 0.35s;
     --anim-duration-slower: 0.45s;
 
+    /* iOS-native easing curves */
+    --anim-ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
     --anim-ease-spring: cubic-bezier(0.2, 1, 0.2, 1);
     --anim-ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     --anim-ease-standard: ease-in-out;
     --anim-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
     --anim-ease-in: ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --anim-duration-instant: 0.01s;
+        --anim-duration-fast: 0.01s;
+        --anim-duration-normal: 0.01s;
+        --anim-duration-slow: 0.01s;
+        --anim-duration-slower: 0.01s;
+    }
 }
 
 @keyframes slide-up {
@@ -55,12 +67,12 @@
 /* Optimized Utility Classes */
 .anim-slide-up {
     will-change: transform;
-    animation: slide-up var(--anim-duration-slow) var(--anim-ease-spring) forwards;
+    animation: slide-up var(--anim-duration-slow) var(--anim-ease-ios) forwards;
 }
 
 .anim-slide-down {
     will-change: transform;
-    animation: slide-down var(--anim-duration-normal) var(--anim-ease-spring) forwards;
+    animation: slide-down var(--anim-duration-normal) var(--anim-ease-ios) forwards;
 }
 
 .anim-fade-in {
@@ -71,6 +83,17 @@
 .anim-fade-out {
     will-change: opacity;
     animation: fade-out var(--anim-duration-fast) var(--anim-ease-in) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anim-slide-up,
+    .anim-slide-down,
+    .anim-fade-in,
+    .anim-fade-out,
+    .anim-mini-player-entry {
+        animation: none;
+        will-change: auto;
+    }
 }
 
 .anim-shimmer {
@@ -99,5 +122,5 @@
 
 .anim-mini-player-entry {
     will-change: transform;
-    animation: slide-up-centered var(--anim-duration-slow) var(--anim-ease-spring) forwards;
+    animation: slide-up-centered var(--anim-duration-slow) var(--anim-ease-ios) forwards;
 }

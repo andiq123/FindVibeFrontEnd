@@ -12,17 +12,27 @@
 
 .song-container {
   touch-action: pan-y;
-  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.2s ease;
+  transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1),
+    background-color 0.15s ease-out;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform, background-color;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgba(255, 255, 255, 0.03);
   }
 
   &:active {
     transform: scale(0.98);
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    will-change: auto;
+
+    &:active {
+      transform: none;
+    }
   }
 }
 
@@ -33,6 +43,13 @@
 
   img {
     will-change: opacity;
+    content-visibility: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    img {
+      will-change: auto;
+    }
   }
 }
 

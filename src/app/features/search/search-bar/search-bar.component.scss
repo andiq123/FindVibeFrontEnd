@@ -1,7 +1,7 @@
-@keyframes slideIn {
+@keyframes slideInIOS {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(0.98);
+    transform: translateY(-8px) scale(0.95);
   }
 
   to {
@@ -10,8 +10,15 @@
   }
 }
 
-.anim-slide-in {
-  animation: slideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+.anim-slide-in-ios {
+  animation: slideInIOS 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.shadow-ios {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 input::placeholder {
@@ -22,8 +29,23 @@ input:focus::placeholder {
   opacity: 0.7;
 }
 
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 :host {
   display: block;
   position: relative;
   z-index: 50;
+}
+
+ul[role="listbox"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+
+  li button {
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+  }
 }
