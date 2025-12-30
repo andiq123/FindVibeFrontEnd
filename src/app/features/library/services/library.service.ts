@@ -1,4 +1,4 @@
-import { computed, Injectable, signal, inject, effect } from '@angular/core';
+import { computed, Injectable, signal, inject, effect, untracked } from '@angular/core';
 import { LibraryApiService } from './library-api.service';
 import { UserService } from './user.service';
 import { finalize, Observable, tap, timeout, catchError, throwError } from 'rxjs';
@@ -50,7 +50,8 @@ export class LibraryService {
   });
 
   updateLibrarySongs(userId: string) {
-    if (this.songs().length === 0) {
+    const currentSongs = untracked(() => this.songs());
+    if (currentSongs.length === 0) {
       this.loadingSongs.set(true);
     }
     
@@ -58,7 +59,13 @@ export class LibraryService {
       timeout(10000),
       tap({
         next: (songs: Song[]) => {
-          this.songs.set(songs);
+          if (!Array.isArray(songs)) {
+            console.error('[LibraryService] Received invalid songs data (expected array):', songs);
+            this.userService.resetUser();
+            return;
+          }
+          const sortedSongs = [...songs].sort((a, b) => a.order - b.order);
+          this.songs.set(sortedSongs);
         },
         error: (error) => {
           if (error.status === 404 || error.name === 'TimeoutError') {

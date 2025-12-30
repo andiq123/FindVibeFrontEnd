@@ -14,9 +14,7 @@ export class LibraryApiService {
   private readonly httpClient = inject(HttpClient);
 
   getFavoritesSong(userId: string): Observable<Song[]> {
-    return this.httpClient.get<Song[]>(`${BASE_API_URL}/favorites/${userId}`).pipe(
-      map(songs => (Array.isArray(songs) ? songs : []).sort((a, b) => a.order - b.order))
-    );
+    return this.httpClient.get<Song[]>(`${BASE_API_URL}/favorites/${userId}`);
   }
 
   reorderSongs(reorders: Reorder[]): Observable<unknown> {
