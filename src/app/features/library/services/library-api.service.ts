@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { environment } from '../../../../environments/environment.development';
 import { HttpClient } from '@angular/common/http';
 import { Song } from '../../../core/models/song.model';
-import { catchError, map, Observable, of, throwError } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Reorder } from '../../../core/models/reorder.model';
 
 const BASE_API_URL = environment.API_URL;
@@ -15,13 +15,7 @@ export class LibraryApiService {
 
   getFavoritesSong(userId: string): Observable<Song[]> {
     return this.httpClient.get<Song[]>(`${BASE_API_URL}/favorites/${userId}`).pipe(
-      catchError((error) => {
-        if (error.status === 404) {
-          return throwError(() => ({ status: 404, message: 'User not found' }));
-        }
-        return of([]);
-      }),
-      map(songs => songs.sort((a, b) => a.order - b.order))
+      map(songs => (Array.isArray(songs) ? songs : []).sort((a, b) => a.order - b.order))
     );
   }
 
