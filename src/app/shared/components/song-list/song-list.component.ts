@@ -15,9 +15,9 @@ import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
         <p class="text-sm opacity-50">Loading vibes...</p>
       </div>
     } @else {
-      <ul class="flex flex-col anim-stagger">
+      <ul class="flex flex-col">
         @for (song of songs(); track song.id) {
-          <li class="group/item list-none anim-slide-fade-in-up">
+          <li class="group/item list-none">
             <app-song
               [song]="song"
               [isFavoritePage]="allowReorder()"

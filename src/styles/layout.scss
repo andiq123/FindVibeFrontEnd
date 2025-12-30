@@ -5,7 +5,7 @@
   }
 
   .sticky-header {
-    @apply sticky z-[100] px-5 border-b border-white/[0.03] bg-base-100/80 backdrop-blur-3xl transition-all duration-300;
+    @apply sticky z-[30] px-5 border-b border-white/[0.03] bg-base-100/80 backdrop-blur-3xl transition-all duration-300;
     padding-top: max(env(safe-area-inset-top), 1rem);
     padding-bottom: 1rem;
     top: 0;

@@ -1,5 +1,5 @@
 <div
-  class="fixed bottom-0 left-0 right-0 h-[100dvh] z-50 flex flex-col overflow-hidden rounded-t-[2.5rem]"
+  class="fixed bottom-0 left-0 right-0 h-[100dvh] z-[150] flex flex-col overflow-hidden rounded-t-[2.5rem]"
   style="background: linear-gradient(180deg, #121212 0%, #1a1a1a 100%);"
   [class.anim-slide-up]="isOpeningAnimation()"
   [class.anim-slide-down]="isClosingAnimation()"
@@ -21,20 +21,14 @@
     <img
       [ngSrc]="song().image || 'no_album_art.jpg'"
       alt="Song Art BG"
-      class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none animate-bg-breathe transition-all duration-700"
-      [class.blur-[80px]]="!isOpeningAnimation()"
-      [class.opacity-0]="isOpeningAnimation()"
-      [class.opacity-70]="!isOpeningAnimation()"
+      class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none opacity-50 blur-[60px]"
       fill
       sizes="100vw"
       priority
       referrerpolicy="no-referrer"
       draggable="false"
     />
-    <div 
-      class="absolute inset-0 bg-black/40 transition-all duration-700"
-      [class.backdrop-blur-3xl]="!isOpeningAnimation()"
-    ></div>
+    <div class="absolute inset-0 bg-black/40"></div>
   </div>
 
   <div

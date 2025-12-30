@@ -62,7 +62,7 @@ export class AppComponent implements OnInit {
     return duration > 0 ? (this.playerService.currentTime() / duration) * 100 : 0;
   });
 
-  shouldScale = computed(() => this.isModalOpen() || !this.isMiniPlayer());
+
 
   ngOnInit(): void {
     this.initializeServices();

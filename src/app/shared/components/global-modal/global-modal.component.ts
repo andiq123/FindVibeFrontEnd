@@ -33,7 +33,7 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.25);
-      z-index: 1000;
+      z-index: 199;
       backdrop-filter: blur(4px);
     }
 
@@ -46,25 +46,25 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(25, 25, 25, 0.75);
+      background: rgba(30, 30, 30, 0.95);
       border-top-left-radius: 20px;
       border-top-right-radius: 20px;
-      z-index: 1001;
+      z-index: 200;
       padding-bottom: env(safe-area-inset-bottom);
       box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.3);
       max-height: 92vh;
       display: flex;
       flex-direction: column;
-      border-top: 0.5px solid rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(35px) saturate(180%);
-      -webkit-backdrop-filter: blur(35px) saturate(180%);
+      border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       will-change: transform;
       transform: translateY(100%);
-      animation: slide-up var(--anim-duration-slow) var(--anim-ease-spring) forwards;
+      animation: slide-up var(--anim-duration-slow) var(--anim-ease-out) forwards;
     }
     
     .modal-container.closing {
-      animation: slide-down var(--anim-duration-normal) var(--anim-ease-spring) forwards;
+      animation: slide-down var(--anim-duration-normal) var(--anim-ease-in) forwards;
     }
 
     .modal-handle-bar {

@@ -3,12 +3,10 @@
   <app-update-overlay />
 }
 
-<div class="app-scale-wrapper" [class.scale-back]="shouldScale()">
+<div class="app-main-container">
     <div class="route-container">
       <router-outlet />
     </div>
-    
-    
 </div>
 
 @if(song() && isMiniPlayer()) {
