@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideZoneChangeDetection, isDevMode } from '@angular/core';
 
-import { provideRouter, withComponentInputBinding, withRouterConfig, withViewTransitions, RouteReuseStrategy } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withRouterConfig, withViewTransitions, RouteReuseStrategy, withInMemoryScrolling } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
@@ -14,7 +14,13 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withComponentInputBinding(),
-      withRouterConfig({ paramsInheritanceStrategy: 'always' }),
+      withRouterConfig({
+        paramsInheritanceStrategy: 'always'
+      }),
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled',
+        anchorScrolling: 'enabled',
+      }),
       withViewTransitions({
         skipInitialTransition: true,
         onViewTransitionCreated: ({ transition, from, to }) => {

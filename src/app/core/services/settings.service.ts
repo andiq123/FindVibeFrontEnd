@@ -73,12 +73,6 @@ export class SettingsService {
     this._serverStatus.set(ServerStatus.Down);
   }
 
-  setIsCheckedServerDone(): void {
-    if (this._serverStatus() === ServerStatus.Unchecked) {
-      this._serverStatus.set(ServerStatus.Up);
-    }
-  }
-
   setIsCheckedServerPending(): void {
     this._serverStatus.set(ServerStatus.Unchecked);
   }

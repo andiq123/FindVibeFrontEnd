@@ -1,78 +1,80 @@
-<div
-  class="w-full max-w-2xl mx-auto mt-0 px-0 pb-48 min-h-screen bg-base-100 overflow-y-auto scrollable-container"
->
   @if (!isLoggedIn()) { <app-user-form /> } @else {
-    @if(loadingSongs()){
-      <div class="flex flex-col items-center justify-center w-full py-24 px-5 text-center">
-        <h1 class="text-2xl font-bold tracking-tight mb-2">Opening Vault</h1>
-        <p class="text-base-content/60 text-sm mb-8">Gathering your favorite vibes...</p>
-        <app-loading-balls />
-      </div>
-    }@else {
-      <div class="flex flex-col gap-0">
-
-        <div 
-          class="sticky-header pt-7 pb-5 px-5 border-b border-white/[0.03] transition-all duration-300"
-        >
-          <div class="flex justify-between items-center gap-4">
-            <div class="flex flex-col gap-0.5">
-              <span class="text-xs font-bold text-base-content/50 uppercase tracking-[0.2em]">Your Library</span>
-              <h1 class="font-bold text-4xl tracking-tight text-white mb-1 flex items-center gap-3">
-                <span>{{ username() ? (username() | titlecase) : 'My' }}'s Vault</span>
-                @if(isOffline()) {
-                  <span class="px-2.5 py-1 rounded-full bg-error/10 text-error text-[10px] uppercase font-black tracking-widest border border-error/20 inline-flex items-center gap-1.5 anim-fade-in shadow-[0_0_15px_-5px_oklch(var(--er))]">
-                    <span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
-                    Offline
-                  </span>
-                }
-              </h1>
-            </div>
-
-            <div class="flex gap-2.5 items-center shrink-0">
-              @if(orderHasChanged()) {
-                <div class="flex gap-1.5 items-center mr-1">
-                  <button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-95 transition-all" (click)="saveReorders()">
-                    <fa-icon [icon]="faCheck" />
-                  </button>
-                  <button class="w-10 h-10 rounded-full bg-white/10 text-white/60 flex items-center justify-center active:scale-95 transition-all" (click)="cancelReorders()">
-                    <fa-icon [icon]="faXmark" />
-                  </button>
-                </div>
-              }
-
-              <button 
-                class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/40 flex items-center justify-center relative active:scale-90 transition-all" 
-                (click)="storageMenu.toggle()"
-              >
-                <fa-icon [icon]="isDownloading() ? faCircleNotch : faArrowDown" [class.animate-spin]="isDownloading()" class="text-sm" />
-                @if(showStorageDot()) {
-                  <div class="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-base-100 shadow-sm animate-pulse"></div>
-                }
-              </button>
-
-              <button class="w-10 h-10 rounded-full bg-white/5 border border-white/5 text-white/40 flex items-center justify-center active:scale-95 transition-all" (click)="changeUser()">
-                <fa-icon [icon]="faRightFromBracket" />
-              </button>
+    @if(!isCheckedServer()){
+      <div class="w-full flex flex-col justify-center items-center gap-4 h-[60vh]">
+        <div class="text-center space-y-3">
+          <div class="relative w-24 h-24 mx-auto mb-6">
+            <div class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
+            <div class="relative bg-base-200 rounded-full w-full h-full flex items-center justify-center ring-1 ring-white/10">
+              <fa-icon [icon]="faWaveSquare" class="text-4xl text-primary animate-pulse" />
             </div>
           </div>
-        </div>
-        <div class="h-4"></div>
-        <div class="relative px-0">
-          @if (loadingReorder()) {
-            <div class="bg-base-200/80 absolute w-full h-full inset-0 z-10 flex flex-col gap-3 items-center justify-center">
-              <span class="text-base font-medium text-base-content/70 mb-2">Applying reorder...</span>
-              <span class="loading loading-md text-primary"></span>
-            </div>
-          }
-          <app-songs-wrapper
-            [songs]="songs()"
-            (reorder)="reorderSongs($event)"
-            (playlistChange)="onChangePlaylist()"
-          />
+          <h1 class="text-2xl font-bold tracking-tight">Vibe Server is awakening...</h1>
+          <p class="text-base-content/50 text-base max-w-[280px] mx-auto">This might take a few moments as we spin up the high-fidelity audio engine.</p>
         </div>
       </div>
+    } @else {
+      <app-page-layout>
+          <div header class="flex justify-between items-center gap-4 w-full">
+              <div class="flex flex-col gap-0.5">
+                <span class="text-xs font-bold text-base-content/50 uppercase tracking-[0.2em]">Your Library</span>
+                <h1 class="font-bold text-4xl tracking-tight section-headline mb-1 flex items-center gap-3">
+                  <span>{{ username() ? (username() | titlecase) : 'My' }}'s Vault</span>
+                  @if(isOffline()) {
+                    <span class="px-2.5 py-1 rounded-full bg-error/10 text-error text-[10px] uppercase font-black tracking-widest border border-error/20 inline-flex items-center gap-1.5 anim-fade-in shadow-[0_0_15px_-5px_oklch(var(--er))]">
+                      <span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+                      Offline
+                    </span>
+                  }
+                </h1>
+              </div>
+
+              <div class="flex gap-2.5 items-center shrink-0">
+                @if(orderHasChanged()) {
+                  <div class="flex gap-1.5 items-center mr-1">
+                    <button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-95 transition-all" (click)="saveReorders()">
+                      <fa-icon [icon]="faCheck" />
+                    </button>
+                    <button class="w-10 h-10 rounded-full bg-white/10 text-white/60 flex items-center justify-center active:scale-95 transition-all" (click)="cancelReorders()">
+                      <fa-icon [icon]="faXmark" />
+                    </button>
+                  </div>
+                }
+
+                <button 
+                  class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/40 flex items-center justify-center relative active:scale-90 transition-all" 
+                  (click)="openStorageInfo()"
+                >
+                  <fa-icon [icon]="isDownloading() ? faCircleNotch : faArrowDown" [class.animate-spin]="isDownloading()" class="text-sm" />
+                  @if(showStorageDot()) {
+                    <div class="absolute -top-0.5 -right-0.5 w-3 h-3 bg-primary rounded-full border-2 border-base-100 shadow-sm animate-pulse"></div>
+                  }
+                </button>
+
+                <button class="w-10 h-10 rounded-full bg-white/5 border border-white/5 text-white/40 flex items-center justify-center active:scale-95 transition-all" (click)="changeUser()">
+                  <fa-icon [icon]="faRightFromBracket" />
+                </button>
+              </div>
+          </div>
+
+          <div class="relative pt-6 pb-12">
+            @if (loadingReorder()) {
+              <div class="bg-base-200/80 absolute w-full h-full inset-0 z-10 flex flex-col gap-3 items-center justify-center rounded-[2.5rem]">
+                <span class="text-base font-medium text-base-content/70 mb-2">Applying reorder...</span>
+                <span class="loading loading-md text-primary"></span>
+              </div>
+            }
+            <div class="premium-card min-h-[400px]">
+              <app-song-list
+                [songs]="songs()"
+                [isLoading]="loadingSongs()"
+                [allowReorder]="true"
+                emptyStateTitle="No vibes yet"
+                emptyStateDescription="When you add songs to your library, they'll show up here."
+                (reorder)="reorderSongs($event)"
+                (playlistChange)="onChangePlaylist()"
+              />
+            </div>
+          </div>
+      </app-page-layout>
     }
   }
-</div>
-
-<app-storage-info #storageMenu />

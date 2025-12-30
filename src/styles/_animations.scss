@@ -1,61 +1,37 @@
-/* ============================================
-   IDIOMATIC ANIMATION SYSTEM
-   Clean, semantic, and composable animations
-   ============================================ */
-
-/* Animation Tokens */
 :root {
-    /* Durations */
-    --anim-duration-instant: 0.15s;
-    --anim-duration-fast: 0.2s;
-    --anim-duration-normal: 0.3s;
-    --anim-duration-slow: 0.4s;
-    --anim-duration-slower: 0.5s;
+    --anim-duration-instant: 0.1s;
+    --anim-duration-fast: 0.15s;
+    --anim-duration-normal: 0.25s;
+    --anim-duration-slow: 0.35s;
+    --anim-duration-slower: 0.45s;
 
-    /* Easing */
-    --anim-ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+    --anim-ease-spring: cubic-bezier(0.2, 1, 0.2, 1);
     --anim-ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     --anim-ease-standard: ease-in-out;
-    --anim-ease-out: ease-out;
+    --anim-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
     --anim-ease-in: ease-in;
 }
 
-/* ============================================
-   BASE KEYFRAMES (Atomic Animations)
-   ============================================ */
-
-/* Slide Animations */
-@keyframes slide-in-up {
-    from {
+@keyframes slide-up {
+    0% {
         transform: translateY(100%);
     }
 
-    to {
+    100% {
         transform: translateY(0);
     }
 }
 
-@keyframes slide-out-down {
-    from {
+@keyframes slide-down {
+    0% {
         transform: translateY(0);
     }
 
-    to {
+    100% {
         transform: translateY(100%);
     }
 }
 
-@keyframes slide-in-down {
-    from {
-        transform: translateY(-12px);
-    }
-
-    to {
-        transform: translateY(0);
-    }
-}
-
-/* Fade Animations */
 @keyframes fade-in {
     from {
         opacity: 0;
@@ -76,22 +52,54 @@
     }
 }
 
-/* Scale Animations */
-@keyframes scale-in {
-    from {
-        transform: scale(0.98);
+/* Optimized Utility Classes */
+.anim-slide-up {
+    will-change: transform;
+    animation: slide-up var(--anim-duration-slow) var(--anim-ease-spring) forwards;
+}
+
+.anim-slide-down {
+    will-change: transform;
+    animation: slide-down var(--anim-duration-normal) var(--anim-ease-spring) forwards;
+}
+
+.anim-fade-in {
+    will-change: opacity;
+    animation: fade-in var(--anim-duration-normal) var(--anim-ease-out) forwards;
+}
+
+.anim-fade-out {
+    will-change: opacity;
+    animation: fade-out var(--anim-duration-fast) var(--anim-ease-in) forwards;
+}
+
+.anim-slide-fade-in-up {
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: slide-fade-in-up var(--anim-duration-normal) var(--anim-ease-smooth) both;
+}
+
+@keyframes slide-up-centered {
+    0% {
+        transform: translate(-50%, 100%);
+        opacity: 0;
     }
 
-    to {
-        transform: scale(1);
+    100% {
+        transform: translate(-50%, 0);
+        opacity: 1;
     }
 }
 
-/* Combined Animations */
+.anim-mini-player-entry {
+    will-change: transform, opacity;
+    animation: slide-up-centered var(--anim-duration-slow) var(--anim-ease-spring) forwards;
+}
+
 @keyframes slide-fade-in-up {
     from {
         opacity: 0;
-        transform: translateY(16px);
+        transform: translateY(8px);
     }
 
     to {
@@ -100,34 +108,10 @@
     }
 }
 
-@keyframes slide-fade-in-down {
-    from {
-        opacity: 0;
-        transform: translateY(-12px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.anim-shimmer {
+    animation: shimmer 1.2s linear infinite;
 }
 
-/* Bounce Animation (for mini-player with centering) */
-@keyframes bounce-in-up {
-    0% {
-        transform: translate(-50%, 100%);
-    }
-
-    50% {
-        transform: translate(-50%, -10%);
-    }
-
-    100% {
-        transform: translate(-50%, 0);
-    }
-}
-
-/* Loading Animation */
 @keyframes shimmer {
     from {
         transform: translateX(-100%);
@@ -138,73 +122,12 @@
     }
 }
 
-/* ============================================
-   UTILITY CLASSES (Semantic Animations)
-   ============================================ */
-
-/* Slide Animations */
-.anim-slide-in-up {
-    animation: slide-in-up var(--anim-duration-normal) var(--anim-ease-standard) forwards;
-}
-
-.anim-slide-in-up-fast {
-    animation: slide-in-up var(--anim-duration-fast) var(--anim-ease-standard) forwards;
-}
-
-.anim-slide-in-up-spring {
-    animation: slide-in-up 0.35s var(--anim-ease-spring) forwards;
-}
-
-.anim-slide-out-down {
-    animation: slide-out-down var(--anim-duration-fast) var(--anim-ease-standard) forwards;
-}
-
-.anim-slide-out-down-slow {
-    animation: slide-out-down var(--anim-duration-normal) var(--anim-ease-spring) forwards;
-}
-
-/* Fade Animations */
-.anim-fade-in {
-    animation: fade-in var(--anim-duration-normal) var(--anim-ease-out) forwards;
-}
-
-.anim-fade-in-slow {
-    animation: fade-in var(--anim-duration-slow) var(--anim-ease-out) forwards;
-}
-
-.anim-fade-out {
-    animation: fade-out var(--anim-duration-fast) var(--anim-ease-standard) forwards;
-}
-
-/* Combined Animations */
-.anim-slide-fade-in-up {
-    opacity: 0;
-    will-change: transform, opacity;
-    animation: slide-fade-in-up var(--anim-duration-normal) var(--anim-ease-smooth) both;
-}
-
-.anim-slide-fade-in-down {
-    animation: slide-fade-in-down var(--anim-duration-normal) var(--anim-ease-smooth) both;
-}
-
-/* Special Animations */
-.anim-bounce-in-up {
-    animation: bounce-in-up var(--anim-duration-normal) var(--anim-ease-standard) forwards;
-}
-
-.anim-shimmer {
-    animation: shimmer 1.5s linear infinite;
-}
-
-/* ============================================
-   STAGGER UTILITIES
-   ============================================ */
 .anim-stagger {
     will-change: contents;
 }
 
 @for $i from 1 through 12 {
     .anim-stagger>*:nth-child(#{$i}) {
-        animation-delay: calc(#{$i} * 0.03s);
+        animation-delay: calc(#{$i} * 0.02s);
     }
 }

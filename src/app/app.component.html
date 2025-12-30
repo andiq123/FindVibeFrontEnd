@@ -3,8 +3,31 @@
   <app-update-overlay />
 }
 
-<div class="route-container">
-  <router-outlet />
+<div class="app-scale-wrapper" [class.scale-back]="shouldScale()">
+    <div class="route-container">
+      <router-outlet />
+    </div>
+    
+    
 </div>
-<app-audio-player />
+
+@if(song() && isMiniPlayer()) {
+  <app-mini-player
+    (toggleSizeEvent)="onToggleSize()"
+    [song]="song()!"
+    [status]="status()"
+    [progress]="progress()"
+  />
+}
+
 <app-navigation />
+
+@if(song() && !isMiniPlayer()) {
+  <app-full-player
+    (toggleSizeEvent)="onToggleSize()"
+    [song]="song()!"
+    [status]="status()"
+  />
+}
+
+<app-global-modal />

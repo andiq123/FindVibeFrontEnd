@@ -1,0 +1,26 @@
+@layer utilities {
+  .page-container {
+    @apply w-full max-w-3xl mx-auto min-h-screen bg-base-100;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  .sticky-header {
+    @apply sticky z-[100] px-5 border-b border-white/[0.03] bg-base-100/80 backdrop-blur-3xl transition-all duration-300;
+    padding-top: max(env(safe-area-inset-top), 1rem);
+    padding-bottom: 1rem;
+    top: 0;
+  }
+
+  .section-headline {
+    @apply font-bold text-4xl tracking-tight;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.7));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .premium-card {
+    @apply bg-white/[0.03] rounded-[2.5rem] border border-white/[0.05] overflow-hidden;
+  }
+}

@@ -35,7 +35,7 @@
 }
 
 .pending .status-content {
-    color: #ff9f0a; // iOS Amber
+    color: #ff9f0a;
 }
 
 .status-content span {
@@ -59,10 +59,8 @@
 .icon {
     width: 14px;
     height: 14px;
-    color: #ff453a; // iOS Red
+    color: #ff453a;
 }
-
-
 
 @keyframes rotate {
     from {

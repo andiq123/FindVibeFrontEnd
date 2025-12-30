@@ -1,4 +1,4 @@
-import { Component, computed, input, OnInit, signal, OnDestroy, effect, inject, untracked, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, input, OnInit, signal, OnDestroy, effect, inject, untracked, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faMagnifyingGlass, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { FormsModule } from '@angular/forms';
@@ -24,6 +24,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
   suggestions = computed(() => this.suggestionsService.suggestions());
+  suggestionsLoading = computed(() => this.suggestionsService.suggestionsLoading());
 
   faMagnifyingGlass = faMagnifyingGlass;
   faArrowUpLeft = faArrowUp;
@@ -32,23 +33,18 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     effect(() => {
       const q = this.query();
       untracked(() => {
-        if (q) {
-          if (q !== this.suggestionsService.lastQuery()) {
-            this.searchTerm.set(q);
-            this.submitSearchSongs();
-          } else {
-            this.searchTerm.set(q);
-          }
-          this.suggestionsService.resetSuggestions();
-        } else {
+        if (!q) {
           const lastQ = this.suggestionsService.lastQuery();
-          if (lastQ) {
-            this.searchTerm.set(lastQ);
-            this.router.navigate([`/songs/${lastQ}`]);
-          } else {
-            this.searchTerm.set('');
-          }
+          this.searchTerm.set(lastQ || '');
+          if (lastQ) this.router.navigate([`/songs/${lastQ}`]);
+          return;
         }
+
+        this.searchTerm.set(q);
+        if (q !== this.suggestionsService.lastQuery()) {
+          this.submitSearchSongs();
+        }
+        this.suggestionsService.resetSuggestions();
       });
     });
   }
@@ -107,6 +103,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
   }
 
+  @HostListener('window:scroll', [])
+  onScroll() {
+    if (this.suggestions().length > 0 || this.suggestionsLoading()) {
+      this.suggestionsService.resetSuggestions();
+    }
+  }
+
   private async setQueryParamsToCurrentSearchTerm() {
     await this.router.navigate([`/songs/${this.searchTerm()}`]);
   }
@@ -119,6 +122,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   private submitSearchSongs() {
     this.suggestionsService.searchSongs(this.searchTerm()).subscribe({
+      next: () => this.suggestionsService.resetSuggestions(),
       error: () => this.suggestionsService.resetSuggestions(),
     });
   }

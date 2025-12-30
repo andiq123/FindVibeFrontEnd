@@ -1,23 +1,41 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { AudioPlayerComponent } from './features/player/audio-player.component';
+import { Component, OnInit, inject, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { NavigationComponent } from './features/navigation/navigation.component';
-import { UserService } from './features/library/services/user.service';
-import { WakeService } from './core/services/wake.service';
-import { SettingsService } from './core/services/settings.service';
-import { AppUpdateService } from './core/services/app-update.service';
-import { MediaSessionService } from './core/services/media-session.service';
-import { AudioService } from './core/services/audio.service';
-import { OfflineStorageService } from './features/library/services/offline-storage.service';
 import { catchError, tap } from 'rxjs';
+
+import { MiniPlayerComponent } from './features/player/mini-player/mini-player.component';
+import { FullPlayerComponent } from './features/player/full-player/full-player.component';
+import { NavigationComponent } from './features/navigation/navigation.component';
 import { ConnectionStatusComponent } from './shared/connection-status/connection-status.component';
 import { UpdateOverlayComponent } from './shared/update-overlay/update-overlay.component';
+import { GlobalModalComponent } from './shared/components/global-modal/global-modal.component';
+
+import { SettingsService } from './core/services/settings.service';
+import { UserService } from './features/library/services/user.service';
+import { AudioService } from './core/services/audio.service';
+import { MediaSessionService } from './core/services/media-session.service';
+import { OfflineStorageService } from './features/library/services/offline-storage.service';
+import { ModalService } from './core/services/modal.service';
+import { AppUpdateService } from './core/services/app-update.service';
+import { WakeService } from './core/services/wake.service';
+import { PlayerService } from './core/services/player.service';
+import { PlaylistService } from './core/services/playlist.service';
 
 @Component({
   selector: 'app-root',
-  imports: [AudioPlayerComponent, RouterOutlet, NavigationComponent, ConnectionStatusComponent, UpdateOverlayComponent],
+  standalone: true,
+  imports: [
+    RouterOutlet, 
+    MiniPlayerComponent,
+    FullPlayerComponent,
+    NavigationComponent, 
+    UpdateOverlayComponent, 
+    ConnectionStatusComponent, 
+    GlobalModalComponent, 
+    CommonModule
+  ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
   private userService = inject(UserService);
@@ -27,13 +45,32 @@ export class AppComponent implements OnInit {
   private mediaSessionService = inject(MediaSessionService);
   private audioService = inject(AudioService);
   private offlineStorageService = inject(OfflineStorageService);
+  private modalService = inject(ModalService);
+  private playerService = inject(PlayerService);
+  private playlistService = inject(PlaylistService);
 
   newUpdateAvailable = this.updateService.newUpdateAvailable;
   secondsToUpdate = this.updateService.secondsToUpdate;
 
+  isMiniPlayer = computed(() => this.settingsService.isMiniPlayer());
+  isModalOpen = computed(() => this.modalService.isOpen());
+
+  song = computed(() => this.playlistService.currentSong());
+  status = this.playerService.status;
+  progress = computed(() => {
+    const duration = this.playerService.duration();
+    return duration > 0 ? (this.playerService.currentTime() / duration) * 100 : 0;
+  });
+
+  shouldScale = computed(() => this.isModalOpen() || !this.isMiniPlayer());
+
   ngOnInit(): void {
     this.initializeServices();
     this.wakeServer().subscribe();
+  }
+
+  onToggleSize() {
+    this.settingsService.toggleMiniPlayer();
   }
 
   private initializeServices(): void {
@@ -46,12 +83,8 @@ export class AppComponent implements OnInit {
   private wakeServer() {
     this.settingsService.setIsCheckedServerPending();
     return this.wakeService.wakeServer().pipe(
-      tap(() => {
-        this.settingsService.setIsCheckedServerDone();
-        this.settingsService.setServerUp();
-      }),
+      tap(() => this.settingsService.setServerUp()),
       catchError((err) => {
-        this.settingsService.setIsCheckedServerDone();
         this.settingsService.setServerDown();
         throw err;
       })

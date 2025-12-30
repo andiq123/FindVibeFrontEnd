@@ -1,12 +1,14 @@
-import { Component, computed, OnInit, signal, inject, viewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { OfflineStorageService } from '../../services/offline-storage.service';
 import { LibraryService } from '../../services/library.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faTrash, faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { Song } from '../../../../core/models/song.model';
+import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
     selector: 'app-storage-info',
+    standalone: true,
     imports: [FontAwesomeModule],
     templateUrl: './storage-info.component.html',
     styleUrl: './storage-info.component.scss',
@@ -15,11 +17,7 @@ import { Song } from '../../../../core/models/song.model';
 export class StorageInfoComponent implements OnInit {
   private offlineStorageService = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
-
-  isVisible = signal<boolean>(false);
-  isClosing = signal<boolean>(false);
-
-  sheetRef = viewChild<ElementRef<HTMLDivElement>>('sheetRef');
+  private modalService = inject(ModalService);
 
   storageTotal = this.offlineStorageService.storageTotal;
   storageUsed = this.offlineStorageService.storageUsed;
@@ -38,27 +36,8 @@ export class StorageInfoComponent implements OnInit {
     this.populateAvailableOfflineSongs();
   }
 
-  toggle(): void {
-    if (this.isVisible()) {
-      this.dismiss();
-    } else {
-      this.isVisible.set(true);
-      this.isClosing.set(false);
-    }
-  }
-
-  dismiss(): void {
-    this.isClosing.set(true);
-    const element = this.sheetRef()?.nativeElement;
-    if (element) {
-      element.addEventListener('animationend', () => {
-        this.isVisible.set(false);
-        this.isClosing.set(false);
-      }, { once: true });
-    } else {
-      this.isVisible.set(false);
-      this.isClosing.set(false);
-    }
+  close() {
+    this.modalService.close();
   }
 
   async downloadAll(): Promise<void> {

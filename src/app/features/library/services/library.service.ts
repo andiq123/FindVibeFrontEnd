@@ -1,7 +1,7 @@
 import { computed, Injectable, signal, inject, effect } from '@angular/core';
 import { LibraryApiService } from './library-api.service';
 import { UserService } from './user.service';
-import { Observable, tap } from 'rxjs';
+import { finalize, Observable, tap } from 'rxjs';
 import { Song } from '../../../core/models/song.model';
 import { OfflineStorageService } from './offline-storage.service';
 import { Reorder } from '../../../core/models/reorder.model';
@@ -50,21 +50,25 @@ export class LibraryService {
   });
 
   updateLibrarySongs(userId: string) {
-    this.loadingSongs.set(true);
+    if (this.songs().length === 0) {
+      this.loadingSongs.set(true);
+    }
+    
     return this.libraryApiService.getFavoritesSong(userId).pipe(
       tap({
         next: (songs: Song[]) => {
           this.songs.set(songs);
-          this.loadingSongs.set(false);
         },
         error: (error) => {
-          this.loadingSongs.set(false);
           if (error.status === 404) {
             setTimeout(() => {
               this.userService.resetUser();
             }, 100);
           }
         },
+      }),
+      finalize(() => {
+        this.loadingSongs.set(false);
       })
     );
   }

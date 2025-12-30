@@ -53,34 +53,40 @@
   </button>
 
   <!-- Suggestions Dropdown -->
-  @if(suggestions().length > 0) {
+  @if(suggestions().length > 0 || (suggestionsLoading() && searchTerm().length > 0)) {
     <ul 
       role="listbox" 
       class="absolute top-full left-0 w-full mt-4 z-50 anim-slide-in bg-base-200/80 backdrop-blur-xl rounded-[14px] overflow-hidden border border-white/5 shadow-2xl origin-top"
       aria-label="Search suggestions"
     >
-      @for(suggestion of suggestions(); track suggestion) {
-        <li role="option" aria-selected="false">
-          <button
-            type="button"
-            class="group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-base-content/10 transition-colors relative border-b border-white/5 last:border-0 w-full text-left"
-            (click)="searchBySuggestion(suggestion)"
-          >
-            <div class="flex items-center gap-3.5 min-w-0 flex-1">
-              <fa-icon class="text-base-content/40 text-[14px]" [icon]="faMagnifyingGlass"></fa-icon>
-              <span class="text-[17px] text-base-content/90 truncate font-normal">{{ suggestion | titlecase }}</span>
-            </div>
-
-            <button 
-              type="button"
-              (click)="fillSuggestion(suggestion, $event)"
-              class="w-8 h-8 flex items-center justify-center -mr-2 text-primary active:scale-90 transition-transform"
-              aria-label="Fill search with {{ suggestion }}"
+      @if(suggestionsLoading()) {
+        <div class="w-full h-[160px] flex items-center justify-center">
+            <span class="loading loading-spinner loading-md text-primary"></span>
+        </div>
+      } @else {
+        @for(suggestion of suggestions(); track suggestion) {
+            <li role="option" aria-selected="false">
+            <button
+                type="button"
+                class="group flex items-center justify-between px-4 py-3.5 cursor-pointer active:bg-base-content/10 transition-colors relative border-b border-white/5 last:border-0 w-full text-left"
+                (click)="searchBySuggestion(suggestion)"
             >
-               <fa-icon [icon]="faArrowUpLeft" class="-rotate-45 text-sm" />
+                <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                <fa-icon class="text-base-content/40 text-[14px]" [icon]="faMagnifyingGlass"></fa-icon>
+                <span class="text-[17px] text-base-content/90 truncate font-normal">{{ suggestion | titlecase }}</span>
+                </div>
+
+                <button 
+                type="button"
+                (click)="fillSuggestion(suggestion, $event)"
+                class="w-8 h-8 flex items-center justify-center -mr-2 text-primary active:scale-90 transition-transform"
+                aria-label="Fill search with {{ suggestion }}"
+                >
+                <fa-icon [icon]="faArrowUpLeft" class="-rotate-45 text-sm" />
+                </button>
             </button>
-          </button>
-        </li>
+            </li>
+        }
       }
     </ul>
   }

@@ -1,6 +1,8 @@
-import { Component, computed, effect, input, inject, ChangeDetectionStrategy, signal, AfterViewInit } from '@angular/core';
-import { SongComponent } from '../../shared/song/song.component';
+import { Component, computed, effect, input, inject, ChangeDetectionStrategy } from '@angular/core';
+
 import { SearchBarComponent } from './search-bar/search-bar.component';
+import { PageLayoutComponent } from '../../shared/components/page-layout/page-layout.component';
+import { SongListComponent } from '../../shared/components/song-list/song-list.component';
 import { SearchStatus } from '../../core/models/song.model';
 import { Router } from '@angular/router';
 import { SearchService } from './services/search.service';
@@ -14,12 +16,12 @@ import { faMagnifyingGlass, faTriangleExclamation, faWaveSquare, faMusic } from 
 
 @Component({
     selector: 'app-search-page',
-    imports: [SongComponent, SearchBarComponent, FontAwesomeModule, EmptyStateComponent],
+    imports: [SearchBarComponent, FontAwesomeModule, EmptyStateComponent, PageLayoutComponent, SongListComponent],
     templateUrl: './search-page.component.html',
     styleUrl: './search-page.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SearchPageComponent implements AfterViewInit {
+export class SearchPageComponent {
   private router = inject(Router);
   private songsService = inject(SearchService);
   private settingsService = inject(SettingsService);
@@ -33,15 +35,11 @@ export class SearchPageComponent implements AfterViewInit {
   isCheckedServer = computed(() => this.settingsService.isCheckedServer());
 
   searchStatus = SearchStatus;
-  hasAnimated = signal(false);
-  shouldAnimate = computed(() => !this.hasAnimated() && this.status() !== SearchStatus.None);
 
   faMagnifyingGlass = faMagnifyingGlass;
   faTriangleExclamation = faTriangleExclamation;
   faWaveSquare = faWaveSquare;
   faMusic = faMusic;
-
-  readonly dummySong = { id: '', artist: '', title: '', image: '', link: '', order: 0, isFavorite: false };
 
   constructor() {
     effect(() => {
@@ -49,18 +47,6 @@ export class SearchPageComponent implements AfterViewInit {
         this.router.navigate(['/library']);
       }
     });
-
-    effect(() => {
-      if (this.status() === SearchStatus.Finished && this.songs().length > 0) {
-        this.hasAnimated.set(true);
-      }
-    });
-  }
-
-  ngAfterViewInit() {
-    if (this.status() === SearchStatus.Finished && this.songs().length > 0) {
-      this.hasAnimated.set(true);
-    }
   }
 
   onChangePlaylist() {

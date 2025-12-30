@@ -124,6 +124,7 @@ export class PlayerService implements OnDestroy {
     this.audioService.pause();
     this.audioService.setSource('');
     this.playlistService.reset();
+    this.alreadyAddedInRecents.set(false);
     this.cleanupObjectUrl();
   }
 

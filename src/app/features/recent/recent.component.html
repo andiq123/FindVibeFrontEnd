@@ -1,26 +1,16 @@
-<div 
-  class="w-full max-w-2xl mx-auto mt-0 pb-48 slideRight space-y-6 overflow-y-auto scrollable-container"
->
-  <h1 class="font-bold text-3xl tracking-tight px-5 pt-4">History</h1>
-
-  <div class="card-container">
-    <ul class="flex flex-col">
-      @for (song of songs(); track song.link) { 
-          <li class="group/item list-none">
-            <app-song
-              [song]="song"
-              (playlistChange)="onChangePlaylist()"
-            />
-          </li> 
-      } @empty {
-        <li class="flex flex-col items-center justify-center py-12 px-8 text-center">
-          <div class="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
-            <span class="text-2xl">⏳</span>
-          </div>
-          <p class="text-base-content/70">No vibes yet</p>
-          <p class="text-base-content/50 text-sm mt-2">When you listen to songs, your last 20 will show up here</p>
-        </li>
-      }
-    </ul>
+<app-page-layout [showStickyHeader]="true">
+  <div header class="w-full">
+    <h1 class="font-bold text-4xl section-headline">History</h1>
   </div>
-</div>
+
+  <div class="relative pt-6 pb-24">
+    <div class="premium-card min-h-[400px]">
+    <app-song-list
+      [songs]="songs()"
+      emptyStateTitle="No vibes yet"
+      emptyStateDescription="When you listen to songs, your last 20 will show up here"
+      (playlistChange)="onChangePlaylist()"
+    />
+    </div>
+  </div>
+</app-page-layout>

@@ -1,26 +1,3 @@
-
-
-.song-item-staggered {
-
-    will-change: transform, opacity;
-}
-
-.skeleton-item {
-    position: relative;
-    overflow: hidden;
-
-    &::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg,
-                transparent,
-                rgba(255, 255, 255, 0.05),
-                transparent);
-        animation: shimmer 1.5s infinite;
-    }
-}
-
 .section-headline {
     letter-spacing: -0.02em;
     background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.7));

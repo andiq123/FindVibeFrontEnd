@@ -1,5 +1,27 @@
 .route-container {
     position: relative;
     width: 100%;
+    min-height: 100vh;
+}
+
+.app-scale-wrapper {
+    transition:
+        transform var(--anim-duration-slow) var(--anim-ease-spring),
+        border-radius var(--anim-duration-slow) var(--anim-ease-spring),
+        opacity var(--anim-duration-normal) linear;
+    transform-origin: center top;
+    will-change: transform, opacity, border-radius;
     height: 100%;
+    width: 100%;
+    background: var(--base-100);
+    z-index: 0;
+    transform: translate3d(0, 0, 0);
+}
+
+.scale-back {
+    transform: translate3d(0, 10px, 0) scale(0.92);
+    border-radius: 20px;
+    overflow: hidden;
+    opacity: 0.6;
+    pointer-events: none;
 }

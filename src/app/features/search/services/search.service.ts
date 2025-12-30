@@ -24,6 +24,7 @@ export class SearchService {
   private readonly _songs = signal<Song[]>([]);
   private readonly _searchStatus = signal<SearchStatus>(SearchStatus.None);
   private readonly _suggestions = signal<string[]>([]);
+  private readonly _suggestionsLoading = signal<boolean>(false);
   private readonly _lastSearchQuery = signal<string>('');
 
   constructor() {
@@ -33,6 +34,7 @@ export class SearchService {
   readonly songs = this._songs.asReadonly();
   readonly status = this._searchStatus.asReadonly();
   readonly suggestions = this._suggestions.asReadonly();
+  readonly suggestionsLoading = this._suggestionsLoading.asReadonly();
   readonly lastQuery = this._lastSearchQuery.asReadonly();
 
   private loadingTimeout?: ReturnType<typeof setTimeout>;
@@ -75,8 +77,18 @@ export class SearchService {
   }
 
   getSuggestions(term: string): Observable<string[]> {
+    this._suggestionsLoading.set(true);
     return this.httpClient.get<string[]>(`${BASE_API_URL}/suggest?q=${term}`).pipe(
-      tap((result) => this._suggestions.set(result))
+      tap({
+        next: (result) => {
+          this._suggestions.set(result);
+          this._suggestionsLoading.set(false);
+        },
+        error: () => {
+          this._suggestionsLoading.set(false);
+          this._suggestions.set([]);
+        }
+      })
     );
   }
 

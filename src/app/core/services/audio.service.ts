@@ -53,7 +53,6 @@ export class AudioService implements OnDestroy {
       await this.audio.play();
     } catch (error) {
       this.status.set(PlayerStatus.Error);
-      console.error('Audio playback failed:', error);
     }
   }
 
@@ -82,6 +81,5 @@ export class AudioService implements OnDestroy {
       this.audio = undefined;
     }
     this.abortController?.abort();
-    this.abortController = undefined;
   }
 }

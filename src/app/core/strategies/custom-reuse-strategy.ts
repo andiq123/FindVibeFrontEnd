@@ -38,9 +38,12 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
     if (stored) {
       setTimeout(() => {
         if (stored.scrollPosition !== undefined) {
-          window.scrollTo(0, stored.scrollPosition);
+          window.scrollTo({
+            top: stored.scrollPosition,
+            behavior: 'instant'
+          });
         }
-      }, 0);
+      }, 10);
       
       return stored.handle;
     }
@@ -68,11 +71,14 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
 
   private shouldCacheRoute(path: string): boolean {
     return this.routesToCache.some(cachedPath => {
+      if (path === cachedPath) return true;
+
       if (cachedPath.includes(':')) {
-        const regex = new RegExp('^' + cachedPath.replace(/:[^/]+/g, '[^/]+') + '$');
-        return regex.test(path);
+        const base = cachedPath.split('/:')[0];
+        return path.startsWith(base);
       }
-      return path === cachedPath;
+      
+      return false;
     });
   }
 

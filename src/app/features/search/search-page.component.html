@@ -12,65 +12,39 @@
   </div>
 </div>
 }@else {
-<div class="w-full max-w-2xl mx-auto space-y-6 pb-36 px-0 scrollable-container">
-  <div class="sticky top-0 z-10 bg-base-100/80 backdrop-blur-3xl py-4 px-5 border-b border-white/[0.03]">
-    <app-search-bar [query]="query()" />
-  </div>
+<app-page-layout>
+  <div class="space-y-6 pb-12">
+    <div header>
+      <app-search-bar [query]="query()" />
+    </div>
 
-  <div class="space-y-4 px-0 pb-12 transition-all duration-300">
-    <h1 class="font-bold text-3xl px-5 section-headline">Explore</h1>
+    <h1 class="font-bold text-4xl section-headline pt-4">Explore</h1>
 
-    <div 
-      class="results-viewport mx-5 bg-white/[0.02] rounded-[2.5rem] overflow-hidden border border-white/[0.04] min-h-[400px] relative transition-all duration-500"
-    >
-      @switch (status()) { 
-        @case (searchStatus.None) {
+    <div class="premium-card min-h-[400px]">
+      @if (status() === searchStatus.None) {
           <app-empty-state
             [icon]="faMagnifyingGlass"
             title="Find your next favorite"
             description="Search for vibes, artists, or specific songs across the entire library."
           />
-        } 
-
-        @case (searchStatus.Loading) {
-          <div class="flex flex-col py-2" [class.anim-stagger]="shouldAnimate()">
-            @for (i of [1,2,3,4,5,6,7,8]; track i) {
-              <app-song [loading]="true" [song]="dummySong" class="block" [class.anim-slide-fade-in-up]="shouldAnimate()" />
-            }
-          </div>
-        } 
-
-        @case (searchStatus.Error) {
+      } @else if (status() === searchStatus.Error) {
           <app-empty-state
             [icon]="faTriangleExclamation"
             title="No results found"
-            description="We couldn't find any vibes matching your search. Please check the spelling or try different keywords."
+            description="Check the spelling or try different keywords."
             variant="error"
           />
-        } 
-
-        @case (searchStatus.Finished) {
-          <ul class="flex flex-col py-2" [class.anim-stagger]="shouldAnimate()">
-            @for (song of songs(); track song.id; let first = $first) { 
-              <li class="group/item list-none song-item-staggered">
-                <app-song
-                  [song]="song"
-                  class="block"
-                  [class.anim-slide-fade-in-up]="shouldAnimate()"
-                  (playlistChange)="onChangePlaylist()"
-                />
-              </li>
-            } @empty {
-              <app-empty-state
-                [icon]="faMusic"
-                title="The vault is silent"
-                description="We couldn't find any songs for that search. Try something else!"
-              />
-            }
-          </ul>
-        }
+      } @else {
+          <app-song-list
+            [songs]="songs()"
+            [isLoading]="status() === searchStatus.Loading"
+            [allowReorder]="false"
+            emptyStateTitle="Empty vault"
+            emptyStateDescription="Try a different search!"
+            (playlistChange)="onChangePlaylist()"
+          />
       }
     </div>
   </div>
-</div>
+</app-page-layout>
 }

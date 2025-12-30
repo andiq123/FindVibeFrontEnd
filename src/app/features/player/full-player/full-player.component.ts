@@ -8,6 +8,7 @@ import {
   viewChild,
   inject,
   effect,
+  untracked,
   OnInit,
   OnDestroy,
   Renderer2,
@@ -81,36 +82,31 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   playerRef = viewChild<ElementRef<HTMLDivElement>>('playerRef');
   timeSlider = viewChild<ElementRef<HTMLInputElement>>('timeSlider');
-  timeProgress = viewChild<ElementRef<HTMLDivElement>>('timeProgress');
 
   isDraggingTime = signal<boolean>(false);
-  currentTime = computed(() => this.serviceCurrentTime());
-
   visualTime = signal<number>(0);
+  private lastSeekTimestamp = 0;
 
-  constructor() {
-    effect(() => {
-      const time = this.serviceCurrentTime();
-      const duration = this.duration();
+  private timeSyncEffect = effect(() => {
+    const time = this.serviceCurrentTime();
+    const now = Date.now();
+    
+    if (!this.isDraggingTime() && (now - this.lastSeekTimestamp > 500)) {
+      untracked(() => this.visualTime.set(time));
+    }
+  });
 
-      if (!this.isDraggingTime()) {
-        this.visualTime.set(time);
+  progressPercent = computed(() => {
+    const duration = this.duration();
+    if (duration <= 0) return 0;
+    return (this.visualTime() / duration) * 100;
+  });
 
-        const slider = this.timeSlider()?.nativeElement;
-        const progress = this.timeProgress()?.nativeElement;
-
-        if (slider && progress && duration > 0) {
-          slider.value = time.toString();
-          const scale = time / duration;
-          progress.style.transform = `scaleX(${scale})`;
-        }
-      }
-    });
-  }
+  constructor() {}
 
   ngOnInit() {
     this.renderer.setStyle(this.document.body, 'overflow', 'hidden');
-    setTimeout(() => this.isOpeningAnimation.set(false), 600);
+    setTimeout(() => this.isOpeningAnimation.set(false), 550);
   }
 
   ngOnDestroy() {
@@ -145,17 +141,11 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   onTimeChange(event: Event) {
     const value = +(event.target as HTMLInputElement).value;
     this.visualTime.set(value);
-
-    const progress = this.timeProgress()?.nativeElement;
-    const duration = this.duration();
-    if (progress && duration > 0) {
-      const scale = value / duration;
-      progress.style.transform = `scaleX(${scale})`;
-    }
   }
 
   onTimeDragEnd(event: Event) {
     const value = +(event.target as HTMLInputElement).value;
+    this.lastSeekTimestamp = Date.now();
     this.playerService.seek(value);
     setTimeout(() => this.isDraggingTime.set(false), 50);
   }
