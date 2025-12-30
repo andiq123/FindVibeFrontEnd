@@ -8,9 +8,20 @@
   touch-action: none;
   will-change: transform;
   transform: translate3d(0, 0, 0);
-  background: #121212 !important;
-  /* Fixed solid color during early slide-up */
+  background: transparent !important;
   box-shadow: none !important;
+}
+
+.player-content-card {
+  background: linear-gradient(180deg, #121212 0%, #1a1a1a 100%);
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* Hardware acceleration for the clipping layer */
+  transform: translate3d(0, 0, 0);
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  /* Force Safari to respect border-radius */
 }
 
 .pb-safe-bottom {
