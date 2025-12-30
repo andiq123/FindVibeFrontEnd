@@ -12,6 +12,8 @@ export class PlaylistService {
   private readonly queue = signal<Song[]>([]);
   private readonly currentIndex = signal<number>(-1);
 
+  readonly queueLength = computed(() => this.queue().length);
+
   readonly currentSong = computed(() => {
     const q = this.queue();
     const i = this.currentIndex();
@@ -59,15 +61,13 @@ export class PlaylistService {
     }
   }
 
-  needToReplay(currentTime: number): boolean {
-    return currentTime > TIME_OFFSET_SECONDS;
-  }
-
   next(): Song | null {
     const q = this.queue();
     if (q.length === 0) return null;
 
-    const nextIndex = (this.currentIndex() + 1) % q.length;
+    const nextIndex = this.currentIndex() + 1;
+    if (nextIndex >= q.length) return null; // Let the caller decide wrap-around based on repeat mode
+
     this.currentIndex.set(nextIndex);
     return q[nextIndex];
   }
@@ -76,9 +76,17 @@ export class PlaylistService {
     const q = this.queue();
     if (q.length === 0) return null;
 
-    const prevIndex = (this.currentIndex() - 1 + q.length) % q.length;
+    const prevIndex = this.currentIndex() - 1;
+    if (prevIndex < 0) return null;
+
     this.currentIndex.set(prevIndex);
     return q[prevIndex];
+  }
+
+  jumpToIndex(index: number): void {
+     if (index >= 0 && index < this.queue().length) {
+       this.currentIndex.set(index);
+     }
   }
 
   reset(): void {

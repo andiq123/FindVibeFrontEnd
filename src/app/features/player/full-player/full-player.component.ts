@@ -25,7 +25,7 @@ import {
   faStepBackward,
   faStepForward,
 } from '@fortawesome/free-solid-svg-icons';
-import { PlayerStatus } from '../models/player.model';
+import { PlayerStatus, RepeatMode } from '../models/player.model';
 import { SettingsService } from '../../../core/services/settings.service';
 import { NgOptimizedImage } from '@angular/common';
 import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
@@ -63,8 +63,10 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   serviceCurrentTime = computed(() => this.playerService.currentTime());
   duration = computed(() => this.playerService.duration());
 
-  isRepeat = computed(() => this.settingsService.isRepeat());
+  repeatMode = computed(() => this.settingsService.repeatMode());
   isShuffle = computed(() => this.settingsService.isShuffle());
+
+  repeatModes = RepeatMode;
 
   toggleSizeEvent = output<void>();
 

@@ -102,10 +102,9 @@
 
       <div class="flex items-center justify-between pt-2">
         <button
-          class="p-4 transition-colors"
-          [class.text-white]="isShuffle()"
+          class="p-4 transition-all duration-300"
+          [class.text-primary]="isShuffle()"
           [class.text-white/40]="!isShuffle()"
-          [class.hover:text-white]="!isShuffle()"
           [attr.aria-label]="isShuffle() ? 'Disable shuffle' : 'Enable shuffle'"
           [attr.aria-pressed]="isShuffle()"
           (click)="toggleShuffle()"
@@ -138,15 +137,16 @@
         </div>
 
         <button
-          class="p-4 transition-colors"
-          [class.text-white]="isRepeat()"
-          [class.text-white/40]="!isRepeat()"
-          [class.hover:text-white]="!isRepeat()"
-          [attr.aria-label]="isRepeat() ? 'Disable repeat' : 'Enable repeat'"
-          [attr.aria-pressed]="isRepeat()"
+          class="p-4 transition-all duration-300 relative"
+          [class.text-primary]="repeatMode() !== repeatModes.OFF"
+          [class.text-white/40]="repeatMode() === repeatModes.OFF"
+          [attr.aria-label]="'Repeat mode: ' + repeatMode()"
           (click)="toggleRepeat()"
         >
           <fa-icon [icon]="faRepeat" size="lg" />
+          @if (repeatMode() === repeatModes.ONE) {
+            <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8px] font-black text-primary-content bg-primary rounded-full w-3 h-3 flex items-center justify-center border border-base-100 shadow-sm mt-1 ml-1 scale-90">1</span>
+          }
         </button>
       </div>
     </div>

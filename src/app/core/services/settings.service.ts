@@ -1,5 +1,6 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { StorageService } from './storage.service';
+import { RepeatMode } from '../../features/player/models/player.model';
 
 enum ServerStatus {
   Unchecked = 'unchecked',
@@ -13,13 +14,13 @@ enum ServerStatus {
 export class SettingsService {
   private readonly storageService = inject(StorageService);
 
-  private readonly _isRepeat = signal(false);
+  private readonly _repeatMode = signal<RepeatMode>(RepeatMode.OFF);
   private readonly _isShuffle = signal(false);
   private readonly _isMiniPlayer = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
 
-  readonly isRepeat = this._isRepeat.asReadonly();
+  readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
   readonly isServerDown = computed(() => this._serverStatus() === ServerStatus.Down);
@@ -30,10 +31,10 @@ export class SettingsService {
     window.addEventListener('online', () => this._isNavigatorOffline.set(false));
     window.addEventListener('offline', () => this._isNavigatorOffline.set(true));
 
-    const isRepeat = this.storageService.getItem<boolean>('isRepeat');
+    const repeatMode = this.storageService.getItem<RepeatMode>('repeatMode');
     const isShuffle = this.storageService.getItem<boolean>('isShuffle');
 
-    if (isRepeat !== null) this._isRepeat.set(isRepeat);
+    if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
   }
 
@@ -42,28 +43,21 @@ export class SettingsService {
   }
 
   toggleRepeat(): void {
-    this.toggleMutuallyExclusive(this._isRepeat, this._isShuffle, 'isRepeat', 'isShuffle');
+    const modes = [RepeatMode.OFF, RepeatMode.ALL, RepeatMode.ONE];
+    const currentIndex = modes.indexOf(this._repeatMode());
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+    
+    this._repeatMode.set(nextMode);
+    this.storageService.setItem('repeatMode', nextMode);
   }
 
   toggleShuffle(): void {
-    this.toggleMutuallyExclusive(this._isShuffle, this._isRepeat, 'isShuffle', 'isRepeat');
+    const newValue = !this._isShuffle();
+    this._isShuffle.set(newValue);
+    this.storageService.setItem('isShuffle', newValue);
   }
 
-  private toggleMutuallyExclusive(
-    primary: typeof this._isRepeat,
-    secondary: typeof this._isShuffle,
-    primaryKey: string,
-    secondaryKey: string
-  ): void {
-    const newValue = !primary();
-    primary.set(newValue);
-    this.storageService.setItem(primaryKey, newValue);
 
-    if (secondary()) {
-      secondary.set(false);
-      this.storageService.setItem(secondaryKey, false);
-    }
-  }
 
   setServerUp(): void {
     this._serverStatus.set(ServerStatus.Up);

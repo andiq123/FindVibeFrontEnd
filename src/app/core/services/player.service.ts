@@ -1,5 +1,6 @@
 import { computed, Injectable, signal, effect, inject, OnDestroy } from '@angular/core';
 import { Song } from '../models/song.model';
+import { PlayerStatus, RepeatMode } from '../../features/player/models/player.model';
 import { SettingsService } from './settings.service';
 import { RecentService } from '../../features/recent/services/recent.service';
 import { PlaylistService } from './playlist.service';
@@ -36,12 +37,42 @@ export class PlayerService implements OnDestroy {
     });
 
     effect(() => {
+      const status = this.status();
+      if (status === PlayerStatus.Ended) {
+        this.handleSongEnded();
+      }
+    });
+
+    effect(() => {
       if (this.settingsService.isShuffle()) {
         this.playlistService.enableShuffle();
       } else {
         this.playlistService.disableShuffle();
       }
     });
+  }
+
+  private async handleSongEnded() {
+    const mode = this.settingsService.repeatMode();
+    
+    if (mode === RepeatMode.ONE) {
+      this.replayCurrentSong();
+      return;
+    }
+
+    const nextSong = this.playlistService.next();
+    
+    if (nextSong) {
+      await this.setSong(nextSong);
+    } else if (mode === RepeatMode.ALL) {
+      // Wrap around
+      this.playlistService.jumpToIndex(0);
+      const firstSong = this.playlistService.currentSong();
+      if (firstSong) await this.setSong(firstSong);
+    } else {
+      // OFF mode and reached the end
+      this.audioService.stop();
+    }
   }
 
   async setSong(song: Song): Promise<void> {
@@ -82,7 +113,7 @@ export class PlayerService implements OnDestroy {
   }
 
   async setPreviousSong(): Promise<Song | undefined> {
-    if (this.playlistService.needToReplay(this.currentTime())) {
+    if (this.currentTime() > 5) {
       return this.replayCurrentSong();
     }
 
@@ -90,19 +121,32 @@ export class PlayerService implements OnDestroy {
     if (previousSong) {
       await this.setSong(previousSong);
       return previousSong;
+    } else if (this.settingsService.repeatMode() === RepeatMode.ALL) {
+      const length = this.playlistService.queueLength();
+      if (length > 0) {
+        this.playlistService.jumpToIndex(length - 1);
+        const lastSong = this.playlistService.currentSong();
+        if (lastSong) {
+          await this.setSong(lastSong);
+          return lastSong;
+        }
+      }
     }
     return undefined;
   }
 
   async setNextSong(): Promise<Song | undefined> {
-    if (this.settingsService.isRepeat()) {
-      return this.replayCurrentSong();
-    }
-
     const nextSong = this.playlistService.next();
     if (nextSong) {
       await this.setSong(nextSong);
       return nextSong;
+    } else if (this.settingsService.repeatMode() === RepeatMode.ALL) {
+       this.playlistService.jumpToIndex(0);
+       const firstSong = this.playlistService.currentSong();
+       if (firstSong) {
+         await this.setSong(firstSong);
+         return firstSong;
+       }
     }
     return undefined;
   }

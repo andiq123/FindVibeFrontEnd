@@ -6,3 +6,9 @@ export enum PlayerStatus {
   Loading = 'Loading',
   Error = 'Error',
 }
+
+export enum RepeatMode {
+  OFF = 'off',
+  ALL = 'all',
+  ONE = 'one',
+}
