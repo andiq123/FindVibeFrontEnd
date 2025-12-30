@@ -1,4 +1,4 @@
-import { computed, Injectable, signal, effect, inject, OnDestroy } from '@angular/core';
+import { computed, Injectable, signal, effect, inject, OnDestroy, untracked } from '@angular/core';
 import { Song } from '../models/song.model';
 import { PlayerStatus, RepeatMode } from '../../features/player/models/player.model';
 import { SettingsService } from './settings.service';
@@ -39,16 +39,19 @@ export class PlayerService implements OnDestroy {
     effect(() => {
       const status = this.status();
       if (status === PlayerStatus.Ended) {
-        this.handleSongEnded();
+        untracked(() => this.handleSongEnded());
       }
     });
 
     effect(() => {
-      if (this.settingsService.isShuffle()) {
-        this.playlistService.enableShuffle();
-      } else {
-        this.playlistService.disableShuffle();
-      }
+      const isShuffle = this.settingsService.isShuffle();
+      untracked(() => {
+        if (isShuffle) {
+          this.playlistService.enableShuffle();
+        } else {
+          this.playlistService.disableShuffle();
+        }
+      });
     });
   }
 
