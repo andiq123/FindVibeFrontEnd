@@ -9,7 +9,6 @@ import { NavigationComponent } from "./features/navigation/navigation.component"
 import { ConnectionStatusComponent } from "./shared/connection-status/connection-status.component";
 import { UpdateOverlayComponent } from "./shared/update-overlay/update-overlay.component";
 import { GlobalModalComponent } from "./shared/components/global-modal/global-modal.component";
-import { ToastComponent } from "./shared/components/toast/toast.component";
 
 import { SettingsService } from "./core/services/settings.service";
 import { UserService } from "./features/library/services/user.service";
@@ -33,7 +32,6 @@ import { PlaylistService } from "./core/services/playlist.service";
     UpdateOverlayComponent,
     ConnectionStatusComponent,
     GlobalModalComponent,
-    ToastComponent,
     CommonModule,
   ],
   templateUrl: "./app.component.html",

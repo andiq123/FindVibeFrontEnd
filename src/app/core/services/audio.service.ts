@@ -84,13 +84,6 @@ export class AudioService implements OnDestroy {
     this.audio?.pause();
   }
 
-  stop(): void {
-    if (!this.audio) return;
-    this.audio.pause();
-    this.audio.currentTime = 0;
-    this.status.set(PlayerStatus.Stopped);
-  }
-
   seek(time: number): void {
     if (this.audio) {
       this.audio.currentTime = time;

@@ -42,16 +42,6 @@
             <span
               >{{ username() ? (username() | titlecase) : "My" }}'s Vault</span
             >
-            @if (isOffline()) {
-              <span
-                class="px-2.5 py-1 rounded-full bg-error/10 text-error text-[10px] uppercase font-black tracking-widest border border-error/20 inline-flex items-center gap-1.5 anim-fade-in shadow-[0_0_15px_-5px_oklch(var(--er))]"
-              >
-                <span
-                  class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"
-                ></span>
-                Offline
-              </span>
-            }
           </h1>
         </div>
 
@@ -82,17 +72,44 @@
       </div>
 
       <div class="relative pt-6 pb-12">
-        @if (loadingReorder()) {
-          <div
-            class="bg-base-200/80 absolute w-full h-full inset-0 z-10 flex flex-col gap-3 items-center justify-center rounded-[2.5rem]"
-          >
-            <span class="text-base font-medium text-base-content/70 mb-2"
-              >Applying reorder...</span
+        @if (hasReordered()) {
+          <div class="flex gap-3 mb-4 sticky top-0 z-20 pb-3">
+            <button
+              class="flex-1 py-3 px-4 rounded-2xl bg-primary text-primary-content font-bold text-sm transition-all active:scale-95 [@media(hover:hover)]:hover:bg-primary/90 flex items-center justify-center gap-2"
+              (click)="saveReorders()"
+              [disabled]="loadingReorder()"
+              aria-label="Save reorder"
             >
-            <span class="loading loading-md text-primary"></span>
+              @if (loadingReorder()) {
+                <span class="loading loading-spinner loading-xs"></span>
+                <span>Saving</span>
+              } @else {
+                <fa-icon [icon]="faCheck" />
+                <span>Save</span>
+              }
+            </button>
+            <button
+              class="flex-1 py-3 px-4 rounded-2xl bg-base-200/60 border border-white/10 text-base-content/70 font-bold text-sm transition-all active:scale-95 [@media(hover:hover)]:hover:bg-base-200 flex items-center justify-center gap-2"
+              (click)="cancelReorders()"
+              [disabled]="loadingReorder()"
+              aria-label="Cancel reorder"
+            >
+              <fa-icon [icon]="faXmark" />
+              <span>Cancel</span>
+            </button>
           </div>
         }
         <div class="premium-card min-h-[400px]">
+          @if (loadingReorder()) {
+            <div
+              class="bg-base-200/80 absolute w-full h-full inset-0 z-10 flex flex-col gap-3 items-center justify-center rounded-[2.5rem]"
+            >
+              <span class="text-base font-medium text-base-content/70 mb-2"
+                >Applying changes...</span
+              >
+              <span class="loading loading-md text-primary"></span>
+            </div>
+          }
           <app-song-list
             [songs]="songs()"
             [isLoading]="loadingSongs()"

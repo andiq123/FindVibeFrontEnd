@@ -18,7 +18,7 @@ import { OfflineStorageService } from "../../features/library/services/offline-s
 import { DragAndDropDirective } from "../../features/search/directives/drag-and-drop.directive";
 import { PlayerService } from "../../core/services/player.service";
 import { SettingsService } from "../../core/services/settings.service";
-import { faCloudArrowDown, faPlay } from "../icons";
+import { faCloudArrowDown } from "../icons";
 
 @Component({
   selector: "app-song",
@@ -81,7 +81,6 @@ export class SongComponent {
   });
 
   faCloudArrowDown = faCloudArrowDown;
-
 
   async play() {
     if (this.isActive()) {

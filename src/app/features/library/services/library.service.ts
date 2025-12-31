@@ -155,10 +155,6 @@ export class LibraryService {
     });
   }
 
-  resetReorder(): void {
-    this.songs.update((songs) => [...songs].sort((a, b) => a.order - b.order));
-  }
-
   private trackLoadingFavorite(id: string, isLoading: boolean): void {
     trackLoadingState(this.currentLoadingFavoriteSongIds, id, isLoading);
   }

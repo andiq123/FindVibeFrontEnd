@@ -13,20 +13,25 @@ import { CommonModule, DOCUMENT } from "@angular/common";
 import { ModalService } from "../../../core/services/modal.service";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faXmark } from "../../icons";
+import { SwipeDownDirective } from "../../../features/player/directives/swipe-down.directive";
 
 @Component({
   selector: "app-global-modal",
   standalone: true,
-  imports: [CommonModule, FontAwesomeModule],
+  imports: [CommonModule, FontAwesomeModule, SwipeDownDirective],
   template: `
     @if (activeComponent()) {
       <div class="modal-backdrop" (click)="close()" role="presentation"></div>
       <div
         class="modal-container"
+        [class.opening]="isOpening()"
         [class.closing]="isClosing()"
         #modalContainer
         role="dialog"
         aria-modal="true"
+        appSwipeDown
+        [handleSelector]="'.modal-handle-bar, .modal-content'"
+        (closePanel)="close()"
       >
         <div
           class="modal-handle-bar"
@@ -86,7 +91,10 @@ import { faXmark } from "../../icons";
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         will-change: transform;
-        transform: translateY(100%);
+        transform: translateY(0);
+      }
+
+      .modal-container.opening {
         animation: slide-up var(--anim-duration-slow) var(--anim-ease-out)
           forwards;
       }
@@ -135,6 +143,7 @@ export class GlobalModalComponent {
 
   activeComponent = this.modalService.activeModal;
   isClosing = signal(false);
+  isOpening = signal(false);
 
   componentInputs = computed(() => {
     const data = this.modalService.modalData();
@@ -149,7 +158,9 @@ export class GlobalModalComponent {
     effect(() => {
       const isOpen = this.activeComponent() !== null;
       if (isOpen) {
+        this.isOpening.set(true);
         this.renderer.setStyle(this.document.body, "overflow", "hidden");
+        setTimeout(() => this.isOpening.set(false), 600);
       } else {
         this.renderer.removeStyle(this.document.body, "overflow");
       }

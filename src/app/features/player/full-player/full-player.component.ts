@@ -84,25 +84,26 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   playerRef = viewChild<ElementRef<HTMLDivElement>>("playerRef");
 
-
   isDraggingTime = signal<boolean>(false);
   visualTime = signal<number>(0);
   private lastSeekTimestamp = 0;
-
-  private timeSyncEffect = effect(() => {
-    const time = this.serviceCurrentTime();
-    const now = Date.now();
-
-    if (!this.isDraggingTime() && now - this.lastSeekTimestamp > 500) {
-      untracked(() => this.visualTime.set(time));
-    }
-  });
 
   progressPercent = computed(() => {
     const duration = this.duration();
     if (duration <= 0) return 0;
     return (this.visualTime() / duration) * 100;
   });
+
+  constructor() {
+    effect(() => {
+      const time = this.serviceCurrentTime();
+      const now = Date.now();
+
+      if (!this.isDraggingTime() && now - this.lastSeekTimestamp > 500) {
+        untracked(() => this.visualTime.set(time));
+      }
+    });
+  }
 
   ngOnInit() {
     this.renderer.setStyle(this.document.body, "overflow", "hidden");

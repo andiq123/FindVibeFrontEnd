@@ -90,7 +90,8 @@ export class PlayerService implements OnDestroy {
       if (firstSong) await this.setSong(firstSong);
     } else {
       // OFF mode and reached the end
-      this.audioService.stop();
+      this.audioService.pause();
+      this.audioService.seek(0);
     }
   }
 

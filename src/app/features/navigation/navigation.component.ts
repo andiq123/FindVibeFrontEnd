@@ -42,6 +42,4 @@ export class NavigationComponent {
   navList = signal<{ name: string; icon: IconDefinition; link: string }[]>(
     this.navListSource(),
   );
-
-  onNavClick() {}
 }

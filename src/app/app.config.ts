@@ -2,7 +2,6 @@ import {
   ApplicationConfig,
   provideZoneChangeDetection,
   isDevMode,
-  ErrorHandler,
 } from "@angular/core";
 
 import {
@@ -19,7 +18,6 @@ import { provideHttpClient } from "@angular/common/http";
 import { provideServiceWorker } from "@angular/service-worker";
 
 import { CustomReuseStrategy } from "./core/strategies/custom-reuse-strategy";
-import { GlobalErrorHandler } from "./core/handlers/global-error.handler";
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -51,7 +49,6 @@ export const appConfig: ApplicationConfig = {
       }),
     ),
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
-    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideHttpClient(),
     provideServiceWorker("ngsw-worker.js", {
       enabled: !isDevMode(),

@@ -15,12 +15,12 @@ import { OfflineStorageService } from "./services/offline-storage.service";
 import { catchError, tap } from "rxjs";
 
 import {
-  faCheck,
-  faXmark,
   faRightFromBracket,
   faArrowDown,
   faCircleNotch,
   faWaveSquare,
+  faCheck,
+  faXmark,
 } from "../../shared/icons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PlaylistService } from "../../core/services/playlist.service";
@@ -58,15 +58,16 @@ export class LibraryComponent {
   isOffline = this.settingsService.isOffline;
   isCheckedServer = this.settingsService.isCheckedServer;
 
-  loadingReorder = signal(false);
   loadingSongs = this.libraryService.loadingSongs;
+  hasReordered = signal(false);
+  loadingReorder = signal(false);
 
-  faCheck = faCheck;
-  faXmark = faXmark;
   faRightFromBracket = faRightFromBracket;
   faArrowDown = faArrowDown;
   faCircleNotch = faCircleNotch;
   faWaveSquare = faWaveSquare;
+  faCheck = faCheck;
+  faXmark = faXmark;
 
   isDownloading = computed(
     () => this.offlineStorageService.currentLoadingDownloadSongIds().length > 0,
@@ -90,10 +91,7 @@ export class LibraryComponent {
 
   reorderSongs(data: { from: string; to: string }) {
     this.libraryService.changePlaces(data.from, data.to);
-  }
-
-  cancelReorders() {
-    this.libraryService.resetReorder();
+    this.hasReordered.set(true);
   }
 
   saveReorders() {
@@ -101,14 +99,21 @@ export class LibraryComponent {
     this.libraryService
       .saveReorders()
       .pipe(
-        catchError(() => {
-          this.loadingReorder.set(false);
-          return [];
-        }),
         tap(() => {
           this.loadingReorder.set(false);
+          this.hasReordered.set(false);
+        }),
+        catchError((err) => {
+          this.loadingReorder.set(false);
+          throw err;
         }),
       )
       .subscribe();
+  }
+
+  cancelReorders() {
+    this.libraryService.updateLibrarySongs(this.userId()).subscribe(() => {
+      this.hasReordered.set(false);
+    });
   }
 }

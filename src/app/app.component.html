@@ -1,9 +1,5 @@
 <app-connection-status />
 
-@defer {
-  <app-toast />
-}
-
 @defer (when newUpdateAvailable()) {
   <app-update-overlay />
 }

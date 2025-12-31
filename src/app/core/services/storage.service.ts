@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class StorageService {
   setItem(key: string, value: unknown): void {
@@ -21,9 +21,5 @@ export class StorageService {
 
   removeItem(key: string): void {
     localStorage.removeItem(key);
-  }
-
-  clear(): void {
-    localStorage.clear();
   }
 }
