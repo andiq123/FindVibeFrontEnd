@@ -19,7 +19,6 @@ export class SettingsService {
   private readonly _isMiniPlayer = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
-  private readonly _isHapticEnabled = signal(true);
 
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
@@ -27,7 +26,6 @@ export class SettingsService {
   readonly isServerDown = computed(
     () => this._serverStatus() === ServerStatus.Down,
   );
-  readonly isHapticEnabled = this._isHapticEnabled.asReadonly();
   readonly isCheckedServer = computed(
     () => this._serverStatus() !== ServerStatus.Unchecked,
   );
@@ -45,12 +43,9 @@ export class SettingsService {
 
     const repeatMode = this.storageService.getItem<RepeatMode>("repeatMode");
     const isShuffle = this.storageService.getItem<boolean>("isShuffle");
-    const isHapticEnabled =
-      this.storageService.getItem<boolean>("isHapticEnabled");
 
     if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
-    if (isHapticEnabled !== null) this._isHapticEnabled.set(isHapticEnabled);
   }
 
   toggleMiniPlayer(): void {
@@ -70,12 +65,6 @@ export class SettingsService {
     const newValue = !this._isShuffle();
     this._isShuffle.set(newValue);
     this.storageService.setItem("isShuffle", newValue);
-  }
-
-  toggleHaptic(): void {
-    const newValue = !this._isHapticEnabled();
-    this._isHapticEnabled.set(newValue);
-    this.storageService.setItem("isHapticEnabled", newValue);
   }
 
   setServerUp(): void {

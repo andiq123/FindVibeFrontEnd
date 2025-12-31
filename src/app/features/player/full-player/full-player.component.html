@@ -44,7 +44,7 @@
       class="flex-1 flex flex-col items-center justify-start px-6 pb-safe-bottom pt-2 max-w-[600px] mx-auto relative z-10 w-full min-h-0"
     >
       <div
-        class="w-full flex-1 flex items-center justify-center artwork-container min-h-0 py-4"
+        class="w-full flex-1 flex items-center justify-center artwork-container min-h-0 py-2"
       >
         <div
           class="relative w-full aspect-square max-w-[340px] group flex items-center justify-center artwork-wrapper"
@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <div class="w-full mt-4 space-y-6 shrink-0">
+      <div class="w-full mt-2 mb-10 space-y-2 shrink-0">
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1 min-w-0">
             <app-moving-title
@@ -89,9 +89,9 @@
           <app-favorite-button [song]="song()" />
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-2">
           <div
-            class="ios-slider-container relative w-full h-20 flex items-center touch-none select-none py-6"
+            class="ios-slider-container relative w-full h-12 flex items-center touch-none select-none"
           >
             <input
               #timeSlider
@@ -115,14 +115,14 @@
               [attr.aria-valuetext]="visualTime() + ' seconds'"
             />
             <div
-              class="absolute w-full h-1.5 bg-white/30 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible"
+              class="absolute w-full h-2 bg-white/30 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible"
             >
               <div
                 class="relative h-full bg-white rounded-full origin-left shadow-sm"
                 [style.width.%]="progressPercent()"
               >
                 <div
-                  class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-lg"
+                  class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg ring-2 ring-black/10"
                 ></div>
               </div>
             </div>
@@ -135,7 +135,7 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between pt-2">
+        <div class="flex items-center justify-between pt-0">
           <button
             class="p-4 transition-all duration-200 touch-manipulation active:scale-95"
             [class.text-primary]="isShuffle()"

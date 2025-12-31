@@ -8,10 +8,6 @@ import {
   OnInit,
   OnDestroy,
 } from "@angular/core";
-import {
-  HapticService,
-  HapticFeedback,
-} from "../../../core/services/haptic.service";
 
 @Directive({
   selector: "[appSwipeDown]",
@@ -20,7 +16,6 @@ import {
 export class SwipeDownDirective implements OnInit, OnDestroy {
   private el = inject(ElementRef);
   private ngZone = inject(NgZone);
-  private haptic = inject(HapticService);
 
   handleSelector = input<string>("");
   closePanel = output<void>();
@@ -119,7 +114,6 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     const threshold = window.innerHeight * 0.15;
     if (this.currentY > threshold && !this.hasHitThreshold) {
       this.hasHitThreshold = true;
-      this.haptic.impact(HapticFeedback.LIGHT);
     } else if (this.currentY <= threshold && this.hasHitThreshold) {
       this.hasHitThreshold = false;
     }

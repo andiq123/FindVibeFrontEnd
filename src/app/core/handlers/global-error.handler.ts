@@ -1,6 +1,5 @@
 import { ErrorHandler, Injectable, inject } from "@angular/core";
 import { ToastService } from "../services/toast.service";
-import { HapticService, HapticFeedback } from "../services/haptic.service";
 
 interface HttpError {
   status?: number;
@@ -18,7 +17,6 @@ type ErrorWithDetails = HttpError & AppError;
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   private toast = inject(ToastService);
-  private haptic = inject(HapticService);
 
   handleError(error: Error | unknown): void {
     if (!this.isProduction()) {
@@ -34,8 +32,6 @@ export class GlobalErrorHandler implements ErrorHandler {
         handler: () => this.reportError(error),
       },
     });
-
-    this.haptic.impact(HapticFeedback.ERROR);
   }
 
   private getUserFriendlyMessage(error: unknown): string {

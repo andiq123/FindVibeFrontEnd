@@ -19,10 +19,6 @@ import { TitleCasePipe } from "@angular/common";
 import { Router } from "@angular/router";
 import { SearchService } from "../services/search.service";
 import { Subject, debounceTime, distinctUntilChanged } from "rxjs";
-import {
-  HapticService,
-  HapticFeedback,
-} from "../../../core/services/haptic.service";
 
 @Component({
   selector: "app-search-bar",
@@ -40,7 +36,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private suggestionsService = inject(SearchService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
-  private hapticService = inject(HapticService);
 
   suggestions = computed(() => this.suggestionsService.suggestions());
   suggestionsLoading = computed(() =>
@@ -91,12 +86,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     this.searchTerm.set(suggestion);
     this.searchSuggestion(suggestion);
-    this.hapticService.impact(HapticFeedback.SELECTION);
   }
 
   async searchBySuggestion(suggestion: string) {
     this.searchTerm.set(suggestion);
-    this.hapticService.impact(HapticFeedback.LIGHT);
     await this.submit();
   }
 
@@ -109,7 +102,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   cancelSearch() {
     this.searchTerm.set("");
     this.suggestionsService.resetSearch();
-    this.hapticService.impact(HapticFeedback.LIGHT);
     this.router.navigate(["/songs/"]);
   }
 

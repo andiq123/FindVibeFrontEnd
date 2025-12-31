@@ -3,7 +3,6 @@ import {
   computed,
   signal,
   ChangeDetectionStrategy,
-  inject,
 } from "@angular/core";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import {
@@ -13,21 +12,16 @@ import {
   IconDefinition,
 } from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
-import {
-  HapticService,
-  HapticFeedback,
-} from "../../core/services/haptic.service";
 
 @Component({
   selector: "app-navigation",
+  standalone: true,
   imports: [FaIconComponent, RouterLink, RouterLinkActive],
   templateUrl: "./navigation.component.html",
   styleUrl: "./navigation.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavigationComponent {
-  private hapticService = inject(HapticService);
-
   navListSource = computed(() => [
     {
       name: "Explore",
@@ -49,7 +43,5 @@ export class NavigationComponent {
     this.navListSource(),
   );
 
-  onNavClick() {
-    this.hapticService.impact(HapticFeedback.SELECTION);
-  }
+  onNavClick() {}
 }

@@ -14,44 +14,20 @@
 } @else {
   @if (allowReorder()) {
     <div
-      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-5 cursor-pointer w-full touch-manipulation"
+      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-5 w-full touch-manipulation"
       [class.song-active]="isActive()"
       [class.opacity-50]="isUnavailable()"
       appDragAndDrop
       [id]="song().id"
       (reorderSongs)="emitReorder($any($event))"
-      (click)="playOrPause()"
-      (keydown.enter)="playOrPause()"
-      (keydown.space)="playOrPause(); $event.preventDefault()"
-      tabindex="0"
-      role="button"
-      [attr.aria-label]="
-        song().title +
-        ' by ' +
-        song().artist +
-        (isActive() ? ' - Now playing' : '')
-      "
-      [attr.aria-disabled]="isUnavailable()"
     >
       <ng-container *ngTemplateOutlet="default"></ng-container>
     </div>
   } @else {
     <div
-      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-5 cursor-pointer w-full touch-manipulation"
+      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-5 w-full touch-manipulation"
       [class.song-active]="isActive()"
       [class.opacity-50]="isUnavailable()"
-      (click)="playOrPause()"
-      (keydown.enter)="playOrPause()"
-      (keydown.space)="playOrPause(); $event.preventDefault()"
-      tabindex="0"
-      role="button"
-      [attr.aria-label]="
-        song().title +
-        ' by ' +
-        song().artist +
-        (isActive() ? ' - Now playing' : '')
-      "
-      [attr.aria-disabled]="isUnavailable()"
     >
       <ng-container *ngTemplateOutlet="default"></ng-container>
     </div>
@@ -60,9 +36,20 @@
 
 <ng-template #default>
   <div
-    id="elToRemove"
-    class="grid grid-flow-col gap-4 items-center w-full justify-start transition-transform duration-200"
+    class="grid grid-flow-col gap-4 items-center w-full justify-start transition-transform duration-200 cursor-pointer"
     [class.unavailable]="isUnavailable()"
+    (click)="playOrPause()"
+    (keydown.enter)="playOrPause()"
+    (keydown.space)="playOrPause(); $event.preventDefault()"
+    tabindex="0"
+    role="button"
+    [attr.aria-label]="
+      song().title +
+      ' by ' +
+      song().artist +
+      (isActive() ? ' - Now playing' : '')
+    "
+    [attr.aria-disabled]="isUnavailable()"
   >
     <div
       class="relative w-12 h-12 rounded-lg overflow-hidden shadow-sm ring-1 ring-white/10 shrink-0 album-art"
@@ -171,7 +158,7 @@
         }
       }
     }
-
+    
     <app-favorite-button [song]="song()" />
   </div>
 </ng-template>

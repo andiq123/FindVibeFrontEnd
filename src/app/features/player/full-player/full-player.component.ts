@@ -83,7 +83,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   isOpeningAnimation = signal<boolean>(true);
 
   playerRef = viewChild<ElementRef<HTMLDivElement>>("playerRef");
-  timeSlider = viewChild<ElementRef<HTMLInputElement>>("timeSlider");
+
 
   isDraggingTime = signal<boolean>(false);
   visualTime = signal<number>(0);

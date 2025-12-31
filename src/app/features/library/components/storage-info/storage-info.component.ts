@@ -13,10 +13,6 @@ import { faTrash, faCloudArrowDown } from "../../../../shared/icons";
 import { Song } from "../../../../core/models/song.model";
 import { ModalService } from "../../../../core/services/modal.service";
 import { SettingsService } from "../../../../core/services/settings.service";
-import {
-  HapticService,
-  HapticFeedback,
-} from "../../../../core/services/haptic.service";
 
 @Component({
   selector: "app-storage-info",
@@ -31,15 +27,11 @@ export class StorageInfoComponent implements OnInit {
   private libraryService = inject(LibraryService);
   private modalService = inject(ModalService);
   private settingsService = inject(SettingsService);
-  private hapticService = inject(HapticService);
 
   storageTotal = this.offlineStorageService.storageTotal;
   storageUsed = this.offlineStorageService.storageUsed;
   loadingDownloading = signal<boolean>(false);
   loadingClearing = signal<boolean>(false);
-
-  isHapticEnabled = this.settingsService.isHapticEnabled;
-  isHapticSupported = this.hapticService.supported;
 
   showRemoveCacheButton = computed(() => {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
@@ -55,11 +47,6 @@ export class StorageInfoComponent implements OnInit {
 
   close() {
     this.modalService.close();
-  }
-
-  toggleHaptic() {
-    this.settingsService.toggleHaptic();
-    this.hapticService.impact(HapticFeedback.SELECTION);
   }
 
   async downloadAll(): Promise<void> {

@@ -3,6 +3,7 @@ import {
   input,
   output,
   computed,
+  signal,
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
@@ -34,10 +35,20 @@ export class MiniPlayerComponent {
 
   playerStatus = PlayerStatus;
   faArrowUp = faArrowUp;
+  imageLoading = signal(true);
 
   isPlaying = computed(() => this.status() === PlayerStatus.Playing);
+  isLoading = computed(() => this.status() === PlayerStatus.Loading);
 
   toggleSize() {
     this.toggleSizeEvent.emit();
+  }
+
+  onImageLoad() {
+    this.imageLoading.set(false);
+  }
+
+  onImageError() {
+    this.imageLoading.set(false);
   }
 }

@@ -14,6 +14,24 @@
         class="album-art relative w-14 aspect-square rounded-lg overflow-hidden ring-1 ring-base-200/30"
         [class.album-art-playing]="isPlaying()"
       >
+        @if (isLoading()) {
+          <div
+            class="absolute inset-0 bg-black/60 flex items-center justify-center z-30"
+          >
+            <div
+              class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+            ></div>
+          </div>
+        }
+        @if (imageLoading()) {
+          <div
+            class="absolute inset-0 bg-white/[0.02] flex items-center justify-center z-20"
+          >
+            <div
+              class="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin"
+            ></div>
+          </div>
+        }
         <div
           class="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 z-10"
         >
@@ -21,11 +39,15 @@
         </div>
         <img
           class="w-full h-full object-cover"
+          [class.opacity-0]="imageLoading()"
+          [class.opacity-100]="!imageLoading()"
           [ngSrc]="song().image || 'no_album_art.jpg'"
           width="56"
           height="56"
           priority
           alt="Album Art"
+          (load)="onImageLoad()"
+          (error)="onImageError()"
         />
       </div>
 

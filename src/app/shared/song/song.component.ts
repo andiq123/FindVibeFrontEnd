@@ -81,7 +81,7 @@ export class SongComponent {
   });
 
   faCloudArrowDown = faCloudArrowDown;
-  faPlayNext = faPlay;
+
 
   async play() {
     if (this.isActive()) {
