@@ -1,15 +1,29 @@
-import { computed, Injectable, signal, inject, effect, untracked } from '@angular/core';
-import { LibraryApiService } from './library-api.service';
-import { UserService } from './user.service';
-import { finalize, Observable, tap, timeout, catchError, throwError } from 'rxjs';
-import { Song } from '../../../core/models/song.model';
-import { OfflineStorageService } from './offline-storage.service';
-import { Reorder } from '../../../core/models/reorder.model';
-import { trackLoadingState } from '../../../core/utils/loading-state.util';
-import { StorageService } from '../../../core/services/storage.service';
+import {
+  computed,
+  Injectable,
+  signal,
+  inject,
+  effect,
+  untracked,
+} from "@angular/core";
+import { LibraryApiService } from "./library-api.service";
+import { UserService } from "./user.service";
+import {
+  finalize,
+  Observable,
+  tap,
+  timeout,
+  catchError,
+  throwError,
+} from "rxjs";
+import { Song } from "../../../core/models/song.model";
+import { OfflineStorageService } from "./offline-storage.service";
+import { Reorder } from "../../../core/models/reorder.model";
+import { trackLoadingState } from "../../../core/utils/loading-state.util";
+import { StorageService } from "../../../core/services/storage.service";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class LibraryService {
   private readonly libraryApiService = inject(LibraryApiService);
@@ -17,9 +31,11 @@ export class LibraryService {
   private readonly userService = inject(UserService);
   private readonly storageService = inject(StorageService);
 
-  private readonly LIBRARY_STORAGE_KEY = 'library';
+  private readonly LIBRARY_STORAGE_KEY = "library";
 
-  readonly songs = signal<Song[]>(this.storageService.getItem<Song[]>(this.LIBRARY_STORAGE_KEY) || []);
+  readonly songs = signal<Song[]>(
+    this.storageService.getItem<Song[]>(this.LIBRARY_STORAGE_KEY) || [],
+  );
   readonly currentLoadingFavoriteSongIds = signal<string[]>([]);
   readonly loadingSongs = signal<boolean>(false);
 
@@ -54,13 +70,16 @@ export class LibraryService {
     if (currentSongs.length === 0) {
       this.loadingSongs.set(true);
     }
-    
+
     return this.libraryApiService.getFavoritesSong(userId).pipe(
       timeout(10000),
       tap({
         next: (songs: Song[]) => {
           if (!Array.isArray(songs)) {
-            console.error('[LibraryService] Received invalid songs data (expected array):', songs);
+            console.error(
+              "[LibraryService] Received invalid songs data (expected array):",
+              songs,
+            );
             this.userService.resetUser();
             return;
           }
@@ -68,18 +87,18 @@ export class LibraryService {
           this.songs.set(sortedSongs);
         },
         error: (error) => {
-          if (error.status === 404 || error.name === 'TimeoutError') {
+          if (error.status === 404 || error.name === "TimeoutError") {
             this.userService.resetUser();
           }
         },
       }),
-      catchError(err => {
+      catchError((err) => {
         this.loadingSongs.set(false);
         return throwError(() => err);
       }),
       finalize(() => {
         this.loadingSongs.set(false);
-      })
+      }),
     );
   }
 
@@ -96,7 +115,7 @@ export class LibraryService {
           this.trackLoadingFavorite(song.id, false);
         },
         error: () => this.trackLoadingFavorite(song.id, false),
-      })
+      }),
     );
   }
 
@@ -104,8 +123,8 @@ export class LibraryService {
     this.trackLoadingFavorite(id, true);
     const song = this.songs().find((x) => x.link === link);
     if (!song) {
-       this.trackLoadingFavorite(id, false);
-       return new Observable();
+      this.trackLoadingFavorite(id, false);
+      return new Observable();
     }
 
     return this.libraryApiService.removeFromFavorites(song.id).pipe(
@@ -116,7 +135,7 @@ export class LibraryService {
           this.trackLoadingFavorite(id, false);
         },
         error: () => this.trackLoadingFavorite(id, false),
-      })
+      }),
     );
   }
 
@@ -126,17 +145,14 @@ export class LibraryService {
       order: x.order,
     }));
 
-    return this.libraryApiService.reorderSongs(reorders).pipe(
-      tap(() => {
-      })
-    );
+    return this.libraryApiService.reorderSongs(reorders);
   }
 
   changePlaces(id1: string, id2: string): void {
     this.songs.update((prevSongs) => {
       const index1 = prevSongs.findIndex((x) => x.id === id1);
       const index2 = prevSongs.findIndex((x) => x.id === id2);
-      
+
       if (index1 === -1 || index2 === -1) return prevSongs;
 
       const newSongs = [...prevSongs];
@@ -151,7 +167,7 @@ export class LibraryService {
   }
 
   resetReorder(): void {
-     this.songs.update(songs => [...songs].sort((a, b) => a.order - b.order));
+    this.songs.update((songs) => [...songs].sort((a, b) => a.order - b.order));
   }
 
   private trackLoadingFavorite(id: string, isLoading: boolean): void {

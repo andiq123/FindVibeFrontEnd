@@ -1,23 +1,36 @@
 <ul
-  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[500px] w-full z-30 bg-base-100/80 backdrop-blur-2xl rounded-t-[2rem] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.4)] border-t border-glass-border pt-5 pb-8 px-4 gap-2"
+  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[600px] w-full glass-suggestions rounded-t-[2rem] shadow-ios-md border-t pt-5 pb-8 px-4 gap-2"
+  style="
+    padding-bottom: max(2rem, env(safe-area-inset-bottom, 2rem));
+    z-index: var(--z-navigation);
+  "
 >
   @for (navItem of navList(); track navItem.name) {
-  <li
-    class="relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-90 group"
-    [routerLink]="navItem.link"
-    routerLinkActive="active-tab"
-  >
+    <li
+      class="relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-90 group"
+      [routerLink]="navItem.link"
+      routerLinkActive="active-tab"
+      (click)="onNavClick()"
+      (keydown.enter)="onNavClick()"
+      (keydown.space)="onNavClick(); $event.preventDefault()"
+      tabindex="0"
+      role="button"
+      [attr.aria-label]="'Navigate to ' + navItem.name"
+    >
+      <div
+        class="relative flex items-center justify-center transition-transform duration-300 group-[.active-tab]:-translate-y-0.5"
+      >
+        <fa-icon
+          [icon]="navItem.icon"
+          class="text-xl text-base-content/40 transition-colors duration-300 group-[.active-tab]:text-primary"
+        ></fa-icon>
+      </div>
 
-    <div class="relative flex items-center justify-center transition-transform duration-300 group-[.active-tab]:-translate-y-0.5">
-      <fa-icon
-        [icon]="navItem.icon"
-        class="text-xl text-base-content/40 transition-colors duration-300 group-[.active-tab]:text-primary"
-      ></fa-icon>
-    </div>
-
-    <span class="text-[10px] font-semibold tracking-wider mt-1.5 text-base-content/30 transition-colors duration-300 group-[.active-tab]:text-primary">
-      {{ navItem.name }}
-    </span>
-  </li>
+      <span
+        class="text-[10px] font-semibold tracking-wider mt-1.5 text-base-content/30 transition-colors duration-300 group-[.active-tab]:text-primary"
+      >
+        {{ navItem.name }}
+      </span>
+    </li>
   }
 </ul>

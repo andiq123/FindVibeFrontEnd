@@ -28,6 +28,43 @@
   ],
   "dataGroups": [
     {
+      "name": "api-songs",
+      "urls": [
+        "https://*/api/songs/*",
+        "https://*/api/search/*",
+        "https://*/api/library/*"
+      ],
+      "cacheConfig": {
+        "maxSize": 100,
+        "maxAge": "1h",
+        "timeout": "5s",
+        "strategy": "freshness"
+      }
+    },
+    {
+      "name": "album-art",
+      "urls": [
+        "https://lh3.googleusercontent.com/*",
+        "http://jpg.muzvibe.org/*"
+      ],
+      "cacheConfig": {
+        "maxSize": 200,
+        "maxAge": "30d",
+        "timeout": "10s",
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "audio-files",
+      "urls": ["https://*.mp3", "https://*.m4a", "https://*.wav"],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "7d",
+        "timeout": "30s",
+        "strategy": "performance"
+      }
+    },
+    {
       "name": "google-fonts-stylesheets",
       "urls": [
         "https://fonts.googleapis.com/css2?family=Mukta:wght@200;300;400;500;600;700;800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"

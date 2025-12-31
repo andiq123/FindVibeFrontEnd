@@ -1,15 +1,23 @@
 
 
 .mini-player-container {
-    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1),
         box-shadow 0.15s ease,
-        border-color 0.3s ease;
+        border-color 0.2s ease;
     -webkit-tap-highlight-color: transparent;
     will-change: transform;
 
     &:active {
-        transform: translate(-50%, 0) scale(0.97);
-        box-shadow: 0 10px 15px -5px rgba(0, 0, 0, 0.2);
+        transform: translate(-50%, 0) scale(0.98);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+        will-change: auto;
+
+        &:active {
+            transform: translate(-50%, 0);
+        }
     }
 }
 

@@ -1,19 +1,21 @@
-import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
-import { Song } from '../../../core/models/song.model';
-import { SongComponent } from '../../song/song.component';
-import { EmptyStateComponent } from '../../empty-state/empty-state.component';
-import { LoadingBallsComponent } from '../../loading-balls/loading-balls.component';
-import { faMusic, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  input,
+  output,
+} from "@angular/core";
+import { Song } from "../../../core/models/song.model";
+import { SongComponent } from "../../song/song.component";
+import { EmptyStateComponent } from "../../empty-state/empty-state.component";
+import { SkeletonComponent } from "../skeleton/skeleton.component";
+import { faMusic } from "@fortawesome/free-solid-svg-icons";
+import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 
 @Component({
-  selector: 'app-song-list',
+  selector: "app-song-list",
   template: `
     @if (isLoading()) {
-      <div class="flex flex-col items-center justify-center p-12 gap-4">
-        <app-loading-balls />
-        <p class="text-sm opacity-50">Loading vibes...</p>
-      </div>
+      <app-skeleton type="song" [count]="skeletonCount()" />
     } @else {
       <ul class="flex flex-col">
         @for (song of songs(); track song.id) {
@@ -36,32 +38,35 @@ import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
       </ul>
     }
   `,
-  styles: [`
-    :host {
-      display: block;
-    }
-  `],
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+    `,
+  ],
   standalone: true,
-  imports: [SongComponent, EmptyStateComponent, LoadingBallsComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  imports: [SongComponent, EmptyStateComponent, SkeletonComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SongListComponent {
-    songs = input.required<Song[]>();
-    isLoading = input(false);
-    allowReorder = input(false);
-    
-    emptyStateIcon = input<IconDefinition>(faMusic);
-    emptyStateTitle = input('No songs found');
-    emptyStateDescription = input('Try searching for something else.');
+  songs = input.required<Song[]>();
+  isLoading = input(false);
+  allowReorder = input(false);
+  skeletonCount = input(5);
 
-    reorder = output<{ from: string; to: string }>();
-    playlistChange = output<void>();
+  emptyStateIcon = input<IconDefinition>(faMusic);
+  emptyStateTitle = input("No songs found");
+  emptyStateDescription = input("Try searching for something else.");
 
-    emitReorder(event: { from: string; to: string }) {
-        this.reorder.emit(event);
-    }
+  reorder = output<{ from: string; to: string }>();
+  playlistChange = output<void>();
 
-    emitPlaylistChange() {
-        this.playlistChange.emit();
-    }
+  emitReorder(event: { from: string; to: string }) {
+    this.reorder.emit(event);
+  }
+
+  emitPlaylistChange() {
+    this.playlistChange.emit();
+  }
 }

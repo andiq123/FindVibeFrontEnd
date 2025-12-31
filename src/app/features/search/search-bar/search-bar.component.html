@@ -1,6 +1,7 @@
 <form
   (ngSubmit)="submit()"
-  class="flex items-center gap-3 w-full group relative z-50"
+  class="flex items-center gap-3 w-full group relative"
+  style="z-index: var(--z-search-suggestions)"
 >
   <div class="relative flex-1 group/search">
     <!-- Search Icon -->
@@ -78,7 +79,8 @@
     <ul
       id="search-suggestions"
       role="listbox"
-      class="absolute top-full left-0 w-full mt-2 z-50 anim-slide-in-ios bg-base-200/95 backdrop-blur-2xl rounded-[12px] overflow-hidden shadow-ios border border-base-content/[0.06] origin-top"
+      class="absolute top-full left-0 w-full mt-2 anim-slide-in-ios glass-suggestions rounded-[14px] overflow-hidden shadow-ios-md origin-top"
+      style="z-index: var(--z-search-suggestions)"
       aria-label="Search suggestions"
       [attr.aria-busy]="suggestionsLoading()"
     >
@@ -98,12 +100,12 @@
           <li role="option" [attr.aria-selected]="false">
             <button
               type="button"
-              class="group flex items-center justify-between px-4 py-[11px] cursor-pointer hover:bg-base-content/[0.04] active:bg-base-content/[0.08] transition-all duration-150 relative border-b border-base-content/[0.06] last:border-0 w-full text-left touch-manipulation"
+              class="group flex items-center justify-between px-5 py-3 cursor-pointer active:bg-base-content/[0.06] transition-all duration-150 relative border-b border-base-content/[0.05] last:border-0 w-full text-left touch-manipulation"
               (click)="searchBySuggestion(suggestion)"
             >
-              <div class="flex items-center gap-3.5 min-w-0 flex-1">
+              <div class="flex items-center gap-4 min-w-0 flex-1">
                 <fa-icon
-                  class="text-base-content/40 text-[15px] transition-colors group-hover:text-base-content/50"
+                  class="text-base-content/30 text-[16px]"
                   [icon]="faMagnifyingGlass"
                 ></fa-icon>
                 <span
@@ -115,12 +117,12 @@
               <button
                 type="button"
                 (click)="fillSuggestion(suggestion, $event)"
-                class="w-9 h-9 flex items-center justify-center -mr-1.5 text-primary hover:bg-primary/10 active:bg-primary/20 rounded-full transition-all duration-150 active:scale-95 touch-manipulation"
+                class="w-8 h-8 flex items-center justify-center -mr-1 text-base-content/40 active:text-primary active:bg-base-content/[0.04] rounded-full transition-all duration-150 active:scale-95 touch-manipulation"
                 [attr.aria-label]="'Fill search with ' + suggestion"
               >
                 <fa-icon
                   [icon]="faArrowUpLeft"
-                  class="-rotate-45 text-[15px]"
+                  class="-rotate-45 text-[14px]"
                 />
               </button>
             </button>

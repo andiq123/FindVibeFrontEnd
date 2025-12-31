@@ -1,15 +1,13 @@
-import { Injectable, signal, Type } from '@angular/core';
+import { Injectable, signal, Type } from "@angular/core";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class ModalService {
-  activeModal = signal<Type<any> | null>(null);
-  modalData = signal<any>(null);
+  activeModal = signal<Type<unknown> | null>(null);
+  modalData = signal<unknown>(null);
 
-  constructor() {}
-
-  open<T>(component: Type<T>, data?: any) {
+  open<T>(component: Type<T>, data?: unknown) {
     this.modalData.set(data);
     this.activeModal.set(component);
   }

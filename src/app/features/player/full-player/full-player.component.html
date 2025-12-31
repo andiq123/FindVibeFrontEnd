@@ -1,5 +1,6 @@
 <div
-  class="fixed bottom-0 left-0 right-0 h-[100dvh] z-[150] flex flex-col"
+  class="fixed bottom-0 left-0 right-0 h-[100dvh] flex flex-col"
+  style="z-index: var(--z-full-player)"
   [class.anim-slide-up]="isOpeningAnimation()"
   [class.anim-slide-down]="isClosingAnimation()"
   #playerRef
@@ -98,10 +99,18 @@
               step="0.1"
               [value]="visualTime()"
               (input)="onTimeChange($event)"
-              (touchstart)="onTimeDragStart()"
+              (touchstart)="onTimeDragStart(); $event.stopPropagation()"
+              (touchmove)="$event.stopPropagation()"
               (mousedown)="onTimeDragStart()"
-              (touchend)="onTimeDragEnd($event)"
+              (touchend)="onTimeDragEnd($event); $event.stopPropagation()"
               (mouseup)="onTimeDragEnd($event)"
+              (change)="onTimeDragEnd($event)"
+              aria-label="Seek"
+              role="slider"
+              [attr.aria-valuemin]="0"
+              [attr.aria-valuemax]="duration()"
+              [attr.aria-valuenow]="visualTime()"
+              [attr.aria-valuetext]="visualTime() + ' seconds'"
             />
             <div class="slider-track">
               <div

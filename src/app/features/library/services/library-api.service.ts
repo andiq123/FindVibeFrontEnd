@@ -1,14 +1,14 @@
-import { Injectable, inject } from '@angular/core';
-import { environment } from '../../../../environments/environment.development';
-import { HttpClient } from '@angular/common/http';
-import { Song } from '../../../core/models/song.model';
-import { map, Observable } from 'rxjs';
-import { Reorder } from '../../../core/models/reorder.model';
+import { Injectable, inject } from "@angular/core";
+import { environment } from "../../../../environments/environment.development";
+import { HttpClient } from "@angular/common/http";
+import { Song } from "../../../core/models/song.model";
+import { Observable } from "rxjs";
+import { Reorder } from "../../../core/models/reorder.model";
 
 const BASE_API_URL = environment.API_URL;
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class LibraryApiService {
   private readonly httpClient = inject(HttpClient);

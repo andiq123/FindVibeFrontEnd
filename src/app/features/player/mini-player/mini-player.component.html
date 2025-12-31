@@ -1,22 +1,22 @@
 <div
-  class="mini-player-container bg-base-100/95 rounded-2xl fixed bottom-[92px] left-1/2 -translate-x-1/2 anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[560px] shadow-premium backdrop-blur-3xl border z-[90] cursor-pointer overflow-hidden"
+  class="mini-player-container glass-suggestions rounded-2xl fixed bottom-[92px] left-1/2 -translate-x-1/2 anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[600px] shadow-ios-md cursor-pointer overflow-hidden touch-manipulation"
+  style="z-index: var(--z-mini-player)"
   [class.border-primary/20]="isPlaying()"
-  [class.border-glass-border]="!isPlaying()"
+  [class.border-transparent]="!isPlaying()"
   (click)="toggleSize()"
   (keydown.enter)="toggleSize()"
   tabindex="0"
   role="button"
 >
-
   <div class="flex items-center gap-3 w-full p-3">
-
     <div class="flex items-center gap-2">
-
-      <div 
+      <div
         class="album-art relative w-14 aspect-square rounded-lg overflow-hidden ring-1 ring-base-200/30"
         [class.album-art-playing]="isPlaying()"
       >
-        <div class="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 z-10">
+        <div
+          class="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 z-10"
+        >
           <app-player-button [status]="status()" />
         </div>
         <img
@@ -29,8 +29,10 @@
         />
       </div>
 
-      @if(isPlaying()) {
-        <div class="waveform-indicator flex items-center gap-[3px] h-4 anim-fade-in">
+      @if (isPlaying()) {
+        <div
+          class="waveform-indicator flex items-center gap-[3px] h-4 anim-fade-in"
+        >
           <span class="waveform-bar"></span>
           <span class="waveform-bar"></span>
           <span class="waveform-bar"></span>
@@ -42,7 +44,11 @@
       <app-moving-title
         [title]="song().title"
         [isActive]="isPlaying()"
-        [classes]="isPlaying() ? 'text-sm font-semibold block' : 'text-sm font-medium block'"
+        [classes]="
+          isPlaying()
+            ? 'text-sm font-semibold block'
+            : 'text-sm font-medium block'
+        "
       />
       <app-moving-title
         [title]="song().artist"
@@ -51,7 +57,7 @@
       />
     </div>
 
-    <button 
+    <button
       class="btn btn-ghost btn-circle btn-sm transition-colors duration-200"
       [class.text-primary]="isPlaying()"
       [class.text-base-content/50]="!isPlaying()"
@@ -61,9 +67,6 @@
   </div>
 
   <div class="progress-bar">
-    <div 
-      class="progress-fill" 
-      [style.width.%]="progress()"
-    ></div>
+    <div class="progress-fill" [style.width.%]="progress()"></div>
   </div>
 </div>

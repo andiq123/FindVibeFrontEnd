@@ -1,28 +1,45 @@
-import { Component, computed, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { OfflineStorageService } from '../../services/offline-storage.service';
-import { LibraryService } from '../../services/library.service';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faTrash, faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
-import { Song } from '../../../../core/models/song.model';
-import { ModalService } from '../../../../core/services/modal.service';
+import {
+  Component,
+  computed,
+  OnInit,
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import { OfflineStorageService } from "../../services/offline-storage.service";
+import { LibraryService } from "../../services/library.service";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { faTrash, faCloudArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { Song } from "../../../../core/models/song.model";
+import { ModalService } from "../../../../core/services/modal.service";
+import { SettingsService } from "../../../../core/services/settings.service";
+import {
+  HapticService,
+  HapticFeedback,
+} from "../../../../core/services/haptic.service";
 
 @Component({
-    selector: 'app-storage-info',
-    standalone: true,
-    imports: [FontAwesomeModule],
-    templateUrl: './storage-info.component.html',
-    styleUrl: './storage-info.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: "app-storage-info",
+  standalone: true,
+  imports: [FontAwesomeModule],
+  templateUrl: "./storage-info.component.html",
+  styleUrl: "./storage-info.component.scss",
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StorageInfoComponent implements OnInit {
   private offlineStorageService = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
   private modalService = inject(ModalService);
+  private settingsService = inject(SettingsService);
+  private hapticService = inject(HapticService);
 
   storageTotal = this.offlineStorageService.storageTotal;
   storageUsed = this.offlineStorageService.storageUsed;
   loadingDownloading = signal<boolean>(false);
   loadingClearing = signal<boolean>(false);
+
+  isHapticEnabled = this.settingsService.isHapticEnabled;
+  isHapticSupported = this.hapticService.supported;
 
   showRemoveCacheButton = computed(() => {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
@@ -40,13 +57,20 @@ export class StorageInfoComponent implements OnInit {
     this.modalService.close();
   }
 
+  toggleHaptic() {
+    this.settingsService.toggleHaptic();
+    this.hapticService.impact(HapticFeedback.SELECTION);
+  }
+
   async downloadAll(): Promise<void> {
     try {
       this.loadingDownloading.set(true);
-      await this.offlineStorageService.cacheAllSongs(this.libraryService.songs());
+      await this.offlineStorageService.cacheAllSongs(
+        this.libraryService.songs(),
+      );
       this.populateAvailableOfflineSongs();
     } catch (error) {
-      console.error('[StorageInfo] Failed to download songs:', error);
+      console.error("[StorageInfo] Failed to download songs:", error);
     } finally {
       this.loadingDownloading.set(false);
     }
@@ -58,7 +82,7 @@ export class StorageInfoComponent implements OnInit {
       await this.offlineStorageService.removeCache();
       this.populateAvailableOfflineSongs();
     } catch (error) {
-      console.error('[StorageInfo] Failed to clear cache:', error);
+      console.error("[StorageInfo] Failed to clear cache:", error);
     } finally {
       this.loadingClearing.set(false);
     }
@@ -68,11 +92,13 @@ export class StorageInfoComponent implements OnInit {
     const songs = this.libraryService.songs();
     await Promise.all(
       songs.map(async (song: Song) => {
-        const isAvailable = await this.offlineStorageService.isAvailableOffline(song.link);
+        const isAvailable = await this.offlineStorageService.isAvailableOffline(
+          song.link,
+        );
         if (isAvailable) {
           this.offlineStorageService.addAvailableOfflineSongId(song.id);
         }
-      })
+      }),
     );
   }
 }

@@ -1,15 +1,17 @@
 <app-connection-status />
-@if(newUpdateAvailable()){
+<app-toast />
+
+@if (newUpdateAvailable()) {
   <app-update-overlay />
 }
 
 <div class="app-main-container">
-    <div class="route-container">
-      <router-outlet />
-    </div>
+  <div class="route-container">
+    <router-outlet />
+  </div>
 </div>
 
-@if(song() && isMiniPlayer()) {
+@if (song() && isMiniPlayer()) {
   <app-mini-player
     (toggleSizeEvent)="onToggleSize()"
     [song]="song()!"
@@ -20,7 +22,7 @@
 
 <app-navigation />
 
-@if(song() && !isMiniPlayer()) {
+@if (song() && !isMiniPlayer()) {
   <app-full-player
     (toggleSizeEvent)="onToggleSize()"
     [song]="song()!"

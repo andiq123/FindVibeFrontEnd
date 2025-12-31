@@ -1,15 +1,15 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
-import { StorageService } from './storage.service';
-import { RepeatMode } from '../../features/player/models/player.model';
+import { Injectable, signal, inject, computed } from "@angular/core";
+import { StorageService } from "./storage.service";
+import { RepeatMode } from "../../features/player/models/player.model";
 
 enum ServerStatus {
-  Unchecked = 'unchecked',
-  Up = 'up',
-  Down = 'down'
+  Unchecked = "unchecked",
+  Up = "up",
+  Down = "down",
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class SettingsService {
   private readonly storageService = inject(StorageService);
@@ -19,23 +19,38 @@ export class SettingsService {
   private readonly _isMiniPlayer = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
+  private readonly _isHapticEnabled = signal(true);
 
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
-  readonly isServerDown = computed(() => this._serverStatus() === ServerStatus.Down);
-  readonly isCheckedServer = computed(() => this._serverStatus() !== ServerStatus.Unchecked);
-  readonly isOffline = computed(() => this._isNavigatorOffline() || this.isServerDown());
+  readonly isServerDown = computed(
+    () => this._serverStatus() === ServerStatus.Down,
+  );
+  readonly isHapticEnabled = this._isHapticEnabled.asReadonly();
+  readonly isCheckedServer = computed(
+    () => this._serverStatus() !== ServerStatus.Unchecked,
+  );
+  readonly isOffline = computed(
+    () => this._isNavigatorOffline() || this.isServerDown(),
+  );
 
   initialize(): void {
-    window.addEventListener('online', () => this._isNavigatorOffline.set(false));
-    window.addEventListener('offline', () => this._isNavigatorOffline.set(true));
+    window.addEventListener("online", () =>
+      this._isNavigatorOffline.set(false),
+    );
+    window.addEventListener("offline", () =>
+      this._isNavigatorOffline.set(true),
+    );
 
-    const repeatMode = this.storageService.getItem<RepeatMode>('repeatMode');
-    const isShuffle = this.storageService.getItem<boolean>('isShuffle');
+    const repeatMode = this.storageService.getItem<RepeatMode>("repeatMode");
+    const isShuffle = this.storageService.getItem<boolean>("isShuffle");
+    const isHapticEnabled =
+      this.storageService.getItem<boolean>("isHapticEnabled");
 
     if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
+    if (isHapticEnabled !== null) this._isHapticEnabled.set(isHapticEnabled);
   }
 
   toggleMiniPlayer(): void {
@@ -46,18 +61,22 @@ export class SettingsService {
     const modes = [RepeatMode.OFF, RepeatMode.ALL, RepeatMode.ONE];
     const currentIndex = modes.indexOf(this._repeatMode());
     const nextMode = modes[(currentIndex + 1) % modes.length];
-    
+
     this._repeatMode.set(nextMode);
-    this.storageService.setItem('repeatMode', nextMode);
+    this.storageService.setItem("repeatMode", nextMode);
   }
 
   toggleShuffle(): void {
     const newValue = !this._isShuffle();
     this._isShuffle.set(newValue);
-    this.storageService.setItem('isShuffle', newValue);
+    this.storageService.setItem("isShuffle", newValue);
   }
 
-
+  toggleHaptic(): void {
+    const newValue = !this._isHapticEnabled();
+    this._isHapticEnabled.set(newValue);
+    this.storageService.setItem("isHapticEnabled", newValue);
+  }
 
   setServerUp(): void {
     this._serverStatus.set(ServerStatus.Up);

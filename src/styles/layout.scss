@@ -5,10 +5,11 @@
   }
 
   .sticky-header {
-    @apply sticky z-[30] px-5 border-b border-white/[0.03] bg-base-100/80 backdrop-blur-3xl transition-all duration-300;
+    @apply sticky px-5 border-b border-white/[0.03] bg-base-100/80 backdrop-blur-3xl transition-all duration-300;
     padding-top: max(env(safe-area-inset-top), 1rem);
     padding-bottom: 1rem;
     top: 0;
+    z-index: var(--z-sticky);
   }
 
   .section-headline {
@@ -18,6 +19,48 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  /* Glass Morphism Utilities - iOS Native Style */
+  .glass-light {
+    background: var(--glass-bg-light);
+    border: 1px solid var(--glass-border-subtle);
+    backdrop-filter: blur(var(--glass-blur-light));
+    -webkit-backdrop-filter: blur(var(--glass-blur-light));
+  }
+
+  .glass-medium {
+    background: var(--glass-bg-medium);
+    border: 1px solid var(--glass-border-light);
+    backdrop-filter: blur(var(--glass-blur-medium));
+    -webkit-backdrop-filter: blur(var(--glass-blur-medium));
+  }
+
+  .glass-strong {
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border-medium);
+    backdrop-filter: blur(var(--glass-blur-strong));
+    -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+  }
+
+  .glass-suggestions {
+    background: var(--glass-bg-suggestions);
+    border: 1px solid var(--glass-border-light);
+    backdrop-filter: blur(var(--glass-blur-ultra));
+    -webkit-backdrop-filter: blur(var(--glass-blur-ultra));
+  }
+
+  /* iOS Shadow Utilities */
+  .shadow-ios-sm {
+    box-shadow: var(--shadow-ios-sm);
+  }
+
+  .shadow-ios-md {
+    box-shadow: var(--shadow-ios-md);
+  }
+
+  .shadow-ios-lg {
+    box-shadow: var(--shadow-ios-lg);
   }
 
   .premium-card {

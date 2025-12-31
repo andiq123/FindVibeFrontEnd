@@ -13,10 +13,10 @@ import {
   OnDestroy,
   Renderer2,
   ChangeDetectionStrategy,
-} from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { Router } from '@angular/router';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+} from "@angular/core";
+import { DOCUMENT } from "@angular/common";
+import { Router } from "@angular/router";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
   faPause,
   faPlay,
@@ -24,19 +24,19 @@ import {
   faShuffle,
   faStepBackward,
   faStepForward,
-} from '@fortawesome/free-solid-svg-icons';
-import { PlayerStatus, RepeatMode } from '../models/player.model';
-import { SettingsService } from '../../../core/services/settings.service';
-import { NgOptimizedImage } from '@angular/common';
-import { FavoriteButtonComponent } from '../../../shared/favorite-button/favorite-button.component';
-import { SwipeDownDirective } from '../directives/swipe-down.directive';
-import { PlayerService } from '../../../core/services/player.service';
-import { Song } from '../../../core/models/song.model';
-import { MovingTitleComponent } from '../../../shared/moving-title/moving-title.component';
-import { TimeFormatPipe } from '../../../shared/pipes/time-format.pipe';
+} from "@fortawesome/free-solid-svg-icons";
+import { PlayerStatus, RepeatMode } from "../models/player.model";
+import { SettingsService } from "../../../core/services/settings.service";
+import { NgOptimizedImage } from "@angular/common";
+import { FavoriteButtonComponent } from "../../../shared/favorite-button/favorite-button.component";
+import { SwipeDownDirective } from "../directives/swipe-down.directive";
+import { PlayerService } from "../../../core/services/player.service";
+import { Song } from "../../../core/models/song.model";
+import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
+import { TimeFormatPipe } from "../../../shared/pipes/time-format.pipe";
 
 @Component({
-  selector: 'app-full-player',
+  selector: "app-full-player",
   standalone: true,
   imports: [
     FontAwesomeModule,
@@ -46,8 +46,8 @@ import { TimeFormatPipe } from '../../../shared/pipes/time-format.pipe';
     MovingTitleComponent,
     TimeFormatPipe,
   ],
-  templateUrl: './full-player.component.html',
-  styleUrl: './full-player.component.scss',
+  templateUrl: "./full-player.component.html",
+  styleUrl: "./full-player.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FullPlayerComponent implements OnInit, OnDestroy {
@@ -82,8 +82,8 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   isClosingAnimation = signal<boolean>(false);
   isOpeningAnimation = signal<boolean>(true);
 
-  playerRef = viewChild<ElementRef<HTMLDivElement>>('playerRef');
-  timeSlider = viewChild<ElementRef<HTMLInputElement>>('timeSlider');
+  playerRef = viewChild<ElementRef<HTMLDivElement>>("playerRef");
+  timeSlider = viewChild<ElementRef<HTMLInputElement>>("timeSlider");
 
   isDraggingTime = signal<boolean>(false);
   visualTime = signal<number>(0);
@@ -92,8 +92,8 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   private timeSyncEffect = effect(() => {
     const time = this.serviceCurrentTime();
     const now = Date.now();
-    
-    if (!this.isDraggingTime() && (now - this.lastSeekTimestamp > 500)) {
+
+    if (!this.isDraggingTime() && now - this.lastSeekTimestamp > 500) {
       untracked(() => this.visualTime.set(time));
     }
   });
@@ -104,27 +104,27 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
     return (this.visualTime() / duration) * 100;
   });
 
-  constructor() {}
-
   ngOnInit() {
-    this.renderer.setStyle(this.document.body, 'overflow', 'hidden');
+    this.renderer.setStyle(this.document.body, "overflow", "hidden");
     setTimeout(() => this.isOpeningAnimation.set(false), 550);
   }
 
   ngOnDestroy() {
-    this.renderer.removeStyle(this.document.body, 'overflow');
+    this.renderer.removeStyle(this.document.body, "overflow");
   }
-
-
 
   toggleSize(isImmediate = false) {
     if (isImmediate) {
       this.toggleSizeEvent.emit();
       return;
     }
-    this.playerRef()?.nativeElement.addEventListener('animationend', () => {
-      this.toggleSizeEvent.emit();
-    }, { once: true });
+    this.playerRef()?.nativeElement.addEventListener(
+      "animationend",
+      () => {
+        this.toggleSizeEvent.emit();
+      },
+      { once: true },
+    );
     this.isClosingAnimation.set(true);
   }
 
@@ -172,7 +172,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
     const artistName = this.song().artist;
     if (artistName) {
       this.toggleSize();
-      this.router.navigate(['/songs', artistName]);
+      this.router.navigate(["/songs", artistName]);
     }
   }
 }

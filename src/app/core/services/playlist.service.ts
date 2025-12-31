@@ -1,11 +1,9 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { Song } from '../models/song.model';
-import { shuffleArray } from '../utils/utils';
-
-const TIME_OFFSET_SECONDS = 5;
+import { Injectable, signal, computed } from "@angular/core";
+import { Song } from "../models/song.model";
+import { shuffleArray } from "../utils/utils";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class PlaylistService {
   private readonly originalList = signal<Song[]>([]);
@@ -17,7 +15,7 @@ export class PlaylistService {
   readonly currentSong = computed(() => {
     const q = this.queue();
     const i = this.currentIndex();
-    return (i >= 0 && i < q.length) ? q[i] : null;
+    return i >= 0 && i < q.length ? q[i] : null;
   });
 
   setCurrentSong(song: Song | null): void {
@@ -26,7 +24,7 @@ export class PlaylistService {
       return;
     }
 
-    const index = this.queue().findIndex(s => s.id === song.id);
+    const index = this.queue().findIndex((s) => s.id === song.id);
     this.currentIndex.set(index !== -1 ? index : -1);
   }
 
@@ -41,7 +39,7 @@ export class PlaylistService {
     let shuffled = shuffleArray(this.originalList());
 
     if (current) {
-      shuffled = shuffled.filter(s => s.id !== current.id);
+      shuffled = shuffled.filter((s) => s.id !== current.id);
       shuffled.unshift(current);
     }
 
@@ -54,7 +52,7 @@ export class PlaylistService {
     this.queue.set(this.originalList());
 
     if (current) {
-      const index = this.originalList().findIndex(s => s.id === current.id);
+      const index = this.originalList().findIndex((s) => s.id === current.id);
       this.currentIndex.set(index);
     } else {
       this.currentIndex.set(-1);
@@ -84,9 +82,9 @@ export class PlaylistService {
   }
 
   jumpToIndex(index: number): void {
-     if (index >= 0 && index < this.queue().length) {
-       this.currentIndex.set(index);
-     }
+    if (index >= 0 && index < this.queue().length) {
+      this.currentIndex.set(index);
+    }
   }
 
   reset(): void {
