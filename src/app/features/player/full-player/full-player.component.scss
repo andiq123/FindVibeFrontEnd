@@ -1,78 +1,18 @@
-:host {
-  display: block;
-  background: transparent !important;
-}
+@use '../../../../styles/mixins';
 
-.fixed.h-\[100dvh\] {
-  height: 100dvh;
-  touch-action: none;
+.artwork-wrapper {
+  transition: transform 0.8s mixins.$ease-out-expo;
+  transform: scale(0.95);
   will-change: transform;
-  transform: translate3d(0, 0, 0);
-  background: transparent !important;
-  box-shadow: none !important;
-}
 
-.player-content-card {
-  background: linear-gradient(180deg, #121212 0%, #1a1a1a 100%);
-  width: 100%;
-  height: 100%;
-  position: relative;
-  /* Hardware acceleration for the clipping layer */
-  transform: translate3d(0, 0, 0);
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
-  mask-image: radial-gradient(white, black);
-  /* Force Safari to respect border-radius */
-}
-
-.pb-safe-bottom {
-  padding-bottom: max(2rem, env(safe-area-inset-bottom) + 1.5rem);
-}
-
-.artwork-container {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 0;
-
-  .artwork-wrapper {
-    transition: transform 0.8s cubic-bezier(0.32, 0.72, 0, 1);
-    transform: scale(0.95);
-    will-change: transform;
-    touch-action: none;
-
-    &.playing {
-      transform: scale(1.0);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      transition: none;
-      will-change: auto;
-      transform: scale(1.0);
-
-      &.playing {
-        transform: scale(1.0);
-      }
-    }
+  &.playing {
+    transform: scale(1);
   }
-}
 
-.ios-artwork-shadow {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  @include mixins.respect-reduced-motion;
 }
 
 .ios-slider-container {
-  position: relative;
-  width: 100%;
-  height: 80px;
-  display: flex;
-  align-items: center;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  padding: 24px 0;
-
   input[type="range"] {
     position: absolute;
     inset: 0;
@@ -80,24 +20,19 @@
     width: 100%;
     height: 100%;
     background: transparent;
-    -webkit-appearance: none;
     appearance: none;
     cursor: pointer;
     margin: 0;
-    padding: 0;
     outline: none;
-    touch-action: none;
 
     &::-webkit-slider-thumb {
-      -webkit-appearance: none;
+      appearance: none;
       width: 44px;
       height: 44px;
       background: transparent;
       border: none;
       border-radius: 50%;
       cursor: grab;
-      transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
-      position: relative;
       z-index: 40;
     }
 
@@ -109,80 +44,9 @@
       border-radius: 50%;
       cursor: grab;
     }
-
-    &:active::-webkit-slider-thumb {
-      transform: scale(1.2);
-    }
-
-    /* Target the following track */
-    &:active+.slider-track {
-      height: 8px;
-      background: rgba(255, 255, 255, 0.35);
-    }
-
-    &:active+.slider-track .slider-fill::after {
-      transform: translate(50%, -50%) scale(1.3);
-    }
-  }
-
-  .slider-track {
-    position: absolute;
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 100px;
-    overflow: visible;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: height 0.2s cubic-bezier(0.32, 0.72, 0, 1);
-    z-index: 10;
-    pointer-events: none;
-  }
-
-  .slider-fill {
-    position: absolute;
-    height: 100%;
-    background: white;
-    border-radius: 100px;
-    pointer-events: none;
-    transform-origin: left;
-    transition: background 0.2s ease;
-    will-change: width;
-    position: relative;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-
-    &::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translate(50%, -50%);
-      width: 14px;
-      height: 14px;
-      background: white;
-      border-radius: 50%;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
-      opacity: 1;
-      transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
-    }
   }
 }
 
 .pressable-native {
-  transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1);
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-
-  &:active {
-    transform: scale(0.92);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-
-    &:active {
-      transform: none;
-    }
-  }
+  @include mixins.pressable-lg;
 }

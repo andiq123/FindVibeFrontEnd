@@ -7,7 +7,7 @@ import {
   faExclamationTriangle,
   faInfoCircle,
   faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+} from "../../icons";
 
 @Component({
   selector: "app-toast",

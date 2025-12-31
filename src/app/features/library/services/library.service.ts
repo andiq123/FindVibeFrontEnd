@@ -1,11 +1,4 @@
-import {
-  computed,
-  Injectable,
-  signal,
-  inject,
-  effect,
-  untracked,
-} from "@angular/core";
+import { Injectable, signal, inject, effect, untracked } from "@angular/core";
 import { LibraryApiService } from "./library-api.service";
 import { UserService } from "./user.service";
 import {
@@ -60,10 +53,6 @@ export class LibraryService {
     this.loadingSongs.set(false);
     this.storageService.removeItem(this.LIBRARY_STORAGE_KEY);
   }
-
-  readonly orderHasChanged = computed(() => {
-    return false;
-  });
 
   updateLibrarySongs(userId: string) {
     const currentSongs = untracked(() => this.songs());

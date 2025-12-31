@@ -1,13 +1,13 @@
-import { Component, input } from '@angular/core';
-import { PlayerStatus } from '../../features/player/models/player.model';
-import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { Component, input } from "@angular/core";
+import { PlayerStatus } from "../../features/player/models/player.model";
+import { faPause, faPlay } from "../icons";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 
 @Component({
-    selector: 'app-player-button',
-    imports: [FontAwesomeModule],
-    templateUrl: './player-button.component.html',
-    styleUrl: './player-button.component.scss'
+  selector: "app-player-button",
+  imports: [FontAwesomeModule],
+  templateUrl: "./player-button.component.html",
+  styleUrl: "./player-button.component.scss",
 })
 export class PlayerButtonComponent {
   status = input.required<PlayerStatus>();

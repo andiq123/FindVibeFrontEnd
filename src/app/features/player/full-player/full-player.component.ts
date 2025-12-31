@@ -24,7 +24,7 @@ import {
   faShuffle,
   faStepBackward,
   faStepForward,
-} from "@fortawesome/free-solid-svg-icons";
+} from "../../../shared/icons";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
 import { SettingsService } from "../../../core/services/settings.service";
 import { NgOptimizedImage } from "@angular/common";

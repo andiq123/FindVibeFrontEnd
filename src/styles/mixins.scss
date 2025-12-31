@@ -1,0 +1,77 @@
+// Animation and Transition Mixins
+
+// Easing functions
+$ease-out-expo: cubic-bezier(0.32, 0.72, 0, 1);
+
+// Tap highlight prevention
+@mixin no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Reduced motion support
+@mixin respect-reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+    animation: none !important;
+    will-change: auto !important;
+
+    &:active {
+      transform: none !important;
+    }
+  }
+}
+
+// Pressable scale effects
+@mixin pressable-base {
+  transition: transform 0.15s $ease-out-expo;
+  will-change: transform;
+  @include no-tap-highlight;
+  @include respect-reduced-motion;
+}
+
+@mixin pressable-sm {
+  @include pressable-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@mixin pressable-md {
+  @include pressable-base;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+@mixin pressable-lg {
+  @include pressable-base;
+
+  &:active {
+    transform: scale(0.92);
+  }
+}
+
+// Loading/Skeleton pulse animation
+@mixin skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: pulse 1.5s ease-in-out infinite;
+
+  @include respect-reduced-motion;
+}
+
+@keyframes pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

@@ -9,7 +9,7 @@ import {
 import { OfflineStorageService } from "../../services/offline-storage.service";
 import { LibraryService } from "../../services/library.service";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faTrash, faCloudArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faCloudArrowDown } from "../../../../shared/icons";
 import { Song } from "../../../../core/models/song.model";
 import { ModalService } from "../../../../core/services/modal.service";
 import { SettingsService } from "../../../../core/services/settings.service";

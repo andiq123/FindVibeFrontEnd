@@ -13,10 +13,7 @@ import {
   ElementRef,
 } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import {
-  faMagnifyingGlass,
-  faArrowUp,
-} from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass, faArrowUp } from "../../../shared/icons";
 import { FormsModule } from "@angular/forms";
 import { TitleCasePipe } from "@angular/common";
 import { Router } from "@angular/router";

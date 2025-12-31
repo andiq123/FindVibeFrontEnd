@@ -8,8 +8,7 @@ import { Song } from "../../../core/models/song.model";
 import { SongComponent } from "../../song/song.component";
 import { EmptyStateComponent } from "../../empty-state/empty-state.component";
 import { SkeletonComponent } from "../skeleton/skeleton.component";
-import { faMusic } from "@fortawesome/free-solid-svg-icons";
-import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
+import { faMusic, IconDefinition } from "../../icons";
 
 @Component({
   selector: "app-song-list",

@@ -1,32 +1,39 @@
-import { Component, computed, input, output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { Song } from '../../core/models/song.model';
-import { PlayerStatus } from '../../features/player/models/player.model';
-import { PlayerButtonComponent } from '../player-button/player-button.component';
-import { MovingTitleComponent } from '../moving-title/moving-title.component';
-import { NgOptimizedImage, NgTemplateOutlet } from '@angular/common';
-import { FavoriteButtonComponent } from '../favorite-button/favorite-button.component';
-import { faCloudArrowDown } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { OfflineStorageService } from '../../features/library/services/offline-storage.service';
-import { DragAndDropDirective } from '../../features/search/directives/drag-and-drop.directive';
-import { PlayerService } from '../../core/services/player.service';
-import { SettingsService } from '../../core/services/settings.service';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import {
+  Component,
+  computed,
+  input,
+  output,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import { Song } from "../../core/models/song.model";
+import { PlayerStatus } from "../../features/player/models/player.model";
+import { PlayerButtonComponent } from "../player-button/player-button.component";
+import { MovingTitleComponent } from "../moving-title/moving-title.component";
+import { NgOptimizedImage, NgTemplateOutlet } from "@angular/common";
+import { FavoriteButtonComponent } from "../favorite-button/favorite-button.component";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
+import { DragAndDropDirective } from "../../features/search/directives/drag-and-drop.directive";
+import { PlayerService } from "../../core/services/player.service";
+import { SettingsService } from "../../core/services/settings.service";
+import { faCloudArrowDown, faPlay } from "../icons";
 
 @Component({
-    selector: 'app-song',
-    imports: [
-        PlayerButtonComponent,
-        MovingTitleComponent,
-        NgOptimizedImage,
-        FavoriteButtonComponent,
-        FontAwesomeModule,
-        DragAndDropDirective,
-        NgTemplateOutlet
-    ],
-    templateUrl: './song.component.html',
-    styleUrl: './song.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: "app-song",
+  imports: [
+    PlayerButtonComponent,
+    MovingTitleComponent,
+    NgOptimizedImage,
+    FavoriteButtonComponent,
+    FontAwesomeModule,
+    DragAndDropDirective,
+    NgTemplateOutlet,
+  ],
+  templateUrl: "./song.component.html",
+  styleUrl: "./song.component.scss",
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SongComponent {
   private playerService = inject(PlayerService);
@@ -46,7 +53,9 @@ export class SongComponent {
   imageLoading = signal(true);
   imageError = signal(false);
 
-  isActive = computed(() => this.playerService.song()?.link === this.song().link);
+  isActive = computed(
+    () => this.playerService.song()?.link === this.song().link,
+  );
 
   status = computed(() => {
     if (this.isActive()) {
@@ -62,7 +71,9 @@ export class SongComponent {
   });
 
   isAvailableOffline = computed(() => {
-    return this.offlineStorageService.availableOfflineSongIds().includes(this.song().id);
+    return this.offlineStorageService
+      .availableOfflineSongIds()
+      .includes(this.song().id);
   });
 
   isUnavailable = computed(() => {

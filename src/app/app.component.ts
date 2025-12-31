@@ -59,12 +59,7 @@ export class AppComponent implements OnInit {
 
   song = computed(() => this.playlistService.currentSong());
   status = this.playerService.status;
-  progress = computed(() => {
-    const duration = this.playerService.duration();
-    return duration > 0
-      ? (this.playerService.currentTime() / duration) * 100
-      : 0;
-  });
+  progress = computed(() => this.playerService.progress());
 
   ngOnInit(): void {
     this.initializeServices();

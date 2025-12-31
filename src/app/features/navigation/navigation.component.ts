@@ -5,15 +5,13 @@ import {
   ChangeDetectionStrategy,
   inject,
 } from "@angular/core";
-import {
-  FaIconComponent,
-  IconDefinition,
-} from "@fortawesome/angular-fontawesome";
+import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import {
   faCompass,
   faBookmark,
   faClock,
-} from "@fortawesome/free-solid-svg-icons";
+  IconDefinition,
+} from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import {
   HapticService,

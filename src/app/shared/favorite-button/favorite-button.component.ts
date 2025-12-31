@@ -1,17 +1,25 @@
-import { Component, computed, input, inject, ChangeDetectionStrategy } from '@angular/core';
-import { faHeart as favoritedHeart } from '@fortawesome/free-solid-svg-icons';
-import { faHeart as unFavoritedHeart } from '@fortawesome/free-regular-svg-icons';
-import { UserService } from '../../features/library/services/user.service';
-import { LibraryService } from '../../features/library/services/library.service';
-import { Song } from '../../core/models/song.model';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {
+  Component,
+  computed,
+  input,
+  inject,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import {
+  faHeartSolid as favoritedHeart,
+  faHeartRegular as unFavoritedHeart,
+} from "../icons";
+import { UserService } from "../../features/library/services/user.service";
+import { LibraryService } from "../../features/library/services/library.service";
+import { Song } from "../../core/models/song.model";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 
 @Component({
-    selector: 'app-favorite-button',
-    imports: [FontAwesomeModule],
-    templateUrl: './favorite-button.component.html',
-    styleUrl: './favorite-button.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: "app-favorite-button",
+  imports: [FontAwesomeModule],
+  templateUrl: "./favorite-button.component.html",
+  styleUrl: "./favorite-button.component.scss",
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FavoriteButtonComponent {
   private userService = inject(UserService);
@@ -26,7 +34,7 @@ export class FavoriteButtonComponent {
   isLoadingFavorite = computed(() =>
     this.libraryService
       .currentLoadingFavoriteSongIds()
-      .includes(this.song().id)
+      .includes(this.song().id),
   );
 
   isAbleToAddToFav = computed(() => !!this.userService.user());
@@ -34,7 +42,7 @@ export class FavoriteButtonComponent {
   isFavorited = computed(() =>
     this.libraryService
       .songs()
-      .some((song: Song) => song.link === this.song().link)
+      .some((song: Song) => song.link === this.song().link),
   );
 
   toggleAddToFavorite() {
@@ -46,9 +54,7 @@ export class FavoriteButtonComponent {
         .removeFromFavorites(this.song().id, this.song().link)
         .subscribe();
     } else {
-      this.libraryService
-        .addToFavorites(this.song(), user.id)
-        .subscribe();
+      this.libraryService.addToFavorites(this.song(), user.id).subscribe();
     }
   }
 }

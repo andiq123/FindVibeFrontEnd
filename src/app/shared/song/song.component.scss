@@ -1,3 +1,5 @@
+@use '../../../styles/mixins';
+
 .dragging {
   opacity: 0.3;
 }
@@ -11,10 +13,10 @@
 }
 
 .song-container {
+  @include mixins.pressable-sm;
   touch-action: pan-y;
-  transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1),
+  transition: transform 0.15s mixins.$ease-out-expo,
     background-color 0.15s ease-out;
-  -webkit-tap-highlight-color: transparent;
   will-change: transform, background-color;
 
   &:hover {
@@ -22,17 +24,7 @@
   }
 
   &:active {
-    transform: scale(0.98);
     background-color: rgba(255, 255, 255, 0.06);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-    will-change: auto;
-
-    &:active {
-      transform: none;
-    }
   }
 }
 

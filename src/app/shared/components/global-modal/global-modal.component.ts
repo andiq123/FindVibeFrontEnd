@@ -12,7 +12,7 @@ import {
 import { CommonModule, DOCUMENT } from "@angular/common";
 import { ModalService } from "../../../core/services/modal.service";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark } from "../../icons";
 
 @Component({
   selector: "app-global-modal",

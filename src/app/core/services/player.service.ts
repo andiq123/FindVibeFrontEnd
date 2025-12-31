@@ -1,14 +1,25 @@
-import { computed, Injectable, signal, effect, inject, OnDestroy, untracked } from '@angular/core';
-import { Song } from '../models/song.model';
-import { PlayerStatus, RepeatMode } from '../../features/player/models/player.model';
-import { SettingsService } from './settings.service';
-import { RecentService } from '../../features/recent/services/recent.service';
-import { PlaylistService } from './playlist.service';
-import { OfflineStorageService } from '../../features/library/services/offline-storage.service';
-import { AudioService } from './audio.service';
+import {
+  computed,
+  Injectable,
+  signal,
+  effect,
+  inject,
+  OnDestroy,
+  untracked,
+} from "@angular/core";
+import { Song } from "../models/song.model";
+import {
+  PlayerStatus,
+  RepeatMode,
+} from "../../features/player/models/player.model";
+import { SettingsService } from "./settings.service";
+import { RecentService } from "../../features/recent/services/recent.service";
+import { PlaylistService } from "./playlist.service";
+import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
+import { AudioService } from "./audio.service";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class PlayerService implements OnDestroy {
   private readonly settingsService = inject(SettingsService);
@@ -24,6 +35,11 @@ export class PlayerService implements OnDestroy {
   readonly status = this.audioService.status;
   readonly currentTime = this.audioService.currentTime;
   readonly duration = this.audioService.duration;
+  readonly progress = computed(() => {
+    const currentTime = this.currentTime();
+    const duration = this.duration();
+    return duration > 0 ? (currentTime / duration) * 100 : 0;
+  });
 
   constructor() {
     effect(() => {
@@ -57,14 +73,14 @@ export class PlayerService implements OnDestroy {
 
   private async handleSongEnded() {
     const mode = this.settingsService.repeatMode();
-    
+
     if (mode === RepeatMode.ONE) {
       this.replayCurrentSong();
       return;
     }
 
     const nextSong = this.playlistService.next();
-    
+
     if (nextSong) {
       await this.setSong(nextSong);
     } else if (mode === RepeatMode.ALL) {
@@ -86,7 +102,9 @@ export class PlayerService implements OnDestroy {
     this.audioService.seek(0);
     this.alreadyAddedInRecents.set(false);
 
-    const offlineResponse = await this.offlineStorageService.isAvailableOffline(song.link);
+    const offlineResponse = await this.offlineStorageService.isAvailableOffline(
+      song.link,
+    );
 
     if (offlineResponse) {
       const blob = await offlineResponse.blob();
@@ -94,7 +112,7 @@ export class PlayerService implements OnDestroy {
       this.audioService.setSource(this.currentObjectUrl);
     } else {
       if (this.settingsService.isOffline()) {
-        this.audioService.setSource('');
+        this.audioService.setSource("");
         return;
       }
       this.audioService.setSource(song.link);
@@ -144,12 +162,12 @@ export class PlayerService implements OnDestroy {
       await this.setSong(nextSong);
       return nextSong;
     } else if (this.settingsService.repeatMode() === RepeatMode.ALL) {
-       this.playlistService.jumpToIndex(0);
-       const firstSong = this.playlistService.currentSong();
-       if (firstSong) {
-         await this.setSong(firstSong);
-         return firstSong;
-       }
+      this.playlistService.jumpToIndex(0);
+      const firstSong = this.playlistService.currentSong();
+      if (firstSong) {
+        await this.setSong(firstSong);
+        return firstSong;
+      }
     }
     return undefined;
   }
@@ -169,7 +187,7 @@ export class PlayerService implements OnDestroy {
 
   reset(): void {
     this.audioService.pause();
-    this.audioService.setSource('');
+    this.audioService.setSource("");
     this.playlistService.reset();
     this.alreadyAddedInRecents.set(false);
     this.cleanupObjectUrl();

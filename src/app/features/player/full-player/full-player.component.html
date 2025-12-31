@@ -90,7 +90,9 @@
         </div>
 
         <div class="space-y-4">
-          <div class="ios-slider-container">
+          <div
+            class="ios-slider-container relative w-full h-20 flex items-center touch-none select-none py-6"
+          >
             <input
               #timeSlider
               type="range"
@@ -112,11 +114,17 @@
               [attr.aria-valuenow]="visualTime()"
               [attr.aria-valuetext]="visualTime() + ' seconds'"
             />
-            <div class="slider-track">
+            <div
+              class="absolute w-full h-1.5 bg-white/30 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible"
+            >
               <div
-                class="slider-fill"
+                class="relative h-full bg-white rounded-full origin-left shadow-sm"
                 [style.width.%]="progressPercent()"
-              ></div>
+              >
+                <div
+                  class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-lg"
+                ></div>
+              </div>
             </div>
           </div>
           <div

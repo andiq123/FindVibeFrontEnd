@@ -1,23 +1,14 @@
 
+@use '../../../../styles/mixins';
 
 .mini-player-container {
-    transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1),
+    @include mixins.pressable-sm;
+    transition: transform 0.15s mixins.$ease-out-expo,
         box-shadow 0.15s ease,
         border-color 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-    will-change: transform;
 
     &:active {
         transform: translate(-50%, 0) scale(0.98);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        transition: none;
-        will-change: auto;
-
-        &:active {
-            transform: translate(-50%, 0);
-        }
     }
 }
 
