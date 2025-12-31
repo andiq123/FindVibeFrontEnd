@@ -78,7 +78,7 @@
               color="white"
             />
             <button
-              class="text-white/60 text-lg truncate mt-1 hover:text-white/80 active:text-white/90 transition-colors duration-150 text-left w-full touch-manipulation"
+              class="text-white/60 text-lg truncate mt-1 active:text-white/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-white/80"
               (click)="navigateToArtist()"
               [attr.aria-label]="'View songs by ' + song().artist"
               type="button"
@@ -152,7 +152,7 @@
 
           <div class="flex items-center gap-4">
             <button
-              class="p-4 text-white hover:text-primary active:text-primary/80 transition-colors duration-150 touch-manipulation active:scale-95"
+              class="p-4 text-white active:text-primary/80 transition-colors duration-150 touch-manipulation active:scale-95 [@media(hover:hover)]:hover:text-primary"
               aria-label="Previous track"
               (click)="previous()"
               type="button"
@@ -160,7 +160,7 @@
               <fa-icon [icon]="faStepBackward" size="2xl" />
             </button>
             <button
-              class="w-16 h-16 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 active:scale-95 transition-transform duration-200 shadow-xl touch-manipulation"
+              class="w-16 h-16 flex items-center justify-center bg-white text-black rounded-full active:scale-95 transition-transform duration-200 shadow-xl touch-manipulation [@media(hover:hover)]:hover:scale-105"
               [attr.aria-label]="
                 status() === playerStatus.Playing ? 'Pause' : 'Play'
               "
@@ -173,7 +173,7 @@
               />
             </button>
             <button
-              class="p-4 text-white hover:text-primary active:text-primary/80 transition-colors duration-150 touch-manipulation active:scale-95"
+              class="p-4 text-white active:text-primary/80 transition-colors duration-150 touch-manipulation active:scale-95 [@media(hover:hover)]:hover:text-primary"
               aria-label="Next track"
               (click)="next()"
               type="button"

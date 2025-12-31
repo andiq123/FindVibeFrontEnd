@@ -1,11 +1,11 @@
 
+@use '../../../../../styles/mixins';
 
 .pressable-native {
+    @include mixins.pressable-md;
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
-    -webkit-tap-highlight-color: transparent;
 
     &:active {
-        transform: scale(0.97);
         opacity: 0.8;
     }
 }

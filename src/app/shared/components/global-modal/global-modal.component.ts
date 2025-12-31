@@ -59,9 +59,9 @@ import { faXmark } from "../../icons";
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.25);
+        background: oklch(from oklch(var(--b1)) l c h / 0.6);
         z-index: 199;
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(8px);
       }
 
       .modal-backdrop:not(.closing) {
@@ -73,18 +73,18 @@ import { faXmark } from "../../icons";
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(30, 30, 30, 0.95);
-        border-top-left-radius: 20px;
-        border-top-right-radius: 20px;
+        background: oklch(from oklch(var(--b2)) l c h / 0.95);
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
         z-index: 200;
         padding-bottom: env(safe-area-inset-bottom);
-        box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
         max-height: 92vh;
         display: flex;
         flex-direction: column;
-        border-top: 0.5px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid oklch(from oklch(var(--bc)) l c h / 0.1);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         will-change: transform;
         transform: translateY(100%);
         animation: slide-up var(--anim-duration-slow) var(--anim-ease-out)
