@@ -23,6 +23,13 @@
             ></div>
           </div>
         }
+        @if (isError()) {
+          <div
+            class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-30"
+          >
+            <fa-icon [icon]="faTriangleExclamation" class="text-error text-xl" />
+          </div>
+        }
         @if (imageLoading()) {
           <div
             class="absolute inset-0 bg-white/[0.02] flex items-center justify-center z-20"

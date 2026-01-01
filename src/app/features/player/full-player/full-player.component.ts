@@ -24,6 +24,7 @@ import {
   faShuffle,
   faStepBackward,
   faStepForward,
+  faTriangleExclamation,
 } from "@fortawesome/free-solid-svg-icons";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
 import { SettingsService } from "../../../core/services/settings.service";
@@ -81,6 +82,9 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   isClosingAnimation = signal<boolean>(false);
   isOpeningAnimation = signal<boolean>(true);
+  isError = computed(() => this.status() === PlayerStatus.Error);
+
+  faTriangleExclamation = faTriangleExclamation;
 
   playerRef = viewChild<ElementRef<HTMLDivElement>>("playerRef");
 

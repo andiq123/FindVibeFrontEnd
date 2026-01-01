@@ -7,7 +7,7 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faArrowUp } from "../../../shared/icons";
+import { faArrowUp, faTriangleExclamation } from "../../../shared/icons";
 import { PlayerStatus } from "../models/player.model";
 import { PlayerButtonComponent } from "../../../shared/player-button/player-button.component";
 import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
@@ -35,10 +35,12 @@ export class MiniPlayerComponent {
 
   playerStatus = PlayerStatus;
   faArrowUp = faArrowUp;
+  faTriangleExclamation = faTriangleExclamation;
   imageLoading = signal(true);
 
   isPlaying = computed(() => this.status() === PlayerStatus.Playing);
   isLoading = computed(() => this.status() === PlayerStatus.Loading);
+  isError = computed(() => this.status() === PlayerStatus.Error);
 
   toggleSize() {
     this.toggleSizeEvent.emit();

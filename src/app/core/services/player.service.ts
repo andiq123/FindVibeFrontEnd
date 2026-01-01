@@ -103,9 +103,11 @@ export class PlayerService implements OnDestroy {
     this.audioService.seek(0);
     this.alreadyAddedInRecents.set(false);
 
-    const offlineResponse = await this.offlineStorageService.isAvailableOffline(
-      song.link,
-    );
+    // Upgrade HTTP URLs to HTTPS to prevent mixed content errors
+    const secureLink = song.link.replace(/^http:\/\//i, "https://");
+
+    const offlineResponse =
+      await this.offlineStorageService.isAvailableOffline(secureLink);
 
     if (offlineResponse) {
       const blob = await offlineResponse.blob();
@@ -116,7 +118,7 @@ export class PlayerService implements OnDestroy {
         this.audioService.setSource("");
         return;
       }
-      this.audioService.setSource(song.link);
+      this.audioService.setSource(secureLink);
     }
 
     await this.audioService.play();

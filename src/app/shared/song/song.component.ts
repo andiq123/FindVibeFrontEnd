@@ -18,7 +18,7 @@ import { OfflineStorageService } from "../../features/library/services/offline-s
 import { DragAndDropDirective } from "../../features/search/directives/drag-and-drop.directive";
 import { PlayerService } from "../../core/services/player.service";
 import { SettingsService } from "../../core/services/settings.service";
-import { faCloudArrowDown } from "../icons";
+import { faCloudArrowDown, faTriangleExclamation } from "../icons";
 
 @Component({
   selector: "app-song",
@@ -79,8 +79,11 @@ export class SongComponent {
   isUnavailable = computed(() => {
     return this.settingsService.isOffline() && !this.isAvailableOffline();
   });
+  
+  isError = computed(() => this.status() === PlayerStatus.Error);
 
   faCloudArrowDown = faCloudArrowDown;
+  faTriangleExclamation = faTriangleExclamation;
 
   async play() {
     if (this.isActive()) {

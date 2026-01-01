@@ -55,6 +55,16 @@
           <div
             class="absolute inset-0 rounded-2xl overflow-hidden ios-artwork-shadow"
           >
+            @if (isError()) {
+              <div
+                class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-30"
+              >
+                <fa-icon
+                  [icon]="faTriangleExclamation"
+                  class="text-error text-5xl"
+                />
+              </div>
+            }
             <img
               [ngSrc]="song().image || 'no_album_art.jpg'"
               [alt]="song().title"
