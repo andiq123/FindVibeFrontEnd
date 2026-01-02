@@ -17,6 +17,7 @@ import { RecentService } from "../../features/recent/services/recent.service";
 import { PlaylistService } from "./playlist.service";
 import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
 import { AudioService } from "./audio.service";
+import { upgradeToHttps } from "../utils/utils";
 
 @Injectable({
   providedIn: "root",
@@ -103,8 +104,7 @@ export class PlayerService implements OnDestroy {
     this.audioService.seek(0);
     this.alreadyAddedInRecents.set(false);
 
-    // Upgrade HTTP URLs to HTTPS to prevent mixed content errors
-    const secureLink = song.link.replace(/^http:\/\//i, "https://");
+    const secureLink = upgradeToHttps(song.link);
 
     const offlineResponse =
       await this.offlineStorageService.isAvailableOffline(secureLink);

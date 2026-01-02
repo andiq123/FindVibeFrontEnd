@@ -13,6 +13,7 @@ import { faTrash, faCloudArrowDown } from "../../../../shared/icons";
 import { Song } from "../../../../core/models/song.model";
 import { ModalService } from "../../../../core/services/modal.service";
 import { SettingsService } from "../../../../core/services/settings.service";
+import { upgradeToHttps } from "../../../../core/utils/utils";
 
 @Component({
   selector: "app-storage-info",
@@ -79,9 +80,9 @@ export class StorageInfoComponent implements OnInit {
     const songs = this.libraryService.songs();
     await Promise.all(
       songs.map(async (song: Song) => {
-        const isAvailable = await this.offlineStorageService.isAvailableOffline(
-          song.link,
-        );
+        const secureLink = upgradeToHttps(song.link);
+        const isAvailable =
+          await this.offlineStorageService.isAvailableOffline(secureLink);
         if (isAvailable) {
           this.offlineStorageService.addAvailableOfflineSongId(song.id);
         }

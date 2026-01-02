@@ -1,14 +1,14 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { bytesToGB } from '../../../core/utils/utils';
-import { Song } from '../../../core/models/song.model';
-import { inject } from '@angular/core';
-import { StorageService } from '../../../core/services/storage.service';
-import { trackLoadingState } from '../../../core/utils/loading-state.util';
+import { Injectable, signal, computed } from "@angular/core";
+import { bytesToGB, upgradeToHttps } from "../../../core/utils/utils";
+import { Song } from "../../../core/models/song.model";
+import { inject } from "@angular/core";
+import { StorageService } from "../../../core/services/storage.service";
+import { trackLoadingState } from "../../../core/utils/loading-state.util";
 
-const CACHE_NAME = 'library-vault';
+const CACHE_NAME = "library-vault";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class OfflineStorageService {
   readonly storageTotal = signal<number>(0);
@@ -18,10 +18,13 @@ export class OfflineStorageService {
   private readonly _availableOfflineSongIds = signal<string[]>([]);
   private readonly storageService = inject(StorageService);
 
-  readonly currentLoadingDownloadSongIds = this._currentLoadingDownloadSongIds.asReadonly();
+  readonly currentLoadingDownloadSongIds =
+    this._currentLoadingDownloadSongIds.asReadonly();
   readonly availableOfflineSongIds = this._availableOfflineSongIds.asReadonly();
 
-  readonly isSyncing = computed(() => this._currentLoadingDownloadSongIds().length > 0);
+  readonly isSyncing = computed(
+    () => this._currentLoadingDownloadSongIds().length > 0,
+  );
 
   private cachePromise?: Promise<Cache>;
 
@@ -31,14 +34,15 @@ export class OfflineStorageService {
   }
 
   async syncOfflineSongs(): Promise<void> {
-    const songs = this.storageService.getItem<Song[]>('library') || [];
+    const songs = this.storageService.getItem<Song[]>("library") || [];
     if (!songs.length) return;
 
     const cache = await this.getCache();
     const availableIds: string[] = [];
 
     for (const song of songs) {
-      const match = await cache.match(song.link);
+      const secureLink = upgradeToHttps(song.link);
+      const match = await cache.match(secureLink);
       if (match) {
         availableIds.push(song.id);
       }
@@ -55,7 +59,7 @@ export class OfflineStorageService {
       this.storageTotal.set(bytesToGB(quota ?? 0));
       this.storageUsed.set(bytesToGB(usage ?? 0));
     } catch (error) {
-      console.error('[OfflineStorage] Failed to estimate storage:', error);
+      console.error("[OfflineStorage] Failed to estimate storage:", error);
     }
   }
 
@@ -63,25 +67,29 @@ export class OfflineStorageService {
     const cache = await this.getCache();
 
     for (const song of songs) {
-      const exists = await this.isAvailableOffline(song.link, cache);
+      const secureLink = upgradeToHttps(song.link);
+      const exists = await this.isAvailableOffline(secureLink, cache);
       if (exists) continue;
 
       this.trackProgress(song.id, true);
 
       try {
-        await cache.add(song.link);
+        await cache.add(secureLink);
         this.addAvailableOfflineSongId(song.id);
         await this.setUpStorage();
       } catch (error) {
-        console.error('Failed to cache song:', error);
+        console.error("Failed to cache song:", error);
       } finally {
         this.trackProgress(song.id, false);
       }
     }
   }
 
-  async isAvailableOffline(songLink: string, existingCache?: Cache): Promise<Response | undefined> {
-    const cache = existingCache ?? await this.getCache();
+  async isAvailableOffline(
+    songLink: string,
+    existingCache?: Cache,
+  ): Promise<Response | undefined> {
+    const cache = existingCache ?? (await this.getCache());
     return await cache.match(songLink);
   }
 
@@ -93,7 +101,7 @@ export class OfflineStorageService {
     const delayMs = 500;
 
     for (let i = 0; i < maxRetries; i++) {
-      await new Promise(resolve => setTimeout(resolve, delayMs));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
       await this.setUpStorage();
 
       if (this.storageUsed() < 0.01) {
@@ -105,8 +113,8 @@ export class OfflineStorageService {
   }
 
   addAvailableOfflineSongId(songId: string): void {
-    this._availableOfflineSongIds.update(ids => 
-      ids.includes(songId) ? ids : [...ids, songId]
+    this._availableOfflineSongIds.update((ids) =>
+      ids.includes(songId) ? ids : [...ids, songId],
     );
   }
 
@@ -117,12 +125,15 @@ export class OfflineStorageService {
   async removeSongFromCache(songId: string, songLink: string): Promise<void> {
     try {
       const cache = await this.getCache();
-      await cache.delete(songLink);
+      const secureLink = upgradeToHttps(songLink);
+      await cache.delete(secureLink);
 
-      this._availableOfflineSongIds.update(ids => ids.filter(id => id !== songId));
+      this._availableOfflineSongIds.update((ids) =>
+        ids.filter((id) => id !== songId),
+      );
       await this.setUpStorage();
     } catch (error) {
-      console.error('Failed to remove song from cache:', error);
+      console.error("Failed to remove song from cache:", error);
     }
   }
 
