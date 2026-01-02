@@ -62,6 +62,7 @@ export class MediaSessionService {
   initialize(): void {
     if (!('mediaSession' in navigator)) return;
 
+    // Register handlers once at startup
     navigator.mediaSession.setActionHandler('nexttrack', () => this.playerService.setNextSong());
     navigator.mediaSession.setActionHandler('previoustrack', () => this.playerService.setPreviousSong());
     navigator.mediaSession.setActionHandler('play', () => this.playerService.play());
@@ -71,16 +72,6 @@ export class MediaSessionService {
       if (details.seekTime !== undefined) {
         this.playerService.seek(details.seekTime);
       }
-    });
-
-    navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-      const skipTime = details.seekOffset || 10;
-      this.playerService.seek(Math.max(this.playerService.currentTime() - skipTime, 0));
-    });
-
-    navigator.mediaSession.setActionHandler('seekforward', (details) => {
-      const skipTime = details.seekOffset || 10;
-      this.playerService.seek(Math.min(this.playerService.currentTime() + skipTime, this.playerService.duration()));
     });
   }
 }
