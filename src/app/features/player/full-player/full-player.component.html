@@ -28,7 +28,7 @@
 
     <div class="absolute inset-0 -z-20 overflow-hidden bg-black">
       <img
-        [ngSrc]="song().image || 'no_album_art.jpg'"
+        [ngSrc]="imageSrc()"
         alt="Song Art BG"
         class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none opacity-50 blur-[60px]"
         fill
@@ -36,6 +36,9 @@
         priority
         referrerpolicy="no-referrer"
         draggable="false"
+        (loadstart)="onImageLoadStart()"
+        (load)="onImageLoad()"
+        (error)="onImageError()"
       />
       <div class="absolute inset-0 bg-black/40"></div>
     </div>
@@ -66,13 +69,16 @@
               </div>
             }
             <img
-              [ngSrc]="song().image || 'no_album_art.jpg'"
+              [ngSrc]="imageSrc()"
               [alt]="song().title"
               width="340"
               height="340"
               priority
               class="object-cover"
               referrerpolicy="no-referrer"
+              (loadstart)="onImageLoadStart()"
+              (load)="onImageLoad()"
+              (error)="onImageError()"
             />
           </div>
         </div>

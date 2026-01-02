@@ -6,6 +6,8 @@ import {
   inject,
   signal,
   ChangeDetectionStrategy,
+  effect,
+  OnDestroy,
 } from "@angular/core";
 import { Song } from "../../core/models/song.model";
 import { PlayerStatus } from "../../features/player/models/player.model";
@@ -19,6 +21,7 @@ import { DragAndDropDirective } from "../../features/search/directives/drag-and-
 import { PlayerService } from "../../core/services/player.service";
 import { SettingsService } from "../../core/services/settings.service";
 import { faCloudArrowDown, faTriangleExclamation } from "../icons";
+import { createImageLoader, ImageLoader } from "../utils/image-loader.util";
 
 @Component({
   selector: "app-song",
@@ -35,7 +38,7 @@ import { faCloudArrowDown, faTriangleExclamation } from "../icons";
   styleUrl: "./song.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SongComponent {
+export class SongComponent implements OnDestroy {
   private playerService = inject(PlayerService);
   private offlineStorageService = inject(OfflineStorageService);
   private settingsService = inject(SettingsService);
@@ -50,8 +53,29 @@ export class SongComponent {
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
 
+  private imageLoader!: ImageLoader;
   imageLoading = signal(true);
   imageError = signal(false);
+  imageSrc = signal<string>("no_album_art.jpg");
+
+  constructor() {
+    effect(() => {
+      const songImage = this.song().image;
+
+      if (!this.imageLoader) {
+        this.imageLoader = createImageLoader(songImage);
+        this.imageLoading = this.imageLoader.imageLoading;
+        this.imageError = this.imageLoader.imageError;
+        this.imageSrc = this.imageLoader.imageSrc;
+      } else {
+        this.imageLoader.updateSrc(songImage);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.imageLoader?.cleanup();
+  }
 
   isActive = computed(
     () => this.playerService.song()?.link === this.song().link,
@@ -79,7 +103,7 @@ export class SongComponent {
   isUnavailable = computed(() => {
     return this.settingsService.isOffline() && !this.isAvailableOffline();
   });
-  
+
   isError = computed(() => this.status() === PlayerStatus.Error);
 
   faCloudArrowDown = faCloudArrowDown;
@@ -112,12 +136,14 @@ export class SongComponent {
   }
 
   onImageLoad() {
-    this.imageLoading.set(false);
-    this.imageError.set(false);
+    this.imageLoader.onImageLoad();
   }
 
   onImageError() {
-    this.imageLoading.set(false);
-    this.imageError.set(true);
+    this.imageLoader.onImageError();
+  }
+
+  onImageLoadStart() {
+    this.imageLoader.onImageLoadStart();
   }
 }

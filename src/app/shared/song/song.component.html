@@ -83,13 +83,14 @@
         class="w-full h-full object-cover transition-opacity duration-200"
         [class.opacity-0]="imageLoading()"
         [class.opacity-100]="!imageLoading()"
-        [ngSrc]="song().image || 'no_album_art.jpg'"
+        [ngSrc]="imageSrc()"
         [alt]="song().title + ' by ' + song().artist + ' album art'"
         width="48"
         height="48"
         loading="lazy"
         decoding="async"
         referrerpolicy="no-referrer"
+        (loadstart)="onImageLoadStart()"
         (load)="onImageLoad()"
         (error)="onImageError()"
       />
@@ -166,7 +167,7 @@
         }
       }
     }
-    
+
     <app-favorite-button [song]="song()" />
   </div>
 </ng-template>

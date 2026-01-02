@@ -27,7 +27,10 @@
           <div
             class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-30"
           >
-            <fa-icon [icon]="faTriangleExclamation" class="text-error text-xl" />
+            <fa-icon
+              [icon]="faTriangleExclamation"
+              class="text-error text-xl"
+            />
           </div>
         }
         @if (imageLoading()) {
@@ -48,11 +51,13 @@
           class="w-full h-full object-cover"
           [class.opacity-0]="imageLoading()"
           [class.opacity-100]="!imageLoading()"
-          [ngSrc]="song().image || 'no_album_art.jpg'"
+          [ngSrc]="imageSrc()"
           width="56"
           height="56"
           priority
           alt="Album Art"
+          referrerpolicy="no-referrer"
+          (loadstart)="onImageLoadStart()"
           (load)="onImageLoad()"
           (error)="onImageError()"
         />

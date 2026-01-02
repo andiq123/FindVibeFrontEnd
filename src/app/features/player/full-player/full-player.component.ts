@@ -35,6 +35,10 @@ import { PlayerService } from "../../../core/services/player.service";
 import { Song } from "../../../core/models/song.model";
 import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
 import { TimeFormatPipe } from "../../../shared/pipes/time-format.pipe";
+import {
+  createImageLoader,
+  ImageLoader,
+} from "../../../shared/utils/image-loader.util";
 
 @Component({
   selector: "app-full-player",
@@ -98,7 +102,25 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
     return (this.visualTime() / duration) * 100;
   });
 
+  private imageLoader!: ImageLoader;
+  imageLoading = signal(true);
+  imageError = signal(false);
+  imageSrc = signal<string>("no_album_art.jpg");
+
   constructor() {
+    effect(() => {
+      const songImage = this.song().image;
+
+      if (!this.imageLoader) {
+        this.imageLoader = createImageLoader(songImage);
+        this.imageLoading = this.imageLoader.imageLoading;
+        this.imageError = this.imageLoader.imageError;
+        this.imageSrc = this.imageLoader.imageSrc;
+      } else {
+        this.imageLoader.updateSrc(songImage);
+      }
+    });
+
     effect(() => {
       const time = this.serviceCurrentTime();
       const now = Date.now();
@@ -116,6 +138,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.renderer.removeStyle(this.document.body, "overflow");
+    this.imageLoader?.cleanup();
   }
 
   toggleSize(isImmediate = false) {
@@ -179,5 +202,17 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
       this.toggleSize();
       this.router.navigate(["/songs", artistName]);
     }
+  }
+
+  onImageLoad() {
+    this.imageLoader.onImageLoad();
+  }
+
+  onImageError() {
+    this.imageLoader.onImageError();
+  }
+
+  onImageLoadStart() {
+    this.imageLoader.onImageLoadStart();
   }
 }

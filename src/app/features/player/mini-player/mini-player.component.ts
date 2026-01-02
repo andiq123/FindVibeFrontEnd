@@ -5,6 +5,8 @@ import {
   computed,
   signal,
   ChangeDetectionStrategy,
+  effect,
+  OnDestroy,
 } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faArrowUp, faTriangleExclamation } from "../../../shared/icons";
@@ -12,7 +14,10 @@ import { PlayerStatus } from "../models/player.model";
 import { PlayerButtonComponent } from "../../../shared/player-button/player-button.component";
 import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
 import { Song } from "../../../core/models/song.model";
-
+import {
+  createImageLoader,
+  ImageLoader,
+} from "../../../shared/utils/image-loader.util";
 import { NgOptimizedImage } from "@angular/common";
 
 @Component({
@@ -27,7 +32,7 @@ import { NgOptimizedImage } from "@angular/common";
   styleUrl: "./mini-player.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MiniPlayerComponent {
+export class MiniPlayerComponent implements OnDestroy {
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
   progress = input<number>(0);
@@ -36,7 +41,30 @@ export class MiniPlayerComponent {
   playerStatus = PlayerStatus;
   faArrowUp = faArrowUp;
   faTriangleExclamation = faTriangleExclamation;
+
+  private imageLoader!: ImageLoader;
   imageLoading = signal(true);
+  imageError = signal(false);
+  imageSrc = signal<string>("no_album_art.jpg");
+
+  constructor() {
+    effect(() => {
+      const songImage = this.song().image;
+
+      if (!this.imageLoader) {
+        this.imageLoader = createImageLoader(songImage);
+        this.imageLoading = this.imageLoader.imageLoading;
+        this.imageError = this.imageLoader.imageError;
+        this.imageSrc = this.imageLoader.imageSrc;
+      } else {
+        this.imageLoader.updateSrc(songImage);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.imageLoader?.cleanup();
+  }
 
   isPlaying = computed(() => this.status() === PlayerStatus.Playing);
   isLoading = computed(() => this.status() === PlayerStatus.Loading);
@@ -47,10 +75,14 @@ export class MiniPlayerComponent {
   }
 
   onImageLoad() {
-    this.imageLoading.set(false);
+    this.imageLoader.onImageLoad();
   }
 
   onImageError() {
-    this.imageLoading.set(false);
+    this.imageLoader.onImageError();
+  }
+
+  onImageLoadStart() {
+    this.imageLoader.onImageLoadStart();
   }
 }
