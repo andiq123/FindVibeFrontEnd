@@ -60,11 +60,17 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
 
     const target = event.target as HTMLElement;
     const selector = this.handleSelector();
+
+    // Check if target is a button or interactive element
+    const isButton = !!target.closest('button, input, a, [role="button"], fa-icon');
     const isGrabBar = !!target.closest(".pressable-native");
 
     const isControlsArea = !!target.closest(
       '.ios-slider-container, button, input, a, [role="button"], .flex.items-center.justify-between.pt-2',
     );
+
+    // Don't start swiping if clicking on buttons (except grab bar)
+    if (isButton && !isGrabBar) return;
 
     if (selector) {
       const allowedElement = target.closest(selector);

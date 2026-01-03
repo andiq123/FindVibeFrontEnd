@@ -107,6 +107,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   imageLoading = signal(true);
   imageError = signal(false);
   imageSrc = signal<string>("no_album_art.jpg");
+  private updateFrameId: number | null = null;
 
   constructor() {
     effect(() => {
@@ -127,7 +128,14 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
       const now = Date.now();
 
       if (!this.isDraggingTime() && now - this.lastSeekTimestamp > 500) {
-        untracked(() => this.visualTime.set(time));
+        // Use requestAnimationFrame to batch updates and reduce reflows
+        if (this.updateFrameId !== null) {
+          cancelAnimationFrame(this.updateFrameId);
+        }
+        this.updateFrameId = requestAnimationFrame(() => {
+          untracked(() => this.visualTime.set(time));
+          this.updateFrameId = null;
+        });
       }
     });
   }
@@ -140,6 +148,9 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.renderer.removeStyle(this.document.body, "overflow");
     this.imageLoader?.cleanup();
+    if (this.updateFrameId !== null) {
+      cancelAnimationFrame(this.updateFrameId);
+    }
   }
 
   toggleSize(isImmediate = false) {
