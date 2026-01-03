@@ -6,7 +6,6 @@ import { AppUpdateService } from '../../core/services/app-update.service';
   standalone: true,
   imports: [],
   templateUrl: './update-overlay.component.html',
-  styleUrl: './update-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UpdateOverlayComponent {

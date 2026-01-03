@@ -1,14 +1,19 @@
-
-@use '../../../../styles/mixins';
-
 .mini-player-container {
-    @include mixins.pressable-sm;
-    transition: transform 0.15s mixins.$ease-out-expo,
-        box-shadow 0.15s ease,
-        border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.15s ease, border-color 0.2s ease;
+    will-change: transform;
 
     &:active {
         transform: translate(-50%, 0) scale(0.98);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none !important;
+        will-change: auto !important;
+
+        &:active {
+            transform: none !important;
+        }
     }
 }
 
@@ -17,7 +22,7 @@
 
     &.album-art-playing {
         animation: pulse-glow 2s ease-in-out infinite;
-        box-shadow: 0 0 20px rgba(var(--fallback-p, oklch(var(--p))), 0.3);
+        box-shadow: 0 0 20px color-mix(in oklab, var(--color-accent) 30%, transparent);
     }
 
     img {
@@ -46,7 +51,7 @@
 
 .waveform-bar {
     width: 3px;
-    background: var(--fallback-p, oklch(var(--p)));
+    background: var(--color-accent);
     border-radius: 2px;
     animation: waveform 0.8s ease-in-out infinite;
     transform-origin: center;
@@ -84,7 +89,7 @@
 .progress-bar {
     position: relative;
     height: 2px;
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in oklab, var(--color-base-content) 10%, transparent);
     overflow: hidden;
 }
 
@@ -93,11 +98,9 @@
     left: 0;
     top: 0;
     height: 100%;
-    background: linear-gradient(90deg,
-            var(--fallback-p, oklch(var(--p))),
-            var(--fallback-p, oklch(var(--p) / 0.8)));
+    background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-accent) 80%, transparent));
     transition: width 0.3s linear;
-    box-shadow: 0 0 8px rgba(var(--fallback-p, oklch(var(--p))), 0.5);
+    box-shadow: 0 0 8px color-mix(in oklab, var(--color-accent) 50%, transparent);
 }
 
 .btn {

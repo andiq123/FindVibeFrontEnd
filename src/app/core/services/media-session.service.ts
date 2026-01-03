@@ -11,9 +11,15 @@ export class MediaSessionService {
   private readonly playerService = inject(PlayerService);
 
   constructor() {
+    this.setupMetadataEffect();
+    this.setupPlaybackStateEffect();
+    this.setupPositionStateEffect();
+  }
+
+  private setupMetadataEffect(): void {
     effect(() => {
       const song = this.playlistService.currentSong();
-      if (!song) return;
+      if (!song || !('mediaSession' in navigator)) return;
 
       navigator.mediaSession.metadata = new MediaMetadata({
         title: song.title,
@@ -27,18 +33,18 @@ export class MediaSessionService {
         ],
       });
     });
+  }
 
+  private setupPlaybackStateEffect(): void {
     effect(() => {
       const status = this.playerService.status();
       if (!('mediaSession' in navigator)) return;
 
-      if (status === PlayerStatus.Playing) {
-        navigator.mediaSession.playbackState = 'playing';
-      } else {
-        navigator.mediaSession.playbackState = 'paused';
-      }
+      navigator.mediaSession.playbackState = status === PlayerStatus.Playing ? 'playing' : 'paused';
     });
+  }
 
+  private setupPositionStateEffect(): void {
     effect(() => {
       const currentTime = this.playerService.currentTime();
       const duration = this.playerService.duration();
@@ -46,15 +52,11 @@ export class MediaSessionService {
       if (!('mediaSession' in navigator) || !('setPositionState' in navigator.mediaSession)) return;
 
       if (duration > 0 && currentTime <= duration) {
-        try {
-          navigator.mediaSession.setPositionState({
-            duration: duration,
-            playbackRate: 1,
-            position: currentTime,
-          });
-        } catch (error) {
-          console.error('Error setting media session position state:', error);
-        }
+        navigator.mediaSession.setPositionState({
+          duration,
+          playbackRate: 1,
+          position: currentTime,
+        });
       }
     });
   }
@@ -62,13 +64,13 @@ export class MediaSessionService {
   initialize(): void {
     if (!('mediaSession' in navigator)) return;
 
-    // Register handlers once at startup
-    navigator.mediaSession.setActionHandler('nexttrack', () => this.playerService.setNextSong());
-    navigator.mediaSession.setActionHandler('previoustrack', () => this.playerService.setPreviousSong());
-    navigator.mediaSession.setActionHandler('play', () => this.playerService.play());
-    navigator.mediaSession.setActionHandler('pause', () => this.playerService.pause());
-    navigator.mediaSession.setActionHandler('stop', () => this.playerService.pause());
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
+    const ms = navigator.mediaSession;
+    ms.setActionHandler('nexttrack', () => this.playerService.setNextSong());
+    ms.setActionHandler('previoustrack', () => this.playerService.setPreviousSong());
+    ms.setActionHandler('play', () => this.playerService.play());
+    ms.setActionHandler('pause', () => this.playerService.pause());
+    ms.setActionHandler('stop', () => this.playerService.pause());
+    ms.setActionHandler('seekto', (details) => {
       if (details.seekTime !== undefined) {
         this.playerService.seek(details.seekTime);
       }

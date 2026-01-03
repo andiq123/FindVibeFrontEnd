@@ -24,14 +24,12 @@
     </div>
   </div>
 } @else {
-  <app-page-layout>
-    <div class="space-y-6 pb-12">
-      <div header>
-        <app-search-bar [query]="query()" />
-      </div>
+  <app-page-layout [showStickyHeader]="false">
+    <div class="space-y-6 pb-32 pt-6">
+      <app-search-bar [query]="query()" />
 
       <div class="flex items-center justify-between flex-wrap gap-4 pt-4">
-        <h1 class="font-bold text-4xl section-headline">Explore</h1>
+        <h1 class="font-bold text-4xl tracking-tighter bg-gradient-to-b from-base-content to-base-content/30 bg-clip-text text-transparent">Explore</h1>
 
         @if (pagination() && pagination()!.totalResults > 0) {
           <div
@@ -42,7 +40,7 @@
                 class="text-base-content/50 text-xs font-medium uppercase tracking-wider"
                 >Page</span
               >
-              <span class="text-primary font-semibold text-base">{{
+              <span class="text-accent font-semibold text-base">{{
                 pagination()!.currentPage
               }}</span>
               <span class="text-base-content/40 text-xs">of</span>
@@ -52,7 +50,7 @@
             </div>
             <div class="w-px h-4 bg-base-300/40"></div>
             <div class="flex items-center gap-1.5">
-              <span class="text-primary font-semibold text-base">{{
+              <span class="text-accent font-semibold text-base">{{
                 pagination()!.totalResults
               }}</span>
               <span class="text-base-content/50 text-xs font-medium">{{

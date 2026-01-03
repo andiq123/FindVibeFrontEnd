@@ -85,12 +85,10 @@ export class PlayerService implements OnDestroy {
     if (nextSong) {
       await this.setSong(nextSong);
     } else if (mode === RepeatMode.ALL) {
-      // Wrap around
       this.playlistService.jumpToIndex(0);
       const firstSong = this.playlistService.currentSong();
       if (firstSong) await this.setSong(firstSong);
     } else {
-      // OFF mode and reached the end
       this.audioService.pause();
       this.audioService.seek(0);
     }

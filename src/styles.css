@@ -1,0 +1,308 @@
+@import "tailwindcss";
+@source "src/**/*.{html,ts}";
+@plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "vibenative";
+  default: true;
+  color-scheme: dark;
+  --color-base-100: oklch(22% 0.02 260);
+  --color-base-200: oklch(27% 0.02 260);
+  --color-base-300: oklch(32% 0.03 260);
+  --color-base-content: oklch(98% 0.01 260);
+  
+  --color-primary: oklch(65% 0.28 310);
+  --color-primary-content: oklch(98% 0.01 260);
+  
+  --color-secondary: oklch(75% 0.22 170);
+  --color-secondary-content: oklch(12% 0.04 260);
+  
+  --color-accent: oklch(68% 0.14 60);
+  --color-accent-content: oklch(12% 0.04 260);
+  
+  --color-neutral: oklch(20% 0.02 260);
+  --color-neutral-content: oklch(98% 0.01 260);
+  
+  --color-info: oklch(70% 0.18 240);
+  --color-info-content: oklch(12% 0.04 260);
+  
+  --color-success: oklch(70% 0.20 145);
+  --color-success-content: oklch(12% 0.04 260);
+  
+  --color-warning: oklch(85% 0.20 95);
+  --color-warning-content: oklch(12% 0.04 260);
+  
+  --color-error: oklch(65% 0.25 25);
+  --color-error-content: oklch(98% 0.01 260);
+
+  --radius-btn: 1rem;
+  --radius-box: 1.5rem;
+};
+
+:root {
+  --anim-duration-instant: 0.1s;
+  --anim-duration-fast: 0.15s;
+  --anim-duration-normal: 0.2s;
+  --anim-duration-slow: 0.35s;
+  --anim-duration-slower: 0.45s;
+
+  --anim-ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --anim-ease-spring: cubic-bezier(0.2, 1, 0.2, 1);
+  --anim-ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --anim-ease-standard: ease-in-out;
+  --anim-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --anim-ease-in: ease-in;
+
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  --glass-bg-light: color-mix(in oklab, var(--color-base-100) 5%, transparent);
+  --glass-bg-medium: color-mix(in oklab, var(--color-base-100) 10%, transparent);
+  --glass-bg-strong: color-mix(in oklab, var(--color-base-100) 20%, transparent);
+  --glass-bg-suggestions: color-mix(in oklab, var(--color-base-200) 98%, transparent);
+
+  --glass-border-subtle: color-mix(in oklab, var(--color-base-content) 5%, transparent);
+  --glass-border-light: color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  --glass-border-medium: color-mix(in oklab, var(--color-base-content) 12%, transparent);
+
+  --glass-blur-light: 16px;
+  --glass-blur-medium: 24px;
+  --glass-blur-strong: 32px;
+  --glass-blur-ultra: 48px;
+
+  --glass-bg: var(--glass-bg-light);
+  --glass-border: var(--glass-border-light);
+  --glass-blur: var(--glass-blur-medium);
+
+  --z-base: 1;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-navigation: 30;
+  --z-mini-player: 40;
+  --z-search-suggestions: 50;
+  --z-full-player: 100;
+  --z-modal: 200;
+
+  --player-gradient-start: rgba(0, 0, 0, 0);
+  --player-gradient-mid: rgba(0, 0, 0, 0.4);
+  --player-gradient-end: rgba(0, 0, 0, 0.8);
+
+  --shadow-ios-sm: 0 2px 6px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-ios-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.1), 0 16px 48px rgba(0, 0, 0, 0.14);
+  --shadow-ios-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 16px 48px rgba(0, 0, 0, 0.16), 0 24px 80px rgba(0, 0, 0, 0.2);
+
+  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --anim-duration-instant: 0.01s;
+    --anim-duration-fast: 0.01s;
+    --anim-duration-normal: 0.01s;
+    --anim-duration-slow: 0.01s;
+    --anim-duration-slower: 0.01s;
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    transform: translateY(100%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide-up-centered {
+  0% {
+    transform: translate(-50%, 100%);
+  }
+
+  100% {
+    transform: translate(-50%, 0);
+  }
+}
+
+.anim-slide-up {
+  will-change: transform;
+  animation: slide-up var(--anim-duration-slow) var(--anim-ease-ios) forwards;
+}
+
+.anim-slide-down {
+  will-change: transform;
+  animation: slide-down var(--anim-duration-normal) var(--anim-ease-ios) forwards;
+}
+
+.anim-fade-in {
+  will-change: opacity;
+  animation: fade-in var(--anim-duration-normal) var(--anim-ease-out) forwards;
+}
+
+.anim-fade-out {
+  will-change: opacity;
+  animation: fade-out var(--anim-duration-fast) var(--anim-ease-in) forwards;
+}
+
+.anim-shimmer {
+  animation: shimmer 1.2s linear infinite;
+}
+
+.anim-mini-player-entry {
+  will-change: transform;
+  animation: slide-up-centered var(--anim-duration-slow) var(--anim-ease-ios) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .anim-slide-up,
+  .anim-slide-down,
+  .anim-fade-in,
+  .anim-fade-out,
+  .anim-mini-player-entry {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+
+
+
+
+.glass-light {
+  background: var(--glass-bg-light);
+  border: 1px solid var(--glass-border-subtle);
+  backdrop-filter: blur(var(--glass-blur-light));
+  -webkit-backdrop-filter: blur(var(--glass-blur-light));
+}
+
+.glass-medium {
+  background: var(--glass-bg-medium);
+  border: 1px solid var(--glass-border-light);
+  backdrop-filter: blur(var(--glass-blur-medium));
+  -webkit-backdrop-filter: blur(var(--glass-blur-medium));
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border-medium);
+  backdrop-filter: blur(var(--glass-blur-strong));
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong));
+}
+
+.bg-app-gradient {
+  background-color: var(--color-base-100);
+  background-image: 
+    radial-gradient(circle at 10% 20%, color-mix(in oklab, var(--color-primary) 12%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, color-mix(in oklab, var(--color-accent) 10%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 80% 10%, color-mix(in oklab, var(--color-secondary) 8%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 20% 90%, color-mix(in oklab, var(--color-info) 8%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--color-base-200) 40%, transparent) 0%, transparent 100%);
+  background-attachment: fixed;
+}
+
+.glass-suggestions {
+  background: color-mix(in oklab, var(--color-base-200) 40%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 12%, transparent);
+  backdrop-filter: blur(48px) saturate(2);
+  -webkit-backdrop-filter: blur(48px) saturate(2);
+}
+
+.shadow-ios-sm {
+  box-shadow: var(--shadow-ios-sm);
+}
+
+.shadow-ios-md {
+  box-shadow: var(--shadow-ios-md);
+}
+
+.shadow-ios-lg {
+  box-shadow: var(--shadow-ios-lg);
+}
+
+.premium-card {
+  background-color: color-mix(in oklab, var(--color-base-100) 3%, transparent);
+  border-radius: 2.5rem;
+  border-width: 1px;
+  border-color: color-mix(in oklab, var(--color-base-content) 5%, transparent);
+  overflow: hidden;
+}
+
+html {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  letter-spacing: -0.011em;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--color-base-100);
+  background-image: 
+    radial-gradient(circle at 10% 20%, color-mix(in oklab, var(--color-primary) 12%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, color-mix(in oklab, var(--color-accent) 10%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 80% 10%, color-mix(in oklab, var(--color-secondary) 8%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 20% 90%, color-mix(in oklab, var(--color-info) 8%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--color-base-200) 40%, transparent) 0%, transparent 100%);
+  background-attachment: fixed;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.8) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}

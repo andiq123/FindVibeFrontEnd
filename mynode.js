@@ -1,29 +1,19 @@
-import { writeFile } from "fs/promises";
-import { join, dirname } from "path";
-import { config } from "dotenv";
-import { fileURLToPath } from "url";
+import fs from 'fs';
+import dotenv from 'dotenv';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config();
 
-config({ path: "src/.env" });
-
-const environmentContent = `export const environment = {
-  API_URL: '${process.env.API_URL}',
+const envFile = 'src/environments/environment.development.ts';
+const content = `
+export const environment = {
+  production: false,
+  api_url: '${process.env.API_URL}',
+  isDebug: ${process.env.IS_DEBUG}
 };
 `;
 
-const targetPath = join(
-  __dirname,
-  "./src/environments/environment.development.ts",
-);
-
 try {
-  await writeFile(targetPath, environmentContent);
-  console.log(
-    "\x1b[32m%s\x1b[0m",
-    "✅ Successfully generated environment.development.ts",
-  );
-} catch (error) {
-  console.error(error);
+  fs.writeFileSync(envFile, content);
+} catch (err) {
   process.exit(1);
 }

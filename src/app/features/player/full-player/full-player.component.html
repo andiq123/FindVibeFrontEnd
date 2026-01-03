@@ -15,18 +15,18 @@
       class="w-full pt-4 pb-2 flex flex-col items-center justify-center shrink-0 relative z-20"
     >
       <button
-        class="group w-full flex flex-col items-center justify-center -mt-2 pressable-native touch-manipulation"
+        class="group w-full flex flex-col items-center justify-center -mt-2 pressable-native touch-manipulation p-4 min-h-[44px]"
         (click)="toggleSize()"
         aria-label="Minimize player"
         type="button"
       >
         <div
-          class="w-12 h-1.5 bg-white/25 rounded-full group-active:bg-white/45 transition-colors duration-150"
+          class="w-12 h-1.5 bg-base-content/30 rounded-full group-active:bg-base-content/50 transition-colors duration-200"
         ></div>
       </button>
     </div>
 
-    <div class="absolute inset-0 -z-20 overflow-hidden bg-black">
+    <div class="absolute inset-0 -z-20 overflow-hidden bg-base-100">
       <img
         [ngSrc]="imageSrc()"
         alt="Song Art BG"
@@ -40,7 +40,7 @@
         (load)="onImageLoad()"
         (error)="onImageError()"
       />
-      <div class="absolute inset-0 bg-black/40"></div>
+      <div class="absolute inset-0 bg-base-100/40"></div>
     </div>
 
     <div
@@ -60,7 +60,7 @@
           >
             @if (isError()) {
               <div
-                class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-30"
+                class="absolute inset-0 bg-error/20 flex items-center justify-center z-30"
               >
                 <fa-icon
                   [icon]="faTriangleExclamation"
@@ -91,10 +91,10 @@
               [title]="song().title"
               [isBold]="true"
               fontSize="1.75rem"
-              color="white"
+              color="var(--color-base-content)"
             />
             <button
-              class="text-white/60 text-lg truncate mt-1 active:text-white/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-white/80"
+              class="text-base-content/60 text-lg truncate mt-1 active:text-base-content/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-base-content/80"
               (click)="navigateToArtist()"
               [attr.aria-label]="'View songs by ' + song().artist"
               type="button"
@@ -131,20 +131,20 @@
               [attr.aria-valuetext]="visualTime() + ' seconds'"
             />
             <div
-              class="absolute w-full h-2 bg-white/30 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible"
+              class="absolute w-full h-2 bg-base-content/30 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible"
             >
               <div
-                class="relative h-full bg-white rounded-full origin-left shadow-sm"
+                class="relative h-full bg-accent rounded-full origin-left shadow-sm"
                 [style.width.%]="progressPercent()"
               >
                 <div
-                  class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg ring-2 ring-black/10"
+                  class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-base-content rounded-full shadow-lg ring-2 ring-base-100/10"
                 ></div>
               </div>
             </div>
           </div>
           <div
-            class="flex justify-between text-xs font-medium text-white/40 tabular-nums"
+            class="flex justify-between text-xs font-medium text-base-content/40 tabular-nums"
           >
             <span>{{ visualTime() | timeFormat }}</span>
             <span>{{ duration() | timeFormat }}</span>
@@ -154,8 +154,8 @@
         <div class="flex items-center justify-between pt-0">
           <button
             class="p-4 transition-all duration-200 touch-manipulation active:scale-95"
-            [class.text-primary]="isShuffle()"
-            [class.text-white/40]="!isShuffle()"
+            [class.text-accent]="isShuffle()"
+            [class.text-base-content/40]="!isShuffle()"
             [attr.aria-label]="
               isShuffle() ? 'Disable shuffle' : 'Enable shuffle'
             "
@@ -168,7 +168,7 @@
 
           <div class="flex items-center gap-4">
             <button
-              class="p-4 text-white active:text-primary/80 transition-colors duration-150 touch-manipulation active:scale-95 [@media(hover:hover)]:hover:text-primary"
+              class="p-4 text-base-content active:text-accent/80 transition-colors duration-150 touch-manipulation active:scale-95 [@media(hover:hover)]:hover:text-accent"
               aria-label="Previous track"
               (click)="previous()"
               type="button"
@@ -176,7 +176,7 @@
               <fa-icon [icon]="faStepBackward" size="2xl" />
             </button>
             <button
-              class="w-16 h-16 flex items-center justify-center bg-white text-black rounded-full active:scale-95 transition-transform duration-200 shadow-xl touch-manipulation [@media(hover:hover)]:hover:scale-105"
+              class="w-16 h-16 flex items-center justify-center bg-base-content text-base-100 rounded-full active:scale-95 transition-transform duration-200 shadow-xl touch-manipulation [@media(hover:hover)]:hover:scale-105"
               [attr.aria-label]="
                 status() === playerStatus.Playing ? 'Pause' : 'Play'
               "
@@ -189,7 +189,7 @@
               />
             </button>
             <button
-              class="p-4 text-white active:text-primary/80 transition-colors duration-150 touch-manipulation active:scale-95 [@media(hover:hover)]:hover:text-primary"
+              class="p-4 text-base-content active:text-accent/80 transition-colors duration-150 touch-manipulation active:scale-95 [@media(hover:hover)]:hover:text-accent"
               aria-label="Next track"
               (click)="next()"
               type="button"
@@ -200,8 +200,8 @@
 
           <button
             class="p-4 transition-all duration-200 relative touch-manipulation active:scale-95"
-            [class.text-primary]="repeatMode() !== repeatModes.OFF"
-            [class.text-white/40]="repeatMode() === repeatModes.OFF"
+            [class.text-accent]="repeatMode() !== repeatModes.OFF"
+            [class.text-base-content/40]="repeatMode() === repeatModes.OFF"
             [attr.aria-label]="'Repeat mode: ' + repeatMode()"
             (click)="toggleRepeat()"
             type="button"
@@ -209,7 +209,7 @@
             <fa-icon [icon]="faRepeat" size="lg" />
             @if (repeatMode() === repeatModes.ONE) {
               <span
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8px] font-black text-primary-content bg-primary rounded-full w-3 h-3 flex items-center justify-center border border-base-100 shadow-sm mt-1 ml-1 scale-90"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8px] font-black text-accent-content bg-accent rounded-full w-3 h-3 flex items-center justify-center border border-base-100 shadow-sm mt-1 ml-1 scale-90"
                 >1</span
               >
             }

@@ -1,36 +1,44 @@
-@use '../../../styles/mixins';
-
 .dragging {
   opacity: 0.3;
 }
 
 .song-container.dragTarget {
-  background-color: rgba(var(--p), 0.25) !important;
-  border: 3px solid var(--fallback-p, oklch(var(--p))) !important;
+  background-color: color-mix(in oklab, var(--color-accent) 25%, transparent) !important;
+  border: 3px solid var(--color-accent) !important;
   border-radius: 0.75rem !important;
   transform: scale(1.03) !important;
-  box-shadow: 0 0 20px rgba(var(--p), 0.4) !important;
+  box-shadow: 0 0 20px color-mix(in oklab, var(--color-accent) 40%, transparent) !important;
 }
 
 .song-container {
-  @include mixins.pressable-sm;
-  touch-action: pan-y;
-  transition: transform 0.15s mixins.$ease-out-expo,
-    background-color 0.15s ease-out;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.15s ease-out;
   will-change: transform, background-color;
+  touch-action: pan-y;
+  cursor: pointer;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: color-mix(in oklab, var(--color-base-content) 5%, transparent);
   }
 
   &:active {
-    background-color: rgba(255, 255, 255, 0.06);
+    transform: scale(0.98);
+    background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+    will-change: auto !important;
+
+    &:active {
+      transform: none !important;
+    }
   }
 }
 
 .album-art {
   &.loading {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: color-mix(in oklab, var(--color-base-content) 5%, transparent);
   }
 
   img {
@@ -45,7 +53,6 @@
   }
 }
 
-/* Optimized Pulse Animation */
 @keyframes pulse-opacity {
 
   0%,
@@ -83,8 +90,8 @@ app-favorite-button {
 }
 
 .song-active {
-  background: oklch(var(--p) / 0.1);
-  box-shadow: inset 0 0 40px oklch(var(--p) / 0.05);
+  background: color-mix(in oklab, var(--color-accent) 10%, transparent);
+  box-shadow: inset 0 0 40px color-mix(in oklab, var(--color-accent) 5%, transparent);
 }
 
 .song-container.song-active {

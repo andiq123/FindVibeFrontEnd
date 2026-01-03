@@ -1,7 +1,5 @@
-@use '../../../../styles/mixins';
-
 .artwork-wrapper {
-  transition: transform 0.8s mixins.$ease-out-expo;
+  transition: transform 0.8s cubic-bezier(0.32, 0.72, 0, 1);
   transform: scale(0.95);
   will-change: transform;
 
@@ -9,7 +7,15 @@
     transform: scale(1);
   }
 
-  @include mixins.respect-reduced-motion;
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+    animation: none !important;
+    will-change: auto !important;
+
+    &:active {
+      transform: none !important;
+    }
+  }
 }
 
 .ios-slider-container {
@@ -67,8 +73,4 @@
       cursor: grab;
     }
   }
-}
-
-.pressable-native {
-  @include mixins.pressable-lg;
 }

@@ -18,7 +18,6 @@ import { RouterLink, RouterLinkActive } from "@angular/router";
   standalone: true,
   imports: [FaIconComponent, RouterLink, RouterLinkActive],
   templateUrl: "./navigation.component.html",
-  styleUrl: "./navigation.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavigationComponent {

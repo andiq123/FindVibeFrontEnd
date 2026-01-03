@@ -64,7 +64,7 @@ export class PlaylistService {
     if (q.length === 0) return null;
 
     const nextIndex = this.currentIndex() + 1;
-    if (nextIndex >= q.length) return null; // Let the caller decide wrap-around based on repeat mode
+    if (nextIndex >= q.length) return null;
 
     this.currentIndex.set(nextIndex);
     return q[nextIndex];

@@ -13,7 +13,6 @@ import { PaginationInfo } from "../../../core/models/song.model";
   selector: "app-pagination",
   imports: [FontAwesomeModule],
   templateUrl: "./pagination.component.html",
-  styleUrl: "./pagination.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaginationComponent {

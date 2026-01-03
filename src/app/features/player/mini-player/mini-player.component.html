@@ -1,6 +1,6 @@
 <div
-  class="mini-player-container glass-suggestions rounded-2xl fixed bottom-[92px] left-1/2 -translate-x-1/2 anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[600px] shadow-ios-md cursor-pointer overflow-hidden touch-manipulation"
-  style="z-index: var(--z-mini-player)"
+  class="mini-player-container glass-suggestions rounded-2xl fixed bottom-[92px] anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[600px] shadow-ios-md cursor-pointer overflow-hidden touch-manipulation"
+  style="z-index: var(--z-mini-player); left: 50%; transform: translateX(-50%);"
   [class.border-primary/20]="isPlaying()"
   [class.border-transparent]="!isPlaying()"
   (click)="toggleSize()"
@@ -16,16 +16,16 @@
       >
         @if (isLoading()) {
           <div
-            class="absolute inset-0 bg-black/60 flex items-center justify-center z-30"
+            class="absolute inset-0 bg-base-300/60 flex items-center justify-center z-30"
           >
             <div
-              class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+              class="w-5 h-5 border-2 border-base-content/30 border-t-base-content rounded-full animate-spin"
             ></div>
           </div>
         }
         @if (isError()) {
           <div
-            class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-30"
+            class="absolute inset-0 bg-error/20 flex items-center justify-center z-30"
           >
             <fa-icon
               [icon]="faTriangleExclamation"
@@ -35,15 +35,15 @@
         }
         @if (imageLoading()) {
           <div
-            class="absolute inset-0 bg-white/[0.02] flex items-center justify-center z-20"
+            class="absolute inset-0 bg-base-content/5 flex items-center justify-center z-20"
           >
             <div
-              class="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin"
+              class="w-4 h-4 border-2 border-base-content/20 border-t-base-content/60 rounded-full animate-spin"
             ></div>
           </div>
         }
         <div
-          class="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 z-10"
+          class="absolute inset-0 bg-base-100/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 z-10"
         >
           <app-player-button [status]="status()" />
         </div>

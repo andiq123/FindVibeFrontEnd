@@ -62,7 +62,6 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     const selector = this.handleSelector();
     const isGrabBar = !!target.closest(".pressable-native");
 
-    // Exclude bottom controls area - don't allow swipe down from there
     const isControlsArea = !!target.closest(
       '.ios-slider-container, button, input, a, [role="button"], .flex.items-center.justify-between.pt-2',
     );
@@ -71,7 +70,6 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
       const allowedElement = target.closest(selector);
       if (!allowedElement) return;
 
-      // Even within allowed selector, block if it's controls area
       if (isControlsArea && !isGrabBar) return;
     } else {
       if (isControlsArea && !isGrabBar) return;

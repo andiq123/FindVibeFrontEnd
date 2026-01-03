@@ -7,7 +7,7 @@ import { Component, input, ChangeDetectionStrategy } from "@angular/core";
     @switch (type()) {
       @case ("song") {
         @for (item of items; track $index) {
-          <div class="flex items-center gap-4 py-3 px-5 animate-pulse">
+          <div class="flex items-center gap-4 py-3 px-5 animate-pulse motion-reduce:animate-none motion-reduce:opacity-50">
             <div class="w-12 h-12 rounded-lg bg-white/[0.03] shrink-0"></div>
             <div class="flex-1 space-y-2">
               <div
@@ -21,20 +21,20 @@ import { Component, input, ChangeDetectionStrategy } from "@angular/core";
       }
       @case ("text") {
         <div
-          class="h-4 bg-white/[0.03] rounded animate-pulse"
+          class="h-4 bg-white/[0.03] rounded animate-pulse motion-reduce:animate-none motion-reduce:opacity-50"
           [style.width]="width()"
         ></div>
       }
       @case ("circle") {
         <div
-          class="rounded-full bg-white/[0.03] animate-pulse shrink-0"
+          class="rounded-full bg-white/[0.03] animate-pulse motion-reduce:animate-none motion-reduce:opacity-50 shrink-0"
           [style.width]="size()"
           [style.height]="size()"
         ></div>
       }
       @case ("card") {
         @for (item of items; track $index) {
-          <div class="glass-light rounded-2xl p-4 animate-pulse space-y-3">
+          <div class="glass-light rounded-2xl p-4 animate-pulse motion-reduce:animate-none motion-reduce:opacity-50 space-y-3">
             <div class="w-full aspect-square bg-white/[0.03] rounded-lg"></div>
             <div class="h-4 bg-white/[0.03] rounded w-3/4"></div>
             <div class="h-3 bg-white/[0.02] rounded w-1/2"></div>
@@ -43,23 +43,13 @@ import { Component, input, ChangeDetectionStrategy } from "@angular/core";
       }
       @case ("rect") {
         <div
-          class="bg-white/[0.03] rounded animate-pulse"
+          class="bg-white/[0.03] rounded animate-pulse motion-reduce:animate-none motion-reduce:opacity-50"
           [style.width]="width()"
           [style.height]="height()"
         ></div>
       }
     }
   `,
-  styles: [
-    `
-      @media (prefers-reduced-motion: reduce) {
-        .animate-pulse {
-          animation: none;
-          opacity: 0.5;
-        }
-      }
-    `,
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SkeletonComponent {

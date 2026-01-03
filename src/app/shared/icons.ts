@@ -1,4 +1,3 @@
-// Centralized FontAwesome icons
 import {
   faArrowDown,
   faArrowUp,
@@ -36,7 +35,6 @@ import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
 
 export {
   IconDefinition,
-  // Solid icons
   faArrowDown,
   faArrowUp,
   faBookmark,
@@ -65,7 +63,6 @@ export {
   faTriangleExclamation,
   faWaveSquare,
   faXmark,
-  // Heart icons (aliased)
   faHeartRegular,
   faHeartSolid,
 };

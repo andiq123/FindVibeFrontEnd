@@ -1,8 +1,8 @@
-<nav class="pagination" role="navigation" aria-label="Pagination">
+<nav class="flex items-center justify-center gap-2 sm:gap-3 w-full px-4 py-8 box-border" role="navigation" aria-label="Pagination">
   @if (pagination().hasPrevPage) {
     <button
       type="button"
-      class="pagination-button prev"
+      class="flex items-center justify-center min-w-[2.75rem] h-11 rounded-xl bg-base-content/3 border border-base-content/10 text-base-content/80 text-sm transition-all duration-200 cursor-pointer backdrop-blur-md shrink-0 hover:bg-base-content/10 hover:border-base-content/20 hover:-translate-y-px active:scale-95 active:translate-y-0"
       (click)="onPageChange(pagination().currentPage - 1)"
       aria-label="Previous page"
     >
@@ -10,13 +10,16 @@
     </button>
   }
 
-  <div class="pagination-pages">
+  <div class="flex gap-1 sm:gap-2 overflow-x-auto p-1 -m-1 scrollbar-none touch-pan-x">
     @for (page of pageNumbers(); track $index) {
       @if (isNumber(page)) {
         <button
           type="button"
-          class="pagination-page"
-          [class.active]="page === pagination().currentPage"
+          class="min-w-10 sm:min-w-[2.75rem] h-10 sm:h-11 p-0 flex items-center justify-center rounded-lg sm:rounded-xl bg-transparent border border-transparent text-base-content/60 text-sm font-medium transition-all duration-200 cursor-pointer shrink-0 hover:bg-base-content/10 hover:text-base-content active:scale-90"
+          [class.bg-accent]="page === pagination().currentPage"
+          [class.text-accent-content]="page === pagination().currentPage"
+          [class.font-bold]="page === pagination().currentPage"
+          [class.hover:bg-accent-focus]="page === pagination().currentPage"
           [attr.aria-label]="'Page ' + page"
           [attr.aria-current]="
             page === pagination().currentPage ? 'page' : null
@@ -26,7 +29,7 @@
           {{ page }}
         </button>
       } @else {
-        <span class="pagination-ellipsis">{{ page }}</span>
+        <span class="min-w-8 sm:min-w-[2.75rem] h-10 sm:h-11 flex items-center justify-center text-base-content/30 text-sm">{{ page }}</span>
       }
     }
   </div>
@@ -34,7 +37,7 @@
   @if (pagination().hasNextPage) {
     <button
       type="button"
-      class="pagination-button next"
+      class="flex items-center justify-center min-w-[2.75rem] h-11 rounded-xl bg-base-content/3 border border-base-content/10 text-base-content/80 text-sm transition-all duration-200 cursor-pointer backdrop-blur-md shrink-0 hover:bg-base-content/10 hover:border-base-content/20 hover:-translate-y-px active:scale-95 active:translate-y-0"
       (click)="onPageChange(pagination().currentPage + 1)"
       aria-label="Next page"
     >

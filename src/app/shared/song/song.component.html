@@ -2,19 +2,19 @@
   <div class="flex justify-between items-center py-3 w-full skeleton-song px-5">
     <div class="grid grid-flow-col gap-4 items-center w-full justify-start">
       <div
-        class="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 skeleton-image bg-white/[0.05]"
+        class="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 skeleton-image bg-base-content/5"
       ></div>
 
       <div class="min-w-0 flex-1 space-y-2">
-        <div class="skeleton-title h-4 w-32 rounded bg-white/[0.05]"></div>
-        <div class="skeleton-artist h-3 w-24 rounded bg-white/[0.03]"></div>
+        <div class="skeleton-title h-4 w-32 rounded bg-base-content/5"></div>
+        <div class="skeleton-artist h-3 w-24 rounded bg-base-content/5"></div>
       </div>
     </div>
   </div>
 } @else {
   @if (allowReorder()) {
     <div
-      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-5 w-full touch-manipulation"
+      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-5 w-full touch-manipulation hover:bg-base-200/50 rounded-xl"
       [class.song-active]="isActive()"
       [class.opacity-50]="isUnavailable()"
       appDragAndDrop
@@ -25,7 +25,7 @@
     </div>
   } @else {
     <div
-      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-5 w-full touch-manipulation"
+      class="song-container group flex items-center gap-4 py-3 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-5 w-full touch-manipulation hover:bg-base-200/50 rounded-xl"
       [class.song-active]="isActive()"
       [class.opacity-50]="isUnavailable()"
     >
@@ -52,29 +52,29 @@
     [attr.aria-disabled]="isUnavailable()"
   >
     <div
-      class="relative w-12 h-12 rounded-lg overflow-hidden shadow-sm ring-1 ring-white/10 shrink-0 album-art"
+      class="relative w-12 h-12 rounded-lg overflow-hidden shadow-sm ring-1 ring-base-content/10 shrink-0 album-art"
       [class.loading]="imageLoading()"
     >
       @if (imageLoading()) {
         <div
-          class="absolute inset-0 bg-white/[0.02] flex items-center justify-center"
+          class="absolute inset-0 bg-base-content/5 flex items-center justify-center"
         >
           <div
-            class="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin"
+            class="w-4 h-4 border-2 border-base-content/20 border-t-base-content/60 rounded-full animate-spin"
           ></div>
         </div>
       }
 
       @if (isError() && isActive()) {
         <div
-          class="absolute inset-0 bg-red-500/20 flex items-center justify-center z-20"
+          class="absolute inset-0 bg-error/20 flex items-center justify-center z-20"
         >
           <fa-icon [icon]="faTriangleExclamation" class="text-error text-lg" />
         </div>
       }
 
       <div
-        class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/song:opacity-100 transition-opacity duration-150 z-10"
+        class="absolute inset-0 bg-base-300/60 flex items-center justify-center opacity-0 group-hover/song:opacity-100 transition-opacity duration-150 z-10"
       >
         <app-player-button [status]="status()" />
       </div>
@@ -97,10 +97,10 @@
 
       @if (imageError()) {
         <div
-          class="absolute inset-0 bg-white/[0.03] flex items-center justify-center"
+          class="absolute inset-0 bg-base-content/5 flex items-center justify-center"
         >
           <svg
-            class="w-5 h-5 text-white/30"
+            class="w-5 h-5 text-base-content/30"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -129,7 +129,7 @@
       />
 
       <div
-        class="absolute -bottom-3 left-0 right-[-100px] h-[0.5px] bg-white/[0.06] group-last/item:hidden"
+        class="absolute -bottom-3 left-0 right-[-100px] h-[0.5px] bg-base-content/10 group-last/item:hidden"
       ></div>
     </div>
   </div>
