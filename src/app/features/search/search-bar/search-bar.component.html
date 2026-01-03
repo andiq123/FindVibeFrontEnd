@@ -39,11 +39,7 @@
     @if (searchTerm().length > 0) {
       <button
         type="button"
-        (click)="
-          searchTerm.set('');
-          onInput($any({ target: { value: '' } }));
-          searchInput.focus()
-        "
+        (click)="clearSearch(searchInput)"
         class="absolute right-2 top-1/2 -translate-y-1/2 w-[22px] h-[22px] flex items-center justify-center transition-all active:scale-90 rounded-full touch-manipulation"
         aria-label="Clear search"
       >

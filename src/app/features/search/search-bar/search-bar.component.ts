@@ -2,9 +2,7 @@ import {
   Component,
   computed,
   input,
-  OnInit,
   signal,
-  OnDestroy,
   effect,
   inject,
   untracked,
@@ -12,13 +10,21 @@ import {
   HostListener,
   ElementRef,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faMagnifyingGlass, faArrowUp } from "../../../shared/icons";
 import { FormsModule } from "@angular/forms";
 import { TitleCasePipe } from "@angular/common";
 import { Router } from "@angular/router";
 import { SearchService } from "../services/search.service";
-import { Subject, debounceTime, distinctUntilChanged } from "rxjs";
+import { SearchStatus } from "../../../core/models/song.model";
+import {
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  of,
+} from "rxjs";
 
 @Component({
   selector: "app-search-bar",
@@ -27,20 +33,18 @@ import { Subject, debounceTime, distinctUntilChanged } from "rxjs";
   styleUrl: "./search-bar.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchBarComponent implements OnInit, OnDestroy {
+export class SearchBarComponent {
   query = input<string>("");
   searchTerm = signal<string>("");
   isFocused = signal<boolean>(false);
 
   private searchSubject = new Subject<string>();
-  private suggestionsService = inject(SearchService);
+  private searchService = inject(SearchService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
 
-  suggestions = computed(() => this.suggestionsService.suggestions());
-  suggestionsLoading = computed(() =>
-    this.suggestionsService.suggestionsLoading(),
-  );
+  suggestions = computed(() => this.searchService.suggestions());
+  suggestionsLoading = computed(() => this.searchService.suggestionsLoading());
 
   faMagnifyingGlass = faMagnifyingGlass;
   faArrowUpLeft = faArrowUp;
@@ -48,102 +52,96 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   constructor() {
     effect(() => {
       const q = this.query();
-      untracked(() => {
-        if (!q) {
-          const lastQ = this.suggestionsService.lastQuery();
-          this.searchTerm.set(lastQ || "");
-          if (lastQ) this.router.navigate([`/songs/${lastQ}`]);
-          return;
-        }
 
-        this.searchTerm.set(q);
-        if (q !== this.suggestionsService.lastQuery()) {
-          this.submitSearchSongs();
+      if (!q) {
+        if (untracked(() => this.searchTerm()) !== "") {
+          this.searchTerm.set("");
         }
-        this.suggestionsService.resetSuggestions();
-      });
+        return;
+      }
+
+      this.searchTerm.set(q);
+
+      const lastQuery = untracked(() => this.searchService.lastQuery());
+      const searchStatus = untracked(() => this.searchService.status());
+
+      if (q !== lastQuery || searchStatus === SearchStatus.None) {
+        this.submitSearchSongs();
+      }
+
+      this.searchService.resetSuggestions();
     });
-  }
 
-  ngOnInit(): void {
     this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe((term) => {
-        if (term.trim()) {
-          this.searchSuggestion(term);
-        } else {
-          this.suggestionsService.resetSuggestions();
-        }
-      });
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((term) => {
+          if (term.trim()) {
+            return this.searchService.getSuggestions(term);
+          } else {
+            this.searchService.resetSuggestions();
+            return of([]);
+          }
+        }),
+        takeUntilDestroyed(),
+      )
+      .subscribe();
   }
 
-  ngOnDestroy(): void {
-    this.searchSubject.complete();
-    this.suggestionsService.resetSuggestions();
-  }
-
-  fillSuggestion(suggestion: string, event: Event) {
+  fillSuggestion(suggestion: string, event: Event): void {
     event.stopPropagation();
     this.searchTerm.set(suggestion);
-    this.searchSuggestion(suggestion);
   }
 
-  async searchBySuggestion(suggestion: string) {
+  async searchBySuggestion(suggestion: string): Promise<void> {
     this.searchTerm.set(suggestion);
     await this.submit();
   }
 
-  onInput(event: Event) {
+  onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
     this.searchSubject.next(value);
   }
 
-  cancelSearch() {
+  clearSearch(input: HTMLInputElement): void {
     this.searchTerm.set("");
-    this.suggestionsService.resetSearch();
-    this.router.navigate(["/songs/"]);
+    this.searchService.resetSuggestions();
+    input.focus();
   }
 
-  async submit() {
-    const term = this.searchTerm().trim();
-    if (term === "") {
-      return;
-    }
+  async cancelSearch(): Promise<void> {
+    this.searchTerm.set("");
+    this.searchService.resetSearch();
+    await this.router.navigate(["/songs/"]);
+  }
 
-    if (this.query() === term) {
-      this.submitSearchSongs();
-      this.suggestionsService.resetSuggestions();
+  async submit(): Promise<void> {
+    const term = this.searchTerm().trim();
+    if (!term) return;
+
+    this.searchService.resetSuggestions();
+
+    if (this.query() !== term) {
+      await this.router.navigate([`/songs/${term}`]);
     } else {
-      await this.setQueryParamsToCurrentSearchTerm();
+      this.submitSearchSongs();
     }
   }
 
   @HostListener("document:click", ["$event"])
-  onClickOutside(event: Event) {
+  onClickOutside(event: Event): void {
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
     if (
       !clickedInside &&
       (this.suggestions().length > 0 || this.suggestionsLoading())
     ) {
-      this.suggestionsService.resetSuggestions();
+      this.searchService.resetSuggestions();
     }
   }
 
-  private async setQueryParamsToCurrentSearchTerm() {
-    await this.router.navigate([`/songs/${this.searchTerm()}`]);
-  }
-
-  private searchSuggestion(term: string) {
-    this.suggestionsService.getSuggestions(term).subscribe({
-      error: () => this.suggestionsService.resetSuggestions(),
-    });
-  }
-
-  private submitSearchSongs() {
-    this.suggestionsService.searchSongs(this.searchTerm(), 1).subscribe({
-      next: () => this.suggestionsService.resetSuggestions(),
-      error: () => this.suggestionsService.resetSuggestions(),
-    });
+  private submitSearchSongs(): void {
+    this.searchService.searchSongs(this.searchTerm(), 1).subscribe();
   }
 }

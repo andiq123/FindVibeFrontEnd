@@ -1,14 +1,14 @@
 <nav class="pagination" role="navigation" aria-label="Pagination">
-  <button
-    type="button"
-    class="pagination-button prev"
-    [disabled]="!pagination().hasPrevPage"
-    (click)="onPageChange(pagination().currentPage - 1)"
-    aria-label="Previous page"
-  >
-    <fa-icon [icon]="faChevronLeft" class="text-sm" />
-    <span class="hidden sm:inline">Previous</span>
-  </button>
+  @if (pagination().hasPrevPage) {
+    <button
+      type="button"
+      class="pagination-button prev"
+      (click)="onPageChange(pagination().currentPage - 1)"
+      aria-label="Previous page"
+    >
+      <fa-icon [icon]="faChevronLeft" class="text-sm" />
+    </button>
+  }
 
   <div class="pagination-pages">
     @for (page of pageNumbers(); track $index) {
@@ -31,14 +31,14 @@
     }
   </div>
 
-  <button
-    type="button"
-    class="pagination-button next"
-    [disabled]="!pagination().hasNextPage"
-    (click)="onPageChange(pagination().currentPage + 1)"
-    aria-label="Next page"
-  >
-    <span class="hidden sm:inline">Next</span>
-    <fa-icon [icon]="faChevronRight" class="text-sm" />
-  </button>
+  @if (pagination().hasNextPage) {
+    <button
+      type="button"
+      class="pagination-button next"
+      (click)="onPageChange(pagination().currentPage + 1)"
+      aria-label="Next page"
+    >
+      <fa-icon [icon]="faChevronRight" class="text-sm" />
+    </button>
+  }
 </nav>

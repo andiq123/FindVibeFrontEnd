@@ -50,14 +50,14 @@ export class SearchService {
 
   searchSongs(
     searchTerm: string,
-    page: number = 1,
+    page = 1,
     force = false,
   ): Observable<SearchResponse> {
     if (
       !force &&
       searchTerm === this._lastSearchQuery() &&
       page === this._currentPage() &&
-      this._songs().length > 0
+      this._searchStatus() === SearchStatus.Finished
     ) {
       return of({
         songs: this._songs(),
