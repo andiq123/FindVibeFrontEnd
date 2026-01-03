@@ -141,7 +141,6 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.renderer.setStyle(this.document.body, "overflow", "hidden");
     this.isOpeningAnimation.set(true);
-    setTimeout(() => this.isOpeningAnimation.set(false), 350);
   }
 
   ngOnDestroy() {
@@ -152,15 +151,18 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleSize(isImmediate = false) {
+  onAnimationEnd() {
+    if (this.isOpeningAnimation()) {
+      this.isOpeningAnimation.set(false);
+    }
+    if (this.isClosingAnimation()) {
+      this.toggleSizeEvent.emit();
+    }
+  }
+
+  toggleSize() {
     this.isOpeningAnimation.set(false);
     this.isClosingAnimation.set(true);
-    setTimeout(
-      () => {
-        this.toggleSizeEvent.emit();
-      },
-      isImmediate ? 0 : 350,
-    );
   }
 
   async togglePlay() {

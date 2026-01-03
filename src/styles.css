@@ -40,14 +40,14 @@
 
 :root {
   --anim-duration-instant: 0.1s;
-  --anim-duration-fast: 0.15s;
-  --anim-duration-normal: 0.2s;
-  --anim-duration-slow: 0.35s;
-  --anim-duration-slower: 0.45s;
+  --anim-duration-fast: 0.2s;
+  --anim-duration-normal: 0.3s;
+  --anim-duration-slow: 0.45s;
+  --anim-duration-slower: 0.6s;
 
-  --anim-ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --anim-ease-ios: cubic-bezier(0.28, 0.11, 0.32, 1);
   --anim-ease-spring: cubic-bezier(0.2, 1, 0.2, 1);
-  --anim-ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --anim-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   --anim-ease-standard: ease-in-out;
   --anim-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
   --anim-ease-in: ease-in;
@@ -201,8 +201,7 @@
 
 .anim-slide-down {
   will-change: transform;
-  animation: slide-down var(--anim-duration-slow) var(--anim-ease-smooth)
-    forwards;
+  animation: slide-down 0.35s ease-in forwards;
 }
 
 .anim-fade-in {

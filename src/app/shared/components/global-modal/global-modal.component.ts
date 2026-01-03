@@ -32,6 +32,7 @@ import { SwipeDownDirective } from "../../../features/player/directives/swipe-do
         [class.anim-slide-up]="isOpening()"
         [class.anim-slide-down]="isClosing()"
         #modalContainer
+        (animationend)="onAnimationEnd()"
         role="dialog"
         aria-modal="true"
         appSwipeDown
@@ -90,18 +91,23 @@ export class GlobalModalComponent {
       if (isOpen) {
         this.isOpening.set(true);
         this.renderer.setStyle(this.document.body, "overflow", "hidden");
-        setTimeout(() => this.isOpening.set(false), 350);
       } else {
         this.renderer.removeStyle(this.document.body, "overflow");
       }
     });
   }
 
-  close() {
-    this.isClosing.set(true);
-    setTimeout(() => {
+  onAnimationEnd() {
+    if (this.isOpening()) {
+      this.isOpening.set(false);
+    }
+    if (this.isClosing()) {
       this.modalService.close();
       this.isClosing.set(false);
-    }, 350);
+    }
+  }
+
+  close() {
+    this.isClosing.set(true);
   }
 }
