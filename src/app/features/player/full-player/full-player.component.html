@@ -1,4 +1,11 @@
 <div
+  class="fixed inset-0 bg-base-100/80 backdrop-blur-md"
+  style="z-index: var(--z-full-player)"
+  [class.anim-fade-in]="isOpeningAnimation()"
+  [class.anim-fade-out]="isClosingAnimation()"
+></div>
+
+<div
   class="fixed bottom-0 left-0 right-0 h-[100dvh] flex flex-col"
   style="z-index: var(--z-full-player)"
   [class.anim-slide-up]="isOpeningAnimation()"

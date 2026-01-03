@@ -9,34 +9,34 @@
   --color-base-200: oklch(27% 0.02 260);
   --color-base-300: oklch(32% 0.03 260);
   --color-base-content: oklch(98% 0.01 260);
-  
+
   --color-primary: oklch(65% 0.28 310);
   --color-primary-content: oklch(98% 0.01 260);
-  
+
   --color-secondary: oklch(75% 0.22 170);
   --color-secondary-content: oklch(12% 0.04 260);
-  
+
   --color-accent: oklch(68% 0.14 60);
   --color-accent-content: oklch(12% 0.04 260);
-  
+
   --color-neutral: oklch(20% 0.02 260);
   --color-neutral-content: oklch(98% 0.01 260);
-  
+
   --color-info: oklch(70% 0.18 240);
   --color-info-content: oklch(12% 0.04 260);
-  
-  --color-success: oklch(70% 0.20 145);
+
+  --color-success: oklch(70% 0.2 145);
   --color-success-content: oklch(12% 0.04 260);
-  
-  --color-warning: oklch(85% 0.20 95);
+
+  --color-warning: oklch(85% 0.2 95);
   --color-warning-content: oklch(12% 0.04 260);
-  
+
   --color-error: oklch(65% 0.25 25);
   --color-error-content: oklch(98% 0.01 260);
 
   --radius-btn: 1rem;
   --radius-box: 1.5rem;
-};
+}
 
 :root {
   --anim-duration-instant: 0.1s;
@@ -57,13 +57,37 @@
   user-select: none;
 
   --glass-bg-light: color-mix(in oklab, var(--color-base-100) 5%, transparent);
-  --glass-bg-medium: color-mix(in oklab, var(--color-base-100) 10%, transparent);
-  --glass-bg-strong: color-mix(in oklab, var(--color-base-100) 20%, transparent);
-  --glass-bg-suggestions: color-mix(in oklab, var(--color-base-200) 98%, transparent);
+  --glass-bg-medium: color-mix(
+    in oklab,
+    var(--color-base-100) 10%,
+    transparent
+  );
+  --glass-bg-strong: color-mix(
+    in oklab,
+    var(--color-base-100) 20%,
+    transparent
+  );
+  --glass-bg-suggestions: color-mix(
+    in oklab,
+    var(--color-base-200) 98%,
+    transparent
+  );
 
-  --glass-border-subtle: color-mix(in oklab, var(--color-base-content) 5%, transparent);
-  --glass-border-light: color-mix(in oklab, var(--color-base-content) 8%, transparent);
-  --glass-border-medium: color-mix(in oklab, var(--color-base-content) 12%, transparent);
+  --glass-border-subtle: color-mix(
+    in oklab,
+    var(--color-base-content) 5%,
+    transparent
+  );
+  --glass-border-light: color-mix(
+    in oklab,
+    var(--color-base-content) 8%,
+    transparent
+  );
+  --glass-border-medium: color-mix(
+    in oklab,
+    var(--color-base-content) 12%,
+    transparent
+  );
 
   --glass-blur-light: 16px;
   --glass-blur-medium: 24px;
@@ -87,11 +111,17 @@
   --player-gradient-mid: rgba(0, 0, 0, 0.4);
   --player-gradient-end: rgba(0, 0, 0, 0.8);
 
-  --shadow-ios-sm: 0 2px 6px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.12);
-  --shadow-ios-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.1), 0 16px 48px rgba(0, 0, 0, 0.14);
-  --shadow-ios-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 16px 48px rgba(0, 0, 0, 0.16), 0 24px 80px rgba(0, 0, 0, 0.2);
+  --shadow-ios-sm:
+    0 2px 6px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-ios-md:
+    0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.1),
+    0 16px 48px rgba(0, 0, 0, 0.14);
+  --shadow-ios-lg:
+    0 8px 24px rgba(0, 0, 0, 0.12), 0 16px 48px rgba(0, 0, 0, 0.16),
+    0 24px 80px rgba(0, 0, 0, 0.2);
 
-  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  --shadow-premium:
+    0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -171,7 +201,8 @@
 
 .anim-slide-down {
   will-change: transform;
-  animation: slide-down var(--anim-duration-normal) var(--anim-ease-ios) forwards;
+  animation: slide-down var(--anim-duration-slow) var(--anim-ease-smooth)
+    forwards;
 }
 
 .anim-fade-in {
@@ -190,11 +221,11 @@
 
 .anim-mini-player-entry {
   will-change: transform;
-  animation: slide-up-centered var(--anim-duration-slow) var(--anim-ease-ios) forwards;
+  animation: slide-up-centered var(--anim-duration-slow) var(--anim-ease-ios)
+    forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .anim-slide-up,
   .anim-slide-down,
   .anim-fade-in,
@@ -204,10 +235,6 @@
     will-change: auto;
   }
 }
-
-
-
-
 
 .glass-light {
   background: var(--glass-bg-light);
@@ -232,18 +259,39 @@
 
 .bg-app-gradient {
   background-color: var(--color-base-100);
-  background-image: 
-    radial-gradient(circle at 10% 20%, color-mix(in oklab, var(--color-primary) 12%, transparent) 0%, transparent 45%),
-    radial-gradient(circle at 90% 80%, color-mix(in oklab, var(--color-accent) 10%, transparent) 0%, transparent 45%),
-    radial-gradient(circle at 80% 10%, color-mix(in oklab, var(--color-secondary) 8%, transparent) 0%, transparent 40%),
-    radial-gradient(circle at 20% 90%, color-mix(in oklab, var(--color-info) 8%, transparent) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--color-base-200) 40%, transparent) 0%, transparent 100%);
+  background-image:
+    radial-gradient(
+      circle at 10% 20%,
+      color-mix(in oklab, var(--color-primary) 12%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      color-mix(in oklab, var(--color-accent) 10%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 80% 10%,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 20% 90%,
+      color-mix(in oklab, var(--color-info) 8%, transparent) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      color-mix(in oklab, var(--color-base-200) 40%, transparent) 0%,
+      transparent 100%
+    );
   background-attachment: fixed;
 }
 
 .glass-suggestions {
   background: color-mix(in oklab, var(--color-base-200) 40%, transparent);
-  border: 1px solid color-mix(in oklab, var(--color-base-content) 12%, transparent);
+  border: 1px solid
+    color-mix(in oklab, var(--color-base-content) 12%, transparent);
   backdrop-filter: blur(48px) saturate(2);
   -webkit-backdrop-filter: blur(48px) saturate(2);
 }
@@ -274,7 +322,9 @@ html {
   padding: 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   letter-spacing: -0.011em;
   min-height: 100%;
 }
@@ -284,12 +334,32 @@ body {
   padding: 0;
   min-height: 100vh;
   background-color: var(--color-base-100);
-  background-image: 
-    radial-gradient(circle at 10% 20%, color-mix(in oklab, var(--color-primary) 12%, transparent) 0%, transparent 45%),
-    radial-gradient(circle at 90% 80%, color-mix(in oklab, var(--color-accent) 10%, transparent) 0%, transparent 45%),
-    radial-gradient(circle at 80% 10%, color-mix(in oklab, var(--color-secondary) 8%, transparent) 0%, transparent 40%),
-    radial-gradient(circle at 20% 90%, color-mix(in oklab, var(--color-info) 8%, transparent) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--color-base-200) 40%, transparent) 0%, transparent 100%);
+  background-image:
+    radial-gradient(
+      circle at 10% 20%,
+      color-mix(in oklab, var(--color-primary) 12%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      color-mix(in oklab, var(--color-accent) 10%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 80% 10%,
+      color-mix(in oklab, var(--color-secondary) 8%, transparent) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 20% 90%,
+      color-mix(in oklab, var(--color-info) 8%, transparent) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      color-mix(in oklab, var(--color-base-200) 40%, transparent) 0%,
+      transparent 100%
+    );
   background-attachment: fixed;
 }
 
@@ -298,11 +368,21 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleUp {
-  from { opacity: 0; transform: scale(0.8) translateY(20px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }

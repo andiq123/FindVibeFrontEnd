@@ -25,7 +25,6 @@ import {
   faStepBackward,
   faStepForward,
   faTriangleExclamation,
-
 } from "@fortawesome/free-solid-svg-icons";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
 import { SettingsService } from "../../../core/services/settings.service";
@@ -86,7 +85,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   playerStatus = PlayerStatus;
 
   isClosingAnimation = signal(false);
-  isOpeningAnimation = signal(true);
+  isOpeningAnimation = signal(false);
   isError = computed(() => this.status() === PlayerStatus.Error);
 
   faTriangleExclamation = faTriangleExclamation;
@@ -141,7 +140,8 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.renderer.setStyle(this.document.body, "overflow", "hidden");
-    setTimeout(() => this.isOpeningAnimation.set(false), 550);
+    this.isOpeningAnimation.set(true);
+    setTimeout(() => this.isOpeningAnimation.set(false), 350);
   }
 
   ngOnDestroy() {
@@ -153,18 +153,14 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   }
 
   toggleSize(isImmediate = false) {
-    if (isImmediate) {
-      this.toggleSizeEvent.emit();
-      return;
-    }
-    this.playerRef()?.nativeElement.addEventListener(
-      "animationend",
+    this.isOpeningAnimation.set(false);
+    this.isClosingAnimation.set(true);
+    setTimeout(
       () => {
         this.toggleSizeEvent.emit();
       },
-      { once: true },
+      isImmediate ? 0 : 350,
     );
-    this.isClosingAnimation.set(true);
   }
 
   async togglePlay() {

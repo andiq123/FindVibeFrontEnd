@@ -67,7 +67,7 @@ export class SearchBarComponent {
       const searchStatus = untracked(() => this.searchService.status());
 
       if (q !== lastQuery || searchStatus === SearchStatus.None) {
-        this.submitSearchSongs();
+        this.submitSearchSongs(1);
       }
 
       this.searchService.resetSuggestions();
@@ -103,7 +103,12 @@ export class SearchBarComponent {
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
-    this.searchSubject.next(value);
+
+    if (value.trim()) {
+      this.searchSubject.next(value);
+    } else {
+      this.searchService.resetSuggestions();
+    }
   }
 
   clearSearch(input: HTMLInputElement): void {
@@ -123,6 +128,7 @@ export class SearchBarComponent {
     if (!term) return;
 
     this.searchService.resetSuggestions();
+    this.isFocused.set(false);
 
     if (this.query() !== term) {
       await this.router.navigate([`/songs/${term}`]);
@@ -142,7 +148,7 @@ export class SearchBarComponent {
     }
   }
 
-  private submitSearchSongs(): void {
-    this.searchService.searchSongs(this.searchTerm(), 1).subscribe();
+  private submitSearchSongs(page = 1): void {
+    this.searchService.searchSongs(this.searchTerm(), page).subscribe();
   }
 }

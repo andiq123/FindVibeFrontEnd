@@ -5,6 +5,7 @@ import {
   input,
   inject,
   ChangeDetectionStrategy,
+  untracked,
 } from "@angular/core";
 
 import { SearchBarComponent } from "./search-bar/search-bar.component";
@@ -70,6 +71,17 @@ export class SearchPageComponent {
         this.router.url !== "/library"
       ) {
         this.router.navigate(["/library"]);
+      }
+    });
+
+    effect(() => {
+      const currentQuery = this.query();
+
+      if (!currentQuery) {
+        const lastQuery = untracked(() => this.songsService.lastQuery());
+        if (lastQuery) {
+          this.router.navigate(["/songs", lastQuery], { replaceUrl: true });
+        }
       }
     });
   }

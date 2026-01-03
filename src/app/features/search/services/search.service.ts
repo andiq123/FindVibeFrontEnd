@@ -57,7 +57,8 @@ export class SearchService {
       !force &&
       searchTerm === this._lastSearchQuery() &&
       page === this._currentPage() &&
-      this._searchStatus() === SearchStatus.Finished
+      this._searchStatus() === SearchStatus.Finished &&
+      this._songs().length > 0
     ) {
       return of({
         songs: this._songs(),
