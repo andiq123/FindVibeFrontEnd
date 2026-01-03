@@ -11,6 +11,7 @@ import { PaginationInfo } from "../../../core/models/song.model";
 
 @Component({
   selector: "app-pagination",
+  standalone: true,
   imports: [FontAwesomeModule],
   templateUrl: "./pagination.component.html",
   changeDetection: ChangeDetectionStrategy.OnPush,

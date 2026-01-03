@@ -85,16 +85,16 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   playerStatus = PlayerStatus;
 
-  isClosingAnimation = signal<boolean>(false);
-  isOpeningAnimation = signal<boolean>(true);
+  isClosingAnimation = signal(false);
+  isOpeningAnimation = signal(true);
   isError = computed(() => this.status() === PlayerStatus.Error);
 
   faTriangleExclamation = faTriangleExclamation;
 
   playerRef = viewChild<ElementRef<HTMLDivElement>>("playerRef");
 
-  isDraggingTime = signal<boolean>(false);
-  visualTime = signal<number>(0);
+  isDraggingTime = signal(false);
+  visualTime = signal(0);
   private lastSeekTimestamp = 0;
 
   progressPercent = computed(() => {
@@ -107,6 +107,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   imageLoading = signal(true);
   imageError = signal(false);
   imageSrc = signal<string>("no_album_art.jpg");
+  private updateFrameId: number | null = null;
 
   constructor() {
     effect(() => {
@@ -127,7 +128,13 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
       const now = Date.now();
 
       if (!this.isDraggingTime() && now - this.lastSeekTimestamp > 500) {
-        untracked(() => this.visualTime.set(time));
+        if (this.updateFrameId !== null) {
+          cancelAnimationFrame(this.updateFrameId);
+        }
+        this.updateFrameId = requestAnimationFrame(() => {
+          untracked(() => this.visualTime.set(time));
+          this.updateFrameId = null;
+        });
       }
     });
   }
@@ -140,6 +147,9 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.renderer.removeStyle(this.document.body, "overflow");
     this.imageLoader?.cleanup();
+    if (this.updateFrameId !== null) {
+      cancelAnimationFrame(this.updateFrameId);
+    }
   }
 
   toggleSize(isImmediate = false) {

@@ -22,6 +22,7 @@ import { NgOptimizedImage } from "@angular/common";
 
 @Component({
   selector: "app-mini-player",
+  standalone: true,
   imports: [
     FontAwesomeModule,
     PlayerButtonComponent,

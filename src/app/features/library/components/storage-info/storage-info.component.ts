@@ -11,8 +11,6 @@ import { LibraryService } from "../../services/library.service";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faTrash, faCloudArrowDown } from "../../../../shared/icons";
 import { Song } from "../../../../core/models/song.model";
-import { ModalService } from "../../../../core/services/modal.service";
-import { SettingsService } from "../../../../core/services/settings.service";
 import { upgradeToHttps } from "../../../../core/utils/utils";
 
 @Component({
@@ -26,13 +24,11 @@ import { upgradeToHttps } from "../../../../core/utils/utils";
 export class StorageInfoComponent implements OnInit {
   private offlineStorageService = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
-  private modalService = inject(ModalService);
-  private settingsService = inject(SettingsService);
 
   storageTotal = this.offlineStorageService.storageTotal;
   storageUsed = this.offlineStorageService.storageUsed;
-  loadingDownloading = signal<boolean>(false);
-  loadingClearing = signal<boolean>(false);
+  loadingDownloading = signal(false);
+  loadingClearing = signal(false);
 
   showRemoveCacheButton = computed(() => {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
@@ -44,10 +40,6 @@ export class StorageInfoComponent implements OnInit {
   ngOnInit(): void {
     this.offlineStorageService.setUpStorage();
     this.populateAvailableOfflineSongs();
-  }
-
-  close() {
-    this.modalService.close();
   }
 
   async downloadAll(): Promise<void> {

@@ -28,15 +28,16 @@ import {
 
 @Component({
   selector: "app-search-bar",
+  standalone: true,
   imports: [FontAwesomeModule, FormsModule, TitleCasePipe],
   templateUrl: "./search-bar.component.html",
   styleUrl: "./search-bar.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchBarComponent {
-  query = input<string>("");
-  searchTerm = signal<string>("");
-  isFocused = signal<boolean>(false);
+  query = input("");
+  searchTerm = signal("");
+  isFocused = signal(false);
 
   private searchSubject = new Subject<string>();
   private searchService = inject(SearchService);

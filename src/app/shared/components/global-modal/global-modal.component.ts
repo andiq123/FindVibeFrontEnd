@@ -5,7 +5,7 @@ import {
   signal,
   effect,
   ChangeDetectionStrategy,
-  ViewChild,
+  viewChild,
   ElementRef,
   Renderer2,
 } from "@angular/core";
@@ -74,7 +74,7 @@ export class GlobalModalComponent {
     return data ? { data } : {};
   });
 
-  @ViewChild("modalContainer") modalContainer?: ElementRef;
+  modalContainer = viewChild<ElementRef>("modalContainer");
 
   constructor() {
     effect(() => {
