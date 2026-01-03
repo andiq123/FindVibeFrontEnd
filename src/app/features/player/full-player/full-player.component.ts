@@ -85,16 +85,16 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   playerStatus = PlayerStatus;
 
-  isClosingAnimation = signal<boolean>(false);
-  isOpeningAnimation = signal<boolean>(true);
+  isClosingAnimation = signal(false);
+  isOpeningAnimation = signal(true);
   isError = computed(() => this.status() === PlayerStatus.Error);
 
   faTriangleExclamation = faTriangleExclamation;
 
   playerRef = viewChild<ElementRef<HTMLDivElement>>("playerRef");
 
-  isDraggingTime = signal<boolean>(false);
-  visualTime = signal<number>(0);
+  isDraggingTime = signal(false);
+  visualTime = signal(0);
   private lastSeekTimestamp = 0;
 
   progressPercent = computed(() => {

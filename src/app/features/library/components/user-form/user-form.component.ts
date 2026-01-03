@@ -11,8 +11,8 @@ import { FormsModule } from '@angular/forms';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserFormComponent {
-  name = signal<string>('');
-  loadingSubmiting = signal<boolean>(false);
+  name = signal('');
+  loadingSubmiting = signal(false);
 
   private userService = inject(UserService);
 
