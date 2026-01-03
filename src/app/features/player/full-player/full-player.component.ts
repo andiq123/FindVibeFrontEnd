@@ -141,7 +141,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.renderer.setStyle(this.document.body, "overflow", "hidden");
-    setTimeout(() => this.isOpeningAnimation.set(false), 550);
+    setTimeout(() => this.isOpeningAnimation.set(false), 350);
   }
 
   ngOnDestroy() {
@@ -160,6 +160,7 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
     this.playerRef()?.nativeElement.addEventListener(
       "animationend",
       () => {
+        this.isClosingAnimation.set(false);
         this.toggleSizeEvent.emit();
       },
       { once: true },
