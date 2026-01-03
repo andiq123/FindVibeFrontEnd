@@ -5,6 +5,8 @@ import {
   faBookmark,
   faCheck,
   faCheckCircle,
+  faChevronLeft,
+  faChevronRight,
   faCircleNotch,
   faClock,
   faCloudArrowDown,
@@ -27,10 +29,10 @@ import {
   faWaveSquare,
   faXmark,
   IconDefinition,
-} from '@fortawesome/free-solid-svg-icons';
+} from "@fortawesome/free-solid-svg-icons";
 
-import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
-import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as faHeartRegular } from "@fortawesome/free-regular-svg-icons";
+import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
 
 export {
   IconDefinition,
@@ -40,6 +42,8 @@ export {
   faBookmark,
   faCheck,
   faCheckCircle,
+  faChevronLeft,
+  faChevronRight,
   faCircleNotch,
   faClock,
   faCloudArrowDown,

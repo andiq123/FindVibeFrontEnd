@@ -1,40 +1,83 @@
-@if(!isCheckedServer()){
-<div class="w-full flex flex-col justify-center items-center gap-4 h-[60vh]">
-  <div class="text-center space-y-3">
-    <div class="relative w-24 h-24 mx-auto mb-6">
-      <div class="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
-      <div class="relative bg-base-200 rounded-full w-full h-full flex items-center justify-center ring-1 ring-white/10">
-        <fa-icon [icon]="faWaveSquare" class="text-4xl text-primary animate-pulse" />
+@if (!isCheckedServer()) {
+  <div class="w-full flex flex-col justify-center items-center gap-4 h-[60vh]">
+    <div class="text-center space-y-3">
+      <div class="relative w-24 h-24 mx-auto mb-6">
+        <div
+          class="absolute inset-0 bg-primary/20 rounded-full animate-ping"
+        ></div>
+        <div
+          class="relative bg-base-200 rounded-full w-full h-full flex items-center justify-center ring-1 ring-white/10"
+        >
+          <fa-icon
+            [icon]="faWaveSquare"
+            class="text-4xl text-primary animate-pulse"
+          />
+        </div>
       </div>
+      <h1 class="text-2xl font-bold tracking-tight">
+        Vibe Server is awakening...
+      </h1>
+      <p class="text-base-content/50 text-base max-w-[280px] mx-auto">
+        This might take a few moments as we spin up the high-fidelity audio
+        engine.
+      </p>
     </div>
-    <h1 class="text-2xl font-bold tracking-tight">Vibe Server is awakening...</h1>
-    <p class="text-base-content/50 text-base max-w-[280px] mx-auto">This might take a few moments as we spin up the high-fidelity audio engine.</p>
   </div>
-</div>
-}@else {
-<app-page-layout>
-  <div class="space-y-6 pb-12">
-    <div header>
-      <app-search-bar [query]="query()" />
-    </div>
+} @else {
+  <app-page-layout>
+    <div class="space-y-6 pb-12">
+      <div header>
+        <app-search-bar [query]="query()" />
+      </div>
 
-    <h1 class="font-bold text-4xl section-headline pt-4">Explore</h1>
+      <div class="flex items-center justify-between flex-wrap gap-4 pt-4">
+        <h1 class="font-bold text-4xl section-headline">Explore</h1>
 
-    <div class="premium-card min-h-[400px]">
-      @if (status() === searchStatus.None) {
+        @if (pagination() && pagination()!.totalResults > 0) {
+          <div
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-base-200/30 backdrop-blur-sm border border-base-300/20"
+          >
+            <div class="flex items-center gap-2">
+              <span
+                class="text-base-content/50 text-xs font-medium uppercase tracking-wider"
+                >Page</span
+              >
+              <span class="text-primary font-semibold text-base">{{
+                pagination()!.currentPage
+              }}</span>
+              <span class="text-base-content/40 text-xs">of</span>
+              <span class="text-base-content/70 font-medium">{{
+                pagination()!.totalPages
+              }}</span>
+            </div>
+            <div class="w-px h-4 bg-base-300/40"></div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-primary font-semibold text-base">{{
+                pagination()!.totalResults
+              }}</span>
+              <span class="text-base-content/50 text-xs font-medium">{{
+                pagination()!.totalResults === 1 ? "result" : "results"
+              }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="premium-card min-h-[400px]">
+        @if (status() === searchStatus.None) {
           <app-empty-state
             [icon]="faMagnifyingGlass"
             title="Find your next favorite"
             description="Search for vibes, artists, or specific songs across the entire library."
           />
-      } @else if (status() === searchStatus.Error) {
+        } @else if (status() === searchStatus.Error) {
           <app-empty-state
             [icon]="faTriangleExclamation"
             title="No results found"
             description="Check the spelling or try different keywords."
             variant="error"
           />
-      } @else {
+        } @else {
           <app-song-list
             [songs]="songs()"
             [isLoading]="status() === searchStatus.Loading"
@@ -43,8 +86,15 @@
             emptyStateDescription="Try a different search!"
             (playlistChange)="onChangePlaylist()"
           />
-      }
+
+          @if (pagination() && pagination()!.totalPages > 1) {
+            <app-pagination
+              [pagination]="pagination()!"
+              (pageChange)="onPageChange($event)"
+            />
+          }
+        }
+      </div>
     </div>
-  </div>
-</app-page-layout>
+  </app-page-layout>
 }

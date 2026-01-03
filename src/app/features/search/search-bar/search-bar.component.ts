@@ -141,7 +141,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   private submitSearchSongs() {
-    this.suggestionsService.searchSongs(this.searchTerm()).subscribe({
+    this.suggestionsService.searchSongs(this.searchTerm(), 1).subscribe({
       next: () => this.suggestionsService.resetSuggestions(),
       error: () => this.suggestionsService.resetSuggestions(),
     });

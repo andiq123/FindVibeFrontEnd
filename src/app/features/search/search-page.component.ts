@@ -10,6 +10,7 @@ import {
 import { SearchBarComponent } from "./search-bar/search-bar.component";
 import { PageLayoutComponent } from "../../shared/components/page-layout/page-layout.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
+import { PaginationComponent } from "../../shared/components/pagination/pagination.component";
 import { SearchStatus } from "../../core/models/song.model";
 import { Router } from "@angular/router";
 import { SearchService } from "./services/search.service";
@@ -34,6 +35,7 @@ import {
     EmptyStateComponent,
     PageLayoutComponent,
     SongListComponent,
+    PaginationComponent,
   ],
   templateUrl: "./search-page.component.html",
   styleUrl: "./search-page.component.scss",
@@ -50,6 +52,8 @@ export class SearchPageComponent {
 
   songs = computed(() => this.songsService.songs());
   status = computed(() => this.songsService.status());
+  pagination = computed(() => this.songsService.pagination());
+  currentPage = computed(() => this.songsService.currentPage());
   isCheckedServer = computed(() => this.settingsService.isCheckedServer());
 
   searchStatus = SearchStatus;
@@ -70,7 +74,15 @@ export class SearchPageComponent {
     });
   }
 
-  onChangePlaylist() {
+  onChangePlaylist(): void {
     this.playlistService.setCurrentPlaylist(this.songs());
+  }
+
+  onPageChange(page: number): void {
+    const query = this.query();
+    if (!query) return;
+
+    this.songsService.searchSongs(query, page).subscribe();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 }
