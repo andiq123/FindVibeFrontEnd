@@ -128,7 +128,6 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
       const now = Date.now();
 
       if (!this.isDraggingTime() && now - this.lastSeekTimestamp > 500) {
-        // Use requestAnimationFrame to batch updates and reduce reflows
         if (this.updateFrameId !== null) {
           cancelAnimationFrame(this.updateFrameId);
         }

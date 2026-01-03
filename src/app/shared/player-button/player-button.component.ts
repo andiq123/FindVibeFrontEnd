@@ -5,6 +5,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 
 @Component({
   selector: "app-player-button",
+  standalone: true,
   imports: [FontAwesomeModule],
   templateUrl: "./player-button.component.html",
   styleUrl: "./player-button.component.scss",

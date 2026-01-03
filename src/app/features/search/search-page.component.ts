@@ -29,6 +29,7 @@ import {
 
 @Component({
   selector: "app-search-page",
+  standalone: true,
   imports: [
     SearchBarComponent,
     FontAwesomeModule,

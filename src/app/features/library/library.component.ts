@@ -31,6 +31,7 @@ import { SongListComponent } from "../../shared/components/song-list/song-list.c
 
 @Component({
   selector: "app-library",
+  standalone: true,
   imports: [
     UserFormComponent,
     TitleCasePipe,

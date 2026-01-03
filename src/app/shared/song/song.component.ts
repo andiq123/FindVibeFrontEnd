@@ -25,6 +25,7 @@ import { createImageLoader, ImageLoader } from "../utils/image-loader.util";
 
 @Component({
   selector: "app-song",
+  standalone: true,
   imports: [
     PlayerButtonComponent,
     MovingTitleComponent,

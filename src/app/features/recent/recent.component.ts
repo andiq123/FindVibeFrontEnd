@@ -7,6 +7,7 @@ import { PlayerService } from "../../core/services/player.service";
 
 @Component({
   selector: "app-recent",
+  standalone: true,
   imports: [PageLayoutComponent, SongListComponent],
   templateUrl: "./recent.component.html",
   styleUrl: "./recent.component.scss",

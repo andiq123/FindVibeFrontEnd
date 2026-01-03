@@ -28,6 +28,7 @@ import {
 
 @Component({
   selector: "app-search-bar",
+  standalone: true,
   imports: [FontAwesomeModule, FormsModule, TitleCasePipe],
   templateUrl: "./search-bar.component.html",
   styleUrl: "./search-bar.component.scss",

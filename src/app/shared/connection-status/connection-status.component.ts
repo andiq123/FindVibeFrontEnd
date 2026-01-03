@@ -10,6 +10,7 @@ import { SettingsService } from "../../core/services/settings.service";
 
 @Component({
   selector: "app-connection-status",
+  standalone: true,
   imports: [],
   templateUrl: "./connection-status.component.html",
   styleUrl: "./connection-status.component.scss",

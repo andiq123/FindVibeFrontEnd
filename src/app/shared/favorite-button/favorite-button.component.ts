@@ -16,6 +16,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 
 @Component({
   selector: "app-favorite-button",
+  standalone: true,
   imports: [FontAwesomeModule],
   templateUrl: "./favorite-button.component.html",
   styleUrl: "./favorite-button.component.scss",
