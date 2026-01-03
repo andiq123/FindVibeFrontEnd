@@ -2,7 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { StorageService } from '../../../core/services/storage.service';
 import { User } from '../../../core/models/user.model';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from "../../../../environments/environment";
 import { Subject, tap } from 'rxjs';
 
 import { OfflineStorageService } from './offline-storage.service';

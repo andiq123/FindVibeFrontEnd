@@ -7,7 +7,7 @@ import {
   SearchResponse,
   PaginationInfo,
 } from "../../../core/models/song.model";
-import { environment } from "../../../../environments/environment.development";
+import { environment } from "../../../../environments/environment";
 import { StorageService } from "../../../core/services/storage.service";
 
 const BASE_API_URL = environment.API_URL;
