@@ -1,27 +1,56 @@
-# ClientAngular
+# FindVibe
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.1.
+A modern music streaming and discovery web app built with Angular.
 
-## Development server
+**Live Demo:** [https://find-vibe.vercel.app/](https://find-vibe.vercel.app/)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Features
 
-## Code scaffolding
+- **Music Discovery** - Search and explore a vast music library
+- **Personal Library** - Save and organize your favorite songs
+- **Offline Playback** - Download songs for offline listening
+- **Smart Player** - Full-featured player with shuffle and repeat modes
+- **Play History** - Quick access to recently played tracks
+- **Progressive Web App** - Install on any device with offline support
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Getting Started
 
-## Build
+### Prerequisites
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- Node.js (v18 or higher)
+- npm or yarn
 
-## Running unit tests
+### Installation
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```bash
+npm install
+```
 
-## Running end-to-end tests
+### Development
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+Create a `src/.env` file:
 
-## Further help
+```env
+API_URL=http://localhost:8080
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Start the development server:
+
+```bash
+npm start
+```
+
+Navigate to `http://localhost:4200/`
+
+### Build
+
+```bash
+npm run build
+```
+
+## Tech Stack
+
+- Angular 21
+- Tailwind CSS + DaisyUI
+- RxJS
+- Service Worker (PWA)

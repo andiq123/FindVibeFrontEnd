@@ -76,8 +76,24 @@ export class LibraryService {
           this.songs.set(sortedSongs);
         },
         error: (error) => {
-          if (error.status === 404 || error.name === "TimeoutError") {
+          const isAuthenticationError =
+            error.status === 401 || error.status === 403;
+
+          if (isAuthenticationError) {
+            console.error(
+              "[LibraryService] Authentication error, logging out user",
+            );
             this.userService.resetUser();
+            return;
+          }
+
+          const isTemporaryError =
+            error.status === 404 || error.name === "TimeoutError";
+
+          if (isTemporaryError) {
+            console.warn(
+              "[LibraryService] API unavailable or timeout, keeping user logged in",
+            );
           }
         },
       }),

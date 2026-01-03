@@ -1,5 +1,6 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import daisyui from "daisyui";
+
+export default {
   content: ["./src/**/*.{html,ts}"],
   theme: {
     extend: {
@@ -13,20 +14,19 @@ module.exports = {
       },
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [daisyui],
   daisyui: {
     themes: [
       {
-        // Ocean Breeze - Fresh Blue & Teal
         vibenative: {
-          primary: "#06b6d4", // Vibrant Cyan
-          secondary: "#14b8a6", // Teal
-          accent: "#f59e0b", // Warm Amber
+          primary: "#06b6d4",
+          secondary: "#14b8a6",
+          accent: "#f59e0b",
           neutral: "#475569",
-          "base-100": "#0c1222", // Deep navy
-          "base-200": "#1e293b", // Navy slate
-          "base-300": "#334155", // Lighter navy
-          "base-content": "#f1f5f9", // Bright text
+          "base-100": "#0c1222",
+          "base-200": "#1e293b",
+          "base-300": "#334155",
+          "base-content": "#f1f5f9",
           info: "#3b82f6",
           success: "#10b981",
           warning: "#f59e0b",

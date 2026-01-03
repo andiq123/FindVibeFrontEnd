@@ -1,26 +1,29 @@
-const fs = require("fs");
-const path = require("path");
-const successColor = "\x1b[32m%s\x1b[0m";
-const checkSign = "\u{2705}";
-const dotenv = require("dotenv").config({ path: "src/.env" });
+import { writeFile } from "fs/promises";
+import { join, dirname } from "path";
+import { config } from "dotenv";
+import { fileURLToPath } from "url";
 
-const envFile = `export const environment = {
-    API_URL: '${process.env.API_URL}',
-    CORS_URL: '${process.env.CORS_URL}'
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+config({ path: "src/.env" });
+
+const environmentContent = `export const environment = {
+  API_URL: '${process.env.API_URL}',
 };
 `;
-const targetPath = path.join(
+
+const targetPath = join(
   __dirname,
-  "./src/environments/environment.development.ts"
+  "./src/environments/environment.development.ts",
 );
-fs.writeFile(targetPath, envFile, (err) => {
-  if (err) {
-    console.error(err);
-    throw err;
-  } else {
-    console.log(
-      successColor,
-      `${checkSign} Successfully generated environment.development.ts`
-    );
-  }
-});
+
+try {
+  await writeFile(targetPath, environmentContent);
+  console.log(
+    "\x1b[32m%s\x1b[0m",
+    "✅ Successfully generated environment.development.ts",
+  );
+} catch (error) {
+  console.error(error);
+  process.exit(1);
+}
