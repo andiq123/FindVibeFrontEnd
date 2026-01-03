@@ -1,0 +1,23 @@
+.pagination {
+  @apply flex items-center justify-center gap-3 my-10;
+}
+
+.pagination-button {
+  @apply flex items-center gap-2 px-5 py-3 rounded-xl bg-base-200/50 border border-base-300/30 text-sm transition-all hover:bg-base-200 disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
+.pagination-pages {
+  @apply flex gap-2;
+}
+
+.pagination-page {
+  @apply min-w-11 h-11 px-3 rounded-lg bg-base-200/50 border border-base-300/30 text-sm transition-all hover:bg-base-200;
+
+  &.active {
+    @apply bg-primary text-primary-content border-primary;
+  }
+}
+
+.pagination-ellipsis {
+  @apply min-w-11 h-11 flex items-center justify-center text-base-content/40 text-sm;
+}

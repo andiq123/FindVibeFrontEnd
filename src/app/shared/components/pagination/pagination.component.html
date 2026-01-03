@@ -1,0 +1,44 @@
+<nav class="pagination" role="navigation" aria-label="Pagination">
+  <button
+    type="button"
+    class="pagination-button prev"
+    [disabled]="!pagination().hasPrevPage"
+    (click)="onPageChange(pagination().currentPage - 1)"
+    aria-label="Previous page"
+  >
+    <fa-icon [icon]="faChevronLeft" class="text-sm" />
+    <span class="hidden sm:inline">Previous</span>
+  </button>
+
+  <div class="pagination-pages">
+    @for (page of pageNumbers(); track $index) {
+      @if (isNumber(page)) {
+        <button
+          type="button"
+          class="pagination-page"
+          [class.active]="page === pagination().currentPage"
+          [attr.aria-label]="'Page ' + page"
+          [attr.aria-current]="
+            page === pagination().currentPage ? 'page' : null
+          "
+          (click)="onPageChange(page)"
+        >
+          {{ page }}
+        </button>
+      } @else {
+        <span class="pagination-ellipsis">{{ page }}</span>
+      }
+    }
+  </div>
+
+  <button
+    type="button"
+    class="pagination-button next"
+    [disabled]="!pagination().hasNextPage"
+    (click)="onPageChange(pagination().currentPage + 1)"
+    aria-label="Next page"
+  >
+    <span class="hidden sm:inline">Next</span>
+    <fa-icon [icon]="faChevronRight" class="text-sm" />
+  </button>
+</nav>
