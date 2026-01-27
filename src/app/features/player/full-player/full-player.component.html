@@ -56,9 +56,11 @@
             status() === playerStatus.Playing && !isOpeningAnimation()
           "
         >
-          <div
-            class="absolute inset-0 rounded-2xl overflow-hidden ios-artwork-shadow"
-          >
+        <div
+          class="absolute inset-0 rounded-3xl overflow-hidden ios-artwork-shadow ring-2 ring-base-content/5 transition-all duration-300"
+          [class.ring-accent/20]="status() === playerStatus.Playing"
+          [class.shadow-2xl]="status() === playerStatus.Playing"
+        >
             @if (isError()) {
               <div
                 class="absolute inset-0 bg-error/20 flex items-center justify-center z-30"
@@ -132,14 +134,16 @@
               [attr.aria-valuetext]="visualTime() + ' seconds'"
             />
             <div
-              class="absolute w-full h-2 bg-base-content/30 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible"
+              class="absolute w-full h-2.5 bg-base-content/20 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible backdrop-blur-sm"
             >
               <div
-                class="relative h-full bg-accent rounded-full origin-left shadow-sm"
+                class="relative h-full bg-gradient-to-r from-accent to-primary rounded-full origin-left shadow-lg transition-all duration-300"
                 [style.width.%]="progressPercent()"
+                [style.box-shadow]="'0 0 12px color-mix(in oklab, var(--color-accent) 40%, transparent)'"
               >
                 <div
-                  class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-base-content rounded-full shadow-lg ring-2 ring-base-100/10"
+                  class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-base-content rounded-full shadow-xl ring-3 ring-accent/30 transition-all duration-300"
+                  [class.scale-110]="isDraggingTime()"
                 ></div>
               </div>
             </div>
@@ -168,16 +172,18 @@
           </button>
 
           <div class="flex items-center gap-4">
+          <button
+            class="p-4 text-base-content/70 active:text-accent transition-all duration-200 touch-manipulation active:scale-90 [@media(hover:hover)]:hover:text-accent [@media(hover:hover)]:hover:scale-110"
+            aria-label="Previous track"
+            (click)="previous()"
+            type="button"
+          >
+            <fa-icon [icon]="faStepBackward" size="2xl" />
+          </button>
             <button
-              class="p-4 text-base-content active:text-accent/80 transition-colors duration-150 touch-manipulation active:scale-95 [@media(hover:hover)]:hover:text-accent"
-              aria-label="Previous track"
-              (click)="previous()"
-              type="button"
-            >
-              <fa-icon [icon]="faStepBackward" size="2xl" />
-            </button>
-            <button
-              class="w-16 h-16 flex items-center justify-center bg-base-content text-base-100 rounded-full active:scale-95 transition-transform duration-200 shadow-xl touch-manipulation [@media(hover:hover)]:hover:scale-105"
+              class="w-20 h-20 flex items-center justify-center bg-base-content text-base-100 rounded-full active:scale-95 transition-all duration-300 shadow-2xl touch-manipulation [@media(hover:hover)]:hover:scale-110 [@media(hover:hover)]:hover:shadow-accent/30 ring-4 ring-base-content/5"
+              [class.bg-accent]="status() === playerStatus.Playing"
+              [class.ring-accent/20]="status() === playerStatus.Playing"
               [attr.aria-label]="
                 status() === playerStatus.Playing ? 'Pause' : 'Play'
               "
@@ -190,7 +196,7 @@
               />
             </button>
             <button
-              class="p-4 text-base-content active:text-accent/80 transition-colors duration-150 touch-manipulation active:scale-95 [@media(hover:hover)]:hover:text-accent"
+              class="p-4 text-base-content/70 active:text-accent transition-all duration-200 touch-manipulation active:scale-90 [@media(hover:hover)]:hover:text-accent [@media(hover:hover)]:hover:scale-110"
               aria-label="Next track"
               (click)="next()"
               type="button"

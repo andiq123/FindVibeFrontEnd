@@ -95,6 +95,8 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   isDraggingTime = signal(false);
   visualTime = signal(0);
   private lastSeekTimestamp = 0;
+  private lastVisualUpdateTime = 0;
+  private readonly VISUAL_UPDATE_THROTTLE_MS = 33; // ~30fps
 
   progressPercent = computed(() => {
     const duration = this.duration();
@@ -126,15 +128,30 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
       const time = this.serviceCurrentTime();
       const now = Date.now();
 
-      if (!this.isDraggingTime() && now - this.lastSeekTimestamp > 500) {
-        if (this.updateFrameId !== null) {
-          cancelAnimationFrame(this.updateFrameId);
-        }
-        this.updateFrameId = requestAnimationFrame(() => {
-          untracked(() => this.visualTime.set(time));
-          this.updateFrameId = null;
-        });
+      // Skip update if dragging or recently seeked
+      if (this.isDraggingTime() || now - this.lastSeekTimestamp < 500) {
+        return;
       }
+
+      // Throttle visual updates to ~30fps
+      if (now - this.lastVisualUpdateTime < this.VISUAL_UPDATE_THROTTLE_MS) {
+        return;
+      }
+
+      // Cancel any pending frame request
+      if (this.updateFrameId !== null) {
+        cancelAnimationFrame(this.updateFrameId);
+        this.updateFrameId = null;
+      }
+
+      // Schedule update
+      this.updateFrameId = requestAnimationFrame(() => {
+        untracked(() => {
+          this.visualTime.set(time);
+          this.lastVisualUpdateTime = Date.now();
+        });
+        this.updateFrameId = null;
+      });
     });
   }
 
@@ -145,9 +162,13 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.renderer.removeStyle(this.document.body, "overflow");
-    this.imageLoader?.cleanup();
+    if (this.imageLoader) {
+      this.imageLoader.cleanup();
+      this.imageLoader = undefined as any;
+    }
     if (this.updateFrameId !== null) {
       cancelAnimationFrame(this.updateFrameId);
+      this.updateFrameId = null;
     }
   }
 
@@ -214,14 +235,20 @@ export class FullPlayerComponent implements OnInit, OnDestroy {
   }
 
   onImageLoad() {
-    this.imageLoader.onImageLoad();
+    if (this.imageLoader) {
+      this.imageLoader.onImageLoad();
+    }
   }
 
   onImageError() {
-    this.imageLoader.onImageError();
+    if (this.imageLoader) {
+      this.imageLoader.onImageError();
+    }
   }
 
   onImageLoadStart() {
-    this.imageLoader.onImageLoadStart();
+    if (this.imageLoader) {
+      this.imageLoader.onImageLoadStart();
+    }
   }
 }

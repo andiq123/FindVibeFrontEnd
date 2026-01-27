@@ -8,6 +8,7 @@ import {
   timeout,
   catchError,
   throwError,
+  Subscription,
 } from "rxjs";
 import { Song } from "../../../core/models/song.model";
 import { OfflineStorageService } from "./offline-storage.service";
@@ -32,18 +33,40 @@ export class LibraryService {
   readonly currentLoadingFavoriteSongIds = signal<string[]>([]);
   readonly loadingSongs = signal<boolean>(false);
 
+  private libraryUpdateSubscription: Subscription | null = null;
+
   constructor() {
     effect(() => {
       this.storageService.setItem(this.LIBRARY_STORAGE_KEY, this.songs());
     });
 
-    effect(() => {
-      const user = this.userService.user();
-      if (user) {
-        this.updateLibrarySongs(user.id).subscribe();
-      } else {
-        this.reset();
+    effect((onCleanup) => {
+      const user = untracked(() => this.userService.user());
+      
+      // Cleanup previous subscription if it exists
+      if (this.libraryUpdateSubscription) {
+        this.libraryUpdateSubscription.unsubscribe();
+        this.libraryUpdateSubscription = null;
       }
+
+      if (user) {
+        // Use untracked to prevent effect from tracking the subscription
+        untracked(() => {
+          this.libraryUpdateSubscription = this.updateLibrarySongs(user.id).subscribe();
+        });
+      } else {
+        untracked(() => {
+          this.reset();
+        });
+      }
+
+      // Cleanup subscription when effect is destroyed or user changes
+      onCleanup(() => {
+        if (this.libraryUpdateSubscription) {
+          this.libraryUpdateSubscription.unsubscribe();
+          this.libraryUpdateSubscription = null;
+        }
+      });
     });
   }
 

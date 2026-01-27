@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, effect } from '@angular/core';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { filter, interval, map, switchMap, takeWhile, tap } from 'rxjs';
+import { filter, interval, map, switchMap, takeWhile, tap, Subscription } from 'rxjs';
 
 const UPDATE_COUNTDOWN_SECONDS = 3;
 
@@ -14,16 +14,30 @@ export class AppUpdateService {
   readonly secondsToUpdate = signal(UPDATE_COUNTDOWN_SECONDS);
   readonly updateLoading = signal(false);
 
+  private checkIntervalSubscription: Subscription | null = null;
+  private versionUpdatesSubscription: Subscription | null = null;
+
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       if (!this.swUpdate.isEnabled) return;
 
+      // Cleanup previous subscriptions if they exist
+      if (this.checkIntervalSubscription) {
+        this.checkIntervalSubscription.unsubscribe();
+        this.checkIntervalSubscription = null;
+      }
+      if (this.versionUpdatesSubscription) {
+        this.versionUpdatesSubscription.unsubscribe();
+        this.versionUpdatesSubscription = null;
+      }
+
       this.checkForUpdate();
-      interval(6 * 60 * 60 * 1000).pipe(
+      
+      this.checkIntervalSubscription = interval(6 * 60 * 60 * 1000).pipe(
         tap(() => this.checkForUpdate())
       ).subscribe();
 
-      this.swUpdate.versionUpdates.pipe(
+      this.versionUpdatesSubscription = this.swUpdate.versionUpdates.pipe(
         filter((evt): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
         tap(() => this.newUpdateAvailable.set(true)),
         switchMap(() => this.countdown(UPDATE_COUNTDOWN_SECONDS)),
@@ -34,6 +48,18 @@ export class AppUpdateService {
           }
         })
       ).subscribe();
+
+      // Cleanup subscriptions when effect is destroyed
+      onCleanup(() => {
+        if (this.checkIntervalSubscription) {
+          this.checkIntervalSubscription.unsubscribe();
+          this.checkIntervalSubscription = null;
+        }
+        if (this.versionUpdatesSubscription) {
+          this.versionUpdatesSubscription.unsubscribe();
+          this.versionUpdatesSubscription = null;
+        }
+      });
     });
   }
 

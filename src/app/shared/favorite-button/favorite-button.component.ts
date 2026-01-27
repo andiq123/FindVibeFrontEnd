@@ -4,7 +4,9 @@ import {
   input,
   inject,
   ChangeDetectionStrategy,
+  DestroyRef,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
   faHeartSolid as favoritedHeart,
   faHeartRegular as unFavoritedHeart,
@@ -25,6 +27,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 export class FavoriteButtonComponent {
   private userService = inject(UserService);
   private libraryService = inject(LibraryService);
+  private destroyRef = inject(DestroyRef);
 
   forPlayer = input<boolean>(false);
   song = input.required<Song>();
@@ -53,9 +56,12 @@ export class FavoriteButtonComponent {
     if (this.isFavorited()) {
       this.libraryService
         .removeFromFavorites(this.song().id, this.song().link)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe();
     } else {
-      this.libraryService.addToFavorites(this.song(), user.id).subscribe();
+      this.libraryService.addToFavorites(this.song(), user.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe();
     }
   }
 }

@@ -31,6 +31,7 @@ export class PlayerService implements OnDestroy {
 
   private readonly alreadyAddedInRecents = signal<boolean>(false);
   private currentObjectUrl: string | null = null;
+  private isHandlingSongEnded = false;
 
   readonly song = computed(() => this.playlistService.currentSong());
   readonly status = this.audioService.status;
@@ -55,13 +56,26 @@ export class PlayerService implements OnDestroy {
 
     effect(() => {
       const status = this.status();
-      if (status === PlayerStatus.Ended) {
-        untracked(() => this.handleSongEnded());
+      if (status === PlayerStatus.Ended && !this.isHandlingSongEnded) {
+        this.isHandlingSongEnded = true;
+        untracked(() => {
+          this.handleSongEnded().finally(() => {
+            // Reset flag after handling is complete
+            this.isHandlingSongEnded = false;
+          });
+        });
       }
     });
 
     effect(() => {
       const isShuffle = this.settingsService.isShuffle();
+      const queueLength = untracked(() => this.playlistService.queueLength());
+      
+      // Skip if playlist is empty
+      if (queueLength === 0) {
+        return;
+      }
+
       untracked(() => {
         if (isShuffle) {
           this.playlistService.enableShuffle();
@@ -72,11 +86,11 @@ export class PlayerService implements OnDestroy {
     });
   }
 
-  private async handleSongEnded() {
+  private async handleSongEnded(): Promise<void> {
     const mode = this.settingsService.repeatMode();
 
     if (mode === RepeatMode.ONE) {
-      this.replayCurrentSong();
+      await this.replayCurrentSong();
       return;
     }
 
@@ -96,6 +110,9 @@ export class PlayerService implements OnDestroy {
 
   async setSong(song: Song): Promise<void> {
     this.cleanupObjectUrl();
+    
+    // Reset song ended handler flag when starting a new song
+    this.isHandlingSongEnded = false;
 
     this.playlistService.setCurrentSong(song);
     this.audioService.pause();

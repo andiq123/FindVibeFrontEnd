@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, computed } from "@angular/core";
+import { Component, OnInit, inject, computed, DestroyRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterOutlet } from "@angular/router";
 import { catchError, tap } from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { MiniPlayerComponent } from "./features/player/mini-player/mini-player.component";
 import { FullPlayerComponent } from "./features/player/full-player/full-player.component";
@@ -48,6 +49,7 @@ export class AppComponent implements OnInit {
   private modalService = inject(ModalService);
   private playerService = inject(PlayerService);
   private playlistService = inject(PlaylistService);
+  private destroyRef = inject(DestroyRef);
 
   newUpdateAvailable = this.updateService.newUpdateAvailable;
   secondsToUpdate = this.updateService.secondsToUpdate;
@@ -61,7 +63,9 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeServices();
-    this.wakeServer().subscribe();
+    this.wakeServer()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
 
   onToggleSize() {

@@ -12,18 +12,20 @@
 
 .song-container {
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.15s ease-out;
-  will-change: transform, background-color;
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform, background-color, box-shadow;
   touch-action: pan-y;
   cursor: pointer;
 
   &:hover {
-    background-color: color-mix(in oklab, var(--color-base-content) 5%, transparent);
+    background-color: color-mix(in oklab, var(--color-base-200) 60%, transparent);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   &:active {
-    transform: scale(0.98);
-    background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+    transform: translateX(2px) scale(0.98);
+    background-color: color-mix(in oklab, var(--color-base-200) 70%, transparent);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -90,8 +92,15 @@ app-favorite-button {
 }
 
 .song-active {
-  background: color-mix(in oklab, var(--color-accent) 10%, transparent);
-  box-shadow: inset 0 0 40px color-mix(in oklab, var(--color-accent) 5%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-accent) 12%, transparent) 0%,
+    color-mix(in oklab, var(--color-accent) 8%, transparent) 100%
+  );
+  box-shadow: 
+    inset 0 0 40px color-mix(in oklab, var(--color-accent) 5%, transparent),
+    0 2px 12px color-mix(in oklab, var(--color-accent) 15%, transparent);
+  border-left: 3px solid var(--color-accent);
 }
 
 .song-container.song-active {

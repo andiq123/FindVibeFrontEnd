@@ -1,8 +1,9 @@
 <div
-  class="mini-player-container glass-suggestions rounded-2xl fixed bottom-[92px] anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[600px] shadow-ios-md cursor-pointer overflow-hidden touch-manipulation"
-  style="z-index: var(--z-mini-player); left: 50%; transform: translateX(-50%);"
-  [class.border-primary/20]="isPlaying()"
-  [class.border-transparent]="!isPlaying()"
+  class="mini-player-container glass-suggestions rounded-2xl fixed anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[600px] shadow-ios-lg cursor-pointer overflow-hidden touch-manipulation border transition-all duration-300"
+  style="z-index: var(--z-mini-player); left: 50%; transform: translateX(-50%); bottom: calc(max(2.5rem, env(safe-area-inset-bottom, 2.5rem)) + 4rem);"
+  [class.border-accent/30]="isPlaying()"
+  [class.border-base-content/8]="!isPlaying()"
+  [class.shadow-accent/20]="isPlaying()"
   (click)="toggleSize()"
   (keydown.enter)="toggleSize()"
   tabindex="0"
@@ -11,8 +12,10 @@
   <div class="flex items-center gap-3 w-full p-3">
     <div class="flex items-center gap-2">
       <div
-        class="album-art relative w-14 aspect-square rounded-lg overflow-hidden ring-1 ring-base-200/30"
+        class="album-art relative w-16 aspect-square rounded-xl overflow-hidden ring-1 ring-base-content/10 shadow-md transition-all duration-300"
         [class.album-art-playing]="isPlaying()"
+        [class.ring-accent/30]="isPlaying()"
+        [class.shadow-accent/30]="isPlaying()"
       >
         @if (isLoading()) {
           <div

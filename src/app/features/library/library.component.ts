@@ -4,7 +4,9 @@ import {
   signal,
   inject,
   ChangeDetectionStrategy,
+  DestroyRef,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ModalService } from "../../core/services/modal.service";
 import { LibraryService } from "./services/library.service";
 import { UserService } from "./services/user.service";
@@ -49,6 +51,7 @@ export class LibraryComponent {
   private playlistService = inject(PlaylistService);
   private settingsService = inject(SettingsService);
   private modalService = inject(ModalService);
+  private destroyRef = inject(DestroyRef);
 
   public offlineStorageService = inject(OfflineStorageService);
 
@@ -108,13 +111,16 @@ export class LibraryComponent {
           this.loadingReorder.set(false);
           throw err;
         }),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
   }
 
   cancelReorders() {
-    this.libraryService.updateLibrarySongs(this.userId()).subscribe(() => {
-      this.hasReordered.set(false);
-    });
+    this.libraryService.updateLibrarySongs(this.userId())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.hasReordered.set(false);
+      });
   }
 }

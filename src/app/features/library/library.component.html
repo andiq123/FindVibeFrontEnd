@@ -6,23 +6,26 @@
       class="w-full flex flex-col justify-center items-center gap-4 h-[60vh]"
     >
       <div class="text-center space-y-3">
-        <div class="relative w-24 h-24 mx-auto mb-6">
+        <div class="relative w-28 h-28 mx-auto mb-8">
           <div
-            class="absolute inset-0 bg-primary/20 rounded-full animate-ping"
+            class="absolute inset-0 bg-primary/30 rounded-full animate-ping"
           ></div>
           <div
-            class="relative bg-base-200 rounded-full w-full h-full flex items-center justify-center ring-1 ring-white/10"
+            class="absolute inset-0 bg-primary/20 rounded-full animate-pulse"
+          ></div>
+          <div
+            class="relative bg-gradient-to-br from-primary/20 to-accent/20 rounded-full w-full h-full flex items-center justify-center ring-2 ring-primary/30 backdrop-blur-sm shadow-lg"
           >
             <fa-icon
               [icon]="faWaveSquare"
-              class="text-4xl text-primary animate-pulse"
+              class="text-5xl text-primary animate-pulse"
             />
           </div>
         </div>
-        <h1 class="text-2xl font-bold tracking-tight">
+        <h1 class="text-3xl font-bold tracking-tight mb-2 bg-gradient-to-r from-base-content to-base-content/60 bg-clip-text text-transparent">
           Vibe Server is awakening...
         </h1>
-        <p class="text-base-content/50 text-base max-w-[280px] mx-auto">
+        <p class="text-base-content/60 text-base max-w-[300px] mx-auto leading-relaxed">
           This might take a few moments as we spin up the high-fidelity audio
           engine.
         </p>
@@ -37,7 +40,7 @@
             >Your Library</span
           >
           <h1
-            class="font-bold text-4xl tracking-tighter bg-gradient-to-b from-base-content to-base-content/30 bg-clip-text text-transparent mb-1 flex items-center gap-3"
+            class="font-bold text-5xl tracking-tight bg-gradient-to-br from-base-content via-base-content/90 to-base-content/60 bg-clip-text text-transparent mb-2 flex items-center gap-3"
           >
             <span
               >{{ username() ? (username() | titlecase) : "My" }}'s Vault</span
@@ -47,7 +50,7 @@
 
         <div class="flex gap-2.5 items-center shrink-0">
           <button
-            class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white/40 flex items-center justify-center relative active:scale-90 transition-all"
+            class="w-11 h-11 rounded-full bg-base-200/40 border border-base-content/10 text-base-content/60 flex items-center justify-center relative active:scale-90 transition-all duration-200 hover:bg-base-200/60 hover:text-base-content/80 hover:border-base-content/20 backdrop-blur-sm shadow-sm"
             (click)="openStorageInfo()"
           >
             <fa-icon
@@ -63,7 +66,7 @@
           </button>
 
           <button
-            class="w-10 h-10 rounded-full bg-white/5 border border-white/5 text-white/40 flex items-center justify-center active:scale-95 transition-all"
+            class="w-11 h-11 rounded-full bg-base-200/40 border border-base-content/10 text-base-content/60 flex items-center justify-center active:scale-90 transition-all duration-200 hover:bg-base-200/60 hover:text-base-content/80 hover:border-base-content/20 backdrop-blur-sm shadow-sm"
             (click)="changeUser()"
           >
             <fa-icon [icon]="faRightFromBracket" />

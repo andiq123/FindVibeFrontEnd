@@ -6,7 +6,9 @@ import {
   inject,
   ChangeDetectionStrategy,
   untracked,
+  DestroyRef,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { SearchBarComponent } from "./search-bar/search-bar.component";
 import { PageLayoutComponent } from "../../shared/components/page-layout/page-layout.component";
@@ -48,6 +50,7 @@ export class SearchPageComponent {
   private settingsService = inject(SettingsService);
   private playlistService = inject(PlaylistService);
   public playerService = inject(PlayerService);
+  private destroyRef = inject(DestroyRef);
 
   query = input<string>("");
 
@@ -94,7 +97,9 @@ export class SearchPageComponent {
     const query = this.query();
     if (!query) return;
 
-    this.songsService.searchSongs(query, page).subscribe();
+    this.songsService.searchSongs(query, page)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 }

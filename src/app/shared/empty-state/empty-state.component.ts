@@ -8,17 +8,18 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
   imports: [FontAwesomeModule],
   template: `
     <div
-      class="flex flex-col items-center justify-center py-20 px-8 text-center"
+      class="flex flex-col items-center justify-center py-24 px-8 text-center"
     >
       <div
-        [class]="'w-20 h-20 rounded-3xl flex items-center justify-center mb-6 ring-1 ' + iconBgClass()"
+        [class]="'w-24 h-24 rounded-3xl flex items-center justify-center mb-8 ring-1 transition-all duration-300 ' + iconBgClass()"
+        [class.animate-pulse]="variant() === 'default'"
       >
-        <fa-icon [icon]="icon()" class="text-3xl" [class]="iconColorClass()" />
+        <fa-icon [icon]="icon()" class="text-4xl" [class]="iconColorClass()" />
       </div>
-      <h2 [class]="'text-xl font-semibold mb-2 ' + titleColorClass()">
+      <h2 [class]="'text-2xl font-bold mb-3 tracking-tight ' + titleColorClass()">
         {{ title() }}
       </h2>
-      <p class="text-base-content/40 text-sm max-w-[240px]">
+      <p class="text-base-content/50 text-base max-w-[280px] leading-relaxed">
         {{ description() }}
       </p>
     </div>

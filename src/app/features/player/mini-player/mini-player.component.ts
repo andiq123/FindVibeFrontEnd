@@ -64,7 +64,10 @@ export class MiniPlayerComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.imageLoader?.cleanup();
+    if (this.imageLoader) {
+      this.imageLoader.cleanup();
+      this.imageLoader = undefined as any;
+    }
   }
 
   isPlaying = computed(() => this.status() === PlayerStatus.Playing);
@@ -76,14 +79,20 @@ export class MiniPlayerComponent implements OnDestroy {
   }
 
   onImageLoad() {
-    this.imageLoader.onImageLoad();
+    if (this.imageLoader) {
+      this.imageLoader.onImageLoad();
+    }
   }
 
   onImageError() {
-    this.imageLoader.onImageError();
+    if (this.imageLoader) {
+      this.imageLoader.onImageError();
+    }
   }
 
   onImageLoadStart() {
-    this.imageLoader.onImageLoadStart();
+    if (this.imageLoader) {
+      this.imageLoader.onImageLoadStart();
+    }
   }
 }
