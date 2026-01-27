@@ -119,15 +119,15 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   private performDismiss(velocity: number) {
     this.isDismissing = true;
     const el = this.el.nativeElement;
-    const baseDuration = 400;
+    const baseDuration = 250;
     let duration = baseDuration;
     if (velocity > 1) {
-      duration = Math.max(250, baseDuration - velocity * 50);
+      duration = Math.max(180, baseDuration - velocity * 40);
     }
     const durationSec = duration / 1000;
     el.style.setProperty(
       "transition",
-      `transform ${durationSec}s cubic-bezier(0.32, 0.72, 0, 1)`,
+      `transform ${durationSec}s cubic-bezier(0.4, 0, 0.2, 1)`,
       "important",
     );
     el.style.transform = "translate3d(0, 100%, 0)";
@@ -143,7 +143,7 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   }
   private performSnapBack() {
     const el = this.el.nativeElement;
-    el.style.setProperty("transition", "transform 0.4s cubic-bezier(0.17, 0.89, 0.24, 1.1)", "important");
+    el.style.setProperty("transition", "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)", "important");
     el.style.transform = "translate3d(0, 0, 0)";
     const onTransitionEnd = (e: TransitionEvent) => {
       if (e.propertyName !== "transform") return;

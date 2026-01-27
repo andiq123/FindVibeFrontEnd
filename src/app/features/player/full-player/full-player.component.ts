@@ -84,11 +84,9 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   ngAfterViewInit() {
     if (this.isOpened()) return;
-    requestAnimationFrame(() => {
-      if (!this.isClosingAnimation() && !this.isOpened()) {
-        this.isOpeningAnimation.set(true);
-      }
-    });
+    if (!this.isClosingAnimation() && !this.isOpened()) {
+      this.isOpeningAnimation.set(true);
+    }
   }
   ngOnDestroy() {
     this.renderer.removeStyle(this.document.body, "overflow");

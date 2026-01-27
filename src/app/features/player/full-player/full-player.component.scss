@@ -6,7 +6,7 @@
   }
   
   &.anim-slide-down {
-    animation: slide-down 0.35s ease-in forwards;
+    animation: slide-down 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
   
   &.opened {
@@ -15,7 +15,11 @@
   
   @media (max-width: 768px) {
     &.anim-slide-up {
-      animation-duration: 0.25s;
+      animation-duration: 0.2s;
+    }
+    
+    &.anim-slide-down {
+      animation-duration: 0.2s;
     }
   }
   
