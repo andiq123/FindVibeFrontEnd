@@ -1,10 +1,9 @@
 import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
-import { RecentService } from "./services/recent.service";
+import { StorageService } from "../../core/services/storage.service";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { PageLayoutComponent } from "../../shared/components/page-layout/page-layout.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
 import { PlayerService } from "../../core/services/player.service";
-
 @Component({
   selector: "app-recent",
   standalone: true,
@@ -14,12 +13,10 @@ import { PlayerService } from "../../core/services/player.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecentComponent {
-  private recentService = inject(RecentService);
+  private storageService = inject(StorageService);
   private playlistService = inject(PlaylistService);
   public playerService = inject(PlayerService);
-
-  songs = this.recentService.songs;
-
+  songs = this.storageService.recentSongs;
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
   }

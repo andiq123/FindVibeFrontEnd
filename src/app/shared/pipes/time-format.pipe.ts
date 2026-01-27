@@ -1,6 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { convertTime } from '../../core/utils/utils';
-
 @Pipe({
   name: 'timeFormat',
   standalone: true

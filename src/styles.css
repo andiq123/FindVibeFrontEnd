@@ -172,28 +172,31 @@
 
 /* Mobile-first optimizations */
 @media (max-width: 768px) {
-  /* Reduce animation complexity on mobile */
+  /* Reduce animation durations for better performance */
   .anim-slide-up,
   .anim-slide-down {
-    animation-duration: 0.25s;
+    animation-duration: 0.2s;
   }
   
-  /* Disable will-change on mobile to reduce memory usage */
+  .anim-fade-in,
+  .anim-fade-out {
+    animation-duration: 0.15s;
+  }
+  
+  /* Disable will-change globally on mobile to reduce memory usage */
   * {
     will-change: auto !important;
   }
   
-  /* Only enable will-change during active animations */
+  /* Only enable will-change during active animations (GPU-accelerated properties only) */
   .anim-slide-up,
-  .anim-slide-down,
-  .anim-fade-in,
-  .anim-fade-out {
-    will-change: transform, opacity;
+  .anim-slide-down {
+    will-change: transform;
   }
   
-  /* Reduce transform complexity */
-  .artwork-wrapper {
-    transition: transform 0.3s ease;
+  .anim-fade-in,
+  .anim-fade-out {
+    will-change: opacity;
   }
   
   /* Simplify shadows on mobile */
@@ -201,6 +204,26 @@
   .shadow-ios-md,
   .shadow-ios-lg {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Reduce infinite animation complexity */
+  .animate-pulse {
+    animation-duration: 2.5s;
+  }
+  
+  .animate-spin {
+    animation-duration: 0.8s;
+  }
+  
+  .animate-ping {
+    animation-duration: 1.5s;
+  }
+  
+  /* Disable expensive background animations on mobile */
+  .bg-primary\\/10,
+  .bg-accent\\/8,
+  .bg-secondary\\/8 {
+    animation: none !important;
   }
 }
 

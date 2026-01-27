@@ -25,7 +25,6 @@ import {
   switchMap,
   of,
 } from "rxjs";
-
 @Component({
   selector: "app-search-bar",
   standalone: true,
@@ -38,41 +37,31 @@ export class SearchBarComponent {
   query = input("");
   searchTerm = signal("");
   isFocused = signal(false);
-
   private searchSubject = new Subject<string>();
   private searchService = inject(SearchService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
-
   suggestions = computed(() => this.searchService.suggestions());
   suggestionsLoading = computed(() => this.searchService.suggestionsLoading());
-
   faMagnifyingGlass = faMagnifyingGlass;
   faArrowUpLeft = faArrowUp;
-
   constructor() {
     effect(() => {
       const q = this.query();
-
       if (!q) {
         if (untracked(() => this.searchTerm()) !== "") {
           this.searchTerm.set("");
         }
         return;
       }
-
       this.searchTerm.set(q);
-
       const lastQuery = untracked(() => this.searchService.lastQuery());
       const searchStatus = untracked(() => this.searchService.status());
-
       if (q !== lastQuery || searchStatus === SearchStatus.None) {
         this.submitSearchSongs(1);
       }
-
       this.searchService.resetSuggestions();
     });
-
     this.searchSubject
       .pipe(
         debounceTime(300),
@@ -89,54 +78,44 @@ export class SearchBarComponent {
       )
       .subscribe();
   }
-
   fillSuggestion(suggestion: string, event: Event): void {
     event.stopPropagation();
     this.searchTerm.set(suggestion);
   }
-
   async searchBySuggestion(suggestion: string): Promise<void> {
     this.searchTerm.set(suggestion);
     await this.submit();
   }
-
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
-
     if (value.trim()) {
       this.searchSubject.next(value);
     } else {
       this.searchService.resetSuggestions();
     }
   }
-
   clearSearch(input: HTMLInputElement): void {
     this.searchTerm.set("");
     this.searchService.resetSuggestions();
     input.focus();
   }
-
   async cancelSearch(): Promise<void> {
     this.searchTerm.set("");
     this.searchService.resetSearch();
     await this.router.navigate(["/songs/"]);
   }
-
   async submit(): Promise<void> {
     const term = this.searchTerm().trim();
     if (!term) return;
-
     this.searchService.resetSuggestions();
     this.isFocused.set(false);
-
     if (this.query() !== term) {
       await this.router.navigate([`/songs/${term}`]);
     } else {
       this.submitSearchSongs();
     }
   }
-
   @HostListener("document:click", ["$event"])
   onClickOutside(event: Event): void {
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
@@ -147,7 +126,6 @@ export class SearchBarComponent {
       this.searchService.resetSuggestions();
     }
   }
-
   private submitSearchSongs(page = 1): void {
     this.searchService.searchSongs(this.searchTerm(), page).subscribe();
   }

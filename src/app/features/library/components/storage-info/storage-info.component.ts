@@ -12,7 +12,6 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faTrash, faCloudArrowDown } from "../../../../shared/icons";
 import { Song } from "../../../../core/models/song.model";
 import { upgradeToHttps } from "../../../../core/utils/utils";
-
 @Component({
   selector: "app-storage-info",
   standalone: true,
@@ -24,24 +23,19 @@ import { upgradeToHttps } from "../../../../core/utils/utils";
 export class StorageInfoComponent implements OnInit {
   private offlineStorageService = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
-
   storageTotal = this.offlineStorageService.storageTotal;
   storageUsed = this.offlineStorageService.storageUsed;
   loadingDownloading = signal(false);
   loadingClearing = signal(false);
-
   showRemoveCacheButton = computed(() => {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
   });
-
   faTrash = faTrash;
   faCloudArrowDown = faCloudArrowDown;
-
   ngOnInit(): void {
     this.offlineStorageService.setUpStorage();
     this.populateAvailableOfflineSongs();
   }
-
   async downloadAll(): Promise<void> {
     try {
       this.loadingDownloading.set(true);
@@ -55,7 +49,6 @@ export class StorageInfoComponent implements OnInit {
       this.loadingDownloading.set(false);
     }
   }
-
   async removeCache(): Promise<void> {
     try {
       this.loadingClearing.set(true);
@@ -67,7 +60,6 @@ export class StorageInfoComponent implements OnInit {
       this.loadingClearing.set(false);
     }
   }
-
   private async populateAvailableOfflineSongs(): Promise<void> {
     const songs = this.libraryService.songs();
     await Promise.all(

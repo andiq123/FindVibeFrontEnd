@@ -1,5 +1,4 @@
 import { Component, input, ChangeDetectionStrategy } from "@angular/core";
-
 @Component({
   selector: "app-skeleton",
   standalone: true,
@@ -58,11 +57,9 @@ export class SkeletonComponent {
   width = input<string>("100%");
   height = input<string>("auto");
   size = input<string>("48px");
-
   get items() {
     return Array(this.count()).fill(0);
   }
-
   randomWidth(): string {
     const widths = ["60%", "70%", "80%", "90%"];
     return widths[Math.floor(Math.random() * widths.length)];

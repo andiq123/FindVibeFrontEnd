@@ -3,7 +3,6 @@ import {
   provideZoneChangeDetection,
   isDevMode,
 } from "@angular/core";
-
 import {
   provideRouter,
   withComponentInputBinding,
@@ -12,13 +11,10 @@ import {
   RouteReuseStrategy,
   withInMemoryScrolling,
 } from "@angular/router";
-
 import { routes } from "./app.routes";
 import { provideHttpClient } from "@angular/common/http";
 import { provideServiceWorker } from "@angular/service-worker";
-
 import { CustomReuseStrategy } from "./core/strategies/custom-reuse-strategy";
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
@@ -38,7 +34,6 @@ export const appConfig: ApplicationConfig = {
           const cachedRoutes = ["library", "songs", "songs/:query", "recent"];
           const toPath = to?.routeConfig?.path || "";
           const fromPath = from?.routeConfig?.path || "";
-
           if (
             cachedRoutes.includes(toPath) ||
             cachedRoutes.includes(fromPath)

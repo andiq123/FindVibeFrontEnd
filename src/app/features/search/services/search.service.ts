@@ -9,10 +9,8 @@ import {
 } from "../../../core/models/song.model";
 import { environment } from "../../../../environments/environment";
 import { StorageService } from "../../../core/services/storage.service";
-
 const BASE_API_URL = environment.API_URL;
 const SEARCH_STORAGE_KEY = "search_state";
-
 interface SearchState {
   songs: Song[];
   status: SearchStatus;
@@ -20,14 +18,12 @@ interface SearchState {
   pagination: PaginationInfo | null;
   currentPage: number;
 }
-
 @Injectable({
   providedIn: "root",
 })
 export class SearchService {
   private readonly httpClient = inject(HttpClient);
   private readonly storageService = inject(StorageService);
-
   private readonly _songs = signal<Song[]>([]);
   private readonly _searchStatus = signal<SearchStatus>(SearchStatus.None);
   private readonly _suggestions = signal<string[]>([]);
@@ -35,11 +31,9 @@ export class SearchService {
   private readonly _lastSearchQuery = signal<string>("");
   private readonly _pagination = signal<PaginationInfo | null>(null);
   private readonly _currentPage = signal<number>(1);
-
   constructor() {
     this.restoreState();
   }
-
   readonly songs = this._songs.asReadonly();
   readonly status = this._searchStatus.asReadonly();
   readonly suggestions = this._suggestions.asReadonly();
@@ -47,7 +41,6 @@ export class SearchService {
   readonly lastQuery = this._lastSearchQuery.asReadonly();
   readonly pagination = this._pagination.asReadonly();
   readonly currentPage = this._currentPage.asReadonly();
-
   searchSongs(
     searchTerm: string,
     page = 1,
@@ -65,15 +58,12 @@ export class SearchService {
         pagination: this._pagination(),
       });
     }
-
     this._searchStatus.set(SearchStatus.Loading);
     this._songs.set([]);
-
     const url =
       page > 1
         ? `${BASE_API_URL}/search?q=${searchTerm}&page=${page}`
         : `${BASE_API_URL}/search?q=${searchTerm}`;
-
     return this.httpClient.get<SearchResponse>(url).pipe(
       tap((response: SearchResponse) => {
         this._songs.set(response.songs);
@@ -89,7 +79,6 @@ export class SearchService {
       }),
     );
   }
-
   getSuggestions(term: string): Observable<string[]> {
     this._suggestionsLoading.set(true);
     return this.httpClient
@@ -107,11 +96,9 @@ export class SearchService {
         }),
       );
   }
-
   resetSuggestions(): void {
     this._suggestions.set([]);
   }
-
   resetSearch(): void {
     this._songs.set([]);
     this._searchStatus.set(SearchStatus.None);
@@ -121,7 +108,6 @@ export class SearchService {
     this._currentPage.set(1);
     this.storageService.removeItem(SEARCH_STORAGE_KEY);
   }
-
   private saveState(): void {
     const state: SearchState = {
       songs: this._songs(),
@@ -132,7 +118,6 @@ export class SearchService {
     };
     this.storageService.setItem(SEARCH_STORAGE_KEY, state);
   }
-
   private restoreState(): void {
     const state = this.storageService.getItem<SearchState>(SEARCH_STORAGE_KEY);
     if (state) {

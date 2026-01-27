@@ -9,6 +9,10 @@
     animation: slide-down 0.35s ease-in forwards;
   }
   
+  &.opened {
+    transform: translateY(0);
+  }
+  
   @media (max-width: 768px) {
     &.anim-slide-up {
       animation-duration: 0.25s;
@@ -30,17 +34,22 @@
   }
 
   @media (max-width: 768px) {
-    transition: transform 0.3s ease;
+    transition: transform 0.25s ease;
     will-change: auto;
+    
+    &.playing {
+      transform: scale(1);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     transition: none !important;
     animation: none !important;
     will-change: auto !important;
+    transform: scale(1) !important;
 
     &:active {
-      transform: none !important;
+      transform: scale(1) !important;
     }
   }
 }

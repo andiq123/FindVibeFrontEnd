@@ -1,12 +1,14 @@
 <div
   class="fixed bottom-0 left-0 right-0 h-[100dvh] flex flex-col player-container"
   style="z-index: var(--z-full-player)"
-  [class.anim-slide-up]="isOpeningAnimation()"
+  [class.anim-slide-up]="isOpeningAnimation() && !isOpened()"
   [class.anim-slide-down]="isClosingAnimation()"
-  (animationend)="onAnimationEnd()"
+  [class.opened]="isOpened() && !isClosingAnimation()"
+  (animationend)="onAnimationEnd($event)"
   appSwipeDown
   [handleSelector]="'.player-content-card, .artwork-wrapper, .pressable-native'"
-  (closePanel)="toggleSize()"
+  [disabled]="isOpeningAnimation()"
+  (closePanel)="onSwipeClose()"
 >
   <div
     class="player-content-card flex-1 flex flex-col rounded-t-[2.5rem] overflow-hidden relative shadow-2xl pt-safe"
@@ -25,7 +27,6 @@
         ></div>
       </button>
     </div>
-
     <div class="absolute inset-0 -z-20 overflow-hidden bg-base-100">
       <img
         [ngSrc]="song().image || 'no_album_art.jpg'"
@@ -39,7 +40,6 @@
       />
       <div class="absolute inset-0 bg-base-100/50 player-bg-overlay"></div>
     </div>
-
     <div
       class="flex-1 flex flex-col items-center justify-start px-4 sm:px-6 pb-safe-bottom pt-2 max-w-[600px] mx-auto relative z-10 w-full min-h-0"
     >
@@ -79,7 +79,6 @@
           </div>
         </div>
       </div>
-
       <div class="w-full mt-2 mb-6 sm:mb-10 space-y-2 shrink-0">
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1 min-w-0">
@@ -100,7 +99,6 @@
           </div>
           <app-favorite-button [song]="song()" />
         </div>
-
         <div class="space-y-2">
           <div
             class="ios-slider-container relative w-full h-12 flex items-center touch-none select-none"
@@ -109,9 +107,9 @@
               #timeSlider
               type="range"
               min="0"
-              [max]="playerService.duration() || 0"
+              [max]="duration() || 0"
               step="0.1"
-              [value]="isDraggingTime() ? dragTime() : playerService.currentTime()"
+              [value]="displayTime()"
               (input)="onTimeChange($event)"
               (touchstart)="onTimeDragStart(); $event.stopPropagation()"
               (touchmove)="$event.stopPropagation()"
@@ -122,16 +120,16 @@
               aria-label="Seek"
               role="slider"
               [attr.aria-valuemin]="0"
-              [attr.aria-valuemax]="playerService.duration()"
-              [attr.aria-valuenow]="isDraggingTime() ? dragTime() : playerService.currentTime()"
-              [attr.aria-valuetext]="(isDraggingTime() ? dragTime() : playerService.currentTime()) + ' seconds'"
+              [attr.aria-valuemax]="duration()"
+              [attr.aria-valuenow]="displayTime()"
+              [attr.aria-valuetext]="displayTime() + ' seconds'"
             />
             <div
               class="absolute w-full h-2.5 bg-base-content/20 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible"
             >
               <div
                 class="relative h-full bg-gradient-to-r from-accent to-primary rounded-full origin-left shadow-lg transition-all duration-300"
-                [style.width.%]="(isDraggingTime() ? dragTime() : playerService.currentTime()) / (playerService.duration() || 1) * 100"
+                [style.width.%]="progressPercent()"
                 [style.box-shadow]="'0 0 12px color-mix(in oklab, var(--color-accent) 40%, transparent)'"
               >
                 <div
@@ -144,11 +142,10 @@
           <div
             class="flex justify-between text-xs font-medium text-base-content/40 tabular-nums"
           >
-            <span>{{ (isDraggingTime() ? dragTime() : playerService.currentTime()) | timeFormat }}</span>
-            <span>{{ playerService.duration() | timeFormat }}</span>
+            <span>{{ displayTime() | timeFormat }}</span>
+            <span>{{ duration() | timeFormat }}</span>
           </div>
         </div>
-
         <div class="flex items-center justify-between pt-0">
           <button
             class="p-4 transition-all duration-200 touch-manipulation active:scale-95"
@@ -163,7 +160,6 @@
           >
             <fa-icon [icon]="faShuffle" size="lg" />
           </button>
-
           <div class="flex items-center gap-4">
           <button
             class="p-4 text-base-content/70 active:text-accent transition-all duration-200 touch-manipulation active:scale-90 [@media(hover:hover)]:hover:text-accent [@media(hover:hover)]:hover:scale-110"
@@ -197,7 +193,6 @@
               <fa-icon [icon]="faStepForward" size="2xl" />
             </button>
           </div>
-
           <button
             class="p-4 transition-all duration-200 relative touch-manipulation active:scale-95"
             [class.text-accent]="settingsService.repeatMode() !== repeatModes.OFF"

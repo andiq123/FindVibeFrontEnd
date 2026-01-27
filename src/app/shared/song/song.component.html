@@ -4,7 +4,6 @@
       <div
         class="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 skeleton-image bg-base-content/5"
       ></div>
-
       <div class="min-w-0 flex-1 space-y-2">
         <div class="skeleton-title h-4 w-32 rounded bg-base-content/5"></div>
         <div class="skeleton-artist h-3 w-24 rounded bg-base-content/5"></div>
@@ -34,7 +33,6 @@
     </div>
   }
 }
-
 <ng-template #default>
   <div
     class="grid grid-flow-col gap-4 items-center w-full justify-start transition-transform duration-200 cursor-pointer"
@@ -53,21 +51,10 @@
     [attr.aria-disabled]="isUnavailable()"
   >
     <div
-      class="relative w-14 h-14 rounded-xl overflow-hidden shadow-md ring-1 ring-base-content/10 shrink-0 album-art transition-all duration-200 group-hover:ring-base-content/20 group-hover:shadow-lg"
-      [class.loading]="imageLoading()"
-      [class.ring-accent/30]="isActive()"
-      [class.shadow-accent/20]="isActive()"
+      class="relative w-14 h-14 rounded-xl overflow-hidden shadow-md ring-1 ring-base-content/10 shrink-0 album-art transition-all duration-300 group-hover:ring-base-content/20 group-hover:shadow-lg"
+      [class.ring-accent/40]="isActive()"
+      [class.shadow-lg]="isActive()"
     >
-      @if (imageLoading()) {
-        <div
-          class="absolute inset-0 bg-base-content/5 flex items-center justify-center"
-        >
-          <div
-            class="w-4 h-4 border-2 border-base-content/20 border-t-base-content/60 rounded-full animate-spin"
-          ></div>
-        </div>
-      }
-
       @if (isError() && isActive()) {
         <div
           class="absolute inset-0 bg-error/20 flex items-center justify-center z-20"
@@ -75,68 +62,39 @@
           <fa-icon [icon]="faTriangleExclamation" class="text-error text-lg" />
         </div>
       }
-
       <div
         class="absolute inset-0 bg-base-300/60 flex items-center justify-center opacity-0 group-hover/song:opacity-100 transition-opacity duration-150 z-10"
       >
         <app-player-button [status]="status()" />
       </div>
-
       <img
-        class="w-full h-full object-cover transition-opacity duration-200"
-        [class.opacity-0]="imageLoading()"
-        [class.opacity-100]="!imageLoading()"
-        [ngSrc]="imageSrc()"
+        class="w-full h-full object-cover"
+        [ngSrc]="song().image || 'no_album_art.jpg'"
         [alt]="song().title + ' by ' + song().artist + ' album art'"
         width="48"
         height="48"
         loading="lazy"
         decoding="async"
         referrerpolicy="no-referrer"
-        (loadstart)="onImageLoadStart()"
-        (load)="onImageLoad()"
-        (error)="onImageError()"
       />
-
-      @if (imageError()) {
-        <div
-          class="absolute inset-0 bg-base-content/5 flex items-center justify-center"
-        >
-          <svg
-            class="w-5 h-5 text-base-content/30"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-        </div>
-      }
     </div>
-
     <div class="min-w-0 flex-1 relative py-1">
       <app-moving-title
         [title]="song().title"
         [isActive]="isActive()"
-        classes="font-semibold text-base block"
+        classes="font-semibold text-base block transition-colors duration-200"
       />
       <app-moving-title
         [title]="song().artist"
         [isActive]="isActive()"
-        classes="text-xs text-base-content/50 block"
+        classes="text-xs text-base-content/50 block transition-colors duration-200"
+        [class.text-accent/70]="isActive()"
       />
-
       <div
         class="absolute -bottom-3 left-0 right-[-100px] h-[0.5px] bg-base-content/10 group-last/item:hidden"
       ></div>
     </div>
   </div>
-
   <div class="flex gap-4 items-center relative z-10 pr-1">
     @if (showOfflineIndicator()) {
       @if (isDownloadingOffline()) {
@@ -170,7 +128,6 @@
         }
       }
     }
-
     <app-favorite-button [song]="song()" />
   </div>
 </ng-template>

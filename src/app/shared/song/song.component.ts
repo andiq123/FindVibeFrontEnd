@@ -1,10 +1,8 @@
 import {
   Component,
-  computed,
   input,
   output,
   inject,
-  signal,
   ChangeDetectionStrategy,
   OnDestroy,
 } from "@angular/core";
@@ -21,7 +19,6 @@ import { PlayerService } from "../../core/services/player.service";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
 import { faCloudArrowDown, faTriangleExclamation } from "../icons";
-
 @Component({
   selector: "app-song",
   standalone: true,
@@ -43,57 +40,25 @@ export class SongComponent implements OnDestroy {
   private playlistService = inject(PlaylistService);
   private offlineStorageService = inject(OfflineStorageService);
   private settingsService = inject(SettingsService);
-
   song = input.required<Song>();
   allowReorder = input<boolean>(false);
   loading = input<boolean>(false);
   compact = input<boolean>(false);
   showOfflineIndicator = input<boolean>(true);
   isFavoritePage = input<boolean>(false);
-
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
-
-  imageLoading = signal(true);
-  imageError = signal(false);
-  imageSrc = computed(() => this.song().image || "no_album_art.jpg");
-
   ngOnDestroy() {
-    // No cleanup needed
   }
-
-  isActive = computed(
-    () => this.playlistService.currentSong()?.link === this.song().link,
-  );
-
-  status = computed(() => {
-    if (this.isActive()) {
-      return this.playerService.status();
-    }
-    return PlayerStatus.Paused;
-  });
-
-  isDownloadingOffline = computed(() => {
-    return this.offlineStorageService
-      .currentLoadingDownloadSongIds()
-      .includes(this.song().id);
-  });
-
-  isAvailableOffline = computed(() => {
-    return this.offlineStorageService
-      .availableOfflineSongIds()
-      .includes(this.song().id);
-  });
-
-  isUnavailable = computed(() => {
-    return this.settingsService.isOffline() && !this.isAvailableOffline();
-  });
-
-  isError = computed(() => this.status() === PlayerStatus.Error);
-
+  isActive = () => this.playlistService.currentSong()?.link === this.song().link;
+  status = () => this.isActive() ? this.playerService.status() : PlayerStatus.Paused;
+  isDownloadingOffline = () => this.offlineStorageService.currentLoadingDownloadSongIds().includes(this.song().id);
+  isAvailableOffline = () => this.offlineStorageService.availableOfflineSongIds().includes(this.song().id);
+  isUnavailable = () => this.settingsService.isOffline() && !this.isAvailableOffline();
+  isError = () => this.status() === PlayerStatus.Error;
+  playerStatus = PlayerStatus;
   faCloudArrowDown = faCloudArrowDown;
   faTriangleExclamation = faTriangleExclamation;
-
   async play() {
     if (this.isActive()) {
       await this.playerService.play();
@@ -102,36 +67,19 @@ export class SongComponent implements OnDestroy {
     this.playlistChange.emit();
     await this.playerService.setSong(this.song());
   }
-
   async pause() {
     this.playerService.pause();
   }
-
   async playOrPause() {
     if (this.isUnavailable()) return;
-    if (this.status() === PlayerStatus.Paused) {
+    const currentStatus = this.status();
+    if (currentStatus === PlayerStatus.Paused) {
       await this.play();
     } else {
       await this.pause();
     }
   }
-
   emitReorder(data: { from: string; to: string }) {
     this.reorder.emit(data);
-  }
-
-  onImageLoad() {
-    this.imageLoading.set(false);
-    this.imageError.set(false);
-  }
-
-  onImageError() {
-    this.imageLoading.set(false);
-    this.imageError.set(true);
-  }
-
-  onImageLoadStart() {
-    this.imageLoading.set(true);
-    this.imageError.set(false);
   }
 }

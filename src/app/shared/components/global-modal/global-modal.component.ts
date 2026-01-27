@@ -13,7 +13,6 @@ import { CommonModule, DOCUMENT } from "@angular/common";
 import { ModalService } from "../../../core/services/modal.service";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { SwipeDownDirective } from "../../../features/player/directives/swipe-down.directive";
-
 @Component({
   selector: "app-global-modal",
   standalone: true,
@@ -73,18 +72,14 @@ export class GlobalModalComponent {
   private modalService = inject(ModalService);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
-
   activeComponent = this.modalService.activeModal;
   isClosing = signal(false);
   isOpening = signal(false);
-
   componentInputs = computed(() => {
     const data = this.modalService.modalData();
     return data ? { data } : {};
   });
-
   modalContainer = viewChild<ElementRef>("modalContainer");
-
   constructor() {
     effect(() => {
       const isOpen = this.activeComponent() !== null;
@@ -96,7 +91,6 @@ export class GlobalModalComponent {
       }
     });
   }
-
   onAnimationEnd() {
     if (this.isOpening()) {
       this.isOpening.set(false);
@@ -106,7 +100,6 @@ export class GlobalModalComponent {
       this.isClosing.set(false);
     }
   }
-
   close() {
     this.isClosing.set(true);
   }

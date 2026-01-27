@@ -1,6 +1,5 @@
 import { Routes } from "@angular/router";
 import { offlineGuard } from "./shared/guards/offline.guard";
-
 export const routes: Routes = [
   {
     path: "",

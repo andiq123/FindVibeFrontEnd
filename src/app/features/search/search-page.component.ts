@@ -9,7 +9,6 @@ import {
   DestroyRef,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-
 import { SearchBarComponent } from "./search-bar/search-bar.component";
 import { PageLayoutComponent } from "../../shared/components/page-layout/page-layout.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
@@ -21,7 +20,6 @@ import { SettingsService } from "../../core/services/settings.service";
 import { PlayerService } from "../../core/services/player.service";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { EmptyStateComponent } from "../../shared/empty-state/empty-state.component";
-
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
   faMagnifyingGlass,
@@ -29,7 +27,6 @@ import {
   faWaveSquare,
   faMusic,
 } from "../../shared/icons";
-
 @Component({
   selector: "app-search-page",
   standalone: true,
@@ -51,22 +48,17 @@ export class SearchPageComponent {
   private playlistService = inject(PlaylistService);
   public playerService = inject(PlayerService);
   private destroyRef = inject(DestroyRef);
-
   query = input<string>("");
-
   songs = computed(() => this.songsService.songs());
   status = computed(() => this.songsService.status());
   pagination = computed(() => this.songsService.pagination());
   currentPage = computed(() => this.songsService.currentPage());
   isCheckedServer = computed(() => this.settingsService.isCheckedServer());
-
   searchStatus = SearchStatus;
-
   faMagnifyingGlass = faMagnifyingGlass;
   faTriangleExclamation = faTriangleExclamation;
   faWaveSquare = faWaveSquare;
   faMusic = faMusic;
-
   constructor() {
     effect(() => {
       if (
@@ -76,10 +68,8 @@ export class SearchPageComponent {
         this.router.navigate(["/library"]);
       }
     });
-
     effect(() => {
       const currentQuery = this.query();
-
       if (!currentQuery) {
         const lastQuery = untracked(() => this.songsService.lastQuery());
         if (lastQuery) {
@@ -88,15 +78,12 @@ export class SearchPageComponent {
       }
     });
   }
-
   onChangePlaylist(): void {
     this.playlistService.setCurrentPlaylist(this.songs());
   }
-
   onPageChange(page: number): void {
     const query = this.query();
     if (!query) return;
-
     this.songsService.searchSongs(query, page)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();

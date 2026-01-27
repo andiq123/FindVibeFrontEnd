@@ -15,7 +15,6 @@ import { TitleCasePipe } from "@angular/common";
 import { StorageInfoComponent } from "./components/storage-info/storage-info.component";
 import { OfflineStorageService } from "./services/offline-storage.service";
 import { catchError, tap } from "rxjs";
-
 import {
   faRightFromBracket,
   faArrowDown,
@@ -27,10 +26,8 @@ import {
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
-
 import { PageLayoutComponent } from "../../shared/components/page-layout/page-layout.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
-
 @Component({
   selector: "app-library",
   standalone: true,
@@ -52,52 +49,42 @@ export class LibraryComponent {
   private settingsService = inject(SettingsService);
   private modalService = inject(ModalService);
   private destroyRef = inject(DestroyRef);
-
   public offlineStorageService = inject(OfflineStorageService);
-
   songs = computed(() => this.libraryService.songs());
   isLoggedIn = computed(() => !!this.userService.user());
   username = computed(() => this.userService.user()?.username || "");
   userId = computed(() => this.userService.user()?.id || "");
   isOffline = this.settingsService.isOffline;
   isCheckedServer = this.settingsService.isCheckedServer;
-
   loadingSongs = this.libraryService.loadingSongs;
   hasReordered = signal(false);
   loadingReorder = signal(false);
-
   faRightFromBracket = faRightFromBracket;
   faArrowDown = faArrowDown;
   faCircleNotch = faCircleNotch;
   faWaveSquare = faWaveSquare;
   faCheck = faCheck;
   faXmark = faXmark;
-
   isDownloading = computed(
     () => this.offlineStorageService.currentLoadingDownloadSongIds().length > 0,
   );
   showStorageDot = computed(() => {
     return this.offlineStorageService.availableOfflineSongIds().length > 0;
   });
-
   openStorageInfo() {
     this.modalService.open(StorageInfoComponent);
   }
-
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
   }
-
   changeUser() {
     this.playlistService.reset();
     this.userService.resetUser();
   }
-
   reorderSongs(data: { from: string; to: string }) {
     this.libraryService.changePlaces(data.from, data.to);
     this.hasReordered.set(true);
   }
-
   saveReorders() {
     this.loadingReorder.set(true);
     this.libraryService
@@ -115,7 +102,6 @@ export class LibraryComponent {
       )
       .subscribe();
   }
-
   cancelReorders() {
     this.libraryService.updateLibrarySongs(this.userId())
       .pipe(takeUntilDestroyed(this.destroyRef))

@@ -15,7 +15,6 @@ import { UserService } from "../../features/library/services/user.service";
 import { LibraryService } from "../../features/library/services/library.service";
 import { Song } from "../../core/models/song.model";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-
 @Component({
   selector: "app-favorite-button",
   standalone: true,
@@ -28,31 +27,24 @@ export class FavoriteButtonComponent {
   private userService = inject(UserService);
   private libraryService = inject(LibraryService);
   private destroyRef = inject(DestroyRef);
-
   forPlayer = input<boolean>(false);
   song = input.required<Song>();
-
   unFavoritedHeart = unFavoritedHeart;
   favoritedHeart = favoritedHeart;
-
   isLoadingFavorite = computed(() =>
     this.libraryService
       .currentLoadingFavoriteSongIds()
       .includes(this.song().id),
   );
-
   isAbleToAddToFav = computed(() => !!this.userService.user());
-
   isFavorited = computed(() =>
     this.libraryService
       .songs()
       .some((song: Song) => song.link === this.song().link),
   );
-
   toggleAddToFavorite() {
     const user = this.userService.user();
     if (!user) return;
-
     if (this.isFavorited()) {
       this.libraryService
         .removeFromFavorites(this.song().id, this.song().link)

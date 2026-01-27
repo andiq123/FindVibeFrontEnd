@@ -6,7 +6,6 @@ export interface Song {
   link: string;
   order: number;
 }
-
 export interface PaginationInfo {
   currentPage: number;
   totalResults: number;
@@ -14,12 +13,10 @@ export interface PaginationInfo {
   hasPrevPage: boolean;
   totalPages: number;
 }
-
 export interface SearchResponse {
   songs: Song[];
   pagination: PaginationInfo | null;
 }
-
 export enum SearchStatus {
   None,
   Loading,

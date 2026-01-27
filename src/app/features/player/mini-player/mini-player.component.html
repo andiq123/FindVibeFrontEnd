@@ -51,7 +51,6 @@
           referrerpolicy="no-referrer"
         />
       </div>
-
       @if (status() === playerStatus.Playing) {
         <div
           class="waveform-indicator flex items-center gap-[3px] h-4 anim-fade-in"
@@ -62,7 +61,6 @@
         </div>
       }
     </div>
-
     <div class="flex-1 min-w-0">
       <app-moving-title
         [title]="song().title"
@@ -79,7 +77,6 @@
         classes="text-xs text-base-content/50 block"
       />
     </div>
-
     <button
       class="btn btn-ghost btn-circle btn-sm transition-colors duration-200"
       [class.text-primary]="status() === playerStatus.Playing"
@@ -88,7 +85,6 @@
       <fa-icon [icon]="faArrowUp" class="text-base" />
     </button>
   </div>
-
   <div class="progress-bar">
     <div class="progress-fill" [style.width.%]="progress()"></div>
   </div>

@@ -8,7 +8,6 @@ import {
   OnDestroy,
   effect,
 } from '@angular/core';
-
 @Component({
   selector: 'app-moving-title',
   standalone: true,
@@ -23,40 +22,31 @@ export class MovingTitleComponent implements AfterViewInit, OnDestroy {
   isBold = input<boolean>(false);
   fontSize = input<string>('1rem');
   color = input<string>('inherit');
-
   container = viewChild<ElementRef<HTMLDivElement>>('container');
   content = viewChild<ElementRef<HTMLDivElement>>('content');
-
   isOverflowing = signal<boolean>(false);
   animationDuration = signal<number>(10);
-
   private resizeObserver?: ResizeObserver;
-
   constructor() {
     effect(() => {
       this.title();
-      setTimeout(() => this.checkOverflow(), 0);
+      requestAnimationFrame(() => this.checkOverflow());
     });
   }
-
   ngAfterViewInit() {
     this.checkOverflow();
-
     const containerEl = this.container()?.nativeElement;
     if (containerEl && typeof ResizeObserver !== 'undefined') {
       this.resizeObserver = new ResizeObserver(() => this.checkOverflow());
       this.resizeObserver.observe(containerEl);
     }
   }
-
   ngOnDestroy() {
     this.resizeObserver?.disconnect();
   }
-
   private checkOverflow() {
     const containerEl = this.container()?.nativeElement;
     const contentEl = this.content()?.nativeElement;
-
     if (containerEl && contentEl) {
       const hasOverflow = contentEl.scrollWidth > containerEl.clientWidth;
       if (this.isOverflowing() !== hasOverflow) {

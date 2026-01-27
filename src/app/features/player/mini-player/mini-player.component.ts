@@ -12,7 +12,6 @@ import { PlayerButtonComponent } from "../../../shared/player-button/player-butt
 import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
 import { Song } from "../../../core/models/song.model";
 import { NgOptimizedImage } from "@angular/common";
-
 @Component({
   selector: "app-mini-player",
   standalone: true,
@@ -29,17 +28,18 @@ import { NgOptimizedImage } from "@angular/common";
 export class MiniPlayerComponent implements OnDestroy {
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
-  progress = input<number>(0);
+  currentTime = input<number>(0);
+  duration = input<number>(0);
   toggleSizeEvent = output<void>();
-
   playerStatus = PlayerStatus;
   faArrowUp = faArrowUp;
   faTriangleExclamation = faTriangleExclamation;
-
+  progress = () => {
+    const dur = this.duration();
+    return dur > 0 ? (this.currentTime() / dur) * 100 : 0;
+  };
   ngOnDestroy() {
-    // No cleanup needed
   }
-
   toggleSize() {
     this.toggleSizeEvent.emit();
   }

@@ -1,7 +1,6 @@
 import { Component, input, computed, ChangeDetectionStrategy } from "@angular/core";
 import { IconDefinition } from "../icons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-
 @Component({
   selector: "app-empty-state",
   standalone: true,
@@ -31,17 +30,14 @@ export class EmptyStateComponent {
   title = input.required<string>();
   description = input.required<string>();
   variant = input<"default" | "error">("default");
-
   iconBgClass = computed(() =>
     this.variant() === "error"
       ? "bg-error/10 ring-error/20"
       : "bg-base-200/50 ring-white/5"
   );
-
   iconColorClass = computed(() =>
     this.variant() === "error" ? "text-error" : "text-base-content/20"
   );
-
   titleColorClass = computed(() =>
     this.variant() === "error" ? "text-error" : ""
   );

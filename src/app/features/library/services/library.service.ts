@@ -15,7 +15,6 @@ import { OfflineStorageService } from "./offline-storage.service";
 import { Reorder } from "../../../core/models/reorder.model";
 import { trackLoadingState } from "../../../core/utils/loading-state.util";
 import { StorageService } from "../../../core/services/storage.service";
-
 @Injectable({
   providedIn: "root",
 })
@@ -24,33 +23,24 @@ export class LibraryService {
   private readonly offlineStorageService = inject(OfflineStorageService);
   private readonly userService = inject(UserService);
   private readonly storageService = inject(StorageService);
-
   private readonly LIBRARY_STORAGE_KEY = "library";
-
   readonly songs = signal<Song[]>(
     this.storageService.getItem<Song[]>(this.LIBRARY_STORAGE_KEY) || [],
   );
   readonly currentLoadingFavoriteSongIds = signal<string[]>([]);
   readonly loadingSongs = signal<boolean>(false);
-
   private libraryUpdateSubscription: Subscription | null = null;
-
   constructor() {
     effect(() => {
       this.storageService.setItem(this.LIBRARY_STORAGE_KEY, this.songs());
     });
-
     effect((onCleanup) => {
       const user = untracked(() => this.userService.user());
-      
-      // Cleanup previous subscription if it exists
       if (this.libraryUpdateSubscription) {
         this.libraryUpdateSubscription.unsubscribe();
         this.libraryUpdateSubscription = null;
       }
-
       if (user) {
-        // Use untracked to prevent effect from tracking the subscription
         untracked(() => {
           this.libraryUpdateSubscription = this.updateLibrarySongs(user.id).subscribe();
         });
@@ -59,8 +49,6 @@ export class LibraryService {
           this.reset();
         });
       }
-
-      // Cleanup subscription when effect is destroyed or user changes
       onCleanup(() => {
         if (this.libraryUpdateSubscription) {
           this.libraryUpdateSubscription.unsubscribe();
@@ -69,40 +57,20 @@ export class LibraryService {
       });
     });
   }
-
   reset(): void {
     this.songs.set([]);
     this.currentLoadingFavoriteSongIds.set([]);
     this.loadingSongs.set(false);
     this.storageService.removeItem(this.LIBRARY_STORAGE_KEY);
   }
-
   updateLibrarySongs(userId: string) {
     const currentSongs = untracked(() => this.songs());
-    const startTime = Date.now();
-    const minLoadingTime = 800; // Minimum 800ms to show loading state
-    let loadingCleared = false;
-    
     if (currentSongs.length === 0) {
       this.loadingSongs.set(true);
     }
-
     const clearLoading = () => {
-      if (loadingCleared) return;
-      loadingCleared = true;
-      
-      const elapsed = Date.now() - startTime;
-      const remainingTime = Math.max(0, minLoadingTime - elapsed);
-      
-      if (remainingTime > 0) {
-        setTimeout(() => {
-          this.loadingSongs.set(false);
-        }, remainingTime);
-      } else {
-        this.loadingSongs.set(false);
-      }
+      this.loadingSongs.set(false);
     };
-
     return this.libraryApiService.getFavoritesSong(userId).pipe(
       timeout(10000),
       tap({
@@ -121,7 +89,6 @@ export class LibraryService {
         error: (error) => {
           const isAuthenticationError =
             error.status === 401 || error.status === 403;
-
           if (isAuthenticationError) {
             console.error(
               "[LibraryService] Authentication error, logging out user",
@@ -129,10 +96,8 @@ export class LibraryService {
             this.userService.resetUser();
             return;
           }
-
           const isTemporaryError =
             error.status === 404 || error.name === "TimeoutError";
-
           if (isTemporaryError) {
             console.warn(
               "[LibraryService] API unavailable or timeout, keeping user logged in",
@@ -149,13 +114,10 @@ export class LibraryService {
       }),
     );
   }
-
   addToFavorites(song: Song, userId: string) {
     this.trackLoadingFavorite(song.id, true);
-
     const order = this.songs().length === 0 ? 1 : this.songs().length + 1;
     const favoriteSong: Song = { ...song, order };
-
     return this.libraryApiService.addToFavorites(favoriteSong, userId).pipe(
       tap({
         next: () => {
@@ -166,7 +128,6 @@ export class LibraryService {
       }),
     );
   }
-
   removeFromFavorites(id: string, link: string) {
     this.trackLoadingFavorite(id, true);
     const song = this.songs().find((x) => x.link === link);
@@ -174,7 +135,6 @@ export class LibraryService {
       this.trackLoadingFavorite(id, false);
       return new Observable();
     }
-
     return this.libraryApiService.removeFromFavorites(song.id).pipe(
       tap({
         next: async () => {
@@ -186,34 +146,26 @@ export class LibraryService {
       }),
     );
   }
-
   saveReorders() {
     const reorders: Reorder[] = this.songs().map((x) => ({
       songId: x.id,
       order: x.order,
     }));
-
     return this.libraryApiService.reorderSongs(reorders);
   }
-
   changePlaces(id1: string, id2: string): void {
     this.songs.update((prevSongs) => {
       const index1 = prevSongs.findIndex((x) => x.id === id1);
       const index2 = prevSongs.findIndex((x) => x.id === id2);
-
       if (index1 === -1 || index2 === -1) return prevSongs;
-
       const newSongs = [...prevSongs];
       const song1 = newSongs[index1];
       const song2 = newSongs[index2];
-
       newSongs[index1] = song2;
       newSongs[index2] = song1;
-
       return newSongs.map((song, i) => ({ ...song, order: i + 1 }));
     });
   }
-
   private trackLoadingFavorite(id: string, isLoading: boolean): void {
     trackLoadingState(this.currentLoadingFavoriteSongIds, id, isLoading);
   }

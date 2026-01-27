@@ -19,11 +19,20 @@
 .marquee-content {
   display: inline-flex;
   align-items: center;
-  will-change: transform;
 }
 
 .anim-marquee {
   animation: marquee linear infinite;
+  
+  @media (max-width: 768px) {
+    will-change: transform;
+    animation-duration: 20s;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    will-change: auto;
+  }
 }
 
 .marquee-spacer {

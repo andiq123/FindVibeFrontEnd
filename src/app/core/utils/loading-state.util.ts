@@ -1,5 +1,4 @@
 import { WritableSignal } from '@angular/core';
-
 export function trackLoadingState(
   signal: WritableSignal<string[]>,
   id: string,

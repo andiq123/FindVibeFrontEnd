@@ -7,7 +7,6 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { SettingsService } from "../../core/services/settings.service";
-
 @Component({
   selector: "app-connection-status",
   standalone: true,
@@ -18,26 +17,14 @@ import { SettingsService } from "../../core/services/settings.service";
 })
 export class ConnectionStatusComponent {
   private readonly settingsService = inject(SettingsService);
-
   readonly isCheckedServer = this.settingsService.isCheckedServer;
   readonly isOffline = this.settingsService.isOffline;
-
   readonly shouldShow = signal(false);
-
   readonly isPending = computed(() => !this.isCheckedServer());
-
   constructor() {
-    effect((onCleanup) => {
+    effect(() => {
       const rawVisible = !this.isCheckedServer() || this.isOffline();
-
-      if (rawVisible) {
-        const timer = setTimeout(() => {
-          this.shouldShow.set(true);
-        }, 1000);
-        onCleanup(() => clearTimeout(timer));
-      } else {
-        this.shouldShow.set(false);
-      }
+      this.shouldShow.set(rawVisible);
     });
   }
 }
