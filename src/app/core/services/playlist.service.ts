@@ -1,11 +1,14 @@
-import { Injectable, signal, computed } from "@angular/core";
+import { Injectable, signal, computed, inject } from "@angular/core";
 import { Song } from "../models/song.model";
 import { shuffleArray } from "../utils/utils";
+import { SettingsService } from "./settings.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class PlaylistService {
+  private readonly settingsService = inject(SettingsService);
+  
   private readonly originalList = signal<Song[]>([]);
   private readonly queue = signal<Song[]>([]);
   private readonly currentIndex = signal<number>(-1);
@@ -30,8 +33,29 @@ export class PlaylistService {
 
   setCurrentPlaylist(songs: Song[]): void {
     this.originalList.set(songs);
-    this.queue.set(songs);
-    this.currentIndex.set(-1);
+    
+    // Handle shuffle if enabled
+    if (this.settingsService.isShuffle()) {
+      const current = this.currentSong();
+      let shuffled = shuffleArray(songs);
+      
+      if (current) {
+        shuffled = shuffled.filter((s) => s.id !== current.id);
+        shuffled.unshift(current);
+      }
+      
+      this.queue.set(shuffled);
+      this.currentIndex.set(0);
+    } else {
+      this.queue.set(songs);
+      const current = this.currentSong();
+      if (current) {
+        const index = songs.findIndex((s) => s.id === current.id);
+        this.currentIndex.set(index !== -1 ? index : -1);
+      } else {
+        this.currentIndex.set(-1);
+      }
+    }
   }
 
   enableShuffle(): void {

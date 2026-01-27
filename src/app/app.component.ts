@@ -39,27 +39,21 @@ import { PlaylistService } from "./core/services/playlist.service";
   styleUrl: "./app.component.scss",
 })
 export class AppComponent implements OnInit {
-  private userService = inject(UserService);
   private wakeService = inject(WakeService);
-  private settingsService = inject(SettingsService);
   private updateService = inject(AppUpdateService);
   private mediaSessionService = inject(MediaSessionService);
   private audioService = inject(AudioService);
   private offlineStorageService = inject(OfflineStorageService);
-  private modalService = inject(ModalService);
-  private playerService = inject(PlayerService);
-  private playlistService = inject(PlaylistService);
   private destroyRef = inject(DestroyRef);
 
   newUpdateAvailable = this.updateService.newUpdateAvailable;
   secondsToUpdate = this.updateService.secondsToUpdate;
 
-  isMiniPlayer = computed(() => this.settingsService.isMiniPlayer());
-  isModalOpen = computed(() => this.modalService.isOpen());
-
-  song = computed(() => this.playlistService.currentSong());
-  status = this.playerService.status;
-  progress = computed(() => this.playerService.progress());
+  // Direct service access for template
+  readonly playlistService = inject(PlaylistService);
+  readonly playerService = inject(PlayerService);
+  readonly settingsService = inject(SettingsService);
+  readonly modalService = inject(ModalService);
 
   ngOnInit(): void {
     this.initializeServices();
@@ -81,11 +75,16 @@ export class AppComponent implements OnInit {
 
   private wakeServer() {
     this.settingsService.setIsCheckedServerPending();
+    
     return this.wakeService.wakeServer().pipe(
-      tap(() => this.settingsService.setServerUp()),
+      tap(() => {
+        this.settingsService.setServerUp();
+      }),
       catchError((err) => {
+        // Set server down with minimum display time handled in service
         this.settingsService.setServerDown();
-        throw err;
+        // Don't throw error to prevent console noise and unhandled errors
+        return [];
       }),
     );
   }

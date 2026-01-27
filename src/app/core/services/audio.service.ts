@@ -1,12 +1,18 @@
-import { Injectable, signal, OnDestroy } from "@angular/core";
+import { Injectable, signal, OnDestroy, inject } from "@angular/core";
 import { PlayerStatus } from "../../features/player/models/player.model";
+import { RecentService } from "../../features/recent/services/recent.service";
+import { PlaylistService } from "./playlist.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class AudioService implements OnDestroy {
+  private readonly recentService = inject(RecentService);
+  private readonly playlistService = inject(PlaylistService);
+  
   private audio?: HTMLAudioElement;
   private abortController?: AbortController;
+  private alreadyAddedToRecents = false;
 
   readonly status = signal<PlayerStatus>(PlayerStatus.Stopped);
   readonly currentTime = signal<number>(0);
@@ -44,9 +50,19 @@ export class AudioService implements OnDestroy {
       "timeupdate",
       () => {
         if (!this.audio) return;
-        this.currentTime.set(this.audio.currentTime);
+        const time = this.audio.currentTime;
+        this.currentTime.set(time);
         if (this.audio.duration && this.audio.duration !== this.duration()) {
           this.duration.set(this.audio.duration);
+        }
+        
+        // Add to recents after 7 seconds
+        if (time > 7 && !this.alreadyAddedToRecents) {
+          const song = this.playlistService.currentSong();
+          if (song) {
+            this.alreadyAddedToRecents = true;
+            this.recentService.addSongToRecents(song);
+          }
         }
       },
       { signal },
@@ -67,6 +83,7 @@ export class AudioService implements OnDestroy {
     if (!this.audio) this.initialize();
     if (!this.audio) return;
 
+    this.alreadyAddedToRecents = false; // Reset when new song starts
     this.audio.src = src;
     this.audio.load();
   }

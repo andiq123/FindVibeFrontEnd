@@ -6,7 +6,6 @@ import {
   inject,
   signal,
   ChangeDetectionStrategy,
-  effect,
   OnDestroy,
 } from "@angular/core";
 import { Song } from "../../core/models/song.model";
@@ -19,9 +18,9 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
 import { DragAndDropDirective } from "../../features/search/directives/drag-and-drop.directive";
 import { PlayerService } from "../../core/services/player.service";
+import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
 import { faCloudArrowDown, faTriangleExclamation } from "../icons";
-import { createImageLoader, ImageLoader } from "../utils/image-loader.util";
 
 @Component({
   selector: "app-song",
@@ -41,6 +40,7 @@ import { createImageLoader, ImageLoader } from "../utils/image-loader.util";
 })
 export class SongComponent implements OnDestroy {
   private playerService = inject(PlayerService);
+  private playlistService = inject(PlaylistService);
   private offlineStorageService = inject(OfflineStorageService);
   private settingsService = inject(SettingsService);
 
@@ -54,32 +54,16 @@ export class SongComponent implements OnDestroy {
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
 
-  private imageLoader!: ImageLoader;
   imageLoading = signal(true);
   imageError = signal(false);
-  imageSrc = signal<string>("no_album_art.jpg");
-
-  constructor() {
-    effect(() => {
-      const songImage = this.song().image;
-
-      if (!this.imageLoader) {
-        this.imageLoader = createImageLoader(songImage);
-        this.imageLoading = this.imageLoader.imageLoading;
-        this.imageError = this.imageLoader.imageError;
-        this.imageSrc = this.imageLoader.imageSrc;
-      } else {
-        this.imageLoader.updateSrc(songImage);
-      }
-    });
-  }
+  imageSrc = computed(() => this.song().image || "no_album_art.jpg");
 
   ngOnDestroy() {
-    this.imageLoader?.cleanup();
+    // No cleanup needed
   }
 
   isActive = computed(
-    () => this.playerService.song()?.link === this.song().link,
+    () => this.playlistService.currentSong()?.link === this.song().link,
   );
 
   status = computed(() => {
@@ -137,14 +121,17 @@ export class SongComponent implements OnDestroy {
   }
 
   onImageLoad() {
-    this.imageLoader.onImageLoad();
+    this.imageLoading.set(false);
+    this.imageError.set(false);
   }
 
   onImageError() {
-    this.imageLoader.onImageError();
+    this.imageLoading.set(false);
+    this.imageError.set(true);
   }
 
   onImageLoadStart() {
-    this.imageLoader.onImageLoadStart();
+    this.imageLoading.set(true);
+    this.imageError.set(false);
   }
 }

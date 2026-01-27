@@ -79,9 +79,29 @@ export class LibraryService {
 
   updateLibrarySongs(userId: string) {
     const currentSongs = untracked(() => this.songs());
+    const startTime = Date.now();
+    const minLoadingTime = 800; // Minimum 800ms to show loading state
+    let loadingCleared = false;
+    
     if (currentSongs.length === 0) {
       this.loadingSongs.set(true);
     }
+
+    const clearLoading = () => {
+      if (loadingCleared) return;
+      loadingCleared = true;
+      
+      const elapsed = Date.now() - startTime;
+      const remainingTime = Math.max(0, minLoadingTime - elapsed);
+      
+      if (remainingTime > 0) {
+        setTimeout(() => {
+          this.loadingSongs.set(false);
+        }, remainingTime);
+      } else {
+        this.loadingSongs.set(false);
+      }
+    };
 
     return this.libraryApiService.getFavoritesSong(userId).pipe(
       timeout(10000),
@@ -121,11 +141,11 @@ export class LibraryService {
         },
       }),
       catchError((err) => {
-        this.loadingSongs.set(false);
+        clearLoading();
         return throwError(() => err);
       }),
       finalize(() => {
-        this.loadingSongs.set(false);
+        clearLoading();
       }),
     );
   }

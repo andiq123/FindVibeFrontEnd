@@ -1,10 +1,37 @@
+.player-container {
+  transform: translateY(100%);
+  
+  &.anim-slide-up {
+    animation: slide-up var(--anim-duration-slow) var(--anim-ease-ios) forwards;
+  }
+  
+  &.anim-slide-down {
+    animation: slide-down 0.35s ease-in forwards;
+  }
+  
+  @media (max-width: 768px) {
+    &.anim-slide-up {
+      animation-duration: 0.25s;
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    transform: translateY(0) !important;
+    animation: none !important;
+  }
+}
+
 .artwork-wrapper {
   transition: transform 0.8s cubic-bezier(0.32, 0.72, 0, 1);
   transform: scale(0.95);
-  will-change: transform;
 
   &.playing {
     transform: scale(1);
+  }
+
+  @media (max-width: 768px) {
+    transition: transform 0.3s ease;
+    will-change: auto;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -15,6 +42,19 @@
     &:active {
       transform: none !important;
     }
+  }
+}
+
+.player-bg-image {
+  @media (max-width: 768px) {
+    opacity: 0.3;
+    filter: blur(20px);
+  }
+}
+
+.player-bg-overlay {
+  @media (max-width: 768px) {
+    background-color: color-mix(in oklab, var(--color-base-100) 60%, transparent);
   }
 }
 

@@ -10,13 +10,19 @@
   </div>
 </div>
 
-@defer (when song()) {
-  @if (song() && isMiniPlayer()) {
+@if (playlistService.currentSong(); as song) {
+  @if (settingsService.isMiniPlayer()) {
     <app-mini-player
       (toggleSizeEvent)="onToggleSize()"
-      [song]="song()!"
-      [status]="status()"
-      [progress]="progress()"
+      [song]="song"
+      [status]="playerService.status()"
+      [progress]="playerService.currentTime() / (playerService.duration() || 1) * 100"
+    />
+  } @else {
+    <app-full-player
+      (toggleSizeEvent)="onToggleSize()"
+      [song]="song"
+      [status]="playerService.status()"
     />
   }
 }
@@ -25,16 +31,6 @@
   <app-navigation />
 }
 
-@defer (when song()) {
-  @if (song() && !isMiniPlayer()) {
-    <app-full-player
-      (toggleSizeEvent)="onToggleSize()"
-      [song]="song()!"
-      [status]="status()"
-    />
-  }
-}
-
-@defer (when isModalOpen()) {
+@defer (when modalService.isOpen()) {
   <app-global-modal />
 }

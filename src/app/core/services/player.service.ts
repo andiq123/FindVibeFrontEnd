@@ -13,7 +13,6 @@ import {
   RepeatMode,
 } from "../../features/player/models/player.model";
 import { SettingsService } from "./settings.service";
-import { RecentService } from "../../features/recent/services/recent.service";
 import { PlaylistService } from "./playlist.service";
 import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
 import { AudioService } from "./audio.service";
@@ -24,65 +23,27 @@ import { upgradeToHttps } from "../utils/utils";
 })
 export class PlayerService implements OnDestroy {
   private readonly settingsService = inject(SettingsService);
-  private readonly recentService = inject(RecentService);
   private readonly playlistService = inject(PlaylistService);
   private readonly offlineStorageService = inject(OfflineStorageService);
   private readonly audioService = inject(AudioService);
 
-  private readonly alreadyAddedInRecents = signal<boolean>(false);
   private currentObjectUrl: string | null = null;
-  private isHandlingSongEnded = false;
+  private handlingSongEnded = false;
 
-  readonly song = computed(() => this.playlistService.currentSong());
   readonly status = this.audioService.status;
   readonly currentTime = this.audioService.currentTime;
   readonly duration = this.audioService.duration;
-  readonly progress = computed(() => {
-    const currentTime = this.currentTime();
-    const duration = this.duration();
-    return duration > 0 ? (currentTime / duration) * 100 : 0;
-  });
 
   constructor() {
     effect(() => {
-      const time = this.currentTime();
-      const song = this.song();
-
-      if (time > 7 && !this.alreadyAddedInRecents() && song) {
-        this.alreadyAddedInRecents.set(true);
-        this.recentService.addSongToRecents(song);
-      }
-    });
-
-    effect(() => {
-      const status = this.status();
-      if (status === PlayerStatus.Ended && !this.isHandlingSongEnded) {
-        this.isHandlingSongEnded = true;
+      if (this.status() === PlayerStatus.Ended && !this.handlingSongEnded) {
+        this.handlingSongEnded = true;
         untracked(() => {
           this.handleSongEnded().finally(() => {
-            // Reset flag after handling is complete
-            this.isHandlingSongEnded = false;
+            this.handlingSongEnded = false;
           });
         });
       }
-    });
-
-    effect(() => {
-      const isShuffle = this.settingsService.isShuffle();
-      const queueLength = untracked(() => this.playlistService.queueLength());
-      
-      // Skip if playlist is empty
-      if (queueLength === 0) {
-        return;
-      }
-
-      untracked(() => {
-        if (isShuffle) {
-          this.playlistService.enableShuffle();
-        } else {
-          this.playlistService.disableShuffle();
-        }
-      });
     });
   }
 
@@ -110,14 +71,11 @@ export class PlayerService implements OnDestroy {
 
   async setSong(song: Song): Promise<void> {
     this.cleanupObjectUrl();
-    
-    // Reset song ended handler flag when starting a new song
-    this.isHandlingSongEnded = false;
+    this.handlingSongEnded = false;
 
     this.playlistService.setCurrentSong(song);
     this.audioService.pause();
     this.audioService.seek(0);
-    this.alreadyAddedInRecents.set(false);
 
     const secureLink = upgradeToHttps(song.link);
 
@@ -207,7 +165,6 @@ export class PlayerService implements OnDestroy {
     this.audioService.pause();
     this.audioService.setSource("");
     this.playlistService.reset();
-    this.alreadyAddedInRecents.set(false);
     this.cleanupObjectUrl();
   }
 

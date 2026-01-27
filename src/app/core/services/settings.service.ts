@@ -19,6 +19,7 @@ export class SettingsService {
   private readonly _isMiniPlayer = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
+  private serverStatusChangeTime = 0;
 
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
@@ -68,14 +69,37 @@ export class SettingsService {
   }
 
   setServerUp(): void {
-    this._serverStatus.set(ServerStatus.Up);
+    const now = Date.now();
+    const minDisplayTime = 600; // Minimum 600ms to show loading state
+    const elapsed = now - this.serverStatusChangeTime;
+    const remainingTime = Math.max(0, minDisplayTime - elapsed);
+    
+    if (remainingTime > 0) {
+      setTimeout(() => {
+        this._serverStatus.set(ServerStatus.Up);
+      }, remainingTime);
+    } else {
+      this._serverStatus.set(ServerStatus.Up);
+    }
   }
 
   setServerDown(): void {
-    this._serverStatus.set(ServerStatus.Down);
+    const now = Date.now();
+    const minDisplayTime = 600; // Minimum 600ms to show loading state
+    const elapsed = now - this.serverStatusChangeTime;
+    const remainingTime = Math.max(0, minDisplayTime - elapsed);
+    
+    if (remainingTime > 0) {
+      setTimeout(() => {
+        this._serverStatus.set(ServerStatus.Down);
+      }, remainingTime);
+    } else {
+      this._serverStatus.set(ServerStatus.Down);
+    }
   }
 
   setIsCheckedServerPending(): void {
+    this.serverStatusChangeTime = Date.now();
     this._serverStatus.set(ServerStatus.Unchecked);
   }
 }

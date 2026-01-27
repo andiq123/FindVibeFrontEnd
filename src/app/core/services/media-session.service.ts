@@ -10,65 +10,52 @@ export class MediaSessionService {
   private readonly playlistService = inject(PlaylistService);
   private readonly playerService = inject(PlayerService);
   private lastPositionUpdateTime = 0;
-  private readonly POSITION_UPDATE_THROTTLE_MS = 1000; // Update max once per second
+  private readonly POSITION_UPDATE_THROTTLE_MS = 1000;
 
   constructor() {
-    this.setupMetadataEffect();
-    this.setupPlaybackStateEffect();
-    this.setupPositionStateEffect();
-  }
-
-  private setupMetadataEffect(): void {
+    // Single effect: update all media session state at once
     effect(() => {
-      const song = this.playlistService.currentSong();
-      if (!song || !('mediaSession' in navigator)) return;
-
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: song.title,
-        artist: song.artist,
-        artwork: [
-          {
-            src: song.image || '',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-        ],
-      });
-    });
-  }
-
-  private setupPlaybackStateEffect(): void {
-    effect(() => {
-      const status = this.playerService.status();
       if (!('mediaSession' in navigator)) return;
 
-      navigator.mediaSession.playbackState = status === PlayerStatus.Playing ? 'playing' : 'paused';
-    });
-  }
-
-  private setupPositionStateEffect(): void {
-    effect(() => {
+      const song = this.playlistService.currentSong();
+      const status = this.playerService.status();
       const currentTime = this.playerService.currentTime();
       const duration = this.playerService.duration();
 
-      if (!('mediaSession' in navigator) || !('setPositionState' in navigator.mediaSession)) return;
-
-      // Throttle position updates to max once per second
-      const now = Date.now();
-      if (now - this.lastPositionUpdateTime < this.POSITION_UPDATE_THROTTLE_MS) {
-        return;
+      // Update metadata when song changes
+      if (song) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: song.title,
+          artist: song.artist,
+          artwork: [
+            {
+              src: song.image || '',
+              sizes: '512x512',
+              type: 'image/png',
+            },
+          ],
+        });
       }
 
-      untracked(() => {
-        if (duration > 0 && currentTime <= duration) {
-          navigator.mediaSession.setPositionState({
-            duration,
-            playbackRate: 1,
-            position: currentTime,
+      // Update playback state
+      navigator.mediaSession.playbackState = status === PlayerStatus.Playing ? 'playing' : 'paused';
+
+      // Update position state (throttled)
+      if ('setPositionState' in navigator.mediaSession) {
+        const now = Date.now();
+        if (now - this.lastPositionUpdateTime >= this.POSITION_UPDATE_THROTTLE_MS) {
+          untracked(() => {
+            if (duration > 0 && currentTime <= duration) {
+              navigator.mediaSession.setPositionState({
+                duration,
+                playbackRate: 1,
+                position: currentTime,
+              });
+              this.lastPositionUpdateTime = now;
+            }
           });
-          this.lastPositionUpdateTime = now;
         }
-      });
+      }
     });
   }
 

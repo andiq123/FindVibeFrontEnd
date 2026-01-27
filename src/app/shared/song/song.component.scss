@@ -13,7 +13,6 @@
 .song-container {
   -webkit-tap-highlight-color: transparent;
   transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
-  will-change: transform, background-color, box-shadow;
   touch-action: pan-y;
   cursor: pointer;
 
@@ -26,6 +25,20 @@
   &:active {
     transform: translateX(2px) scale(0.98);
     background-color: color-mix(in oklab, var(--color-base-200) 70%, transparent);
+  }
+
+  @media (max-width: 768px) {
+    will-change: auto;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+    
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    
+    &:active {
+      transform: scale(0.97);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
