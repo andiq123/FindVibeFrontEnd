@@ -25,6 +25,7 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   private hasHitThreshold = false;
   private isDismissing = false;
   private rafId: number | null = null;
+  private transitionEndHandlers = new Set<(e: TransitionEvent) => void>();
   private boundOnStart = this.onStart.bind(this);
   private boundOnMove = this.onMove.bind(this);
   private boundOnEnd = this.onEnd.bind(this);
@@ -48,6 +49,10 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     document.removeEventListener("touchmove", this.boundOnMove);
     document.removeEventListener("touchend", this.boundOnEnd);
     document.removeEventListener("touchcancel", this.boundOnEnd);
+    this.transitionEndHandlers.forEach((handler) => {
+      el.removeEventListener("transitionend", handler);
+    });
+    this.transitionEndHandlers.clear();
   }
   onStart(event: TouchEvent) {
     if (this.isDismissing || this.disabled()) return;
@@ -134,11 +139,13 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     const onTransitionEnd = (e: TransitionEvent) => {
       if (e.propertyName !== "transform") return;
       el.removeEventListener("transitionend", onTransitionEnd);
+      this.transitionEndHandlers.delete(onTransitionEnd);
       this.ngZone.run(() => {
         this.closePanel.emit();
         this.isDismissing = false;
       });
     };
+    this.transitionEndHandlers.add(onTransitionEnd);
     el.addEventListener("transitionend", onTransitionEnd);
   }
   private performSnapBack() {
@@ -148,12 +155,14 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
     const onTransitionEnd = (e: TransitionEvent) => {
       if (e.propertyName !== "transform") return;
       el.removeEventListener("transitionend", onTransitionEnd);
+      this.transitionEndHandlers.delete(onTransitionEnd);
       if (!this.isSwiping && !this.isDismissing) {
         el.style.removeProperty("animation");
         el.style.removeProperty("transition");
         el.style.removeProperty("transform");
       }
     };
+    this.transitionEndHandlers.add(onTransitionEnd);
     el.addEventListener("transitionend", onTransitionEnd);
     this.currentY = 0;
     this.hasHitThreshold = false;

@@ -1,134 +1,93 @@
 .mini-player-container {
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.15s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.15s ease, border-color 0.2s ease;
 
-    &:active {
-        transform: translate(-50%, 0) scale(0.98);
-    }
+  &:active { transform: translate(-50%, 0) scale(0.98); }
 
-    @media (max-width: 768px) {
-        will-change: auto;
-        transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.15s ease;
-    }
+  @media (max-width: 768px) {
+    will-change: auto;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.15s ease;
+  }
 
-    @media (prefers-reduced-motion: reduce) {
-        transition: none !important;
-        will-change: auto !important;
-
-        &:active {
-            transform: none !important;
-        }
-    }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+    will-change: auto !important;
+    &:active { transform: none !important; }
+  }
 }
 
 .album-art {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 
-    &.album-art-playing {
-        animation: pulse-glow 2s ease-in-out infinite;
-        box-shadow: 0 0 20px color-mix(in oklab, var(--color-accent) 30%, transparent);
-        
-        @media (max-width: 768px) {
-            animation-duration: 3s;
-            transform: scale(1);
-        }
-    }
-
-    img {
-        transition: opacity 0.3s ease;
-    }
-    
+  &.album-art-playing {
+    animation: pulse-glow 2s ease-in-out infinite;
+    box-shadow: 0 0 20px color-mix(in oklab, var(--color-accent) 30%, transparent);
     @media (max-width: 768px) {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      animation-duration: 3s;
+      transform: scale(1);
     }
+  }
+
+  img { transition: opacity 0.3s ease; }
+  
+  @media (max-width: 768px) {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
 }
 
 @keyframes pulse-glow {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.02);
-    }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
 
 .waveform-indicator {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    height: 16px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 16px;
 }
 
 .waveform-bar {
-    width: 3px;
-    background: var(--color-accent);
-    border-radius: 2px;
-    animation: waveform 0.8s ease-in-out infinite;
-    transform-origin: center;
+  width: 3px;
+  background: var(--color-accent);
+  border-radius: 2px;
+  animation: waveform 0.8s ease-in-out infinite;
+  transform-origin: center;
 
-    &:nth-child(1) {
-        animation-delay: 0s;
-        height: 8px;
-    }
-
-    &:nth-child(2) {
-        animation-delay: 0.2s;
-        height: 12px;
-    }
-
-    &:nth-child(3) {
-        animation-delay: 0.4s;
-        height: 6px;
-    }
-    
-    @media (max-width: 768px) {
-        animation-duration: 1s;
-    }
-    
-    @media (prefers-reduced-motion: reduce) {
-        animation: none;
-        opacity: 0.7;
-    }
+  &:nth-child(1) { animation-delay: 0s; height: 8px; }
+  &:nth-child(2) { animation-delay: 0.2s; height: 12px; }
+  &:nth-child(3) { animation-delay: 0.4s; height: 6px; }
+  
+  @media (max-width: 768px) { animation-duration: 1s; }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0.7;
+  }
 }
 
 @keyframes waveform {
-
-    0%,
-    100% {
-        transform: scaleY(0.5);
-        opacity: 0.6;
-    }
-
-    50% {
-        transform: scaleY(1);
-        opacity: 1;
-    }
+  0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
+  50% { transform: scaleY(1); opacity: 1; }
 }
 
 .progress-bar {
-    position: relative;
-    height: 2px;
-    background: color-mix(in oklab, var(--color-base-content) 10%, transparent);
-    overflow: hidden;
+  position: relative;
+  height: 2px;
+  background: color-mix(in oklab, var(--color-base-content) 10%, transparent);
+  overflow: hidden;
 }
 
 .progress-fill {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-accent) 80%, transparent));
-    transition: width 0.3s linear;
-    box-shadow: 0 0 8px color-mix(in oklab, var(--color-accent) 50%, transparent);
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-accent) 80%, transparent));
+  transition: width 0.3s linear;
+  box-shadow: 0 0 8px color-mix(in oklab, var(--color-accent) 50%, transparent);
 }
 
 .btn {
-    transition: color 0.2s ease, transform 0.15s ease;
-
-    &:active {
-        transform: scale(0.95);
-    }
+  transition: color 0.2s ease, transform 0.15s ease;
+  &:active { transform: scale(0.95); }
 }

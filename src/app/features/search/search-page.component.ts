@@ -10,7 +10,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { SearchBarComponent } from "./search-bar/search-bar.component";
-import { PageLayoutComponent } from "../../shared/components/page-layout/page-layout.component";
+import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
 import { PaginationComponent } from "../../shared/components/pagination/pagination.component";
 import { SearchStatus } from "../../core/models/song.model";
@@ -24,8 +24,6 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
   faMagnifyingGlass,
   faTriangleExclamation,
-  faWaveSquare,
-  faMusic,
 } from "../../shared/icons";
 @Component({
   selector: "app-search-page",
@@ -34,7 +32,7 @@ import {
     SearchBarComponent,
     FontAwesomeModule,
     EmptyStateComponent,
-    PageLayoutComponent,
+    PageContentComponent,
     SongListComponent,
     PaginationComponent,
   ],
@@ -57,8 +55,6 @@ export class SearchPageComponent {
   searchStatus = SearchStatus;
   faMagnifyingGlass = faMagnifyingGlass;
   faTriangleExclamation = faTriangleExclamation;
-  faWaveSquare = faWaveSquare;
-  faMusic = faMusic;
   constructor() {
     effect(() => {
       if (

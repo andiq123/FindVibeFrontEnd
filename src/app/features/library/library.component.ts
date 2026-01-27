@@ -19,14 +19,13 @@ import {
   faRightFromBracket,
   faArrowDown,
   faCircleNotch,
-  faWaveSquare,
   faCheck,
   faXmark,
 } from "../../shared/icons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
-import { PageLayoutComponent } from "../../shared/components/page-layout/page-layout.component";
+import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
 @Component({
   selector: "app-library",
@@ -35,7 +34,7 @@ import { SongListComponent } from "../../shared/components/song-list/song-list.c
     UserFormComponent,
     TitleCasePipe,
     FontAwesomeModule,
-    PageLayoutComponent,
+    PageContentComponent,
     SongListComponent,
   ],
   templateUrl: "./library.component.html",
@@ -62,7 +61,6 @@ export class LibraryComponent {
   faRightFromBracket = faRightFromBracket;
   faArrowDown = faArrowDown;
   faCircleNotch = faCircleNotch;
-  faWaveSquare = faWaveSquare;
   faCheck = faCheck;
   faXmark = faXmark;
   isDownloading = computed(

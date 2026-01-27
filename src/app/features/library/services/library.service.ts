@@ -32,7 +32,10 @@ export class LibraryService {
   private libraryUpdateSubscription: Subscription | null = null;
   constructor() {
     effect(() => {
-      this.storageService.setItem(this.LIBRARY_STORAGE_KEY, this.songs());
+      const songs = this.songs();
+      if (songs.length > 0) {
+        this.storageService.setItem(this.LIBRARY_STORAGE_KEY, songs);
+      }
     });
     effect((onCleanup) => {
       const user = untracked(() => this.userService.user());

@@ -27,10 +27,23 @@ export class MovingTitleComponent implements AfterViewInit, OnDestroy {
   isOverflowing = signal<boolean>(false);
   animationDuration = signal<number>(10);
   private resizeObserver?: ResizeObserver;
+  private rafId: number | null = null;
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       this.title();
-      requestAnimationFrame(() => this.checkOverflow());
+      if (this.rafId !== null) {
+        cancelAnimationFrame(this.rafId);
+      }
+      this.rafId = requestAnimationFrame(() => {
+        this.rafId = null;
+        this.checkOverflow();
+      });
+      onCleanup(() => {
+        if (this.rafId !== null) {
+          cancelAnimationFrame(this.rafId);
+          this.rafId = null;
+        }
+      });
     });
   }
   ngAfterViewInit() {
@@ -42,6 +55,10 @@ export class MovingTitleComponent implements AfterViewInit, OnDestroy {
     }
   }
   ngOnDestroy() {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
     this.resizeObserver?.disconnect();
   }
   private checkOverflow() {

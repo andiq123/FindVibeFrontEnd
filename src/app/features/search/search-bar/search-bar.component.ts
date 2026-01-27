@@ -9,6 +9,8 @@ import {
   ChangeDetectionStrategy,
   HostListener,
   ElementRef,
+  OnDestroy,
+  DestroyRef,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
@@ -33,7 +35,7 @@ import {
   styleUrl: "./search-bar.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchBarComponent {
+export class SearchBarComponent implements OnDestroy {
   query = input("");
   searchTerm = signal("");
   isFocused = signal(false);
@@ -41,6 +43,7 @@ export class SearchBarComponent {
   private searchService = inject(SearchService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
+  private destroyRef = inject(DestroyRef);
   suggestions = computed(() => this.searchService.suggestions());
   suggestionsLoading = computed(() => this.searchService.suggestionsLoading());
   faMagnifyingGlass = faMagnifyingGlass;
@@ -127,6 +130,11 @@ export class SearchBarComponent {
     }
   }
   private submitSearchSongs(page = 1): void {
-    this.searchService.searchSongs(this.searchTerm(), page).subscribe();
+    this.searchService.searchSongs(this.searchTerm(), page)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+  ngOnDestroy(): void {
+    this.searchSubject.complete();
   }
 }

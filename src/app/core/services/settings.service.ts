@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, computed } from "@angular/core";
+import { Injectable, signal, inject, computed, OnDestroy } from "@angular/core";
 import { StorageService } from "./storage.service";
 import { RepeatMode } from "../../features/player/models/player.model";
 import { HttpClient } from "@angular/common/http";
@@ -12,7 +12,7 @@ enum ServerStatus {
 @Injectable({
   providedIn: "root",
 })
-export class SettingsService {
+export class SettingsService implements OnDestroy {
   private readonly storageService = inject(StorageService);
   private readonly httpClient = inject(HttpClient);
   private readonly healthUrl = `${environment.API_URL}/health`;
@@ -21,6 +21,8 @@ export class SettingsService {
   private readonly _isMiniPlayer = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
+  private onlineHandler = () => this._isNavigatorOffline.set(false);
+  private offlineHandler = () => this._isNavigatorOffline.set(true);
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
@@ -34,16 +36,16 @@ export class SettingsService {
     () => this._isNavigatorOffline() || this.isServerDown(),
   );
   initialize(): void {
-    window.addEventListener("online", () =>
-      this._isNavigatorOffline.set(false),
-    );
-    window.addEventListener("offline", () =>
-      this._isNavigatorOffline.set(true),
-    );
+    window.addEventListener("online", this.onlineHandler);
+    window.addEventListener("offline", this.offlineHandler);
     const repeatMode = this.storageService.getItem<RepeatMode>("repeatMode");
     const isShuffle = this.storageService.getItem<boolean>("isShuffle");
     if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
+  }
+  ngOnDestroy(): void {
+    window.removeEventListener("online", this.onlineHandler);
+    window.removeEventListener("offline", this.offlineHandler);
   }
   toggleMiniPlayer(): void {
     this._isMiniPlayer.set(!this._isMiniPlayer());

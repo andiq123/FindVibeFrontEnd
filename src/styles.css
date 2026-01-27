@@ -220,9 +220,9 @@
   }
   
   /* Disable expensive background animations on mobile */
-  .bg-primary\\/10,
-  .bg-accent\\/8,
-  .bg-secondary\\/8 {
+  [class*="bg-primary/10"],
+  [class*="bg-accent/8"],
+  [class*="bg-secondary/8"] {
     animation: none !important;
   }
 }
