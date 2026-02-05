@@ -21,7 +21,7 @@
 
   &.album-art-playing {
     animation: pulse-glow 2s ease-in-out infinite;
-    box-shadow: 0 0 20px color-mix(in oklab, var(--color-accent) 30%, transparent);
+    box-shadow: 0 0 20px color-mix(in oklab, var(--color-primary) 28%, transparent);
     @media (max-width: 768px) {
       animation-duration: 3s;
       transform: scale(1);
@@ -49,7 +49,7 @@
 
 .waveform-bar {
   width: 3px;
-  background: var(--color-accent);
+  background: var(--color-primary);
   border-radius: 2px;
   animation: waveform 0.8s ease-in-out infinite;
   transform-origin: center;
@@ -82,9 +82,9 @@
   left: 0;
   top: 0;
   height: 100%;
-  background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-accent) 80%, transparent));
+  background: linear-gradient(90deg, var(--color-primary), color-mix(in oklab, var(--color-primary) 75%, transparent));
   transition: width 0.3s linear;
-  box-shadow: 0 0 8px color-mix(in oklab, var(--color-accent) 50%, transparent);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--color-primary) 40%, transparent);
 }
 
 .btn {

@@ -1,9 +1,9 @@
 <div
   class="mini-player-container glass-suggestions rounded-2xl fixed anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[600px] shadow-ios-lg cursor-pointer overflow-hidden touch-manipulation border transition-all duration-300"
   style="z-index: var(--z-mini-player); left: 50%; transform: translateX(-50%); bottom: calc(max(2.5rem, env(safe-area-inset-bottom, 2.5rem)) + 4rem);"
-  [class.border-accent/30]="status() === playerStatus.Playing"
+  [class.border-primary/25]="status() === playerStatus.Playing"
   [class.border-base-content/8]="status() !== playerStatus.Playing"
-  [class.shadow-accent/20]="status() === playerStatus.Playing"
+  [class.shadow-primary/15]="status() === playerStatus.Playing"
   (click)="toggleSize()"
   (keydown.enter)="toggleSize()"
   tabindex="0"
@@ -14,8 +14,8 @@
       <div
         class="album-art relative w-16 aspect-square rounded-xl overflow-hidden ring-1 ring-base-content/10 shadow-md transition-all duration-300"
         [class.album-art-playing]="status() === playerStatus.Playing"
-        [class.ring-accent/30]="status() === playerStatus.Playing"
-        [class.shadow-accent/30]="status() === playerStatus.Playing"
+        [class.ring-primary/25]="status() === playerStatus.Playing"
+        [class.shadow-primary/25]="status() === playerStatus.Playing"
       >
         @if (status() === playerStatus.Loading) {
           <div
@@ -80,7 +80,7 @@
     <button
       class="btn btn-ghost btn-circle btn-sm transition-colors duration-200"
       [class.text-primary]="status() === playerStatus.Playing"
-      [class.text-base-content/50]="status() !== playerStatus.Playing"
+      [class.text-base-content/45]="status() !== playerStatus.Playing"
     >
       <fa-icon [icon]="faArrowUp" class="text-base" />
     </button>

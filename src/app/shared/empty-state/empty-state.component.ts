@@ -33,10 +33,10 @@ export class EmptyStateComponent {
   iconBgClass = computed(() =>
     this.variant() === "error"
       ? "bg-error/10 ring-error/20"
-      : "bg-base-200/50 ring-white/5"
+      : "bg-primary/10 ring-primary/15"
   );
   iconColorClass = computed(() =>
-    this.variant() === "error" ? "text-error" : "text-base-content/20"
+    this.variant() === "error" ? "text-error" : "text-primary/70"
   );
   titleColorClass = computed(() =>
     this.variant() === "error" ? "text-error" : ""

@@ -15,10 +15,10 @@
         <button
           type="button"
           class="min-w-10 sm:min-w-[2.75rem] h-10 sm:h-11 p-0 flex items-center justify-center rounded-lg sm:rounded-xl bg-transparent border border-transparent text-base-content/60 text-sm font-medium transition-all duration-200 cursor-pointer shrink-0 hover:bg-base-content/10 hover:text-base-content active:scale-90"
-          [class.bg-accent]="page === pagination().currentPage"
-          [class.text-accent-content]="page === pagination().currentPage"
+          [class.bg-primary]="page === pagination().currentPage"
+          [class.text-primary-content]="page === pagination().currentPage"
           [class.font-bold]="page === pagination().currentPage"
-          [class.hover:bg-accent-focus]="page === pagination().currentPage"
+          [class.hover:bg-primary/90]="page === pagination().currentPage"
           [attr.aria-label]="'Page ' + page"
           [attr.aria-current]="
             page === pagination().currentPage ? 'page' : null

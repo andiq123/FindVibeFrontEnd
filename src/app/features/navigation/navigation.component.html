@@ -1,5 +1,5 @@
 <ul
-  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[600px] w-full glass-suggestions rounded-t-[2.5rem] shadow-ios-lg border-t border-base-content/8 pt-6 pb-10 px-5 gap-3"
+  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[600px] w-full glass-suggestions rounded-t-[2rem] shadow-ios-lg border-t border-base-content/6 pt-5 pb-10 px-4 gap-2"
   style="
     padding-bottom: max(2.5rem, env(safe-area-inset-bottom, 2.5rem));
     z-index: var(--z-navigation);
@@ -7,7 +7,7 @@
 >
   @for (navItem of navList(); track navItem.name) {
     <li
-      class="relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 group min-h-[60px]"
+      class="relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 group min-h-[56px]"
       [routerLink]="navItem.link"
       routerLinkActive="active-tab"
       tabindex="0"
@@ -15,16 +15,15 @@
       [attr.aria-label]="'Navigate to ' + navItem.name"
     >
       <div
-        class="relative flex items-center justify-center transition-all duration-300 group-[.active-tab]:-translate-y-1 group-[.active-tab]:scale-110"
+        class="relative flex items-center justify-center w-12 h-10 rounded-2xl transition-all duration-300 group-[.active-tab]:bg-primary/20"
       >
-        <div class="absolute inset-0 rounded-full bg-accent/10 scale-0 group-[.active-tab]:scale-150 transition-transform duration-300 opacity-0 group-[.active-tab]:opacity-100"></div>
         <fa-icon
           [icon]="navItem.icon"
-          class="text-2xl text-base-content/50 transition-all duration-300 group-[.active-tab]:text-accent relative z-10"
+          class="text-[1.35rem] text-base-content/45 transition-all duration-300 group-[.active-tab]:text-primary relative z-10"
         ></fa-icon>
       </div>
       <span
-        class="text-[11px] font-semibold tracking-wide mt-2 text-base-content/40 transition-all duration-300 group-[.active-tab]:text-accent group-[.active-tab]:font-bold"
+        class="text-[11px] font-medium tracking-wide mt-1.5 text-base-content/40 transition-all duration-300 group-[.active-tab]:text-primary group-[.active-tab]:font-semibold"
       >
         {{ navItem.name }}
       </span>
