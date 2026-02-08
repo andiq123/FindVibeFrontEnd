@@ -33,6 +33,10 @@ import { PlayerService } from "../../../core/services/player.service";
 import { Song } from "../../../core/models/song.model";
 import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
 import { TimeFormatPipe } from "../../../shared/pipes/time-format.pipe";
+
+const OPEN_ANIM_MS = 500;
+const CLOSE_ANIM_MS = 350;
+
 @Component({
   selector: "app-full-player",
   standalone: true,
@@ -54,6 +58,9 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
+  private openFallbackId: ReturnType<typeof setTimeout> | null = null;
+  private closeFallbackId: ReturnType<typeof setTimeout> | null = null;
+  private destroyed = false;
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
   currentTime = input<number>(0);
@@ -83,20 +90,45 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderer.setStyle(this.document.body, "overflow", "hidden");
   }
   ngAfterViewInit() {
-    if (this.isOpened()) return;
-    if (!this.isClosingAnimation() && !this.isOpened()) {
+    if (this.isOpened() || this.isClosingAnimation()) return;
+    const startOpen = () => {
+      if (this.destroyed) return;
       this.isOpeningAnimation.set(true);
+      this.openFallbackId = setTimeout(() => {
+        this.openFallbackId = null;
+        if (!this.destroyed && this.isOpeningAnimation()) {
+          this.isOpeningAnimation.set(false);
+          this.isOpened.set(true);
+        }
+      }, OPEN_ANIM_MS);
+    };
+    if (typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(() => startOpen());
+    } else {
+      startOpen();
     }
   }
   ngOnDestroy() {
+    this.destroyed = true;
     this.renderer.removeStyle(this.document.body, "overflow");
+    if (this.openFallbackId != null) clearTimeout(this.openFallbackId);
+    if (this.closeFallbackId != null) clearTimeout(this.closeFallbackId);
   }
   onAnimationEnd(event: Event) {
     const animationEvent = event as AnimationEvent;
-    if (animationEvent.animationName?.includes('slide-up') && this.isOpeningAnimation()) {
+    const name = animationEvent.animationName ?? '';
+    if (name.includes('slide-up') && this.isOpeningAnimation()) {
+      if (this.openFallbackId != null) {
+        clearTimeout(this.openFallbackId);
+        this.openFallbackId = null;
+      }
       this.isOpeningAnimation.set(false);
       this.isOpened.set(true);
-    } else if (animationEvent.animationName?.includes('slide-down') && this.isClosingAnimation()) {
+    } else if (name.includes('slide-down') && this.isClosingAnimation()) {
+      if (this.closeFallbackId != null) {
+        clearTimeout(this.closeFallbackId);
+        this.closeFallbackId = null;
+      }
       this.isClosingAnimation.set(false);
       this.isOpened.set(false);
       this.toggleSizeEvent.emit();
@@ -104,6 +136,10 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   onSwipeClose() {
     if (this.isClosingAnimation()) return;
+    if (this.closeFallbackId != null) {
+      clearTimeout(this.closeFallbackId);
+      this.closeFallbackId = null;
+    }
     this.isOpeningAnimation.set(false);
     this.isClosingAnimation.set(false);
     this.isOpened.set(false);
@@ -111,8 +147,21 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   toggleSize() {
     if (this.isClosingAnimation() || this.isOpeningAnimation()) return;
+    const reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      this.onSwipeClose();
+      return;
+    }
     this.isOpeningAnimation.set(false);
     this.isClosingAnimation.set(true);
+    this.closeFallbackId = setTimeout(() => {
+      this.closeFallbackId = null;
+      if (!this.destroyed && this.isClosingAnimation()) {
+        this.isClosingAnimation.set(false);
+        this.isOpened.set(false);
+        this.toggleSizeEvent.emit();
+      }
+    }, CLOSE_ANIM_MS);
   }
   async togglePlay() {
     if (this.status() === PlayerStatus.Playing) {

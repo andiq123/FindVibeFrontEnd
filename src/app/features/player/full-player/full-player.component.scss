@@ -23,7 +23,7 @@
   
   @media (min-width: 1024px) {
     &.player-desktop {
-      left: var(--sidebar-w);
+      left: var(--sidebar-w, 72px);
       right: 0;
       bottom: 0;
       top: auto;
