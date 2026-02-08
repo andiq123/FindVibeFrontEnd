@@ -114,6 +114,16 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.openFallbackId != null) clearTimeout(this.openFallbackId);
     if (this.closeFallbackId != null) clearTimeout(this.closeFallbackId);
   }
+  private closeAndEmit(): void {
+    if (this.closeFallbackId != null) {
+      clearTimeout(this.closeFallbackId);
+      this.closeFallbackId = null;
+    }
+    this.isOpeningAnimation.set(false);
+    this.isClosingAnimation.set(false);
+    this.isOpened.set(false);
+    this.toggleSizeEvent.emit();
+  }
   onAnimationEnd(event: Event) {
     const animationEvent = event as AnimationEvent;
     const name = animationEvent.animationName ?? '';
@@ -125,42 +135,25 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isOpeningAnimation.set(false);
       this.isOpened.set(true);
     } else if (name.includes('slide-down') && this.isClosingAnimation()) {
-      if (this.closeFallbackId != null) {
-        clearTimeout(this.closeFallbackId);
-        this.closeFallbackId = null;
-      }
-      this.isClosingAnimation.set(false);
-      this.isOpened.set(false);
-      this.toggleSizeEvent.emit();
+      this.closeAndEmit();
     }
   }
-  onSwipeClose() {
+  onSwipeClose(): void {
     if (this.isClosingAnimation()) return;
-    if (this.closeFallbackId != null) {
-      clearTimeout(this.closeFallbackId);
-      this.closeFallbackId = null;
-    }
-    this.isOpeningAnimation.set(false);
-    this.isClosingAnimation.set(false);
-    this.isOpened.set(false);
-    this.toggleSizeEvent.emit();
+    this.closeAndEmit();
   }
-  toggleSize() {
+  toggleSize(): void {
     if (this.isClosingAnimation() || this.isOpeningAnimation()) return;
     const reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reducedMotion) {
-      this.onSwipeClose();
+      this.closeAndEmit();
       return;
     }
     this.isOpeningAnimation.set(false);
     this.isClosingAnimation.set(true);
     this.closeFallbackId = setTimeout(() => {
       this.closeFallbackId = null;
-      if (!this.destroyed && this.isClosingAnimation()) {
-        this.isClosingAnimation.set(false);
-        this.isOpened.set(false);
-        this.toggleSizeEvent.emit();
-      }
+      if (!this.destroyed && this.isClosingAnimation()) this.closeAndEmit();
     }, CLOSE_ANIM_MS);
   }
   async togglePlay() {
