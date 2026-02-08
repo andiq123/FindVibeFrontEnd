@@ -151,6 +151,9 @@
   --radius-xl: 1.25rem;
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
+
+  --page-transition-duration: 0.28s;
+  --page-transition-ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -318,6 +321,95 @@
   .anim-mini-player-entry {
     animation: none;
     will-change: auto;
+  }
+}
+
+.route-transition-wrap {
+  view-transition-name: page;
+  contain: layout;
+}
+
+@keyframes page-slide-out {
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes page-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0.95;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes page-slide-out-desktop {
+  to {
+    transform: translateY(-100%);
+    opacity: 0.9;
+  }
+}
+
+@keyframes page-slide-in-desktop {
+  from {
+    transform: translateY(100%);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes page-slide-out-back-desktop {
+  to {
+    transform: translateY(100%);
+    opacity: 0.9;
+  }
+}
+
+@keyframes page-slide-in-back-desktop {
+  from {
+    transform: translateY(-100%);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+::view-transition-old(page) {
+  animation: page-slide-out var(--page-transition-duration) var(--page-transition-ease) forwards;
+  z-index: 0;
+}
+
+::view-transition-new(page) {
+  animation: page-slide-in var(--page-transition-duration) var(--page-transition-ease) forwards;
+  z-index: 1;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-transition-duration: 0.24s;
+  }
+  ::view-transition-old(page) {
+    animation: page-slide-out-desktop var(--page-transition-duration) var(--page-transition-ease) forwards;
+    z-index: 0;
+  }
+  ::view-transition-new(page) {
+    animation: page-slide-in-desktop var(--page-transition-duration) var(--page-transition-ease) forwards;
+    z-index: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --page-transition-duration: 0.12s;
   }
 }
 
