@@ -100,6 +100,7 @@
   --glass-border: var(--glass-border-light);
   --glass-blur: var(--glass-blur-medium);
 
+  --sidebar-w: 72px;
   --z-base: 1;
   --z-dropdown: 10;
   --z-sticky: 20;
@@ -505,6 +506,28 @@ body {
 
 ::-webkit-scrollbar {
   display: none;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-base-content) 25%, transparent) transparent;
+  }
+  ::-webkit-scrollbar {
+    display: block;
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-base-content) 20%, transparent);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--color-base-content) 30%, transparent);
+  }
 }
 
 @keyframes fadeIn {

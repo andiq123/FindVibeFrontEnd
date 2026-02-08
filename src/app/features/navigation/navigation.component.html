@@ -1,5 +1,28 @@
+<nav class="nav-desktop fixed left-0 top-0 bottom-0 w-[72px] hidden lg:flex flex-col items-center py-5 border-r border-base-content/[0.06] z-[var(--z-navigation)]"
+  style="background: var(--glass-bg-light); backdrop-filter: blur(var(--glass-blur-medium)); -webkit-backdrop-filter: blur(var(--glass-blur-medium));">
+  <div class="mb-4 px-2 py-1 rounded-lg">
+    <span class="text-[11px] font-bold tracking-[0.2em] text-primary/90 uppercase">FV</span>
+  </div>
+  @for (navItem of navList(); track navItem.name) {
+    <a
+      [routerLink]="navItem.link"
+      routerLinkActive="active-tab"
+      class="nav-desktop-item flex flex-col items-center justify-center gap-2 w-full py-3 rounded-xl transition-all duration-200 min-h-[64px] cursor-pointer group"
+      tabindex="0"
+      [attr.aria-label]="'Navigate to ' + navItem.name"
+    >
+      <div class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 group-[.active-tab]:bg-primary/20 group-hover:bg-base-content/[0.08]">
+        <fa-icon
+          [icon]="navItem.icon"
+          class="text-[1.25rem] text-base-content/45 transition-colors duration-200 group-[.active-tab]:text-primary group-hover:text-base-content/70"
+        />
+      </div>
+      <span class="text-[10px] font-medium tracking-wide text-base-content/40 transition-colors duration-200 group-[.active-tab]:text-primary group-hover:text-base-content/60">{{ navItem.name }}</span>
+    </a>
+  }
+</nav>
 <ul
-  class="grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[600px] w-full glass-suggestions rounded-t-[2rem] shadow-ios-lg border-t border-base-content/6 pt-5 pb-10 px-4 gap-2"
+  class="nav-mobile grid grid-cols-3 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[600px] w-full glass-suggestions rounded-t-[2rem] shadow-ios-lg border-t border-base-content/6 pt-5 pb-10 px-4 gap-2 lg:hidden"
   style="
     padding-bottom: max(2.5rem, env(safe-area-inset-bottom, 2.5rem));
     z-index: var(--z-navigation);

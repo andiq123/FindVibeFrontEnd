@@ -1,5 +1,5 @@
 <div
-  class="mini-player-container glass-suggestions rounded-2xl fixed anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[600px] shadow-ios-lg cursor-pointer overflow-hidden touch-manipulation border transition-all duration-300"
+  class="mini-player-container mini-player-desktop glass-suggestions rounded-2xl fixed anim-mini-player-entry w-[calc(100%-1.5rem)] max-w-[600px] shadow-ios-lg cursor-pointer overflow-hidden touch-manipulation border transition-all duration-300"
   style="z-index: var(--z-mini-player); left: 50%; transform: translateX(-50%); bottom: calc(max(2.5rem, env(safe-area-inset-bottom, 2.5rem)) + 4rem);"
   [class.border-primary/25]="status() === playerStatus.Playing"
   [class.border-base-content/8]="status() !== playerStatus.Playing"
@@ -10,9 +10,8 @@
   role="button"
 >
   <div class="flex items-center gap-3 w-full p-3">
-    <div class="flex items-center gap-2">
-      <div
-        class="album-art relative w-16 aspect-square rounded-xl overflow-hidden ring-1 ring-base-content/10 shadow-md transition-all duration-300"
+    <div
+      class="album-art relative w-16 aspect-square shrink-0 rounded-xl overflow-hidden ring-1 ring-base-content/10 shadow-md transition-all duration-300"
         [class.album-art-playing]="status() === playerStatus.Playing"
         [class.ring-primary/25]="status() === playerStatus.Playing"
         [class.shadow-primary/25]="status() === playerStatus.Playing"
@@ -50,17 +49,17 @@
           alt="Album Art"
           referrerpolicy="no-referrer"
         />
+        @if (status() === playerStatus.Playing) {
+          <div
+            class="waveform-indicator absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-[2px] h-3 z-20 opacity-90"
+            aria-hidden="true"
+          >
+            <span class="waveform-bar"></span>
+            <span class="waveform-bar"></span>
+            <span class="waveform-bar"></span>
+          </div>
+        }
       </div>
-      @if (status() === playerStatus.Playing) {
-        <div
-          class="waveform-indicator flex items-center gap-[3px] h-4 anim-fade-in"
-        >
-          <span class="waveform-bar"></span>
-          <span class="waveform-bar"></span>
-          <span class="waveform-bar"></span>
-        </div>
-      }
-    </div>
     <div class="flex-1 min-w-0">
       <app-moving-title
         [title]="song().title"
@@ -77,10 +76,46 @@
         classes="text-xs text-base-content/50 block"
       />
     </div>
+    <div class="hidden lg:flex items-center gap-1 shrink-0" (click)="$event.stopPropagation()">
+      <button
+        type="button"
+        class="w-9 h-9 flex items-center justify-center rounded-full text-base-content/50 hover:text-base-content/80 hover:bg-base-content/10 transition-colors duration-150"
+        (click)="previous($event)"
+        aria-label="Previous"
+      >
+        <fa-icon [icon]="faStepBackward" class="text-sm" />
+      </button>
+      <button
+        type="button"
+        class="w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-150"
+        [class.bg-primary]="status() === playerStatus.Playing"
+        [class.text-primary-content]="status() === playerStatus.Playing"
+        [class.text-base-content/70]="status() !== playerStatus.Playing"
+        [class.hover:bg-base-content/15]="status() !== playerStatus.Playing"
+        (click)="togglePlay($event)"
+        [attr.aria-label]="status() === playerStatus.Playing ? 'Pause' : 'Play'"
+      >
+        @if (status() === playerStatus.Loading) {
+          <span class="loading loading-spinner loading-sm text-current"></span>
+        } @else {
+          <fa-icon [icon]="status() === playerStatus.Playing ? faPause : faPlay" class="text-sm" />
+        }
+      </button>
+      <button
+        type="button"
+        class="w-9 h-9 flex items-center justify-center rounded-full text-base-content/50 hover:text-base-content/80 hover:bg-base-content/10 transition-colors duration-150"
+        (click)="next($event)"
+        aria-label="Next"
+      >
+        <fa-icon [icon]="faStepForward" class="text-sm" />
+      </button>
+    </div>
     <button
-      class="btn btn-ghost btn-circle btn-sm transition-colors duration-200"
+      class="btn btn-ghost btn-circle btn-sm transition-colors duration-200 shrink-0"
       [class.text-primary]="status() === playerStatus.Playing"
       [class.text-base-content/45]="status() !== playerStatus.Playing"
+      type="button"
+      aria-label="Expand player"
     >
       <fa-icon [icon]="faArrowUp" class="text-base" />
     </button>

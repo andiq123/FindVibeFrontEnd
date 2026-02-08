@@ -2,14 +2,14 @@
   <app-user-form />
 } @else {
   <app-page-content [isServerReady]="isCheckedServer()">
-    <div class="flex justify-between items-center gap-4 w-full mb-6">
-      <div class="flex flex-col gap-0.5">
+    <div class="flex justify-between items-center gap-3 w-full mb-4">
+      <div class="flex flex-col">
         <span
-          class="text-xs font-bold text-base-content/50 uppercase tracking-[0.2em]"
+          class="text-[10px] font-bold text-base-content/50 uppercase tracking-[0.18em]"
           >Your Library</span
         >
         <h1
-          class="font-bold text-5xl tracking-tight bg-gradient-to-br from-base-content via-base-content/95 to-primary/80 bg-clip-text text-transparent mb-2 flex items-center gap-3"
+          class="font-bold text-2xl tracking-tight bg-gradient-to-br from-base-content via-base-content/95 to-primary/80 bg-clip-text text-transparent flex items-center gap-2"
         >
           <span
             >{{ username() ? (username() | titlecase) : "My" }}'s Vault</span
