@@ -326,7 +326,8 @@
 
 .route-transition-wrap {
   view-transition-name: page;
-  contain: layout;
+  /* Avoid clipping `position: fixed` descendants during long-page scrolls */
+  contain: none;
 }
 
 @keyframes page-slide-out {
