@@ -108,8 +108,6 @@ export class SearchPageComponent {
       : PlayerStatus.Paused,
   );
 
-  songListHasRemaining = computed(() => this.remainingSongs().length > 0);
-
   songListEmptyTitle = computed(() =>
     this.remainingSongs().length === 0
       ? "Top match shown above"
