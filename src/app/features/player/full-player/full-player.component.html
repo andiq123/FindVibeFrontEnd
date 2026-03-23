@@ -9,6 +9,8 @@
     [class.visible]="isOpeningAnimation() || isOpened() || isClosingAnimation()"
     [class.pointer-events-none]="!isOpened() || isClosingAnimation()"
     (click)="toggleSize()"
+    (keydown.enter)="toggleSize()"
+    (keydown.space)="toggleSize(); $event.preventDefault()"
     aria-label="Close player"
   ></button>
   <div
@@ -17,7 +19,6 @@
     [class.anim-slide-down]="isClosingAnimation()"
     [class.opened]="isOpened() && !isClosingAnimation()"
     (animationend)="onAnimationEnd($event)"
-    (click)="$event.stopPropagation()"
     appSwipeDown
     [handleSelector]="'.player-content-card, .artwork-wrapper, .pressable-native'"
     [disabled]="isOpeningAnimation()"

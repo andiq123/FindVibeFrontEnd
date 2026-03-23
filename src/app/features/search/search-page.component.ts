@@ -21,10 +21,17 @@ import { PlayerService } from "../../core/services/player.service";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { EmptyStateComponent } from "../../shared/empty-state/empty-state.component";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { NgOptimizedImage } from "@angular/common";
+import { SkeletonComponent } from "../../shared/components/skeleton/skeleton.component";
+import { PlayerButtonComponent } from "../../shared/player-button/player-button.component";
+import { FavoriteButtonComponent } from "../../shared/favorite-button/favorite-button.component";
 import {
   faMagnifyingGlass,
+  faMusic,
   faTriangleExclamation,
 } from "../../shared/icons";
+import { OfflineStorageService } from "../library/services/offline-storage.service";
+import { PlayerStatus } from "../player/models/player.model";
 @Component({
   selector: "app-search-page",
   standalone: true,
@@ -35,6 +42,10 @@ import {
     PageContentComponent,
     SongListComponent,
     PaginationComponent,
+    NgOptimizedImage,
+    SkeletonComponent,
+    PlayerButtonComponent,
+    FavoriteButtonComponent,
   ],
   templateUrl: "./search-page.component.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +56,7 @@ export class SearchPageComponent {
   private settingsService = inject(SettingsService);
   private playlistService = inject(PlaylistService);
   public playerService = inject(PlayerService);
+  private offlineStorageService = inject(OfflineStorageService);
   private destroyRef = inject(DestroyRef);
   query = input<string>("");
   songs = computed(() => this.songsService.songs());
@@ -54,7 +66,61 @@ export class SearchPageComponent {
   isCheckedServer = computed(() => this.settingsService.isCheckedServer());
   searchStatus = SearchStatus;
   faMagnifyingGlass = faMagnifyingGlass;
+  faMusic = faMusic;
   faTriangleExclamation = faTriangleExclamation;
+
+  displayQuery = computed(() => this.songsService.lastQuery());
+
+  topSong = computed(() => {
+    const list = this.songs() ?? [];
+    return list[0] ?? null;
+  });
+  remainingSongs = computed(() => {
+    const list = this.songs() ?? [];
+    return list.slice(1);
+  });
+
+  isTopSongUnavailable = computed(() => {
+    const song = this.topSong();
+    if (!song) return false;
+    return (
+      this.settingsService.isOffline() &&
+      !this.offlineStorageService.availableOfflineSongIds().includes(song.id)
+    );
+  });
+
+  isTopSongActive = computed(() => {
+    const top = this.topSong();
+    const current = this.playlistService.currentSong();
+    if (!top || !current) return false;
+    return top.link === current.link;
+  });
+
+  isTopSongError = computed(
+    () =>
+      this.isTopSongActive() &&
+      this.playerService.status() === PlayerStatus.Error,
+  );
+
+  topPlayerStatus = computed(() =>
+    this.isTopSongActive()
+      ? this.playerService.status()
+      : PlayerStatus.Paused,
+  );
+
+  songListHasRemaining = computed(() => this.remainingSongs().length > 0);
+
+  songListEmptyTitle = computed(() =>
+    this.remainingSongs().length === 0
+      ? "Top match shown above"
+      : "Empty vault",
+  );
+
+  songListEmptyDescription = computed(() =>
+    this.remainingSongs().length === 0
+      ? "That's the best result for this search on this page."
+      : "Try a different search!",
+  );
   constructor() {
     effect(() => {
       if (
@@ -84,5 +150,27 @@ export class SearchPageComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async toggleTopSong(): Promise<void> {
+    const song = this.topSong();
+    if (!song || this.isTopSongUnavailable()) return;
+
+    const current = this.playlistService.currentSong();
+    const isActive = !!current && current.link === song.link;
+
+    if (isActive) {
+      if (this.playerService.status() === PlayerStatus.Paused) {
+        await this.playerService.play();
+      } else {
+        // Includes Loading/Playing/Error/Ended; best-effort pause keeps UX consistent.
+        this.playerService.pause();
+      }
+      return;
+    }
+
+    // Ensure the queue contains the featured song before starting playback.
+    this.playlistService.setCurrentPlaylist(this.songs());
+    await this.playerService.setSong(song);
   }
 }
