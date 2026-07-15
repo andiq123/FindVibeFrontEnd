@@ -58,6 +58,7 @@
       "name": "audio-files",
       "urls": [
         "https://song.muzvibe.org/*",
+        "https://mn1.sunproxy.net/*",
         "https://*.mp3",
         "https://*.m4a",
         "https://*.wav"
