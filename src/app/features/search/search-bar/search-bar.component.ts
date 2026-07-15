@@ -106,7 +106,7 @@ export class SearchBarComponent implements OnDestroy {
   async cancelSearch(): Promise<void> {
     this.searchTerm.set("");
     this.searchService.resetSearch();
-    await this.router.navigate(["/songs"]);
+    await this.router.navigate(["/songs"], { replaceUrl: true });
   }
   async submit(): Promise<void> {
     const term = this.searchTerm().trim();
@@ -114,7 +114,7 @@ export class SearchBarComponent implements OnDestroy {
     this.searchService.resetSuggestions();
     this.isFocused.set(false);
     if (this.query() !== term) {
-      await this.router.navigate([`/songs/${term}`]);
+      await this.router.navigate([`/songs/${term}`], { replaceUrl: true });
     } else {
       this.submitSearchSongs();
     }

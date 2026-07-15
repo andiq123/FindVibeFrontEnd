@@ -54,7 +54,14 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
     future: ActivatedRouteSnapshot,
     curr: ActivatedRouteSnapshot,
   ): boolean {
-    return future.routeConfig === curr.routeConfig;
+    if (future.routeConfig === curr.routeConfig) return true;
+    // /songs ↔ /songs/:query is the same screen (cancel/submit), not a tab change
+    const a = future.routeConfig?.path ?? "";
+    const b = curr.routeConfig?.path ?? "";
+    return (
+      (a === "songs" || a === "songs/:query") &&
+      (b === "songs" || b === "songs/:query")
+    );
   }
   private getRoutePath(route: ActivatedRouteSnapshot): string {
     if (!route.routeConfig?.path) return "";

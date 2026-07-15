@@ -59,8 +59,14 @@ export const appConfig: ApplicationConfig = {
         onViewTransitionCreated: ({ transition, to }) => {
           const doc = inject(DOCUMENT);
           const router = inject(Router);
-          const fromPath = (router.url.split("?")[0].split("/").filter(Boolean)[0] ?? "") || "songs";
-          const toPath = getSegmentPath(to);
+          const fromPath =
+            router.url.split("?")[0].split("/").filter(Boolean)[0] ?? "songs";
+          const toPath = getSegmentPath(to) || "songs";
+          // ponytail: cancel/search query changes stay on Explore — no page slide
+          if (fromPath === toPath) {
+            transition.skipTransition();
+            return;
+          }
           const isBack = routeOrder(toPath) < routeOrder(fromPath);
           let styleEl: HTMLStyleElement | null = null;
           if (isBack) {
