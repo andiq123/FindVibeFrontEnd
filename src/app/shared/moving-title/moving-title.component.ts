@@ -7,6 +7,7 @@ import {
   AfterViewInit,
   OnDestroy,
   effect,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 @Component({
   selector: 'app-moving-title',
@@ -14,6 +15,7 @@ import {
   imports: [],
   templateUrl: './moving-title.component.html',
   styleUrl: './moving-title.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MovingTitleComponent implements AfterViewInit, OnDestroy {
   title = input.required<string>();

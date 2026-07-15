@@ -29,27 +29,7 @@
 }
 
 .album-art {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  &.album-art-playing {
-    animation: pulse-glow 2s ease-in-out infinite;
-    box-shadow: 0 0 20px color-mix(in oklab, var(--color-primary) 28%, transparent);
-    @media (max-width: 768px) {
-      animation-duration: 3s;
-      transform: scale(1);
-    }
-  }
-
   img { transition: opacity 0.3s ease; }
-  
-  @media (max-width: 768px) {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
 }
 
 .waveform-indicator {
@@ -97,7 +77,6 @@
   height: 100%;
   background: linear-gradient(90deg, var(--color-primary), color-mix(in oklab, var(--color-primary) 75%, transparent));
   transition: width 0.3s linear;
-  box-shadow: 0 0 8px color-mix(in oklab, var(--color-primary) 40%, transparent);
 }
 
 .btn {

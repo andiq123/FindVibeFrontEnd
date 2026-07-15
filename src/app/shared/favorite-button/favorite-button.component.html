@@ -1,7 +1,7 @@
 @if (isAbleToAddToFav()) {
 <button
   class="flex items-center justify-center transition-all duration-300 pressable-native outline-none select-none"
-  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform' : 'tap-target-44 w-11 h-11 rounded-full bg-white/[0.05] border border-white/[0.05] active:bg-white/[0.1]'"
+  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform' : 'tap-target-44 w-11 h-11 rounded-full bg-black/20 border border-black/30 active:bg-black/30'"
   (click)="toggleAddToFavorite()"
   [disabled]="isLoadingFavorite()"
   aria-label="Toggle favorite"

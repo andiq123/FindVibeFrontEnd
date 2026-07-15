@@ -1,5 +1,11 @@
-import { Component, OnInit, inject, computed, DestroyRef } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import {
+  Component,
+  OnInit,
+  inject,
+  computed,
+  DestroyRef,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { catchError, tap } from "rxjs";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -29,10 +35,10 @@ import { PlaylistService } from "./core/services/playlist.service";
     UpdateOverlayComponent,
     ConnectionStatusComponent,
     GlobalModalComponent,
-    CommonModule,
   ],
   templateUrl: "./app.component.html",
   styleUrl: "./app.component.scss",
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
   private updateService = inject(AppUpdateService);

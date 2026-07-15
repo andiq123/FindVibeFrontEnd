@@ -60,10 +60,11 @@ export class SearchService {
     }
     this._searchStatus.set(SearchStatus.Loading);
     this._songs.set([]);
+    const q = encodeURIComponent(searchTerm);
     const url =
       page > 1
-        ? `${BASE_API_URL}/search?q=${searchTerm}&page=${page}`
-        : `${BASE_API_URL}/search?q=${searchTerm}`;
+        ? `${BASE_API_URL}/search?q=${q}&page=${page}`
+        : `${BASE_API_URL}/search?q=${q}`;
     return this.httpClient.get<SearchResponse>(url).pipe(
       tap((response: SearchResponse) => {
         this._songs.set(response.songs);
@@ -74,6 +75,9 @@ export class SearchService {
         this.saveState();
       }),
       catchError(() => {
+        this._lastSearchQuery.set(searchTerm);
+        this._currentPage.set(page);
+        this._pagination.set(null);
         this._searchStatus.set(SearchStatus.Error);
         return of({ songs: [], pagination: null });
       }),
@@ -82,7 +86,7 @@ export class SearchService {
   getSuggestions(term: string): Observable<string[]> {
     this._suggestionsLoading.set(true);
     return this.httpClient
-      .get<string[]>(`${BASE_API_URL}/suggest?q=${term}`)
+      .get<string[]>(`${BASE_API_URL}/suggest?q=${encodeURIComponent(term)}`)
       .pipe(
         tap({
           next: (result) => {

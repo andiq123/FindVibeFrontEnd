@@ -1,8 +1,8 @@
 import {
   ApplicationConfig,
   inject,
-  provideZoneChangeDetection,
   isDevMode,
+  provideZonelessChangeDetection,
 } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 import {
@@ -15,7 +15,7 @@ import {
   Router,
 } from "@angular/router";
 import { routes } from "./app.routes";
-import { provideHttpClient } from "@angular/common/http";
+import { provideHttpClient, withFetch } from "@angular/common/http";
 import { provideServiceWorker } from "@angular/service-worker";
 import { CustomReuseStrategy } from "./core/strategies/custom-reuse-strategy";
 import type { ActivatedRouteSnapshot } from "@angular/router";
@@ -43,7 +43,7 @@ function getSegmentPath(route: ActivatedRouteSnapshot | undefined): string {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZonelessChangeDetection(),
     provideRouter(
       routes,
       withComponentInputBinding(),
@@ -76,7 +76,7 @@ export const appConfig: ApplicationConfig = {
       }),
     ),
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
-    provideHttpClient(),
+    provideHttpClient(withFetch()),
     provideServiceWorker("ngsw-worker.js", {
       enabled: !isDevMode(),
       registrationStrategy: "registerWhenStable:30000",

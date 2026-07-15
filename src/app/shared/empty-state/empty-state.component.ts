@@ -10,8 +10,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
       class="flex flex-col items-center justify-center py-24 px-8 text-center"
     >
       <div
-        [class]="'w-24 h-24 rounded-3xl flex items-center justify-center mb-8 ring-1 transition-all duration-300 ' + iconBgClass()"
-        [class.animate-pulse]="variant() === 'default'"
+        [class]="'w-20 h-20 rounded-2xl flex items-center justify-center mb-6 ring-1 ' + iconBgClass()"
       >
         <fa-icon [icon]="icon()" class="text-4xl" [class]="iconColorClass()" />
       </div>

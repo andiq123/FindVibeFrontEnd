@@ -10,13 +10,12 @@
 
 .song-container {
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   touch-action: pan-y;
   cursor: pointer;
   &:hover {
     background: color-mix(in oklab, var(--color-base-200) 60%, transparent);
     transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   &:active {
     transform: translateX(2px) scale(0.98);
@@ -79,7 +78,7 @@
     width: 4px;
     background: linear-gradient(180deg, var(--color-primary), color-mix(in oklab, var(--color-primary) 70%, transparent));
     border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 12px color-mix(in oklab, var(--color-primary) 35%, transparent);
+    box-shadow: none;
   }
   &::after {
     content: '';
@@ -90,30 +89,12 @@
     border-radius: inherit;
   }
   .album-art {
-    transform: scale(1.02);
-    box-shadow: 0 4px 16px color-mix(in oklab, var(--color-primary) 25%, transparent), 0 0 0 2px color-mix(in oklab, var(--color-primary) 28%, transparent);
+    box-shadow: none;
   }
   app-moving-title :first-child { color: var(--color-primary); font-weight: 600; }
   &:hover { background: color-mix(in oklab, var(--color-primary) 14%, var(--color-base-200)); transform: translateX(0); }
   &:active { transform: scale(0.99); }
   .absolute.-bottom-3 { display: none; }
-}
-
-@keyframes playing-pulse {
-  0%, 100% { opacity: 1; transform: scale(1.02); }
-  50% { opacity: 0.9; transform: scale(1.03); }
-}
-
-.song-active .album-art {
-  animation: playing-pulse 2s ease-in-out infinite;
-  @media (max-width: 768px) {
-    animation-duration: 3s;
-    transform: scale(1.01);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-    transform: scale(1.01) !important;
-  }
 }
 
 .song-active [class*="text-accent/70"] {

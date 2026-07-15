@@ -17,7 +17,7 @@ import { faWaveSquare } from '../../icons';
             class="absolute inset-0 bg-primary/20 rounded-full animate-pulse"
           ></div>
           <div
-            class="relative bg-gradient-to-br from-primary/20 to-accent/20 rounded-full w-full h-full flex items-center justify-center ring-2 ring-primary/30 backdrop-blur-sm shadow-lg"
+            class="relative bg-gradient-to-br from-primary/20 to-accent/20 rounded-full w-full h-full flex items-center justify-center ring-2 ring-primary/30"
           >
             <fa-icon
               [icon]="faWaveSquare"
