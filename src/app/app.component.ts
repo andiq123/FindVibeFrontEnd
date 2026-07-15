@@ -7,7 +7,6 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
-import { catchError, tap } from "rxjs";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MiniPlayerComponent } from "./features/player/mini-player/mini-player.component";
 import { FullPlayerComponent } from "./features/player/full-player/full-player.component";
@@ -54,7 +53,8 @@ export class AppComponent implements OnInit {
   readonly modalService = inject(ModalService);
   ngOnInit(): void {
     this.initializeServices();
-    this.wakeServer()
+    this.settingsService
+      .wakeUntilUp()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }
@@ -66,17 +66,5 @@ export class AppComponent implements OnInit {
     this.settingsService.initialize();
     this.mediaSessionService.initialize();
     this.offlineStorageService.initialize();
-  }
-  private wakeServer() {
-    this.settingsService.setIsCheckedServerPending();
-    return this.settingsService.wakeServer().pipe(
-      tap(() => {
-        this.settingsService.setServerUp();
-      }),
-      catchError((err) => {
-        this.settingsService.setServerDown();
-        return [];
-      }),
-    );
   }
 }

@@ -2,13 +2,24 @@ import { Injectable, signal, inject, computed, OnDestroy } from "@angular/core";
 import { StorageService } from "./storage.service";
 import { RepeatMode } from "../../features/player/models/player.model";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import {
+  Observable,
+  catchError,
+  defer,
+  retry,
+  switchMap,
+  tap,
+  timer,
+  timeout,
+} from "rxjs";
 import { environment } from "../../../environments/environment";
+
 enum ServerStatus {
   Unchecked = "unchecked",
   Up = "up",
   Down = "down",
 }
+
 @Injectable({
   providedIn: "root",
 })
@@ -21,7 +32,9 @@ export class SettingsService implements OnDestroy {
   private readonly _isMiniPlayer = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
-  private onlineHandler = () => this._isNavigatorOffline.set(false);
+  private onlineHandler = () => {
+    this._isNavigatorOffline.set(false);
+  };
   private offlineHandler = () => this._isNavigatorOffline.set(true);
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
@@ -38,6 +51,7 @@ export class SettingsService implements OnDestroy {
   readonly isOffline = computed(
     () => this._isNavigatorOffline() || this.isServerDown(),
   );
+
   initialize(): void {
     window.addEventListener("online", this.onlineHandler);
     window.addEventListener("offline", this.offlineHandler);
@@ -46,13 +60,16 @@ export class SettingsService implements OnDestroy {
     if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
   }
+
   ngOnDestroy(): void {
     window.removeEventListener("online", this.onlineHandler);
     window.removeEventListener("offline", this.offlineHandler);
   }
+
   toggleMiniPlayer(): void {
     this._isMiniPlayer.set(!this._isMiniPlayer());
   }
+
   toggleRepeat(): void {
     const modes = [RepeatMode.OFF, RepeatMode.ALL, RepeatMode.ONE];
     const currentIndex = modes.indexOf(this._repeatMode());
@@ -60,21 +77,47 @@ export class SettingsService implements OnDestroy {
     this._repeatMode.set(nextMode);
     this.storageService.setItem("repeatMode", nextMode);
   }
+
   toggleShuffle(): void {
     const newValue = !this._isShuffle();
     this._isShuffle.set(newValue);
     this.storageService.setItem("isShuffle", newValue);
   }
+
   setServerUp(): void {
     this._serverStatus.set(ServerStatus.Up);
   }
+
   setServerDown(): void {
     this._serverStatus.set(ServerStatus.Down);
   }
+
   setIsCheckedServerPending(): void {
     this._serverStatus.set(ServerStatus.Unchecked);
   }
+
   wakeServer(): Observable<void> {
     return this.httpClient.get<void>(this.healthUrl);
+  }
+
+  /**
+   * Probe /health until Render answers. Free tier + deploys often 504 once;
+   * keep retrying so the UI recovers without a hard refresh.
+   */
+  wakeUntilUp(): Observable<void> {
+    this.setIsCheckedServerPending();
+    return defer(() => this.wakeServer()).pipe(
+      timeout({ first: 45_000 }),
+      retry({
+        count: 8,
+        delay: (_err, n) => timer(Math.min(1500 * 2 ** (n - 1), 15_000)),
+      }),
+      tap(() => this.setServerUp()),
+      catchError(() => {
+        this.setServerDown();
+        // ponytail: free Render sleeps — keep poking every 20s
+        return timer(20_000).pipe(switchMap(() => this.wakeUntilUp()));
+      }),
+    );
   }
 }
