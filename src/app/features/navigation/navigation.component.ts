@@ -5,7 +5,12 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faCompass, faBookmark, faClock } from "../../shared/icons";
+import {
+  faCompass,
+  faBookmark,
+  faClock,
+  faWaveSquare,
+} from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { SearchService } from "../search/services/search.service";
 @Component({
@@ -35,6 +40,11 @@ export class NavigationComponent {
         name: "History",
         icon: faClock,
         link: "/recent",
+      },
+      {
+        name: "Status",
+        icon: faWaveSquare,
+        link: "/status",
       },
     ];
   });

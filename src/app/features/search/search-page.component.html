@@ -163,6 +163,13 @@
                         <app-player-button [status]="topPlayerStatus()" />
                       }
                     </button>
+                    @if (sourceHost(featuredSong.provider); as src) {
+                      <span
+                        class="px-2 py-0.5 bg-base-content/15 text-base-content/70 text-[10px] font-bold rounded uppercase tracking-wider"
+                      >
+                        {{ src }}
+                      </span>
+                    }
                     <!-- Hidden until logged in (favorite-button no-ops without a user). -->
                     <app-favorite-button
                       [song]="featuredSong"

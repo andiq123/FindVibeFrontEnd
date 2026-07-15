@@ -73,11 +73,12 @@ export class PlayerService implements OnDestroy {
       const blob = await offlineResponse.blob();
       this.currentObjectUrl = URL.createObjectURL(blob);
       this.audioService.setSource(this.currentObjectUrl);
+    } else if (this.settingsService.isNavigatorOffline()) {
+      // Device offline + not in vault — don't fake an empty play → Error.
+      this.audioService.setSource("");
+      return;
     } else {
-      if (this.settingsService.isOffline()) {
-        this.audioService.setSource("");
-        return;
-      }
+      // API-down is fine: stream from CDN / service worker cache.
       this.audioService.setSource(secureLink);
     }
     await this.audioService.play();

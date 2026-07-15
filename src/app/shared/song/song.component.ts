@@ -6,7 +6,7 @@ import {
   ChangeDetectionStrategy,
   OnDestroy,
 } from "@angular/core";
-import { Song } from "../../core/models/song.model";
+import { Song, sourceHost } from "../../core/models/song.model";
 import { PlayerStatus } from "../../features/player/models/player.model";
 import { PlayerButtonComponent } from "../player-button/player-button.component";
 import { MovingTitleComponent } from "../moving-title/moving-title.component";
@@ -53,11 +53,13 @@ export class SongComponent implements OnDestroy {
   status = () => this.isActive() ? this.playerService.status() : PlayerStatus.Paused;
   isDownloadingOffline = () => this.offlineStorageService.currentLoadingDownloadSongIds().includes(this.song().id);
   isAvailableOffline = () => this.offlineStorageService.availableOfflineSongIds().includes(this.song().id);
-  isUnavailable = () => this.settingsService.isOffline() && !this.isAvailableOffline();
+  isUnavailable = () =>
+    this.settingsService.isNavigatorOffline() && !this.isAvailableOffline();
   isError = () => this.status() === PlayerStatus.Error;
   playerStatus = PlayerStatus;
   faCloudArrowDown = faCloudArrowDown;
   faTriangleExclamation = faTriangleExclamation;
+  sourceLabel = () => sourceHost(this.song().provider);
   async play() {
     if (this.isActive()) {
       await this.playerService.play();
@@ -80,5 +82,10 @@ export class SongComponent implements OnDestroy {
   }
   emitReorder(data: { from: string; to: string }) {
     this.reorder.emit(data);
+  }
+  async saveOffline(event: Event) {
+    event.stopPropagation();
+    if (this.isDownloadingOffline() || this.isAvailableOffline()) return;
+    await this.offlineStorageService.cacheSong(this.song());
   }
 }

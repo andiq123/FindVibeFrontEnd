@@ -25,6 +25,7 @@ function routeOrder(path: string): number {
   if (path.startsWith("songs")) return 1;
   if (path === "library") return 2;
   if (path === "recent") return 3;
+  if (path === "status") return 4;
   return 0;
 }
 

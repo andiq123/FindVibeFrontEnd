@@ -10,8 +10,7 @@ import { OfflineStorageService } from "../../services/offline-storage.service";
 import { LibraryService } from "../../services/library.service";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faTrash, faCloudArrowDown } from "../../../../shared/icons";
-import { Song } from "../../../../core/models/song.model";
-import { upgradeToHttps } from "../../../../core/utils/utils";
+
 @Component({
   selector: "app-storage-info",
   standalone: true,
@@ -25,52 +24,55 @@ export class StorageInfoComponent implements OnInit {
   private libraryService = inject(LibraryService);
   storageTotal = this.offlineStorageService.storageTotal;
   storageUsed = this.offlineStorageService.storageUsed;
+  offlineCount = this.offlineStorageService.offlineCount;
+  libraryCount = computed(() => this.libraryService.songs().length);
+  progressPercent = computed(() => {
+    const total = this.libraryCount() || 1;
+    return Math.min(100, (this.offlineCount() / total) * 100);
+  });
   loadingDownloading = signal(false);
   loadingClearing = signal(false);
-  showRemoveCacheButton = computed(() => {
-    return this.offlineStorageService.availableOfflineSongIds().length > 0;
-  });
+  lastResult = signal("");
+  showRemoveCacheButton = computed(() => this.offlineCount() > 0);
   faTrash = faTrash;
   faCloudArrowDown = faCloudArrowDown;
+
   ngOnInit(): void {
-    this.offlineStorageService.setUpStorage();
-    this.populateAvailableOfflineSongs();
+    void this.offlineStorageService.setUpStorage();
+    void this.offlineStorageService.syncOfflineSongs(this.libraryService.songs());
   }
+
   async downloadAll(): Promise<void> {
     try {
       this.loadingDownloading.set(true);
-      await this.offlineStorageService.cacheAllSongs(
+      this.lastResult.set("");
+      const result = await this.offlineStorageService.cacheAllSongs(
         this.libraryService.songs(),
       );
-      this.populateAvailableOfflineSongs();
+      const parts: string[] = [];
+      if (result.saved) parts.push(`${result.saved} saved`);
+      if (result.skipped) parts.push(`${result.skipped} already offline`);
+      if (result.failed) parts.push(`${result.failed} failed`);
+      this.lastResult.set(parts.join(" · ") || "Nothing to download");
     } catch (error) {
       console.error("[StorageInfo] Failed to download songs:", error);
+      this.lastResult.set("Download failed");
     } finally {
       this.loadingDownloading.set(false);
     }
   }
+
   async removeCache(): Promise<void> {
     try {
       this.loadingClearing.set(true);
+      this.lastResult.set("");
       await this.offlineStorageService.removeCache();
-      this.populateAvailableOfflineSongs();
+      this.lastResult.set("Offline cache cleared");
     } catch (error) {
       console.error("[StorageInfo] Failed to clear cache:", error);
+      this.lastResult.set("Clear failed");
     } finally {
       this.loadingClearing.set(false);
     }
-  }
-  private async populateAvailableOfflineSongs(): Promise<void> {
-    const songs = this.libraryService.songs();
-    await Promise.all(
-      songs.map(async (song: Song) => {
-        const secureLink = upgradeToHttps(song.link);
-        const isAvailable =
-          await this.offlineStorageService.isAvailableOffline(secureLink);
-        if (isAvailable) {
-          this.offlineStorageService.addAvailableOfflineSongId(song.id);
-        }
-      }),
-    );
   }
 }

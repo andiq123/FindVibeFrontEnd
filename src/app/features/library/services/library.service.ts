@@ -3,18 +3,21 @@ import { LibraryApiService } from "./library-api.service";
 import { UserService } from "./user.service";
 import {
   finalize,
-  Observable,
   tap,
   timeout,
   catchError,
   throwError,
   Subscription,
+  EMPTY,
+  switchMap,
+  from,
 } from "rxjs";
 import { Song } from "../../../core/models/song.model";
 import { OfflineStorageService } from "./offline-storage.service";
 import { Reorder } from "../../../core/models/reorder.model";
 import { trackLoadingState } from "../../../core/utils/loading-state.util";
 import { StorageService } from "../../../core/services/storage.service";
+
 @Injectable({
   providedIn: "root",
 })
@@ -28,14 +31,13 @@ export class LibraryService {
     this.storageService.getItem<Song[]>(this.LIBRARY_STORAGE_KEY) || [],
   );
   readonly currentLoadingFavoriteSongIds = signal<string[]>([]);
-  readonly loadingSongs = signal<boolean>(false);
+  readonly loadingSongs = signal(false);
   private libraryUpdateSubscription: Subscription | null = null;
+
   constructor() {
     effect(() => {
-      const songs = this.songs();
-      if (songs.length > 0) {
-        this.storageService.setItem(this.LIBRARY_STORAGE_KEY, songs);
-      }
+      // Always persist — empty list must clear ghost favorites.
+      this.storageService.setItem(this.LIBRARY_STORAGE_KEY, this.songs());
     });
     effect((onCleanup) => {
       const user = untracked(() => this.userService.user());
@@ -45,78 +47,62 @@ export class LibraryService {
       }
       if (user) {
         untracked(() => {
-          this.libraryUpdateSubscription = this.updateLibrarySongs(user.id).subscribe();
+          this.libraryUpdateSubscription = this.updateLibrarySongs(
+            user.id,
+          ).subscribe();
         });
       } else {
-        untracked(() => {
-          this.reset();
-        });
+        untracked(() => this.reset());
       }
       onCleanup(() => {
-        if (this.libraryUpdateSubscription) {
-          this.libraryUpdateSubscription.unsubscribe();
-          this.libraryUpdateSubscription = null;
-        }
+        this.libraryUpdateSubscription?.unsubscribe();
+        this.libraryUpdateSubscription = null;
       });
     });
   }
+
   reset(): void {
     this.songs.set([]);
     this.currentLoadingFavoriteSongIds.set([]);
     this.loadingSongs.set(false);
     this.storageService.removeItem(this.LIBRARY_STORAGE_KEY);
   }
+
   updateLibrarySongs(userId: string) {
     const currentSongs = untracked(() => this.songs());
     if (currentSongs.length === 0) {
       this.loadingSongs.set(true);
     }
-    const clearLoading = () => {
-      this.loadingSongs.set(false);
-    };
     return this.libraryApiService.getFavoritesSong(userId).pipe(
       timeout(10000),
       tap({
         next: (songs: Song[]) => {
           if (!Array.isArray(songs)) {
-            console.error(
-              "[LibraryService] Received invalid songs data (expected array):",
-              songs,
-            );
+            console.error("[LibraryService] Invalid favorites payload:", songs);
             this.userService.resetUser();
             return;
           }
           const sortedSongs = [...songs].sort((a, b) => a.order - b.order);
           this.songs.set(sortedSongs);
+          void this.offlineStorageService.syncOfflineSongs(sortedSongs);
         },
         error: (error) => {
-          const isAuthenticationError =
-            error.status === 401 || error.status === 403;
-          if (isAuthenticationError) {
-            console.error(
-              "[LibraryService] Authentication error, logging out user",
-            );
+          if (error.status === 401 || error.status === 403) {
             this.userService.resetUser();
             return;
           }
-          const isTemporaryError =
-            error.status === 404 || error.name === "TimeoutError";
-          if (isTemporaryError) {
+          if (error.status === 404 || error.name === "TimeoutError") {
             console.warn(
-              "[LibraryService] API unavailable or timeout, keeping user logged in",
+              "[LibraryService] API unavailable — keeping local vault",
             );
           }
         },
       }),
-      catchError((err) => {
-        clearLoading();
-        return throwError(() => err);
-      }),
-      finalize(() => {
-        clearLoading();
-      }),
+      catchError((err) => throwError(() => err)),
+      finalize(() => this.loadingSongs.set(false)),
     );
   }
+
   addToFavorites(song: Song, userId: string) {
     this.trackLoadingFavorite(song.id, true);
     const order = this.songs().length === 0 ? 1 : this.songs().length + 1;
@@ -125,30 +111,34 @@ export class LibraryService {
       tap({
         next: () => {
           this.songs.update((prev) => [...prev, favoriteSong]);
-          this.trackLoadingFavorite(song.id, false);
+          // Native feel: vault save starts as soon as you heart it.
+          void this.offlineStorageService.cacheSong(favoriteSong);
         },
-        error: () => this.trackLoadingFavorite(song.id, false),
       }),
+      finalize(() => this.trackLoadingFavorite(song.id, false)),
     );
   }
+
   removeFromFavorites(id: string, link: string) {
     this.trackLoadingFavorite(id, true);
     const song = this.songs().find((x) => x.link === link);
     if (!song) {
       this.trackLoadingFavorite(id, false);
-      return new Observable();
+      return EMPTY;
     }
     return this.libraryApiService.removeFromFavorites(song.id).pipe(
-      tap({
-        next: async () => {
-          await this.offlineStorageService.removeSongFromCache(id, link);
-          this.songs.update((prev) => prev.filter((s) => s.link !== link));
-          this.trackLoadingFavorite(id, false);
-        },
-        error: () => this.trackLoadingFavorite(id, false),
+      switchMap(() =>
+        from(
+          this.offlineStorageService.removeSongFromCache(song.id, song.link),
+        ),
+      ),
+      tap(() => {
+        this.songs.update((prev) => prev.filter((s) => s.link !== link));
       }),
+      finalize(() => this.trackLoadingFavorite(id, false)),
     );
   }
+
   saveReorders() {
     const reorders: Reorder[] = this.songs().map((x) => ({
       songId: x.id,
@@ -156,19 +146,18 @@ export class LibraryService {
     }));
     return this.libraryApiService.reorderSongs(reorders);
   }
+
   changePlaces(id1: string, id2: string): void {
     this.songs.update((prevSongs) => {
       const index1 = prevSongs.findIndex((x) => x.id === id1);
       const index2 = prevSongs.findIndex((x) => x.id === id2);
       if (index1 === -1 || index2 === -1) return prevSongs;
       const newSongs = [...prevSongs];
-      const song1 = newSongs[index1];
-      const song2 = newSongs[index2];
-      newSongs[index1] = song2;
-      newSongs[index2] = song1;
+      [newSongs[index1], newSongs[index2]] = [newSongs[index2], newSongs[index1]];
       return newSongs.map((song, i) => ({ ...song, order: i + 1 }));
     });
   }
+
   private trackLoadingFavorite(id: string, isLoading: boolean): void {
     trackLoadingState(this.currentLoadingFavoriteSongIds, id, isLoading);
   }

@@ -16,6 +16,7 @@ import { DOCUMENT } from "@angular/common";
 import { Router } from "@angular/router";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
+  faArrowDown,
   faPause,
   faPlay,
   faRepeat,
@@ -23,7 +24,7 @@ import {
   faStepBackward,
   faStepForward,
   faTriangleExclamation,
-} from "@fortawesome/free-solid-svg-icons";
+} from "../../../shared/icons";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
 import { SettingsService } from "../../../core/services/settings.service";
 import { NgOptimizedImage } from "@angular/common";
@@ -33,6 +34,8 @@ import { PlayerService } from "../../../core/services/player.service";
 import { Song } from "../../../core/models/song.model";
 import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
 import { TimeFormatPipe } from "../../../shared/pipes/time-format.pipe";
+import { upgradeToHttps } from "../../../core/utils/utils";
+import { OfflineStorageService } from "../../library/services/offline-storage.service";
 
 const OPEN_ANIM_MS = 500;
 const CLOSE_ANIM_MS = 350;
@@ -55,6 +58,7 @@ const CLOSE_ANIM_MS = 350;
 export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly playerService = inject(PlayerService);
   readonly settingsService = inject(SettingsService);
+  private offlineStorage = inject(OfflineStorageService);
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
@@ -75,6 +79,8 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   faRepeat = faRepeat;
   faShuffle = faShuffle;
   faTriangleExclamation = faTriangleExclamation;
+  faArrowDown = faArrowDown;
+  isDownloadingMp3 = signal(false);
   isClosingAnimation = signal(false);
   isOpeningAnimation = signal(false);
   isOpened = signal(false);
@@ -194,4 +200,46 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigate(["/songs", artistName]);
     }
   }
+  async downloadMp3() {
+    if (this.isDownloadingMp3()) return;
+    const song = this.song();
+    const url = upgradeToHttps(song.link);
+    if (!url) return;
+
+    const filename = mp3Filename(song.artist, song.title);
+    this.isDownloadingMp3.set(true);
+    try {
+      const res = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const forVault = res.clone();
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      triggerFileDownload(objectUrl, filename);
+      URL.revokeObjectURL(objectUrl);
+      void this.offlineStorage.rememberResponse(song, forVault);
+    } catch {
+      // CORS: file via direct URL; still try vault with no-cors path.
+      triggerFileDownload(url, filename);
+      void this.offlineStorage.cacheSong(song);
+    } finally {
+      if (!this.destroyed) this.isDownloadingMp3.set(false);
+    }
+  }
+}
+
+function mp3Filename(artist: string, title: string): string {
+  const base = `${artist} - ${title}`
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+  return `${base || "track"}.mp3`;
+}
+
+function triggerFileDownload(href: string, filename: string): void {
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = filename;
+  a.rel = "noopener";
+  a.click();
 }

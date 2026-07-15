@@ -13,7 +13,7 @@ import { SearchBarComponent } from "./search-bar/search-bar.component";
 import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
 import { PaginationComponent } from "../../shared/components/pagination/pagination.component";
-import { SearchStatus } from "../../core/models/song.model";
+import { SearchStatus, sourceHost } from "../../core/models/song.model";
 import { Router } from "@angular/router";
 import { SearchService } from "./services/search.service";
 import { SettingsService } from "../../core/services/settings.service";
@@ -64,6 +64,7 @@ export class SearchPageComponent {
   searchStatus = SearchStatus;
   faMagnifyingGlass = faMagnifyingGlass;
   faTriangleExclamation = faTriangleExclamation;
+  sourceHost = sourceHost;
 
   displayQuery = computed(() => this.songsService.lastQuery());
 
@@ -89,7 +90,7 @@ export class SearchPageComponent {
     const song = this.topSong();
     if (!song) return false;
     return (
-      this.settingsService.isOffline() &&
+      this.settingsService.isNavigatorOffline() &&
       !this.offlineStorageService.availableOfflineSongIds().includes(song.id)
     );
   });

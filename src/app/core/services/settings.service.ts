@@ -32,6 +32,9 @@ export class SettingsService implements OnDestroy {
   readonly isCheckedServer = computed(
     () => this._serverStatus() !== ServerStatus.Unchecked,
   );
+  /** True when the device has no network (CDN streaming / offline vault gate). */
+  readonly isNavigatorOffline = this._isNavigatorOffline.asReadonly();
+  /** API unreachable or device offline — gates search / server-backed flows. */
   readonly isOffline = computed(
     () => this._isNavigatorOffline() || this.isServerDown(),
   );

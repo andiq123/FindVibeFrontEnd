@@ -111,7 +111,30 @@
               {{ song().artist }}
             </button>
           </div>
-          <app-favorite-button [song]="song()" />
+          <div class="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              class="tap-target-44 w-11 h-11 rounded-full bg-black/20 border border-black/30 flex items-center justify-center transition-all duration-200 pressable-native outline-none select-none active:bg-black/30 active:scale-90"
+              (click)="downloadMp3()"
+              [disabled]="isDownloadingMp3()"
+              [attr.aria-label]="
+                isDownloadingMp3() ? 'Downloading MP3' : 'Download MP3'
+              "
+            >
+              @if (isDownloadingMp3()) {
+                <span
+                  class="loading loading-spinner loading-xs text-primary"
+                ></span>
+              } @else {
+                <fa-icon
+                  [icon]="faArrowDown"
+                  size="lg"
+                  class="text-white/40"
+                />
+              }
+            </button>
+            <app-favorite-button [song]="song()" />
+          </div>
         </div>
         <div class="space-y-2">
           <div

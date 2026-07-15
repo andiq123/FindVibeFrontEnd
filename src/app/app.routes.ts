@@ -40,4 +40,12 @@ export const routes: Routes = [
       ),
     data: { animation: 3 },
   },
+  {
+    path: "status",
+    loadComponent: () =>
+      import("./features/status/status-page.component").then(
+        (c) => c.StatusPageComponent,
+      ),
+    data: { animation: 4 },
+  },
 ];
