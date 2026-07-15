@@ -1,7 +1,7 @@
 @if (!isLoggedIn()) {
   <app-user-form />
 } @else {
-  <app-page-content [isServerReady]="isCheckedServer()">
+  <app-page-content [isServerReady]="true">
     <div class="flex justify-between items-center gap-3 w-full mb-4">
       <div class="flex flex-col">
         <span

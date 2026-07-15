@@ -60,7 +60,6 @@ export class SearchPageComponent {
   status = computed(() => this.songsService.status());
   pagination = computed(() => this.songsService.pagination());
   currentPage = computed(() => this.songsService.currentPage());
-  isCheckedServer = computed(() => this.settingsService.isCheckedServer());
   searchStatus = SearchStatus;
   faMagnifyingGlass = faMagnifyingGlass;
   faTriangleExclamation = faTriangleExclamation;

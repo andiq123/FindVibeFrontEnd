@@ -54,7 +54,6 @@ export class LibraryComponent {
   username = computed(() => this.userService.user()?.username || "");
   userId = computed(() => this.userService.user()?.id || "");
   isOffline = this.settingsService.isOffline;
-  isCheckedServer = this.settingsService.isCheckedServer;
   loadingSongs = this.libraryService.loadingSongs;
   hasReordered = signal(false);
   loadingReorder = signal(false);

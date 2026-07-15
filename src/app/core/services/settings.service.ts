@@ -101,16 +101,17 @@ export class SettingsService implements OnDestroy {
   }
 
   /**
-   * Probe /health until Render answers. Free tier + deploys often 504 once;
-   * keep retrying so the UI recovers without a hard refresh.
+   * Probe /health until Render answers. Free tier cold-starts with 504s
+   * until the process listens — keep retrying; UI stays usable via banner.
    */
   wakeUntilUp(): Observable<void> {
     this.setIsCheckedServerPending();
     return defer(() => this.wakeServer()).pipe(
-      timeout({ first: 45_000 }),
+      // Render gateway often 504s ~30s; don't hold one request that long.
+      timeout({ first: 12_000 }),
       retry({
-        count: 8,
-        delay: (_err, n) => timer(Math.min(1500 * 2 ** (n - 1), 15_000)),
+        count: 12,
+        delay: (_err, n) => timer(Math.min(2000 * n, 12_000)),
       }),
       tap(() => this.setServerUp()),
       catchError(() => {
