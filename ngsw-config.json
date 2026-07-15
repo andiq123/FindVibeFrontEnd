@@ -45,7 +45,7 @@
       "name": "album-art",
       "urls": [
         "https://lh3.googleusercontent.com/*",
-        "http://jpg.muzvibe.org/*"
+        "https://jpg.muzjam.org/*"
       ],
       "cacheConfig": {
         "maxSize": 200,
@@ -56,7 +56,12 @@
     },
     {
       "name": "audio-files",
-      "urls": ["https://*.mp3", "https://*.m4a", "https://*.wav"],
+      "urls": [
+        "https://song.muzvibe.org/*",
+        "https://*.mp3",
+        "https://*.m4a",
+        "https://*.wav"
+      ],
       "cacheConfig": {
         "maxSize": 50,
         "maxAge": "7d",
