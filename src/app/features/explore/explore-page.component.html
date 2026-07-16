@@ -57,7 +57,11 @@
       </div>
     } @else {
       @for (section of explore.sections(); track section.id) {
-        <section class="explore-shelf" [attr.aria-label]="section.title">
+        <section
+          class="explore-shelf explore-shelf-in"
+          [style.--i]="$index"
+          [attr.aria-label]="section.title"
+        >
           <div class="explore-shelf-head">
             <p class="explore-kicker">{{ section.subtitle }}</p>
             <h2 class="explore-title">{{ section.title }}</h2>
@@ -67,7 +71,8 @@
               @for (song of section.songs; track song.link) {
                 <button
                   type="button"
-                  class="explore-card"
+                  class="explore-card explore-card-in"
+                  [style.--c]="$index"
                   role="listitem"
                   (click)="playFromShelf(section, song)"
                   [attr.aria-label]="'Play ' + song.title + ' by ' + song.artist"
