@@ -1,5 +1,6 @@
 import {
   faArrowDown,
+  faArrowRotateRight,
   faArrowUp,
   faBookmark,
   faCheck,
@@ -35,6 +36,7 @@ import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
 export {
   IconDefinition,
   faArrowDown,
+  faArrowRotateRight,
   faArrowUp,
   faBookmark,
   faCheck,

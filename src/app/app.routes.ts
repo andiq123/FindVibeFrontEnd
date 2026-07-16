@@ -3,8 +3,17 @@ import { offlineGuard } from "./shared/guards/offline.guard";
 export const routes: Routes = [
   {
     path: "",
-    redirectTo: "songs",
+    redirectTo: "explore",
     pathMatch: "full",
+  },
+  {
+    path: "explore",
+    loadComponent: () =>
+      import("./features/explore/explore-page.component").then(
+        (c) => c.ExplorePageComponent,
+      ),
+    canActivate: [offlineGuard],
+    data: { animation: 1 },
   },
   {
     path: "songs",

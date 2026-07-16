@@ -64,7 +64,7 @@
       "name": "Explore Music",
       "short_name": "Explore",
       "description": "Discover new songs and artists",
-      "url": "/songs",
+      "url": "/explore",
       "icons": [
         {
           "src": "icons/icon-192x192.png",

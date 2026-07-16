@@ -2,7 +2,7 @@
   <div class="mb-4 px-2 py-1 rounded-lg">
     <span class="text-[11px] font-bold tracking-[0.2em] text-primary/90 uppercase">FV</span>
   </div>
-  @for (navItem of navList(); track navItem.name) {
+  @for (navItem of navList; track navItem.name) {
     <a
       [routerLink]="navItem.link"
       routerLinkActive="active-tab"
@@ -29,7 +29,7 @@
     z-index: var(--z-navigation);
   "
 >
-  @for (navItem of navList(); track navItem.name) {
+  @for (navItem of navList; track navItem.name) {
     <li
       class="relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 group min-h-[52px]"
       [routerLink]="navItem.link"

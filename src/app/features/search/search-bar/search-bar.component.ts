@@ -123,7 +123,7 @@ export class SearchBarComponent implements OnDestroy {
     this.dismissSuggestions();
     this.isFocused.set(false);
     this.searchService.resetSearch();
-    await this.router.navigate(["/songs"], { replaceUrl: true });
+    await this.router.navigate(["/explore"], { replaceUrl: true });
   }
 
   async submit(): Promise<void> {

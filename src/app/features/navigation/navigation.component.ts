@@ -1,9 +1,4 @@
-import {
-  Component,
-  computed,
-  inject,
-  ChangeDetectionStrategy,
-} from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import {
   faCompass,
@@ -12,7 +7,6 @@ import {
   faGear,
 } from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
-import { SearchService } from "../search/services/search.service";
 @Component({
   selector: "app-navigation",
   standalone: true,
@@ -21,31 +15,26 @@ import { SearchService } from "../search/services/search.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavigationComponent {
-  private searchService = inject(SearchService);
-  navList = computed(() => {
-    const lastQuery = this.searchService.lastQuery();
-    const songsLink = lastQuery ? `/songs/${lastQuery}` : "/songs";
-    return [
-      {
-        name: "Explore",
-        icon: faCompass,
-        link: songsLink,
-      },
-      {
-        name: "Vault",
-        icon: faBookmark,
-        link: "/library",
-      },
-      {
-        name: "History",
-        icon: faClock,
-        link: "/recent",
-      },
-      {
-        name: "Settings",
-        icon: faGear,
-        link: "/settings",
-      },
-    ];
-  });
+  readonly navList = [
+    {
+      name: "Explore",
+      icon: faCompass,
+      link: "/explore",
+    },
+    {
+      name: "Vault",
+      icon: faBookmark,
+      link: "/library",
+    },
+    {
+      name: "History",
+      icon: faClock,
+      link: "/recent",
+    },
+    {
+      name: "Settings",
+      icon: faGear,
+      link: "/settings",
+    },
+  ];
 }
