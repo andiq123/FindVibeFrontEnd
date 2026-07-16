@@ -31,13 +31,13 @@
       class="w-full pt-4 pb-2 flex flex-col items-center justify-center shrink-0 relative z-20"
     >
       <button
-        class="group w-full flex flex-col items-center justify-center -mt-2 pressable-native touch-manipulation p-4 min-h-[44px]"
+        class="group w-full flex flex-col items-center justify-center -mt-2 pressable-native touch-manipulation px-4 py-3 min-h-12"
         (click)="toggleSize()"
         aria-label="Minimize player"
         type="button"
       >
         <div
-          class="w-12 h-1.5 bg-base-content/30 rounded-full group-active:bg-base-content/50 transition-colors duration-200"
+          class="w-14 h-1.5 bg-base-content/35 rounded-full group-active:bg-base-content/55 transition-colors duration-200"
         ></div>
       </button>
     </div>
@@ -66,13 +66,13 @@
       <div class="absolute inset-0 bg-base-100/50 player-bg-overlay"></div>
     </div>
     <div
-      class="flex-1 flex flex-col items-center justify-start px-4 sm:px-6 pb-safe pt-2 max-w-[600px] mx-auto relative z-10 w-full min-h-0"
+      class="flex-1 flex flex-col items-center justify-start px-4 sm:px-6 pb-safe pt-1 max-w-[600px] mx-auto relative z-10 w-full min-h-0 player-main"
     >
       <div
-        class="w-full flex-1 flex items-center justify-center artwork-container min-h-0 py-2"
+        class="w-full flex-1 flex items-center justify-center artwork-container min-h-0 py-1 sm:py-2"
       >
         <div
-          class="relative w-full aspect-square max-w-[280px] sm:max-w-[340px] group flex items-center justify-center artwork-wrapper"
+          class="relative w-full aspect-square max-w-[min(280px,62vw)] sm:max-w-[340px] group flex items-center justify-center artwork-wrapper"
           [class.playing]="
             status() === playerStatus.Playing && !isOpeningAnimation()
           "
@@ -114,8 +114,8 @@
           </div>
         </div>
       </div>
-      <div class="w-full mt-1 mb-2 space-y-2 shrink-0">
-        <div class="flex items-center justify-between gap-4">
+      <div class="w-full mt-1 mb-1 space-y-3 shrink-0 player-controls">
+        <div class="flex items-center justify-between gap-3">
           <div class="flex-1 min-w-0">
             <app-moving-title
               [title]="song().title"
@@ -130,7 +130,7 @@
               </p>
             } @else {
               <button
-                class="text-base-content/60 text-lg truncate mt-1 active:text-base-content/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-base-content/80"
+                class="text-base-content/60 text-base sm:text-lg truncate mt-0.5 min-h-11 py-2 -my-1 active:text-base-content/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-base-content/80"
                 (click)="navigateToArtist()"
                 [attr.aria-label]="'View songs by ' + song().artist"
                 type="button"
@@ -139,11 +139,11 @@
               </button>
             }
           </div>
-          <div class="flex items-center gap-2 shrink-0">
+          <div class="flex items-center gap-1.5 shrink-0">
             @if (settingsService.showPlayerDownload()) {
               <button
                 type="button"
-                class="player-chip w-9 h-9 rounded-full bg-base-content/5 border border-base-content/10 flex items-center justify-center text-base-content/40 active:bg-base-content/10 active:scale-90 transition-colors pressable-native outline-none select-none disabled:opacity-50"
+                class="player-chip w-14 h-14 rounded-full bg-base-content/5 border border-base-content/10 flex items-center justify-center text-base-content/50 active:bg-base-content/10 active:scale-90 transition-colors pressable-native outline-none select-none disabled:opacity-50 touch-manipulation"
                 animate.enter="player-chip-in"
                 animate.leave="player-chip-out"
                 (click)="downloadMp3()"
@@ -154,17 +154,17 @@
               >
                 @if (isDownloadingMp3()) {
                   <span
-                    class="loading loading-spinner loading-xs text-primary"
+                    class="loading loading-spinner loading-sm text-primary"
                   ></span>
                 } @else {
-                  <fa-icon [icon]="faArrowDown" class="text-sm" />
+                  <fa-icon [icon]="faArrowDown" class="text-lg" />
                 }
               </button>
             }
-            <app-favorite-button [song]="song()" />
+            <app-favorite-button [song]="song()" [forPlayer]="true" />
           </div>
         </div>
-        <div class="seek space-y-1.5">
+        <div class="seek space-y-0.5">
           <div
             class="seek-bar"
             [class.seek-bar--dragging]="isDraggingTime()"
@@ -196,16 +196,16 @@
             />
           </div>
           <div
-            class="flex justify-between text-[11px] font-medium text-base-content/45 tabular-nums px-0.5"
+            class="flex justify-between text-xs font-medium text-base-content/50 tabular-nums px-0.5"
           >
             <span>{{ displayTime() | timeFormat }}</span>
             <span>{{ duration() | timeFormat }}</span>
           </div>
         </div>
-        <div class="flex items-center justify-between gap-1 pt-1">
+        <div class="flex items-center justify-between gap-1 pt-0.5 player-transport">
           <button
             type="button"
-            class="w-11 h-11 rounded-full flex items-center justify-center touch-manipulation text-base-content/40 active:scale-[0.92] active:bg-base-content/8 transition-colors"
+            class="w-14 h-14 rounded-full flex items-center justify-center touch-manipulation text-base-content/45 active:scale-[0.92] active:bg-base-content/8 transition-colors"
             [class.text-primary]="settingsService.isShuffle()"
             [attr.aria-label]="
               settingsService.isShuffle() ? 'Disable shuffle' : 'Enable shuffle'
@@ -213,21 +213,21 @@
             [attr.aria-pressed]="settingsService.isShuffle()"
             (click)="toggleShuffle()"
           >
-            <fa-icon [icon]="faShuffle" class="text-lg" />
+            <fa-icon [icon]="faShuffle" class="text-2xl" />
           </button>
 
-          <div class="flex items-center gap-1 sm:gap-3">
+          <div class="flex items-center gap-1 sm:gap-2">
             <button
               type="button"
-              class="w-12 h-12 rounded-full flex items-center justify-center touch-manipulation text-base-content/75 active:scale-[0.92] active:bg-base-content/8"
+              class="w-16 h-16 rounded-full flex items-center justify-center touch-manipulation text-base-content/80 active:scale-[0.92] active:bg-base-content/8"
               aria-label="Previous track"
               (click)="previous()"
             >
-              <fa-icon [icon]="faStepBackward" class="text-2xl" />
+              <fa-icon [icon]="faStepBackward" class="text-3xl" />
             </button>
             <button
               type="button"
-              class="w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] flex items-center justify-center rounded-full bg-base-content text-base-100 active:scale-95 transition-transform touch-manipulation"
+              class="w-20 h-20 sm:w-[5.25rem] sm:h-[5.25rem] flex items-center justify-center rounded-full bg-base-content text-base-100 active:scale-95 transition-transform touch-manipulation shadow-lg shadow-black/20"
               [class.bg-primary]="status() === playerStatus.Playing"
               [attr.aria-label]="
                 status() === playerStatus.Error
@@ -240,30 +240,30 @@
             >
               <fa-icon
                 [icon]="status() === playerStatus.Playing ? faPause : faPlay"
-                class="text-xl"
+                class="text-3xl"
               />
             </button>
             <button
               type="button"
-              class="w-12 h-12 rounded-full flex items-center justify-center touch-manipulation text-base-content/75 active:scale-[0.92] active:bg-base-content/8"
+              class="w-16 h-16 rounded-full flex items-center justify-center touch-manipulation text-base-content/80 active:scale-[0.92] active:bg-base-content/8"
               aria-label="Next track"
               (click)="next()"
             >
-              <fa-icon [icon]="faStepForward" class="text-2xl" />
+              <fa-icon [icon]="faStepForward" class="text-3xl" />
             </button>
           </div>
 
           <button
             type="button"
-            class="relative w-11 h-11 rounded-full flex items-center justify-center touch-manipulation text-base-content/40 active:scale-[0.92] active:bg-base-content/8 transition-colors"
+            class="relative w-14 h-14 rounded-full flex items-center justify-center touch-manipulation text-base-content/45 active:scale-[0.92] active:bg-base-content/8 transition-colors"
             [class.text-primary]="settingsService.repeatMode() !== repeatModes.OFF"
             [attr.aria-label]="repeatLabel()"
             (click)="toggleRepeat()"
           >
-            <fa-icon [icon]="faRepeat" class="text-lg" />
+            <fa-icon [icon]="faRepeat" class="text-2xl" />
             @if (settingsService.repeatMode() === repeatModes.ONE) {
               <span
-                class="absolute right-1.5 bottom-1.5 w-3.5 h-3.5 rounded-full bg-primary text-primary-content text-[8px] font-extrabold flex items-center justify-center pointer-events-none"
+                class="absolute right-2 bottom-2 w-4 h-4 rounded-full bg-primary text-primary-content text-[9px] font-extrabold flex items-center justify-center pointer-events-none"
                 aria-hidden="true"
                 >1</span
               >
@@ -271,12 +271,12 @@
           </button>
         </div>
 
-        <div class="relative pt-2">
+        <div class="relative pt-1 pb-1">
           <div class="player-chip-row flex items-center justify-end gap-2 flex-wrap">
             @if (playlistService.upcoming().length; as n) {
               <button
                 type="button"
-                class="player-chip inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
+                class="player-chip inline-flex items-center gap-2 min-h-12 h-12 px-4 rounded-full bg-base-content/5 text-base-content/60 text-base font-medium touch-manipulation active:bg-base-content/10"
                 animate.enter="player-chip-in"
                 animate.leave="player-chip-out"
                 (click)="toggleUpNext()"
@@ -286,26 +286,26 @@
                 <span class="player-chip-label">Up next · {{ n }}</span>
                 <fa-icon
                   [icon]="faChevronRight"
-                  class="text-[10px] transition-transform duration-200"
+                  class="text-xs transition-transform duration-200"
                   [class.rotate-90]="upNextOpen()"
                 />
               </button>
             }
             <button
               type="button"
-              class="player-chip inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10 transition-colors duration-200"
+              class="player-chip inline-flex items-center gap-2 min-h-12 h-12 px-4 rounded-full bg-base-content/5 text-base-content/60 text-base font-medium touch-manipulation active:bg-base-content/10 transition-colors duration-200"
               [class.text-primary]="lyricsOpen()"
               [class.bg-primary/15]="lyricsOpen()"
               (click)="toggleLyrics()"
               [attr.aria-expanded]="lyricsOpen()"
               aria-label="Show lyrics"
             >
-              <fa-icon [icon]="faMusic" class="text-xs" />
+              <fa-icon [icon]="faMusic" class="text-sm" />
               Lyrics
             </button>
             <button
               type="button"
-              class="player-chip inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary/15 text-primary text-sm font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50 transition-shadow duration-200"
+              class="player-chip inline-flex items-center gap-2 min-h-12 h-12 px-4 rounded-full bg-primary/15 text-primary text-base font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50 transition-shadow duration-200"
               (click)="startRadio()"
               [disabled]="radioService.loading()"
               [class.ring-1]="playlistService.radioActive()"
@@ -374,7 +374,7 @@
           </button>
           <button
             type="button"
-            class="shrink-0 h-8 px-2.5 rounded-lg text-[11px] font-semibold text-error/80 active:bg-error/10"
+            class="shrink-0 min-h-11 h-11 px-3 rounded-xl text-xs font-semibold text-error/80 active:bg-error/10 touch-manipulation"
             (click)="clearUpcoming($event)"
             aria-label="Clear up next"
           >
@@ -412,29 +412,29 @@
               <div class="flex items-center gap-0.5 shrink-0">
                 <button
                   type="button"
-                  class="w-8 h-8 rounded-full text-base-content/35 active:bg-base-content/10 disabled:opacity-25"
+                  class="w-11 h-11 rounded-full text-base-content/40 active:bg-base-content/10 disabled:opacity-25 touch-manipulation"
                   [disabled]="i === 0"
                   (click)="moveUpcoming(track, -1, $event)"
                   aria-label="Move up"
                 >
-                  <fa-icon [icon]="faArrowUp" class="text-[10px]" />
+                  <fa-icon [icon]="faArrowUp" class="text-xs" />
                 </button>
                 <button
                   type="button"
-                  class="w-8 h-8 rounded-full text-base-content/35 active:bg-base-content/10 disabled:opacity-25"
+                  class="w-11 h-11 rounded-full text-base-content/40 active:bg-base-content/10 disabled:opacity-25 touch-manipulation"
                   [disabled]="last"
                   (click)="moveUpcoming(track, 1, $event)"
                   aria-label="Move down"
                 >
-                  <fa-icon [icon]="faArrowDown" class="text-[10px]" />
+                  <fa-icon [icon]="faArrowDown" class="text-xs" />
                 </button>
                 <button
                   type="button"
-                  class="w-8 h-8 rounded-full text-base-content/35 active:text-error active:bg-error/10"
+                  class="w-11 h-11 rounded-full text-base-content/40 active:text-error active:bg-error/10 touch-manipulation"
                   (click)="removeUpcoming(track, $event)"
                   aria-label="Remove from queue"
                 >
-                  <fa-icon [icon]="faTrash" class="text-[10px]" />
+                  <fa-icon [icon]="faTrash" class="text-xs" />
                 </button>
               </div>
             </div>

@@ -727,6 +727,26 @@ body {
   background: transparent;
   touch-action: none;
 }
+/* Coarse pointers: 44px hit strip, thicker track, larger thumb (HIG / Material). */
+@media (pointer: coarse) {
+  .seek-bar {
+    height: 44px;
+  }
+  .seek-track {
+    height: 5px;
+  }
+  .seek-fill::after {
+    width: 16px;
+    height: 16px;
+  }
+  .seek-bar--dragging .seek-track {
+    height: 7px;
+  }
+  .seek-bar--dragging .seek-fill::after {
+    width: 20px;
+    height: 20px;
+  }
+}
 
 /* App-wide flash toast (skip / queue) */
 .app-toast {
@@ -789,8 +809,9 @@ body {
 }
 .player-toast-dismiss {
   flex-shrink: 0;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: -0.55rem -0.45rem -0.55rem 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -888,6 +909,13 @@ body {
   text-align: left;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  min-height: 3.25rem;
+}
+@media (pointer: coarse) {
+  .up-next-row {
+    padding: 0.35rem 0.15rem;
+    gap: 0.35rem;
+  }
 }
 .up-next-row-in {
   animation: up-next-row-in 300ms var(--anim-ease-ios) both;
@@ -900,7 +928,21 @@ body {
 
 /* Full-player action chips — Up next / download mount & unmount */
 .player-chip-row {
-  min-height: 2.25rem;
+  min-height: 3rem;
+}
+@media (pointer: coarse) {
+  .player-chip-row {
+    width: 100%;
+    justify-content: stretch;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+  .player-chip-row > .player-chip {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 3rem;
+    padding-inline: 0.85rem;
+  }
 }
 .player-chip-in {
   animation: player-chip-in 220ms var(--anim-ease-ios) both;

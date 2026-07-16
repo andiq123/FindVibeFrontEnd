@@ -127,3 +127,16 @@
 .player-content-card {
   isolation: isolate;
 }
+
+/* Short phones: shrink art so transport stays in the thumb zone. */
+@media (max-height: 700px) and (pointer: coarse) {
+  .artwork-wrapper {
+    max-width: min(240px, 52vw);
+  }
+}
+
+@media (pointer: coarse) {
+  .player-transport {
+    min-height: 5.25rem;
+  }
+}

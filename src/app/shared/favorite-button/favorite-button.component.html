@@ -2,7 +2,7 @@
 <button
   type="button"
   class="flex items-center justify-center transition-all duration-300 pressable-native outline-none select-none touch-manipulation"
-  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform min-w-11 min-h-11' : 'w-11 h-11 rounded-full bg-base-content/5 border border-base-content/10 active:bg-base-content/10'"
+  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform min-w-14 min-h-14 w-14 h-14' : 'w-11 h-11 rounded-full bg-base-content/5 border border-base-content/10 active:bg-base-content/10'"
   (pointerdown)="$event.stopPropagation()"
   (click)="onToggle($event)"
   [disabled]="isLoadingFavorite()"
