@@ -21,6 +21,25 @@ export function mediaArtworkSrc(image: string): string {
   }
 }
 
+/**
+ * Keep Now Playing alive across Ended→Loading→Playing gaps (iOS PWA).
+ * Only true stop / hard error should drop the session to "none".
+ */
+export function mediaPlaybackState(
+  status: PlayerStatus,
+): MediaSessionPlaybackState {
+  switch (status) {
+    case PlayerStatus.Playing:
+    case PlayerStatus.Loading:
+    case PlayerStatus.Ended:
+      return "playing";
+    case PlayerStatus.Paused:
+      return "paused";
+    default:
+      return "none";
+  }
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -105,23 +124,18 @@ export class MediaSessionService implements OnDestroy {
 
     if (status === this.lastStatus) return;
     this.lastStatus = status;
-    ms.playbackState =
-      status === PlayerStatus.Playing
-        ? "playing"
-        : status === PlayerStatus.Paused || status === PlayerStatus.Loading
-          ? "paused"
-          : "none";
+    ms.playbackState = mediaPlaybackState(status);
 
     const playing = status === PlayerStatus.Playing;
+    const keepAlive =
+      playing ||
+      status === PlayerStatus.Loading ||
+      status === PlayerStatus.Ended;
     this.armPositionTimer(playing);
     if (playing) this.pushPosition();
-    else if (
-      status === PlayerStatus.Stopped ||
-      status === PlayerStatus.Ended ||
-      status === PlayerStatus.Error
-    ) {
+    else if (!keepAlive) {
       try {
-        // empty state clears the scrubber on the lock screen
+        // empty state clears the scrubber — only when session truly stops
         ms.setPositionState({});
       } catch {
         /* ignore */

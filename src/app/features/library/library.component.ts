@@ -16,11 +16,16 @@ import {
   faArrowDown,
   faArrowUp,
   faCheck,
+  faWaveSquare,
   faXmark,
 } from "../../shared/icons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
+import { RadioService } from "../../core/services/radio.service";
+import { PlayerService } from "../../core/services/player.service";
+import { StorageService } from "../../core/services/storage.service";
+import { ToastService } from "../../core/services/toast.service";
 import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
 import { Song } from "../../core/models/song.model";
@@ -44,6 +49,10 @@ export class LibraryComponent {
   private userService = inject(UserService);
   private playlistService = inject(PlaylistService);
   private settingsService = inject(SettingsService);
+  private radioService = inject(RadioService);
+  private playerService = inject(PlayerService);
+  private storage = inject(StorageService);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   hasReordered = signal(false);
@@ -68,12 +77,29 @@ export class LibraryComponent {
   faXmark = faXmark;
   faArrowUp = faArrowUp;
   faArrowDown = faArrowDown;
+  faWaveSquare = faWaveSquare;
+  radioLoading = this.radioService.loading;
 
   /** Snapshot before first drag/bulk move — instant Discard, no refetch. */
   private reorderSnapshot: Song[] | null = null;
 
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
+  }
+
+  /** Smart vault radio — liked seed, discover tracks not already in the vault. */
+  async startVaultRadio(): Promise<void> {
+    if (this.radioLoading() || this.selectMode()) return;
+    const seed = await this.radioService.startFromVault(
+      this.songs(),
+      this.storage.listenStats(),
+    );
+    if (!seed) {
+      this.toast.show(this.radioService.error() || "Couldn't start radio");
+      return;
+    }
+    this.toast.show(`Radio · ${seed.artist}`);
+    await this.playerService.setSong(seed, { fromQueue: true });
   }
 
   toggleSelectMode() {

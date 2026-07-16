@@ -21,19 +21,37 @@
             </span>
           </div>
         </div>
-        @if (songCount() > 1) {
-          <button
-            type="button"
-            class="shrink-0 ml-auto h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation {{
-              selectMode()
-                ? 'bg-primary text-primary-content'
-                : 'bg-base-content/10 text-base-content/70'
-            }}"
-            (click)="toggleSelectMode()"
-          >
-            {{ selectMode() ? "Done" : "Select" }}
-          </button>
-        }
+        <div class="shrink-0 ml-auto flex items-center gap-2">
+          @if (songCount() >= 1) {
+            <button
+              type="button"
+              class="h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation inline-flex items-center gap-1.5 bg-primary/15 text-primary disabled:opacity-45"
+              (click)="startVaultRadio()"
+              [disabled]="radioLoading() || selectMode()"
+              aria-label="Start radio from your vault"
+            >
+              @if (radioLoading()) {
+                <span class="loading loading-spinner loading-xs"></span>
+              } @else {
+                <fa-icon [icon]="faWaveSquare" class="text-[11px]" />
+              }
+              Radio
+            </button>
+          }
+          @if (songCount() > 1) {
+            <button
+              type="button"
+              class="h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation {{
+                selectMode()
+                  ? 'bg-primary text-primary-content'
+                  : 'bg-base-content/10 text-base-content/70'
+              }}"
+              (click)="toggleSelectMode()"
+            >
+              {{ selectMode() ? "Done" : "Select" }}
+            </button>
+          }
+        </div>
       </div>
 
       @if (selectMode() && selectedCount() > 0) {

@@ -1,4 +1,5 @@
 import { Injectable, signal, inject, effect, untracked } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { LibraryApiService } from "./library-api.service";
 import { UserService } from "./user.service";
 import {
@@ -10,12 +11,19 @@ import {
   EMPTY,
   switchMap,
   from,
+  firstValueFrom,
 } from "rxjs";
 import { Song } from "../../../core/models/song.model";
 import { OfflineStorageService } from "./offline-storage.service";
 import { Reorder } from "../../../core/models/reorder.model";
 import { trackLoadingState } from "../../../core/utils/loading-state.util";
 import { StorageService } from "../../../core/services/storage.service";
+import { PlaylistService } from "../../../core/services/playlist.service";
+import { environment } from "../../../../environments/environment";
+
+/** Cap cover backfill per vault sync — avoid flooding /cover. */
+const COVER_BACKFILL_MAX = 40;
+const COVER_BACKFILL_CONC = 3;
 
 @Injectable({
   providedIn: "root",
@@ -25,6 +33,8 @@ export class LibraryService {
   private readonly offlineStorageService = inject(OfflineStorageService);
   private readonly userService = inject(UserService);
   private readonly storageService = inject(StorageService);
+  private readonly playlistService = inject(PlaylistService);
+  private readonly http = inject(HttpClient);
   private readonly LIBRARY_STORAGE_KEY = "library";
   readonly songs = signal<Song[]>(
     this.storageService.getItem<Song[]>(this.LIBRARY_STORAGE_KEY) || [],
@@ -32,6 +42,7 @@ export class LibraryService {
   readonly currentLoadingFavoriteSongIds = signal<string[]>([]);
   readonly loadingSongs = signal(false);
   private libraryUpdateSubscription: Subscription | null = null;
+  private coverBackfillGen = 0;
 
   constructor() {
     effect(() => {
@@ -104,6 +115,7 @@ export class LibraryService {
           });
           this.songs.set(merged);
           void this.offlineStorageService.syncOfflineSongs(merged);
+          void this.backfillMissingCovers(merged);
         },
         error: (error) => {
           if (error.status === 401 || error.status === 403) {
@@ -135,6 +147,10 @@ export class LibraryService {
         next: () => {
           this.songs.update((prev) => insertByOrder(prev, favoriteSong));
           void this.offlineStorageService.cacheSong(favoriteSong);
+          // Spotify import / resolve miss — still try iTunes after save.
+          if (!favoriteSong.image?.trim()) {
+            void this.fillOneCover(favoriteSong);
+          }
         },
       }),
       finalize(() => this.trackLoadingFavorite(song.id, false)),
@@ -184,16 +200,67 @@ export class LibraryService {
     return this.libraryApiService.reorderSongs(reorders);
   }
 
-  /** Persist cover URL on a vault track (localStorage + DB). No-op if not favorited. */
+  /** Persist cover URL on a vault track (localStorage + DB + queue). No-op if not favorited. */
   persistSongImage(link: string, image: string): void {
+    const img = image?.trim();
     const vault = this.songs().find((s) => s.link === link);
-    if (!vault || !image || vault.image === image) return;
+    if (!vault || !img || vault.image === img) return;
     this.songs.update((prev) =>
-      prev.map((s) => (s.link === link ? { ...s, image } : s)),
+      prev.map((s) => (s.link === link ? { ...s, image: img } : s)),
     );
-    this.libraryApiService.updateFavoriteImage(vault.id, image).subscribe({
+    this.playlistService.patchSongImage(link, img);
+    this.libraryApiService.updateFavoriteImage(vault.id, img).subscribe({
       error: () => {},
     });
+  }
+
+  /**
+   * After sync: fill empty vault art via /cover and persist.
+   * New Spotify imports should already arrive filled from /resolve.
+   */
+  private async backfillMissingCovers(songs: Song[]): Promise<void> {
+    const gen = ++this.coverBackfillGen;
+    const missing = songs.filter(
+      (s) =>
+        !!s.link &&
+        !s.image?.trim() &&
+        !!s.artist?.trim() &&
+        !!s.title?.trim(),
+    );
+    if (!missing.length) return;
+    const batch = missing.slice(0, COVER_BACKFILL_MAX);
+    let idx = 0;
+    const worker = async () => {
+      while (idx < batch.length) {
+        if (gen !== this.coverBackfillGen) return;
+        const s = batch[idx++];
+        await this.fillOneCover(s);
+      }
+    };
+    await Promise.all(
+      Array.from(
+        { length: Math.min(COVER_BACKFILL_CONC, batch.length) },
+        () => worker(),
+      ),
+    );
+  }
+
+  private async fillOneCover(s: Song): Promise<void> {
+    if (!s.link || s.image?.trim()) return;
+    if (this.songs().find((x) => x.link === s.link)?.image?.trim()) return;
+    const q = `${s.artist} ${s.title}`.trim();
+    if (!q) return;
+    try {
+      const r = await firstValueFrom(
+        this.http.get<{ image?: string }>(`${environment.API_URL}/cover`, {
+          params: { q },
+        }),
+      );
+      if (!r?.image?.trim()) return;
+      this.persistSongImage(s.link, r.image);
+    } catch {
+      /* leave placeholder */
+    }
   }
 
   /** Persist lyrics on a vault track after first explicit open. No-op if not favorited. */

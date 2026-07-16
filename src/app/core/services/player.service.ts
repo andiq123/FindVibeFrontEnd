@@ -70,6 +70,7 @@ export class PlayerService implements OnDestroy {
           this.consecutiveErrorSkips = 0;
           void this.requestWakeLock();
           this.startPersistLoop();
+          this.warmNextTrack();
         });
         return;
       }
@@ -82,6 +83,9 @@ export class PlayerService implements OnDestroy {
           status === PlayerStatus.Ended
         ) {
           this.persistNow();
+        }
+        if (status === PlayerStatus.Stopped || status === PlayerStatus.Error) {
+          this.audioService.clearPreload();
         }
       });
       if (status === PlayerStatus.Error) {
@@ -97,6 +101,22 @@ export class PlayerService implements OnDestroy {
           }
         });
       }
+    });
+    // Queue edits (play next / radio append) — keep standby src fresh.
+    effect(() => {
+      const nextLink = this.playlistService.upcoming()[0]?.link ?? "";
+      const status = this.status();
+      if (
+        status !== PlayerStatus.Playing &&
+        status !== PlayerStatus.Loading &&
+        status !== PlayerStatus.Paused
+      ) {
+        return;
+      }
+      untracked(() => {
+        void nextLink;
+        this.warmNextTrack();
+      });
     });
     if (typeof document !== "undefined") {
       document.addEventListener("visibilitychange", this.visibilityHandler);
@@ -195,30 +215,48 @@ export class PlayerService implements OnDestroy {
     this.playError.set("");
     this.allowErrorSkip = opts.fromQueue;
     this.playlistService.setCurrentSong(song);
-    this.audioService.pause();
-    this.audioService.seek(0);
     const secureLink = upgradeToHttps(song.link);
-    const offlineResponse =
-      await this.offlineStorageService.isAvailableOffline(secureLink);
-    if (gen !== this.loadGen) return gen;
-    if (offlineResponse) {
+
+    // Online: CDN first — never await Cache API before play() (breaks iOS auto-next).
+    // Offline: vault blob only.
+    let src = secureLink;
+    if (this.settingsService.isNavigatorOffline()) {
+      const offlineResponse =
+        await this.offlineStorageService.isAvailableOffline(secureLink);
+      if (gen !== this.loadGen) return gen;
+      if (!offlineResponse) {
+        this.playError.set("Not available offline");
+        this.audioService.fail();
+        this.persistNow();
+        return gen;
+      }
       const blob = await offlineResponse.blob();
       if (gen !== this.loadGen) return gen;
       this.currentObjectUrl = URL.createObjectURL(blob);
-      this.audioService.setSource(this.currentObjectUrl);
-    } else if (this.settingsService.isNavigatorOffline()) {
-      this.playError.set("Not available offline");
-      this.audioService.fail();
-      this.persistNow();
-      return gen;
-    } else {
-      this.audioService.setSource(secureLink);
+      src = this.currentObjectUrl;
     }
+
     if (gen !== this.loadGen) return gen;
-    if (opts.autoplay) await this.audioService.play();
-    else this.audioService.markPaused();
-    if (gen === this.loadGen) this.persistNow();
+    if (opts.autoplay) await this.audioService.playSource(src);
+    else {
+      this.audioService.setSource(src);
+      this.audioService.markPaused();
+    }
+    if (gen === this.loadGen) {
+      this.persistNow();
+      this.warmNextTrack();
+    }
     return gen;
+  }
+
+  /** Prefetch upcoming[0] into the standby audio element (online CDN only). */
+  private warmNextTrack(): void {
+    const next = this.playlistService.upcoming()[0];
+    if (!next?.link || this.settingsService.isNavigatorOffline()) {
+      this.audioService.clearPreload();
+      return;
+    }
+    this.audioService.preload(upgradeToHttps(next.link));
   }
 
   /** Retry hard-reloads the current track when we're on Error/Ended. */
@@ -338,12 +376,15 @@ export class PlayerService implements OnDestroy {
     if (link) this.storage.recordListenMs(link, PERSIST_EVERY_MS);
   }
   private onVisibility(): void {
-    if (document.visibilityState === "hidden") this.persistNow();
-    if (
-      document.visibilityState === "visible" &&
-      this.status() === PlayerStatus.Playing
-    ) {
+    if (document.visibilityState === "hidden") {
+      this.persistNow();
+      return;
+    }
+    // Foreground again — poke Fiber (Render sleep) + re-arm wake lock / preload.
+    this.settingsService.nudgeWake();
+    if (this.status() === PlayerStatus.Playing) {
       void this.requestWakeLock();
+      this.warmNextTrack();
     }
   }
   private async requestWakeLock(): Promise<void> {
@@ -381,6 +422,7 @@ export class PlayerService implements OnDestroy {
     this.stopPersistLoop();
     this.audioService.pause();
     this.audioService.setSource("");
+    this.audioService.clearPreload();
     this.playlistService.reset();
     this.cleanupObjectUrl();
     this.allowErrorSkip = false;

@@ -32,11 +32,24 @@
   ],
   "dataGroups": [
     {
+      "name": "api-explore",
+      "urls": [
+        "http://localhost:8080/explore*",
+        "http://localhost:8080/recommend*",
+        "https://*/explore*",
+        "https://*/recommend*"
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "6h",
+        "timeout": "5s",
+        "strategy": "freshness"
+      }
+    },
+    {
       "name": "api-fiber",
       "urls": [
         "http://localhost:8080/search*",
-        "http://localhost:8080/explore*",
-        "http://localhost:8080/recommend*",
         "http://localhost:8080/resolve*",
         "http://localhost:8080/spotify/**",
         "http://localhost:8080/similar-artists*",
@@ -45,8 +58,6 @@
         "http://localhost:8080/lyrics*",
         "http://localhost:8080/suggest*",
         "https://*/search*",
-        "https://*/explore*",
-        "https://*/recommend*",
         "https://*/resolve*",
         "https://*/spotify/**",
         "https://*/similar-artists*",
@@ -73,22 +84,6 @@
         "maxSize": 200,
         "maxAge": "30d",
         "timeout": "10s",
-        "strategy": "performance"
-      }
-    },
-    {
-      "name": "audio-files",
-      "urls": [
-        "https://song.muzvibe.org/*",
-        "https://mn1.sunproxy.net/*",
-        "https://*.mp3",
-        "https://*.m4a",
-        "https://*.wav"
-      ],
-      "cacheConfig": {
-        "maxSize": 50,
-        "maxAge": "7d",
-        "timeout": "30s",
         "strategy": "performance"
       }
     },

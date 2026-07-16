@@ -10,6 +10,9 @@ import { rankByListen, rotateIndex } from "../../core/utils/listen-rank";
 /** Client-only shelf ids — never passed back into Fiber chart merge. */
 const LOCAL_SHELF = new Set(["vault", "recents", "because"]);
 const BECAUSE_KEY = "exploreBecause";
+const CHARTS_KEY = "exploreCharts";
+/** Match Fiber exploreTTL / recommendTTL. */
+const CHARTS_TTL_MS = 6 * 60 * 60 * 1000;
 /** ponytail: /recommend is the expensive personalization hit — once/day per seed. */
 const BECAUSE_TTL_MS = 24 * 60 * 60 * 1000;
 const DAY_MS = 86_400_000;
@@ -36,6 +39,12 @@ type BecauseCache = {
   songs: Song[];
 };
 
+type ChartsCache = {
+  at: number;
+  country: string;
+  sections: ExploreSection[];
+};
+
 @Injectable({ providedIn: "root" })
 export class ExploreService {
   private readonly http = inject(HttpClient);
@@ -47,8 +56,6 @@ export class ExploreService {
   readonly loading = signal(false);
   readonly error = signal("");
   private loaded = false;
-  /** One silent sparse-art refresh per session — avoid refresh=1 loops. */
-  private triedSparseRefresh = false;
   /** Last chart payload from API (no local shelves). */
   private charts: ExploreSection[] = [];
   /** Personalized /recommend shelf — memory + localStorage 24h. */
@@ -59,21 +66,25 @@ export class ExploreService {
   /** Manual refresh bumps seed rotation within the same day. */
   private seedBump = 0;
 
-  /** Reuse in-memory shelves across navigations; server also caches charts 6h. */
+  /**
+   * Paint from disk instantly, then revalidate /explore in the background.
+   * Vault / recents are always local; because uses its own 24h cache.
+   */
   async load(refresh = false): Promise<void> {
     if (this.loading()) return;
+
+    // Warm in-memory session — skip network.
     if (!refresh && this.loaded && this.charts.length) {
-      // ponytail: old sessions may hold pre-cover shelves — one silent refresh
-      if (!artSparse(this.charts) || this.triedSparseRefresh) {
-        this.hydrateBecauseFromCache();
-        this.sections.set(this.merge(this.charts));
-        return;
-      }
-      this.triedSparseRefresh = true;
-      refresh = true;
+      this.hydrateBecauseFromCache();
+      this.sections.set(this.merge(this.charts));
+      return;
     }
 
-    this.loading.set(true);
+    // Cold start: show localStorage shelves immediately, then revalidate.
+    if (!refresh) this.paintFromDisk();
+
+    const painted = this.sections().length > 0;
+    if (!painted) this.loading.set(true);
     this.error.set("");
     try {
       const r = await firstValueFrom(
@@ -83,6 +94,7 @@ export class ExploreService {
       );
       this.charts = (r?.sections ?? []).filter((s) => !LOCAL_SHELF.has(s.id));
       this.country.set(r?.country || "Romania");
+      this.persistCharts();
       this.hydrateBecauseFromCache();
       this.sections.set(this.merge(this.charts));
       this.loaded = true;
@@ -90,9 +102,10 @@ export class ExploreService {
       if (refresh) await this.fetchBecauseIfNeeded(true);
       else void this.fetchBecauseIfNeeded(false);
     } catch {
-      this.charts = [];
+      // Keep disk/memory shelves — only error when nothing to show.
+      if (!this.charts.length) this.hydrateChartsFromCache(true);
       this.hydrateBecauseFromCache();
-      const local = this.merge([]);
+      const local = this.merge(this.charts);
       if (local.length) {
         this.sections.set(local);
         this.loaded = true;
@@ -104,16 +117,54 @@ export class ExploreService {
     }
   }
 
-  /** Manual / pull-to-refresh — bust charts + personalized 24h cache, rotate seed. */
+  /** Manual / pull-to-refresh — bust charts + personalized cache, rotate seed. */
   refresh(): Promise<void> {
     this.storage.removeItem(BECAUSE_KEY);
+    this.storage.removeItem(CHARTS_KEY);
     this.because = null;
     this.becauseSeed = null;
     this.becauseFetchKey = null;
     this.becauseFetchGen++;
     this.seedBump++;
-    this.triedSparseRefresh = false;
+    this.charts = [];
+    this.loaded = false;
     return this.load(true);
+  }
+
+  /** Instant UI from localStorage charts + because + vault/recents. */
+  private paintFromDisk(): void {
+    // Fresh preferred; stale still paints while network revalidates.
+    const hadCharts =
+      this.hydrateChartsFromCache(false) || this.hydrateChartsFromCache(true);
+    this.hydrateBecauseFromCache();
+    if (hadCharts || this.because || this.hasLocalShelves()) {
+      this.sections.set(this.merge(this.charts));
+    }
+  }
+
+  private hasLocalShelves(): boolean {
+    return (
+      this.library.songs().length >= 3 ||
+      this.storage.recentSongs().length >= 3
+    );
+  }
+
+  private hydrateChartsFromCache(allowStale: boolean): boolean {
+    const c = this.storage.getItem<ChartsCache>(CHARTS_KEY);
+    if (!c?.sections?.length) return false;
+    if (!allowStale && Date.now() - c.at > CHARTS_TTL_MS) return false;
+    this.charts = c.sections.filter((s) => !LOCAL_SHELF.has(s.id));
+    if (c.country) this.country.set(c.country);
+    return this.charts.length > 0;
+  }
+
+  private persistCharts(): void {
+    if (!this.charts.length) return;
+    this.storage.setItem(CHARTS_KEY, {
+      at: Date.now(),
+      country: this.country(),
+      sections: this.charts,
+    } satisfies ChartsCache);
   }
 
   /** Vault + recents + cached because, then Fiber charts. */
@@ -219,7 +270,9 @@ export class ExploreService {
     try {
       const songs = await firstValueFrom(
         this.http.get<Song[]>(`${environment.API_URL}/recommend`, {
-          params: { artist: seed.artist, title: seed.title },
+          params: force
+            ? { artist: seed.artist, title: seed.title, refresh: "1" }
+            : { artist: seed.artist, title: seed.title },
         }),
       );
       if (gen !== this.becauseFetchGen || this.seedKey() !== key) return;
@@ -278,16 +331,4 @@ function takeUnique(songs: Song[], n: number): Song[] {
     if (out.length >= n) break;
   }
   return out;
-}
-
-function artSparse(charts: ExploreSection[]): boolean {
-  let total = 0;
-  let missing = 0;
-  for (const s of charts) {
-    for (const song of s.songs) {
-      total++;
-      if (!song.image?.trim()) missing++;
-    }
-  }
-  return total > 0 && missing * 2 >= total;
 }

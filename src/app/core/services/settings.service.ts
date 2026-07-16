@@ -6,6 +6,7 @@ import {
   Observable,
   catchError,
   defer,
+  EMPTY,
   retry,
   switchMap,
   tap,
@@ -135,6 +136,23 @@ export class SettingsService implements OnDestroy {
 
   wakeServer(): Observable<void> {
     return this.httpClient.get<void>(this.healthUrl);
+  }
+
+  /**
+   * Single /health poke after resume — Render may have slept while the PWA
+   * was backgrounded even if we previously marked Up.
+   */
+  nudgeWake(): void {
+    this.wakeServer()
+      .pipe(
+        timeout({ first: 12_000 }),
+        tap(() => this.setServerUp()),
+        catchError(() => {
+          this.setServerDown();
+          return EMPTY;
+        }),
+      )
+      .subscribe();
   }
 
   /**

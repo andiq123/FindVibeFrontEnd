@@ -1,5 +1,10 @@
-import { rankByListen, rotateIndex, ListenStats } from "./listen-rank";
-import { Song } from "../models/song.model";
+import {
+  rankByListen,
+  rotateIndex,
+  pickVaultRadioSeed,
+  ListenStats,
+} from "./listen-rank";
+import { Song, songKey } from "../models/song.model";
 
 const song = (n: number, order = n): Song => ({
   id: String(n),
@@ -33,5 +38,20 @@ describe("listen-rank", () => {
     expect(rotateIndex(5, 2, 0)).toBe(2);
     expect(rotateIndex(5, 2, 1)).toBe(3);
     expect(rotateIndex(5, 4, 2)).toBe(1);
+  });
+
+  it("pickVaultRadioSeed rotates and skips last key", () => {
+    const songs = [1, 2, 3, 4].map((n) => song(n));
+    const stats: ListenStats = {
+      "https://x/1.mp3": { ms: 100_000, plays: 5, lastAt: 8 },
+      "https://x/2.mp3": { ms: 80_000, plays: 4, lastAt: 7 },
+      "https://x/3.mp3": { ms: 10_000, plays: 1, lastAt: 1 },
+      "https://x/4.mp3": { ms: 0, plays: 0, lastAt: 0 },
+    };
+    const a = pickVaultRadioSeed(songs, stats, 0);
+    expect(a).toBeTruthy();
+    const b = pickVaultRadioSeed(songs, stats, 1, songKey(a!));
+    expect(b).toBeTruthy();
+    expect(b!.link).not.toBe(a!.link);
   });
 });

@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import {
   EmptyError,
   Observable,
@@ -23,16 +23,20 @@ import { faLink, faXmark } from "../../../../shared/icons";
 
 type RowStatus =
   | "pending"
-  | "adding"
+  | "looking"
+  | "saving"
   | "added"
   | "skipped"
   | "miss"
+  | "failed"
   | "cancelled";
 
 type ImportRow = {
   artist: string;
   title: string;
   status: RowStatus;
+  /** Matched catalog title when it differs from Spotify. */
+  matched?: string;
 };
 
 type PlaylistPayload = {
@@ -117,11 +121,10 @@ type PlaylistPayload = {
         @if (rows().length) {
           <div class="space-y-1.5" aria-label="Import progress">
             <div class="flex items-center justify-between gap-2">
-              <p class="text-[11px] font-medium text-base-content/50 truncate min-w-0">
+              <p
+                class="text-[11px] font-medium text-base-content/50 truncate min-w-0"
+              >
                 {{ playlistName() || "Playlist" }}
-                @if (done() && !running()) {
-                  · Done
-                }
               </p>
               <p
                 class="shrink-0 text-[11px] font-semibold tabular-nums text-base-content/60"
@@ -158,16 +161,22 @@ type PlaylistPayload = {
                   [style.width.%]="progress().missPct"
                 ></span>
               }
+              @if (progress().failedPct) {
+                <span
+                  class="h-full bg-error/70 transition-[width] duration-300 ease-out"
+                  [style.width.%]="progress().failedPct"
+                ></span>
+              }
               @if (progress().cancelledPct) {
                 <span
-                  class="h-full bg-error/50 transition-[width] duration-300 ease-out"
+                  class="h-full bg-error/40 transition-[width] duration-300 ease-out"
                   [style.width.%]="progress().cancelledPct"
                 ></span>
               }
-              @if (progress().addingPct) {
+              @if (progress().activePct) {
                 <span
                   class="h-full bg-primary/70 animate-pulse transition-[width] duration-300 ease-out"
-                  [style.width.%]="progress().addingPct"
+                  [style.width.%]="progress().activePct"
                 ></span>
               }
             </div>
@@ -177,27 +186,54 @@ type PlaylistPayload = {
             </p>
           </div>
 
+          @if (done() && !running()) {
+            <div
+              class="rounded-xl bg-base-content/[0.05] px-3 py-2.5 space-y-1"
+              role="status"
+              aria-label="Import report"
+            >
+              <p class="text-xs font-bold tracking-tight">
+                {{ reportTitle() }}
+              </p>
+              <p class="text-[11px] text-base-content/60 leading-relaxed">
+                {{ reportBody() }}
+              </p>
+            </div>
+          }
+
           <ul
             class="max-h-56 overflow-y-auto space-y-1 pr-0.5 overscroll-contain touch-pan-y"
             aria-live="polite"
           >
             @for (row of rows(); track $index) {
               <li
-                class="flex items-center gap-2 text-xs py-1.5 px-2 rounded-lg bg-base-content/[0.04]"
+                class="flex items-start gap-2 text-xs py-1.5 px-2 rounded-lg bg-base-content/[0.04]"
               >
                 <span
-                  class="shrink-0 w-[4.25rem] text-[10px] font-bold uppercase tracking-wide"
+                  class="shrink-0 w-[4.5rem] pt-0.5 text-[10px] font-bold uppercase tracking-wide"
                   [class.text-base-content/35]="row.status === 'pending'"
-                  [class.text-primary]="row.status === 'adding'"
+                  [class.text-primary]="
+                    row.status === 'looking' || row.status === 'saving'
+                  "
                   [class.text-success]="row.status === 'added'"
                   [class.text-base-content/45]="row.status === 'skipped'"
                   [class.text-warning/80]="row.status === 'miss'"
-                  [class.text-error/70]="row.status === 'cancelled'"
+                  [class.text-error/80]="row.status === 'failed'"
+                  [class.text-error/60]="row.status === 'cancelled'"
                 >
                   {{ statusLabel(row.status) }}
                 </span>
-                <span class="min-w-0 truncate text-base-content/75">
-                  {{ row.artist }} — {{ row.title }}
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-base-content/75">
+                    {{ row.artist }} — {{ row.title }}
+                  </span>
+                  @if (row.matched) {
+                    <span
+                      class="block truncate text-[10px] text-base-content/40 mt-0.5"
+                    >
+                      Matched {{ row.matched }}
+                    </span>
+                  }
                 </span>
               </li>
             }
@@ -237,8 +273,9 @@ export class SpotifyImportComponent implements OnDestroy {
     let added = 0;
     let skipped = 0;
     let miss = 0;
+    let failed = 0;
     let cancelled = 0;
-    let adding = 0;
+    let active = 0;
     for (const r of rows) {
       switch (r.status) {
         case "added":
@@ -250,15 +287,19 @@ export class SpotifyImportComponent implements OnDestroy {
         case "miss":
           miss++;
           break;
+        case "failed":
+          failed++;
+          break;
         case "cancelled":
           cancelled++;
           break;
-        case "adding":
-          adding++;
+        case "looking":
+        case "saving":
+          active++;
           break;
       }
     }
-    const settled = added + skipped + miss + cancelled;
+    const settled = added + skipped + miss + failed + cancelled;
     const pct = total ? Math.round((settled / total) * 100) : 0;
     const share = (n: number) => (total ? (n / total) * 100 : 0);
     return {
@@ -266,15 +307,17 @@ export class SpotifyImportComponent implements OnDestroy {
       added,
       skipped,
       miss,
+      failed,
       cancelled,
-      adding,
+      active,
       settled,
       pct,
       addedPct: share(added),
       skippedPct: share(skipped),
       missPct: share(miss),
+      failedPct: share(failed),
       cancelledPct: share(cancelled),
-      addingPct: share(adding),
+      activePct: share(active),
     };
   });
 
@@ -287,17 +330,30 @@ export class SpotifyImportComponent implements OnDestroy {
   progressLabel(): string {
     const p = this.progress();
     if (!p.total) return "";
-    const parts: string[] = [];
-    if (p.added) parts.push(`${p.added} added`);
-    if (p.skipped) parts.push(`${p.skipped} in vault`);
-    if (p.miss) parts.push(`${p.miss} missed`);
-    if (p.cancelled) parts.push(`${p.cancelled} cancelled`);
     if (this.running()) {
-      if (p.adding) parts.push("importing…");
-      else if (!parts.length) parts.push("starting…");
-    } else if (this.done() && !parts.length) {
-      parts.push("Nothing to import");
+      if (p.active) return `Working… ${p.settled}/${p.total}`;
+      return "Starting…";
     }
+    return this.reportBody();
+  }
+
+  reportTitle(): string {
+    const p = this.progress();
+    if (p.cancelled && p.settled < p.total) return "Import stopped";
+    if (p.added === 0 && p.skipped === 0) return "Nothing added";
+    if (p.added === p.total) return "All tracks added";
+    return "Import complete";
+  }
+
+  reportBody(): string {
+    const p = this.progress();
+    if (!p.total) return "";
+    const parts: string[] = [];
+    parts.push(`${p.added} added`);
+    if (p.skipped) parts.push(`${p.skipped} already in vault`);
+    if (p.miss) parts.push(`${p.miss} not found`);
+    if (p.failed) parts.push(`${p.failed} failed to save`);
+    if (p.cancelled) parts.push(`${p.cancelled} cancelled`);
     return parts.join(" · ");
   }
 
@@ -305,14 +361,18 @@ export class SpotifyImportComponent implements OnDestroy {
     switch (s) {
       case "pending":
         return "Queued";
-      case "adding":
-        return "Adding";
+      case "looking":
+        return "Looking";
+      case "saving":
+        return "Saving";
       case "added":
         return "Added";
       case "skipped":
         return "In vault";
       case "miss":
-        return "No match";
+        return "Not found";
+      case "failed":
+        return "Failed";
       case "cancelled":
         return "Stopped";
     }
@@ -323,7 +383,11 @@ export class SpotifyImportComponent implements OnDestroy {
     this.stop$.next();
     this.rows.update((list) =>
       list.map((r) =>
-        r.status === "pending" ? { ...r, status: "cancelled" as const } : r,
+        r.status === "pending" ||
+        r.status === "looking" ||
+        r.status === "saving"
+          ? { ...r, status: "cancelled" as const }
+          : r,
       ),
     );
     this.running.set(false);
@@ -369,7 +433,11 @@ export class SpotifyImportComponent implements OnDestroy {
           { params: { url: link } },
         ),
       );
-      if (gen !== this.gen || !pl) return;
+      if (gen !== this.gen) return;
+      if (!pl) {
+        this.running.set(false);
+        return;
+      }
 
       this.playlistName.set(pl.name || "Playlist");
       const rows: ImportRow[] = (pl.tracks ?? []).map((t) => ({
@@ -380,7 +448,16 @@ export class SpotifyImportComponent implements OnDestroy {
       this.rows.set(rows);
 
       const vaultKeys = new Set(
-        this.library.songs().map((s) => songKey(s)).filter(Boolean),
+        this.library
+          .songs()
+          .map((s) => songKey(s))
+          .filter(Boolean),
+      );
+      const vaultLinks = new Set(
+        this.library
+          .songs()
+          .map((s) => s.link)
+          .filter(Boolean),
       );
       const orders = this.library.reserveTopOrders(rows.length);
       let orderIdx = 0;
@@ -397,42 +474,71 @@ export class SpotifyImportComponent implements OnDestroy {
           continue;
         }
 
-        this.patch(i, "adding");
+        this.patch(i, "looking");
+        let song: Song | null;
         try {
-          const song = await this.req(
+          song = await this.req(
             this.http.get<Song>(`${environment.API_URL}/resolve`, {
-              params: { artist: row.artist, title: row.title },
+              params: {
+                artist: row.artist,
+                title: row.title,
+                strict: "1",
+              },
+            }),
+          );
+        } catch (err: unknown) {
+          if (gen !== this.gen) break;
+          this.patch(i, httpStatus(err) === 404 ? "miss" : "failed");
+          continue;
+        }
+
+        if (gen !== this.gen) break;
+        if (song === null) {
+          this.patch(i, "cancelled");
+          break;
+        }
+        if (!isPlayableMatch(row, song)) {
+          this.patch(i, "miss");
+          continue;
+        }
+
+        const sk = songKey(song);
+        if (
+          (sk && vaultKeys.has(sk)) ||
+          (song.link && vaultLinks.has(song.link))
+        ) {
+          this.patch(i, "skipped");
+          continue;
+        }
+
+        const matched =
+          songKey(row) !== sk
+            ? `${song.artist} — ${song.title}`
+            : undefined;
+        this.patch(i, "saving", matched);
+
+        try {
+          const saved = await this.req(
+            this.library.addToFavorites(song, user.id, {
+              order: orders[orderIdx++] ?? this.library.reserveTopOrders(1)[0],
             }),
           );
           if (gen !== this.gen) break;
-          if (song === null) {
+          if (saved === null) {
             this.patch(i, "cancelled");
             break;
           }
-
-          const sk = songKey(song);
-          if (sk && vaultKeys.has(sk)) {
-            this.patch(i, "skipped");
-            continue;
-          }
-
-          const order = orders[orderIdx++] ?? this.library.reserveTopOrders(1)[0];
-          const saved = await this.req(
-            this.library.addToFavorites(song, user.id, { order }),
-          );
-          if (gen !== this.gen || saved === null) {
-            if (this.rows()[i]?.status === "adding") this.patch(i, "cancelled");
-            break;
-          }
           if (sk) vaultKeys.add(sk);
-          this.patch(i, "added");
+          if (song.link) vaultLinks.add(song.link);
+          this.patch(i, "added", matched);
         } catch (err: unknown) {
           if (gen !== this.gen) break;
-          const status = (err as { status?: number })?.status;
-          if (status === 409) {
+          if (httpStatus(err) === 409) {
+            if (sk) vaultKeys.add(sk);
+            if (song.link) vaultLinks.add(song.link);
             this.patch(i, "skipped");
           } else {
-            this.patch(i, "miss");
+            this.patch(i, "failed");
           }
         }
       }
@@ -457,13 +563,48 @@ export class SpotifyImportComponent implements OnDestroy {
     }
   }
 
-  private patch(i: number, status: RowStatus) {
+  private patch(i: number, status: RowStatus, matched?: string) {
     this.rows.update((list) => {
       if (i < 0 || i >= list.length) return list;
-      if (list[i].status === status) return list;
+      const cur = list[i];
+      if (cur.status === status && cur.matched === matched) return list;
       const next = list.slice();
-      next[i] = { ...next[i], status };
+      next[i] = { ...cur, status, matched: matched ?? cur.matched };
       return next;
     });
   }
+}
+
+function httpStatus(err: unknown): number | undefined {
+  if (err instanceof HttpErrorResponse) return err.status;
+  return (err as { status?: number })?.status;
+}
+
+/** Playable + artist/title overlap — belt-and-suspenders with Fiber strict=1. */
+function isPlayableMatch(
+  want: Pick<Song, "artist" | "title">,
+  got: Song | null | undefined,
+): boolean {
+  if (!got?.link?.trim() || !got.title?.trim() || !got.artist?.trim()) {
+    return false;
+  }
+  const wantKey = songKey(want);
+  const gotKey = songKey(got);
+  if (wantKey && gotKey && wantKey === gotKey) return true;
+
+  const wantArt = (want.artist || "").toLowerCase().trim();
+  const gotArt = (got.artist || "").toLowerCase().trim();
+  const wantTitle = wantKey.split("|")[1] || "";
+  const gotTitle = gotKey.split("|")[1] || "";
+  if (!wantArt || !gotArt || !wantTitle || !gotTitle) return false;
+
+  const artistOK =
+    gotArt === wantArt ||
+    gotArt.includes(wantArt) ||
+    wantArt.includes(gotArt);
+  const titleOK =
+    gotTitle === wantTitle ||
+    gotTitle.includes(wantTitle) ||
+    wantTitle.includes(gotTitle);
+  return artistOK && titleOK;
 }
