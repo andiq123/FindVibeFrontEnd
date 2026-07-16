@@ -942,9 +942,6 @@ body {
   width: 100%;
   min-height: 3rem;
 }
-.player-action-dock--two {
-  grid-template-columns: 1fr 1fr;
-}
 .player-action {
   display: inline-flex;
   align-items: center;

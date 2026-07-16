@@ -442,7 +442,6 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openUpNext(): void {
-    if (!this.playlistService.upcoming().length) return;
     this.closeLyrics();
     if (this.upNextCloseId != null) {
       clearTimeout(this.upNextCloseId);
