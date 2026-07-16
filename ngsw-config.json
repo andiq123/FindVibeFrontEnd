@@ -45,7 +45,8 @@
       "name": "album-art",
       "urls": [
         "https://lh3.googleusercontent.com/*",
-        "https://jpg.muzjam.org/*"
+        "https://jpg.muzjam.org/*",
+        "https://*.mzstatic.com/**"
       ],
       "cacheConfig": {
         "maxSize": 200,

@@ -43,7 +43,7 @@
     </div>
     <div class="absolute inset-0 -z-20 overflow-hidden bg-base-100">
       <img
-        [ngSrc]="song().image || 'no_album_art.jpg'"
+        [ngSrc]="displayImage()"
         alt="Song Art BG"
         class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none opacity-40 blur-[40px] player-bg-image"
         fill
@@ -52,6 +52,17 @@
         referrerpolicy="no-referrer"
         draggable="false"
       />
+      @if (coverImage()) {
+        <img
+          [src]="coverImage()"
+          alt=""
+          class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none blur-[40px] player-bg-image artwork-cover-fade"
+          [class.is-in]="coverReady()"
+          (load)="onCoverLoaded()"
+          referrerpolicy="no-referrer"
+          draggable="false"
+        />
+      }
       <div class="absolute inset-0 bg-base-100/50 player-bg-overlay"></div>
     </div>
     <div
@@ -82,14 +93,24 @@
               </div>
             }
             <img
-              [ngSrc]="song().image || 'no_album_art.jpg'"
+              [ngSrc]="displayImage()"
               [alt]="song().title"
               width="340"
               height="340"
               priority
-              class="object-cover"
+              class="object-cover w-full h-full"
               referrerpolicy="no-referrer"
             />
+            @if (coverImage()) {
+              <img
+                [src]="coverImage()"
+                [alt]="song().title"
+                class="absolute inset-0 w-full h-full object-cover artwork-cover-fade"
+                [class.is-in]="coverReady()"
+                (load)="onCoverLoaded()"
+                referrerpolicy="no-referrer"
+              />
+            }
           </div>
         </div>
       </div>

@@ -22,4 +22,9 @@ export class LibraryApiService {
   removeFromFavorites(songId: string): Observable<unknown> {
     return this.httpClient.delete(`${BASE_API_URL}/favorites/${songId}`);
   }
+  updateFavoriteImage(songId: string, image: string): Observable<unknown> {
+    return this.httpClient.patch(`${BASE_API_URL}/favorites/${songId}/image`, {
+      image,
+    });
+  }
 }

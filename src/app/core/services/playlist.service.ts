@@ -92,4 +92,12 @@ export class PlaylistService {
     this.queue.set([]);
     this.currentIndex.set(-1);
   }
+
+  /** Keep now-playing / queue art in sync after vault cover persist. */
+  patchSongImage(link: string, image: string): void {
+    const patch = (list: Song[]) =>
+      list.map((s) => (s.link === link ? { ...s, image } : s));
+    this.queue.update(patch);
+    this.originalList.update(patch);
+  }
 }

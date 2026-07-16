@@ -146,6 +146,18 @@ export class LibraryService {
     return this.libraryApiService.reorderSongs(reorders);
   }
 
+  /** Persist cover URL on a vault track (localStorage + DB). No-op if not favorited. */
+  persistSongImage(link: string, image: string): void {
+    const vault = this.songs().find((s) => s.link === link);
+    if (!vault || !image || vault.image === image) return;
+    this.songs.update((prev) =>
+      prev.map((s) => (s.link === link ? { ...s, image } : s)),
+    );
+    this.libraryApiService.updateFavoriteImage(vault.id, image).subscribe({
+      error: () => {},
+    });
+  }
+
   changePlaces(id1: string, id2: string): void {
     this.songs.update((prevSongs) => {
       const index1 = prevSongs.findIndex((x) => x.id === id1);

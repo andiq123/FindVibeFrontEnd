@@ -1,17 +1,20 @@
 import {
   Component,
   computed,
+  effect,
   input,
   output,
   signal,
   inject,
+  untracked,
   OnInit,
   AfterViewInit,
   OnDestroy,
   Renderer2,
   ChangeDetectionStrategy,
 } from "@angular/core";
-import { DOCUMENT } from "@angular/common";
+import { DOCUMENT, NgOptimizedImage } from "@angular/common";
+import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
@@ -26,15 +29,17 @@ import {
 } from "../../../shared/icons";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
 import { SettingsService } from "../../../core/services/settings.service";
-import { NgOptimizedImage } from "@angular/common";
 import { FavoriteButtonComponent } from "../../../shared/favorite-button/favorite-button.component";
 import { SwipeDownDirective } from "../directives/swipe-down.directive";
 import { PlayerService } from "../../../core/services/player.service";
+import { PlaylistService } from "../../../core/services/playlist.service";
 import { Song } from "../../../core/models/song.model";
 import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
 import { TimeFormatPipe } from "../../../shared/pipes/time-format.pipe";
 import { upgradeToHttps } from "../../../core/utils/utils";
 import { OfflineStorageService } from "../../library/services/offline-storage.service";
+import { LibraryService } from "../../library/services/library.service";
+import { environment } from "../../../../environments/environment";
 
 const OPEN_ANIM_MS = 500;
 const CLOSE_ANIM_MS = 350;
@@ -58,6 +63,9 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly playerService = inject(PlayerService);
   readonly settingsService = inject(SettingsService);
   private offlineStorage = inject(OfflineStorageService);
+  private libraryService = inject(LibraryService);
+  private playlistService = inject(PlaylistService);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
@@ -85,6 +93,10 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   isOpened = signal(false);
   isDraggingTime = signal(false);
   dragTime = signal(0);
+  coverImage = signal("");
+  coverReady = signal(false);
+  /** Base layer only — overlay fades iTunes/vault fill on top. */
+  displayImage = computed(() => this.song().image || "no_album_art.jpg");
   displayTime = computed(() =>
     this.isDraggingTime() ? this.dragTime() : this.currentTime(),
   );
@@ -93,6 +105,53 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (dur <= 0) return 0;
     return Math.min(100, (this.displayTime() / dur) * 100);
   });
+  private coverLink = "";
+
+  constructor() {
+    // ponytail: vault-only fill. Reset on track change only — not on library/playlist writes.
+    effect((onCleanup) => {
+      const s = this.song();
+      if (s.link !== this.coverLink) {
+        this.coverLink = s.link;
+        this.coverImage.set("");
+        this.coverReady.set(false);
+      }
+      if (s.image?.trim() || this.coverImage()) return;
+
+      const vault = untracked(() =>
+        this.libraryService.songs().find((x) => x.link === s.link),
+      );
+      if (!vault) return;
+      if (vault.image?.trim()) {
+        this.coverImage.set(vault.image);
+        return;
+      }
+
+      const q = `${s.artist} ${s.title}`.trim();
+      if (!q) return;
+      const sub = this.http
+        .get<{ image?: string }>(`${environment.API_URL}/cover`, {
+          params: { q },
+        })
+        .subscribe({
+          next: (r) => {
+            if (!r?.image || this.coverLink !== s.link) return;
+            this.coverImage.set(r.image);
+            this.libraryService.persistSongImage(s.link, r.image);
+          },
+          error: () => {},
+        });
+      onCleanup(() => sub.unsubscribe());
+    });
+  }
+
+  onCoverLoaded(): void {
+    this.coverReady.set(true);
+    const image = this.coverImage();
+    const link = this.song().link;
+    if (image && link) this.playlistService.patchSongImage(link, image);
+  }
+
   ngOnInit() {
     this.renderer.setStyle(this.document.body, "overflow", "hidden");
   }

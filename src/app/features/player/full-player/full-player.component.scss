@@ -77,6 +77,22 @@
     filter: blur(20px);
   }
 }
+
+// Slow crossfade when iTunes cover replaces the placeholder.
+.artwork-cover-fade {
+  opacity: 0;
+  transition: opacity 1.35s cubic-bezier(0.32, 0.72, 0, 1);
+  &.is-in { opacity: 1; }
+  &.player-bg-image.is-in {
+    opacity: 0.4;
+    @media (max-width: 768px) { opacity: 0.3; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+    opacity: 1;
+    &.player-bg-image { opacity: 0.4; }
+  }
+}
 .player-bg-overlay {
   @media (max-width: 768px) {
     background: color-mix(in oklab, var(--color-base-100) 60%, transparent);
