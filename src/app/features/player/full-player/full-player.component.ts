@@ -266,20 +266,87 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       await this.playerService.play();
     }
   }
-  onTimeDragStart() {
-    this.dragTime.set(this.currentTime());
+  private seekPointerId: number | null = null;
+  private lastLiveSeekAt = 0;
+
+  /** Native-style scrub: pointer capture + live preview, throttled seek. */
+  onSeekPointerDown(event: PointerEvent): void {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    const bar = event.currentTarget as HTMLElement;
+    bar.setPointerCapture(event.pointerId);
+    this.seekPointerId = event.pointerId;
     this.isDraggingTime.set(true);
+    this.scrubToClientX(bar, event.clientX, true);
+    event.preventDefault();
+    event.stopPropagation();
   }
-  onTimeChange(event: Event) {
-    const value = +(event.target as HTMLInputElement).value;
-    this.dragTime.set(value);
-    // Live scrub — instant UI + audio, no wait for pointerup.
-    this.playerService.seek(value);
+
+  onSeekPointerMove(event: PointerEvent): void {
+    if (!this.isDraggingTime() || event.pointerId !== this.seekPointerId) return;
+    this.scrubToClientX(event.currentTarget as HTMLElement, event.clientX, false);
+    event.preventDefault();
   }
-  onTimeDragEnd(event: Event) {
-    const value = +(event.target as HTMLInputElement).value;
-    this.playerService.seek(value);
+
+  onSeekPointerUp(event: PointerEvent): void {
+    if (event.pointerId !== this.seekPointerId) return;
+    const bar = event.currentTarget as HTMLElement;
+    this.scrubToClientX(bar, event.clientX, true);
     this.isDraggingTime.set(false);
+    this.seekPointerId = null;
+    try {
+      bar.releasePointerCapture(event.pointerId);
+    } catch {
+      /* already released */
+    }
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onSeekKeydown(event: KeyboardEvent): void {
+    const dur = this.duration();
+    if (dur <= 0) return;
+    const step = event.shiftKey ? 10 : 5;
+    let t = this.displayTime();
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowUp":
+        t = Math.min(dur, t + step);
+        break;
+      case "ArrowLeft":
+      case "ArrowDown":
+        t = Math.max(0, t - step);
+        break;
+      case "Home":
+        t = 0;
+        break;
+      case "End":
+        t = dur;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    this.dragTime.set(t);
+    this.playerService.seek(t);
+  }
+
+  private scrubToClientX(
+    bar: HTMLElement,
+    clientX: number,
+    forceSeek: boolean,
+  ): void {
+    const dur = this.duration();
+    if (!(dur > 0)) return;
+    const rect = bar.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const t = ratio * dur;
+    this.dragTime.set(t);
+    const now = performance.now();
+    if (forceSeek || now - this.lastLiveSeekAt >= 48) {
+      this.lastLiveSeekAt = now;
+      this.playerService.seek(t);
+    }
   }
   async next() {
     await this.playerService.setNextSong();

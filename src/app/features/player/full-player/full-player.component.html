@@ -164,10 +164,22 @@
             <app-favorite-button [song]="song()" />
           </div>
         </div>
-        <div class="seek -mt-0.5">
+        <div class="seek">
           <div
             class="seek-bar"
             [class.seek-bar--dragging]="isDraggingTime()"
+            role="slider"
+            tabindex="0"
+            aria-label="Seek"
+            [attr.aria-valuemin]="0"
+            [attr.aria-valuemax]="duration() || 0"
+            [attr.aria-valuenow]="displayTime()"
+            [attr.aria-valuetext]="displayTime() | timeFormat"
+            (pointerdown)="onSeekPointerDown($event)"
+            (pointermove)="onSeekPointerMove($event)"
+            (pointerup)="onSeekPointerUp($event)"
+            (pointercancel)="onSeekPointerUp($event)"
+            (keydown)="onSeekKeydown($event)"
           >
             <div class="seek-track" aria-hidden="true">
               <div
@@ -175,28 +187,9 @@
                 [style.width.%]="progressPercent()"
               ></div>
             </div>
-            <input
-              type="range"
-              class="seek-input"
-              min="0"
-              [max]="duration() || 0"
-              step="any"
-              [value]="displayTime()"
-              (pointerdown)="onTimeDragStart(); $event.stopPropagation()"
-              (input)="onTimeChange($event)"
-              (pointerup)="onTimeDragEnd($event); $event.stopPropagation()"
-              (pointercancel)="onTimeDragEnd($event)"
-              (change)="onTimeDragEnd($event)"
-              aria-label="Seek"
-              role="slider"
-              [attr.aria-valuemin]="0"
-              [attr.aria-valuemax]="duration()"
-              [attr.aria-valuenow]="displayTime()"
-              [attr.aria-valuetext]="(displayTime() | timeFormat)"
-            />
           </div>
           <div
-            class="flex justify-between text-xs font-medium text-base-content/50 tabular-nums px-0.5"
+            class="flex justify-between text-xs font-medium text-base-content/50 tabular-nums px-0.5 mt-0.5"
           >
             <span>{{ displayTime() | timeFormat }}</span>
             <span>{{ duration() | timeFormat }}</span>
@@ -271,12 +264,15 @@
           </button>
         </div>
 
-        <div class="relative pb-0.5">
-          <div class="player-chip-row flex items-center justify-end gap-2 flex-wrap">
+        <div class="relative pt-1 pb-1">
+          <div
+            class="player-action-dock"
+            [class.player-action-dock--two]="!playlistService.upcoming().length"
+          >
             @if (playlistService.upcoming().length; as n) {
               <button
                 type="button"
-                class="player-chip inline-flex items-center gap-1.5 min-h-11 h-11 px-3.5 rounded-full bg-base-content/5 text-base-content/60 text-sm font-medium touch-manipulation active:bg-base-content/10"
+                class="player-chip player-action"
                 animate.enter="player-chip-in"
                 animate.leave="player-chip-out"
                 (click)="toggleUpNext()"
@@ -286,30 +282,28 @@
                 <span class="player-chip-label">Up next · {{ n }}</span>
                 <fa-icon
                   [icon]="faChevronRight"
-                  class="text-xs transition-transform duration-200"
+                  class="player-action-chevron"
                   [class.rotate-90]="upNextOpen()"
                 />
               </button>
             }
             <button
               type="button"
-              class="player-chip inline-flex items-center gap-1.5 min-h-11 h-11 px-3.5 rounded-full bg-base-content/5 text-base-content/60 text-sm font-medium touch-manipulation active:bg-base-content/10 transition-colors duration-200"
-              [class.text-primary]="lyricsOpen()"
-              [class.bg-primary/15]="lyricsOpen()"
+              class="player-chip player-action"
+              [class.player-action--active]="lyricsOpen()"
               (click)="toggleLyrics()"
               [attr.aria-expanded]="lyricsOpen()"
               aria-label="Show lyrics"
             >
-              <fa-icon [icon]="faMusic" class="text-xs" />
+              <fa-icon [icon]="faMusic" class="player-action-icon" />
               Lyrics
             </button>
             <button
               type="button"
-              class="player-chip inline-flex items-center gap-1.5 min-h-11 h-11 px-3.5 rounded-full bg-primary/15 text-primary text-sm font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50 transition-shadow duration-200"
+              class="player-chip player-action player-action--primary"
               (click)="startRadio()"
               [disabled]="radioService.loading()"
-              [class.ring-1]="playlistService.radioActive()"
-              [class.ring-primary/40]="playlistService.radioActive()"
+              [class.player-action--ring]="playlistService.radioActive()"
               aria-label="Start radio from this track"
             >
               @if (radioService.loading()) {
@@ -321,7 +315,7 @@
               } @else {
                 <fa-icon
                   [icon]="faWaveSquare"
-                  class="text-xs"
+                  class="player-action-icon"
                   animate.enter="player-chip-in"
                   animate.leave="player-chip-out"
                 />
