@@ -173,8 +173,8 @@
         <div class="flex items-center justify-between gap-1 pt-1">
           <button
             type="button"
-            class="transport-side"
-            [class.is-on]="settingsService.isShuffle()"
+            class="w-11 h-11 rounded-full flex items-center justify-center touch-manipulation text-base-content/40 active:scale-[0.92] active:bg-base-content/8 transition-colors"
+            [class.text-primary]="settingsService.isShuffle()"
             [attr.aria-label]="
               settingsService.isShuffle() ? 'Disable shuffle' : 'Enable shuffle'
             "
@@ -187,7 +187,7 @@
           <div class="flex items-center gap-1 sm:gap-3">
             <button
               type="button"
-              class="transport-skip"
+              class="w-12 h-12 rounded-full flex items-center justify-center touch-manipulation text-base-content/75 active:scale-[0.92] active:bg-base-content/8"
               aria-label="Previous track"
               (click)="previous()"
             >
@@ -209,7 +209,7 @@
             </button>
             <button
               type="button"
-              class="transport-skip"
+              class="w-12 h-12 rounded-full flex items-center justify-center touch-manipulation text-base-content/75 active:scale-[0.92] active:bg-base-content/8"
               aria-label="Next track"
               (click)="next()"
             >
@@ -219,14 +219,18 @@
 
           <button
             type="button"
-            class="transport-side relative"
-            [class.is-on]="settingsService.repeatMode() !== repeatModes.OFF"
+            class="relative w-11 h-11 rounded-full flex items-center justify-center touch-manipulation text-base-content/40 active:scale-[0.92] active:bg-base-content/8 transition-colors"
+            [class.text-primary]="settingsService.repeatMode() !== repeatModes.OFF"
             [attr.aria-label]="repeatLabel()"
             (click)="toggleRepeat()"
           >
             <fa-icon [icon]="faRepeat" class="text-lg" />
             @if (settingsService.repeatMode() === repeatModes.ONE) {
-              <span class="repeat-one" aria-hidden="true">1</span>
+              <span
+                class="absolute right-1.5 bottom-1.5 w-3.5 h-3.5 rounded-full bg-primary text-primary-content text-[8px] font-extrabold flex items-center justify-center pointer-events-none"
+                aria-hidden="true"
+                >1</span
+              >
             }
           </button>
         </div>

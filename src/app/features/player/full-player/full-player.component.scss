@@ -6,21 +6,18 @@
 
 .player-container {
   transform: translateY(100%);
-  
   &.anim-slide-up {
     animation: slide-up var(--anim-duration-slow) var(--anim-ease-ios) forwards;
   }
-  
   &.anim-slide-down {
     animation: slide-down 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
-  
   &.opened { transform: translateY(0); }
-  
+
   @media (max-width: 768px) {
     &.anim-slide-up, &.anim-slide-down { animation-duration: 0.2s; }
   }
-  
+
   @media (min-width: 1024px) {
     &.player-desktop {
       left: var(--sidebar-w, 72px);
@@ -34,15 +31,18 @@
       margin: 0 auto 1.5rem;
       border-radius: 1.5rem;
       overflow: hidden;
-      box-shadow: none;
       border: 1px solid rgba(0, 0, 0, 0.4);
       transform: translateY(calc(100% + 2rem));
       &.opened { transform: translateY(0); }
-      &.anim-slide-up.anim-slide-up { animation: slide-up-desktop var(--anim-duration-slow) var(--anim-ease-ios) forwards; }
-      &.anim-slide-down { animation: slide-down-desktop 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+      &.anim-slide-up {
+        animation: slide-up-desktop var(--anim-duration-slow) var(--anim-ease-ios) forwards;
+      }
+      &.anim-slide-down {
+        animation: slide-down-desktop 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
     }
   }
-  
+
   @media (prefers-reduced-motion: reduce) {
     transform: translateY(0) !important;
     animation: none !important;
@@ -50,33 +50,24 @@
 }
 
 @keyframes slide-up-desktop {
-  0% { transform: translateY(calc(100% + 2rem)); }
-  100% { transform: translateY(0); }
+  from { transform: translateY(calc(100% + 2rem)); }
+  to { transform: translateY(0); }
 }
-
 @keyframes slide-down-desktop {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(calc(100% + 2rem)); }
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(100% + 2rem)); }
 }
 
 .artwork-wrapper {
   transition: transform 0.8s cubic-bezier(0.32, 0.72, 0, 1);
   transform: scale(0.95);
-
   &.playing { transform: scale(1); }
-
   @media (max-width: 768px) {
     transition: transform 0.25s ease;
-    will-change: auto;
-    &.playing { transform: scale(1); }
   }
-
   @media (prefers-reduced-motion: reduce) {
     transition: none !important;
-    animation: none !important;
-    will-change: auto !important;
     transform: scale(1) !important;
-    &:active { transform: scale(1) !important; }
   }
 }
 
@@ -86,14 +77,12 @@
     filter: blur(20px);
   }
 }
-
 .player-bg-overlay {
   @media (max-width: 768px) {
     background: color-mix(in oklab, var(--color-base-100) 60%, transparent);
   }
 }
 
-/* iOS Music–style scrubber: thin track, small thumb, grows while dragging. */
 .seek-bar {
   position: relative;
   width: 100%;
@@ -103,52 +92,38 @@
   touch-action: none;
   user-select: none;
 }
-
 .seek-track {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
+  inset: 50% 0 auto;
   height: 3px;
   transform: translateY(-50%);
   border-radius: 999px;
   background: color-mix(in oklab, var(--color-base-content) 18%, transparent);
   pointer-events: none;
-  overflow: visible;
 }
-
 .seek-fill {
   position: relative;
   height: 100%;
   border-radius: inherit;
   background: var(--color-base-content);
-  /* no width transition — laggy scrub feels broken */
+  &::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-base-content);
+    transform: translate(50%, -50%);
+    transition: width 0.12s ease, height 0.12s ease;
+  }
 }
-
-.seek-fill::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--color-base-content);
-  transform: translate(50%, -50%);
-  box-shadow: 0 0 0 0 transparent;
-  transition: width 0.12s ease, height 0.12s ease, box-shadow 0.12s ease;
-}
-
-.seek-bar--dragging .seek-track {
-  height: 4px;
-}
-
+.seek-bar--dragging .seek-track { height: 4px; }
 .seek-bar--dragging .seek-fill::after {
   width: 14px;
   height: 14px;
-  box-shadow: 0 1px 4px color-mix(in oklab, #000 45%, transparent);
 }
-
 .seek-input {
   position: absolute;
   inset: 0;
@@ -162,14 +137,12 @@
   -webkit-appearance: none;
   background: transparent;
   touch-action: none;
-
   &::-webkit-slider-runnable-track,
   &::-moz-range-track {
     height: 28px;
     background: transparent;
     border: none;
   }
-
   &::-webkit-slider-thumb,
   &::-moz-range-thumb {
     width: 28px;
@@ -180,51 +153,4 @@
     -webkit-appearance: none;
     appearance: none;
   }
-}
-
-.transport-side,
-.transport-skip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 999px;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  transition: color 0.15s ease, background-color 0.15s ease, transform 0.12s ease;
-  color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
-
-  &:active {
-    transform: scale(0.92);
-    background: color-mix(in oklab, var(--color-base-content) 8%, transparent);
-  }
-
-  &.is-on {
-    color: var(--color-primary);
-  }
-}
-
-.transport-skip {
-  color: color-mix(in oklab, var(--color-base-content) 75%, transparent);
-  width: 3rem;
-  height: 3rem;
-}
-
-.repeat-one {
-  position: absolute;
-  right: 0.35rem;
-  bottom: 0.35rem;
-  width: 0.85rem;
-  height: 0.85rem;
-  border-radius: 999px;
-  background: var(--color-primary);
-  color: var(--color-primary-content);
-  font-size: 8px;
-  font-weight: 800;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
 }
