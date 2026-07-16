@@ -82,8 +82,18 @@ export class LibraryService {
             return;
           }
           const sortedSongs = [...songs].sort((a, b) => a.order - b.order);
-          this.songs.set(sortedSongs);
-          void this.offlineStorageService.syncOfflineSongs(sortedSongs);
+          // Keep local cover if API row is still empty (e.g. PATCH blocked before CORS fix).
+          const merged = sortedSongs.map((s) => {
+            if (s.image?.trim()) return s;
+            const prev = currentSongs.find((l) => l.link === s.link);
+            if (!prev?.image?.trim()) return s;
+            this.libraryApiService
+              .updateFavoriteImage(s.id, prev.image)
+              .subscribe({ error: () => {} });
+            return { ...s, image: prev.image };
+          });
+          this.songs.set(merged);
+          void this.offlineStorageService.syncOfflineSongs(merged);
         },
         error: (error) => {
           if (error.status === 401 || error.status === 403) {
