@@ -170,6 +170,16 @@
                 [emptyStateDescription]="songListEmptyDescription()"
                 (playlistChange)="onChangePlaylist()"
               />
+              @if (pagination(); as pages) {
+                @if (pages.totalPages > 1) {
+                  <div class="mt-4 px-2 pb-2">
+                    <app-pagination
+                      [pagination]="pages"
+                      (pageChange)="onPageChange($event)"
+                    />
+                  </div>
+                }
+              }
             </div>
           </div>
         </div>

@@ -6,10 +6,13 @@ import {
   inject,
   ChangeDetectionStrategy,
   untracked,
+  DestroyRef,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { SearchBarComponent } from "./search-bar/search-bar.component";
 import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
+import { PaginationComponent } from "../../shared/components/pagination/pagination.component";
 import { SearchStatus, sourceHost } from "../../core/models/song.model";
 import { Router } from "@angular/router";
 import { SearchService } from "./services/search.service";
@@ -35,6 +38,7 @@ import { PlayerStatus } from "../player/models/player.model";
     EmptyStateComponent,
     PageContentComponent,
     SongListComponent,
+    PaginationComponent,
     PlayerButtonComponent,
     FavoriteButtonComponent,
   ],
@@ -48,9 +52,11 @@ export class SearchPageComponent {
   private playlistService = inject(PlaylistService);
   public playerService = inject(PlayerService);
   private offlineStorageService = inject(OfflineStorageService);
+  private destroyRef = inject(DestroyRef);
   query = input<string>("");
   songs = computed(() => this.songsService.songs());
   status = computed(() => this.songsService.status());
+  pagination = computed(() => this.songsService.pagination());
   searchStatus = SearchStatus;
   faMagnifyingGlass = faMagnifyingGlass;
   faTriangleExclamation = faTriangleExclamation;
@@ -134,6 +140,16 @@ export class SearchPageComponent {
   }
   onChangePlaylist(): void {
     this.playlistService.setCurrentPlaylist(this.songs());
+  }
+
+  onPageChange(page: number): void {
+    const query = this.query();
+    if (!query) return;
+    this.songsService
+      .searchSongs(query, page)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async toggleTopSong(): Promise<void> {
