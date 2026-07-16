@@ -18,7 +18,6 @@ import { PlayerService } from "../../core/services/player.service";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
 import {
-  faForward,
   faGripVertical,
   faListUl,
   faTriangleExclamation,
@@ -63,7 +62,6 @@ export class SongComponent {
     this.settingsService.isNavigatorOffline() && !this.isAvailableOffline();
   isError = () => this.status() === PlayerStatus.Error;
   faTriangleExclamation = faTriangleExclamation;
-  faForward = faForward;
   faListUl = faListUl;
   faGripVertical = faGripVertical;
   sourceLabel = () => sourceHost(this.song().provider);
@@ -101,11 +99,6 @@ export class SongComponent {
   /** Keep row play/pause from firing when tapping the action cluster. */
   guardActions(event: Event) {
     event.stopPropagation();
-  }
-  playNext(event: Event) {
-    event.stopPropagation();
-    event.preventDefault();
-    this.playerService.playNext(this.song());
   }
   addToQueue(event: Event) {
     event.stopPropagation();

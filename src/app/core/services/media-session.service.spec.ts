@@ -1,6 +1,7 @@
 import {
   mediaArtworkSrc,
   mediaPlaybackState,
+  tabTitle,
 } from "./media-session.service";
 import { PlayerStatus } from "../../features/player/models/player.model";
 
@@ -25,5 +26,30 @@ describe("mediaPlaybackState", () => {
     expect(mediaPlaybackState(PlayerStatus.Paused)).toBe("paused");
     expect(mediaPlaybackState(PlayerStatus.Stopped)).toBe("none");
     expect(mediaPlaybackState(PlayerStatus.Error)).toBe("none");
+    expect(mediaPlaybackState(PlayerStatus.Error, true)).toBe("paused");
+  });
+});
+
+describe("tabTitle", () => {
+  const song = { title: "Hello", artist: "Adele" };
+
+  it("shows now-playing and resets when stopped", () => {
+    expect(tabTitle(song, PlayerStatus.Playing)).toBe(
+      "Hello · Adele · FindVibe",
+    );
+    expect(tabTitle(song, PlayerStatus.Paused)).toBe(
+      "❚❚ Hello · Adele · FindVibe",
+    );
+    expect(tabTitle(song, PlayerStatus.Stopped)).toBe("FindVibe");
+    expect(tabTitle(null, PlayerStatus.Playing)).toBe("FindVibe");
+  });
+
+  it("strips control chars", () => {
+    expect(
+      tabTitle(
+        { title: "Hi\nThere", artist: "A\u0000B" },
+        PlayerStatus.Playing,
+      ),
+    ).toBe("HiThere · AB · FindVibe");
   });
 });

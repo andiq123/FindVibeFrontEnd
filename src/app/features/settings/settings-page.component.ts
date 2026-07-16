@@ -14,6 +14,8 @@ import { PageContentComponent } from "../../shared/components/page-content/page-
 import { StorageInfoComponent } from "../library/components/storage-info/storage-info.component";
 import { SpotifyImportComponent } from "../library/components/spotify-import/spotify-import.component";
 import { UserService } from "../library/services/user.service";
+import { LibraryService } from "../library/services/library.service";
+import { OfflineStorageService } from "../library/services/offline-storage.service";
 import { PlayerService } from "../../core/services/player.service";
 import {
   SettingsService,
@@ -60,8 +62,33 @@ interface SourcesResponse {
           </h1>
         </header>
 
-        <section class="premium-card p-3.5" aria-label="Offline vault">
-          <app-storage-info />
+        <section class="premium-card p-3.5 space-y-3" aria-label="Offline vault">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <h2 class="text-sm font-bold tracking-tight">Auto-save offline</h2>
+              <p class="text-[11px] text-base-content/45 mt-0.5">
+                Cache audio when you add to vault or import from Spotify.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              class="shrink-0 w-11 h-6 rounded-full transition-colors relative"
+              [class.bg-primary]="autoOfflineCache()"
+              [class.bg-base-content/15]="!autoOfflineCache()"
+              [attr.aria-checked]="autoOfflineCache()"
+              aria-label="Auto-save vault songs for offline"
+              (click)="toggleAutoOfflineCache()"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-base-100 transition-transform"
+                [class.translate-x-5]="autoOfflineCache()"
+              ></span>
+            </button>
+          </div>
+          <div class="pt-1 border-t border-base-content/8">
+            <app-storage-info />
+          </div>
         </section>
 
         @if (isLoggedIn()) {
@@ -261,6 +288,8 @@ interface SourcesResponse {
 export class SettingsPageComponent {
   private http = inject(HttpClient);
   private userService = inject(UserService);
+  private library = inject(LibraryService);
+  private offline = inject(OfflineStorageService);
   private playerService = inject(PlayerService);
   private settingsService = inject(SettingsService);
   private storage = inject(StorageService);
@@ -277,6 +306,7 @@ export class SettingsPageComponent {
   username = computed(() => this.userService.user()?.username || "");
   suggestRegion = this.settingsService.suggestRegion;
   showPlayerDownload = this.settingsService.showPlayerDownload;
+  autoOfflineCache = this.settingsService.autoOfflineCache;
   recentCount = computed(() => this.storage.recentSongs().length);
 
   sources = resource({
@@ -295,6 +325,26 @@ export class SettingsPageComponent {
 
   toggleShowPlayerDownload() {
     this.settingsService.toggleShowPlayerDownload();
+  }
+
+  toggleAutoOfflineCache() {
+    const turningOn = !this.autoOfflineCache();
+    this.settingsService.toggleAutoOfflineCache();
+    if (turningOn) {
+      // Backfill vault audio so existing likes become offline-ready.
+      const vault = this.library.songs();
+      if (vault.length) {
+        void this.offline.cacheAllSongs(vault).then((r) => {
+          this.toast.show(
+            r.saved
+              ? `Saved ${r.saved} offline`
+              : r.skipped
+                ? "Vault already offline"
+                : "Couldn't save offline",
+          );
+        });
+      }
+    }
   }
 
   clearHistory() {

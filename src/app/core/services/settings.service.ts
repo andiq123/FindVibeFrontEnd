@@ -37,6 +37,8 @@ export class SettingsService implements OnDestroy {
   private readonly _suggestRegion = signal<SuggestRegion>("ro");
   /** Full-player Save/Download MP3 button. */
   private readonly _showPlayerDownload = signal(true);
+  /** Auto-cache vault audio when adding (heart / Spotify import). */
+  private readonly _autoOfflineCache = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
   private onlineHandler = () => this._isNavigatorOffline.set(false);
@@ -46,6 +48,7 @@ export class SettingsService implements OnDestroy {
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
   readonly suggestRegion = this._suggestRegion.asReadonly();
   readonly showPlayerDownload = this._showPlayerDownload.asReadonly();
+  readonly autoOfflineCache = this._autoOfflineCache.asReadonly();
   readonly isServerDown = computed(
     () => this._serverStatus() === ServerStatus.Down,
   );
@@ -79,6 +82,8 @@ export class SettingsService implements OnDestroy {
       this.storageService.getItem<SuggestRegion>("suggestRegion");
     const showPlayerDownload =
       this.storageService.getItem<boolean>("showPlayerDownload");
+    const autoOfflineCache =
+      this.storageService.getItem<boolean>("autoOfflineCache");
     if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
     if (suggestRegion === "ro" || suggestRegion === "device") {
@@ -86,6 +91,9 @@ export class SettingsService implements OnDestroy {
     }
     if (showPlayerDownload !== null) {
       this._showPlayerDownload.set(showPlayerDownload);
+    }
+    if (autoOfflineCache !== null) {
+      this._autoOfflineCache.set(autoOfflineCache);
     }
   }
 
@@ -124,6 +132,15 @@ export class SettingsService implements OnDestroy {
 
   toggleShowPlayerDownload(): void {
     this.setShowPlayerDownload(!this._showPlayerDownload());
+  }
+
+  setAutoOfflineCache(on: boolean): void {
+    this._autoOfflineCache.set(on);
+    this.storageService.setItem("autoOfflineCache", on);
+  }
+
+  toggleAutoOfflineCache(): void {
+    this.setAutoOfflineCache(!this._autoOfflineCache());
   }
 
   setServerUp(): void {

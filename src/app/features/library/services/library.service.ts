@@ -19,6 +19,7 @@ import { Reorder } from "../../../core/models/reorder.model";
 import { trackLoadingState } from "../../../core/utils/loading-state.util";
 import { StorageService } from "../../../core/services/storage.service";
 import { PlaylistService } from "../../../core/services/playlist.service";
+import { SettingsService } from "../../../core/services/settings.service";
 import { environment } from "../../../../environments/environment";
 
 /** Cap cover backfill per vault sync — avoid flooding /cover. */
@@ -34,6 +35,7 @@ export class LibraryService {
   private readonly userService = inject(UserService);
   private readonly storageService = inject(StorageService);
   private readonly playlistService = inject(PlaylistService);
+  private readonly settings = inject(SettingsService);
   private readonly http = inject(HttpClient);
   private readonly LIBRARY_STORAGE_KEY = "library";
   readonly songs = signal<Song[]>(
@@ -146,7 +148,10 @@ export class LibraryService {
       tap({
         next: () => {
           this.songs.update((prev) => insertByOrder(prev, favoriteSong));
-          void this.offlineStorageService.cacheSong(favoriteSong);
+          // Settings → Auto-save offline (heart + Spotify import).
+          if (this.settings.autoOfflineCache()) {
+            void this.offlineStorageService.cacheSong(favoriteSong);
+          }
           // Spotify import / resolve miss — still try iTunes after save.
           if (!favoriteSong.image?.trim()) {
             void this.fillOneCover(favoriteSong);

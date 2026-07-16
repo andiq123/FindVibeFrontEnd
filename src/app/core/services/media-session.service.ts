@@ -1,8 +1,26 @@
 import { Injectable, inject, effect, OnDestroy, untracked } from "@angular/core";
+import { Title } from "@angular/platform-browser";
 import { PlaylistService } from "./playlist.service";
 import { PlayerService } from "./player.service";
-import { PlayerStatus } from "../../features/player/models/player.model";
+import { SettingsService } from "./settings.service";
+import {
+  PlayerStatus,
+  RepeatMode,
+} from "../../features/player/models/player.model";
 import { Song } from "../models/song.model";
+
+const APP_TITLE = "FindVibe";
+
+const MEDIA_ACTIONS: MediaSessionAction[] = [
+  "play",
+  "pause",
+  "stop",
+  "previoustrack",
+  "nexttrack",
+  "seekbackward",
+  "seekforward",
+  "seekto",
+];
 
 /** Absolute https/blob URL for lock-screen artwork, or "". */
 export function mediaArtworkSrc(image: string): string {
@@ -23,10 +41,11 @@ export function mediaArtworkSrc(image: string): string {
 
 /**
  * Keep Now Playing alive across Ended→Loading→Playing gaps (iOS PWA).
- * Only true stop / hard error should drop the session to "none".
+ * Error with a current track stays "paused" so skip/retry doesn't dismiss the session.
  */
 export function mediaPlaybackState(
   status: PlayerStatus,
+  hasSong = false,
 ): MediaSessionPlaybackState {
   switch (status) {
     case PlayerStatus.Playing:
@@ -35,9 +54,31 @@ export function mediaPlaybackState(
       return "playing";
     case PlayerStatus.Paused:
       return "paused";
+    case PlayerStatus.Error:
+      return hasSong ? "paused" : "none";
     default:
       return "none";
   }
+}
+
+/** Browser / PWA tab title from now-playing — pure for the self-check. */
+export function tabTitle(
+  song: Pick<Song, "title" | "artist"> | null | undefined,
+  status: PlayerStatus,
+  app = APP_TITLE,
+): string {
+  const title = safeLabel(song?.title ?? "");
+  if (!title || status === PlayerStatus.Stopped) return app;
+  const artist = safeLabel(song?.artist ?? "") || "Unknown";
+  const track = `${title} · ${artist}`;
+  if (status === PlayerStatus.Paused || status === PlayerStatus.Error) {
+    return `❚❚ ${track} · ${app}`;
+  }
+  return `${track} · ${app}`;
+}
+
+function safeLabel(raw: string, max = 64): string {
+  return raw.replace(/[\u0000-\u001f\u007f]+/g, "").trim().slice(0, max);
 }
 
 @Injectable({
@@ -46,21 +87,34 @@ export function mediaPlaybackState(
 export class MediaSessionService implements OnDestroy {
   private readonly playlist = inject(PlaylistService);
   private readonly player = inject(PlayerService);
+  private readonly settings = inject(SettingsService);
+  private readonly title = inject(Title);
   private lastMetaKey = "";
   private lastStatus: PlayerStatus | null = null;
+  private lastTabTitle = "";
+  private lastCanNext: boolean | null = null;
+  private handlersBound = false;
   private positionTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     effect(() => {
-      if (!("mediaSession" in navigator)) return;
       const song = this.playlist.currentSong();
       const status = this.player.status();
-      untracked(() => this.sync(song, status));
+      // remaining + repeat gate next-track availability on the lock screen
+      const remaining = this.playlist.remaining();
+      const repeat = this.settings.repeatMode();
+      untracked(() => {
+        this.syncTabTitle(song, status);
+        if ("mediaSession" in navigator) {
+          this.sync(song, status, remaining, repeat);
+        }
+      });
     });
   }
 
   initialize(): void {
-    if (!("mediaSession" in navigator)) return;
+    if (!("mediaSession" in navigator) || this.handlersBound) return;
+    this.handlersBound = true;
     const ms = navigator.mediaSession;
     const seekBy = (offset: number) => {
       const next = this.player.currentTime() + offset;
@@ -89,20 +143,33 @@ export class MediaSessionService implements OnDestroy {
       ],
     ];
     for (const [action, handler] of handlers) {
-      try {
-        ms.setActionHandler(action, handler);
-      } catch {
-        // ponytail: not every action is supported on every OS
-      }
+      this.setAction(action, handler);
     }
   }
 
-  private sync(song: Song | null | undefined, status: PlayerStatus): void {
+  private syncTabTitle(
+    song: Song | null | undefined,
+    status: PlayerStatus,
+  ): void {
+    const next = tabTitle(song, status);
+    if (next === this.lastTabTitle) return;
+    this.lastTabTitle = next;
+    this.title.setTitle(next);
+  }
+
+  private sync(
+    song: Song | null | undefined,
+    status: PlayerStatus,
+    remaining: number,
+    repeat: RepeatMode,
+  ): void {
     const ms = navigator.mediaSession;
+    const hasSong = !!song?.link;
     const key = song
       ? `${song.link}\0${song.image}\0${song.title}\0${song.artist}`
       : "";
-    if (key !== this.lastMetaKey) {
+    const metaChanged = key !== this.lastMetaKey;
+    if (metaChanged) {
       this.lastMetaKey = key;
       if (song) {
         const src = mediaArtworkSrc(song.image);
@@ -122,24 +189,56 @@ export class MediaSessionService implements OnDestroy {
       }
     }
 
-    if (status === this.lastStatus) return;
-    this.lastStatus = status;
-    ms.playbackState = mediaPlaybackState(status);
+    const statusChanged = status !== this.lastStatus;
+    if (statusChanged) {
+      this.lastStatus = status;
+      ms.playbackState = mediaPlaybackState(status, hasSong);
+    }
 
     const playing = status === PlayerStatus.Playing;
     const keepAlive =
       playing ||
       status === PlayerStatus.Loading ||
-      status === PlayerStatus.Ended;
+      status === PlayerStatus.Ended ||
+      (status === PlayerStatus.Error && hasSong);
+
     this.armPositionTimer(playing);
-    if (playing) this.pushPosition();
-    else if (!keepAlive) {
+    if (playing || (metaChanged && keepAlive)) {
+      this.pushPosition();
+    } else if (statusChanged && !keepAlive) {
       try {
-        // empty state clears the scrubber — only when session truly stops
         ms.setPositionState({});
       } catch {
         /* ignore */
       }
+    }
+
+    this.syncNextAction(remaining, repeat);
+  }
+
+  /** Hide/disable next on lock screen when the queue can't advance. */
+  private syncNextAction(remaining: number, repeat: RepeatMode): void {
+    if (!this.handlersBound) return;
+    const canNext =
+      remaining > 0 ||
+      repeat === RepeatMode.ALL ||
+      this.playlist.radioActive();
+    if (canNext === this.lastCanNext) return;
+    this.lastCanNext = canNext;
+    this.setAction(
+      "nexttrack",
+      canNext ? () => void this.player.setNextSong() : null,
+    );
+  }
+
+  private setAction(
+    action: MediaSessionAction,
+    handler: MediaSessionActionHandler | null,
+  ): void {
+    try {
+      navigator.mediaSession.setActionHandler(action, handler);
+    } catch {
+      // ponytail: not every action is supported on every OS
     }
   }
 
@@ -162,7 +261,11 @@ export class MediaSessionService implements OnDestroy {
     const duration = this.player.duration();
     const position = this.player.currentTime();
     // setPositionState throws on NaN / position > duration
-    if (!(duration > 0) || !Number.isFinite(duration) || !Number.isFinite(position)) {
+    if (
+      !(duration > 0) ||
+      !Number.isFinite(duration) ||
+      !Number.isFinite(position)
+    ) {
       return;
     }
     try {
@@ -180,6 +283,15 @@ export class MediaSessionService implements OnDestroy {
     if (this.positionTimer != null) {
       clearInterval(this.positionTimer);
       this.positionTimer = null;
+    }
+    if (this.handlersBound && "mediaSession" in navigator) {
+      for (const action of MEDIA_ACTIONS) {
+        this.setAction(action, null);
+      }
+      this.handlersBound = false;
+    }
+    if (this.lastTabTitle !== APP_TITLE) {
+      this.title.setTitle(APP_TITLE);
     }
   }
 }
