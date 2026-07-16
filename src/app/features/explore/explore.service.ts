@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Song } from "../../core/models/song.model";
 import { environment } from "../../../environments/environment";
+import { HapticsService } from "../../core/services/haptics.service";
 
 export type ExploreSection = {
   id: string;
@@ -20,6 +21,7 @@ export type ExploreResponse = {
 @Injectable({ providedIn: "root" })
 export class ExploreService {
   private readonly http = inject(HttpClient);
+  private readonly haptics = inject(HapticsService);
 
   readonly sections = signal<ExploreSection[]>([]);
   readonly country = signal("Romania");
@@ -47,9 +49,11 @@ export class ExploreService {
       this.sections.set(r?.sections ?? []);
       this.country.set(r?.country || "Romania");
       this.loaded = true;
+      this.haptics.ready();
     } catch {
       if (!this.sections().length) {
         this.error.set("Couldn't load charts");
+        this.haptics.warnOnce("explore");
       }
     } finally {
       this.loading.set(false);

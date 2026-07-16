@@ -375,7 +375,10 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const s = this.song();
     const key = `${s.artist}\0${s.title}`;
-    if (key === this.lyricsKey && (this.lyricsText() || this.lyricsError())) return;
+    if (key === this.lyricsKey && (this.lyricsText() || this.lyricsError())) {
+      this.haptics.ready(); // sheet reopened with content already in hand
+      return;
+    }
 
     this.lyricsKey = key;
     this.lyricsText.set("");
@@ -388,6 +391,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       s.lyrics?.trim();
     if (cached) {
       this.lyricsText.set(cached);
+      this.haptics.ready();
       return;
     }
 
@@ -402,10 +406,12 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       const text = r?.lyrics?.trim();
       if (!text) {
         this.lyricsError.set("No lyrics for this track");
+        this.haptics.ready();
         return;
       }
       this.lyricsText.set(text);
       this.libraryService.persistSongLyrics(s.link, text);
+      this.haptics.ready();
     } catch (e: unknown) {
       if (this.destroyed || this.lyricsKey !== key) return;
       const err = e as {
@@ -418,13 +424,16 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       if (status === 0) {
         this.lyricsErrorHard.set(true);
         this.lyricsError.set("Can't reach the server");
+        this.haptics.warnOnce(`lyrics:${key}`);
       } else if (status >= 500 || code === "upstream") {
         this.lyricsErrorHard.set(true);
         this.lyricsError.set(msg || "Couldn't reach lyrics service");
+        this.haptics.warnOnce(`lyrics:${key}`);
       } else {
         // 404 not_found / instrumental — calm empty state, not an alarm.
         this.lyricsErrorHard.set(false);
         this.lyricsError.set(msg || "No lyrics for this track");
+        this.haptics.ready();
       }
     } finally {
       if (!this.destroyed) this.lyricsLoading.set(false);
@@ -495,10 +504,12 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       triggerFileDownload(objectUrl, filename);
       URL.revokeObjectURL(objectUrl);
       void this.offlineStorage.rememberResponse(song, forVault);
+      this.haptics.success();
     } catch {
       // CORS: file via direct URL; still try vault with no-cors path.
       triggerFileDownload(url, filename);
-      void this.offlineStorage.cacheSong(song);
+      this.haptics.success();
+      void this.offlineStorage.cacheSong(song, { silent: true });
     } finally {
       if (!this.destroyed) this.isDownloadingMp3.set(false);
     }

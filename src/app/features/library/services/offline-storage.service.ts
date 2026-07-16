@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from "@angular/core";
 import { bytesToGB, upgradeToHttps } from "../../../core/utils/utils";
 import { Song } from "../../../core/models/song.model";
 import { StorageService } from "../../../core/services/storage.service";
+import { HapticsService } from "../../../core/services/haptics.service";
 import { trackLoadingState } from "../../../core/utils/loading-state.util";
 
 const CACHE_NAME = "library-vault";
@@ -22,6 +23,7 @@ export class OfflineStorageService {
   private readonly _currentLoadingDownloadSongIds = signal<string[]>([]);
   private readonly _availableOfflineSongIds = signal<string[]>([]);
   private readonly storageService = inject(StorageService);
+  private readonly haptics = inject(HapticsService);
   readonly currentLoadingDownloadSongIds =
     this._currentLoadingDownloadSongIds.asReadonly();
   readonly availableOfflineSongIds = this._availableOfflineSongIds.asReadonly();
@@ -65,8 +67,9 @@ export class OfflineStorageService {
     }
   }
 
-  async cacheSong(song: Song): Promise<boolean> {
+  async cacheSong(song: Song, opts?: { silent?: boolean }): Promise<boolean> {
     const { saved, skipped } = await this.cacheAllSongs([song]);
+    if (saved > 0 && !opts?.silent) this.haptics.success();
     return saved > 0 || skipped > 0;
   }
 
@@ -121,6 +124,8 @@ export class OfflineStorageService {
     const n = Math.min(DOWNLOAD_CONCURRENCY, songs.length);
     await Promise.all(Array.from({ length: n }, () => worker()));
     await this.setUpStorage();
+    // Bulk only — single-song path haptics in cacheSong().
+    if (songs.length > 1 && result.saved > 0) this.haptics.success();
     return result;
   }
 

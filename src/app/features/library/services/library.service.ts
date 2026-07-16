@@ -129,7 +129,10 @@ export class LibraryService {
         next: () => {
           this.songs.update((prev) => [...prev, favoriteSong]);
           // Native feel: vault save starts as soon as you heart it.
-          void this.offlineStorageService.cacheSong(favoriteSong);
+          // silent: heart button already fired success haptic
+          void this.offlineStorageService.cacheSong(favoriteSong, {
+            silent: true,
+          });
         },
       }),
       finalize(() => this.trackLoadingFavorite(song.id, false)),

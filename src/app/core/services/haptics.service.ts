@@ -6,7 +6,8 @@ import { WebHaptics } from "web-haptics";
  * Presets (keep soft — music UI, not a game):
  *   selection → nav / toggles
  *   light     → play, next, prev
- *   success   → favorite, radio queued, reorder saved
+ *   soft      → async content ready (lyrics, search, explore)
+ *   success   → favorite, radio queued, reorder saved, download
  *   warning   → user-visible play failure (not auto-skip)
  * Never: buzz / heavy / error-triple on routine taps.
  */
@@ -26,6 +27,11 @@ export class HapticsService implements OnDestroy {
   /** Play / pause / next / prev / song row. */
   light(): void {
     this.fire("light");
+  }
+
+  /** Loading finished → content (or calm empty) is on screen. */
+  ready(): void {
+    this.fire("soft", 0.45);
   }
 
   /** Confirmations that landed. */
