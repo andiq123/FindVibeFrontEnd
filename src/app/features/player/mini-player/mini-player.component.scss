@@ -10,9 +10,10 @@
   }
 
   @media (min-width: 1024px) {
-    left: var(--sidebar-w) !important;
-    right: 0;
-    width: calc(100vw - var(--sidebar-w) - 2rem) !important;
+    /* 100vw + sidebar math overflows; pin to content column instead */
+    left: calc(var(--sidebar-w) + 1rem) !important;
+    right: 1rem;
+    width: auto !important;
     max-width: 520px;
     margin-left: auto;
     margin-right: auto;
