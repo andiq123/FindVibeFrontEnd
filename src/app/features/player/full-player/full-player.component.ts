@@ -47,7 +47,6 @@ import { TimeFormatPipe } from "../../../shared/pipes/time-format.pipe";
 import { upgradeToHttps } from "../../../core/utils/utils";
 import { OfflineStorageService } from "../../library/services/offline-storage.service";
 import { LibraryService } from "../../library/services/library.service";
-import { HapticsService } from "../../../core/services/haptics.service";
 import { ToastService } from "../../../core/services/toast.service";
 import { environment } from "../../../../environments/environment";
 
@@ -74,7 +73,6 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly settingsService = inject(SettingsService);
   private offlineStorage = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
-  private readonly haptics = inject(HapticsService);
   private readonly toast = inject(ToastService);
   readonly playlistService = inject(PlaylistService);
   readonly radioService = inject(RadioService);
@@ -262,7 +260,6 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }, CLOSE_ANIM_MS);
   }
   async togglePlay() {
-    this.haptics.light();
     if (this.status() === PlayerStatus.Playing) {
       this.playerService.pause();
     } else {
@@ -285,19 +282,15 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isDraggingTime.set(false);
   }
   async next() {
-    this.haptics.light();
     await this.playerService.setNextSong();
   }
   async previous() {
-    this.haptics.light();
     await this.playerService.setPreviousSong();
   }
   toggleRepeat() {
-    this.haptics.selection();
     this.playerService.toggleRepeat();
   }
   toggleShuffle() {
-    this.haptics.selection();
     this.playerService.toggleShuffle();
   }
   repeatLabel(): string {
@@ -363,21 +356,18 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   removeUpcoming(track: Song, event: Event): void {
     event.stopPropagation();
     this.playlistService.removeUpcoming(track.link);
-    this.haptics.selection();
     if (!this.playlistService.upcoming().length) this.closeUpNext();
   }
 
   clearUpcoming(event: Event): void {
     event.stopPropagation();
     this.playlistService.clearUpcoming();
-    this.haptics.selection();
     this.closeUpNext();
   }
 
   moveUpcoming(track: Song, dir: -1 | 1, event: Event): void {
     event.stopPropagation();
     this.playlistService.moveUpcoming(track.link, dir);
-    this.haptics.selection();
   }
   toggleUpNext(): void {
     if (this.upNextOpen() || this.upNextClosing()) this.closeUpNext();
@@ -442,7 +432,6 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     const s = this.song();
     const key = `${s.artist}\0${s.title}`;
     if (key === this.lyricsKey && (this.lyricsText() || this.lyricsError())) {
-      this.haptics.ready(); // sheet reopened with content already in hand
       return;
     }
 
@@ -457,7 +446,6 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       s.lyrics?.trim();
     if (cached) {
       this.lyricsText.set(cached);
-      this.haptics.ready();
       return;
     }
 
@@ -472,12 +460,10 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       const text = r?.lyrics?.trim();
       if (!text) {
         this.lyricsError.set("No lyrics for this track");
-        this.haptics.ready();
         return;
       }
       this.lyricsText.set(text);
       this.libraryService.persistSongLyrics(s.link, text);
-      this.haptics.ready();
     } catch (e: unknown) {
       if (this.destroyed || this.lyricsKey !== key) return;
       const err = e as {
@@ -490,16 +476,13 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       if (status === 0) {
         this.lyricsErrorHard.set(true);
         this.lyricsError.set("Can't reach the server");
-        this.haptics.warnOnce(`lyrics:${key}`);
       } else if (status >= 500 || code === "upstream") {
         this.lyricsErrorHard.set(true);
         this.lyricsError.set(msg || "Couldn't reach lyrics service");
-        this.haptics.warnOnce(`lyrics:${key}`);
       } else {
         // 404 not_found / instrumental — calm empty state, not an alarm.
         this.lyricsErrorHard.set(false);
         this.lyricsError.set(msg || "No lyrics for this track");
-        this.haptics.ready();
       }
     } finally {
       if (!this.destroyed && this.lyricsKey === key) {
@@ -534,7 +517,6 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     const current = this.song();
     const ok = await this.radioService.start(current);
     if (!ok) return;
-    this.haptics.success();
     this.toast.show("Radio queued");
     if (this.status() !== PlayerStatus.Playing) {
       await this.playerService.setSong(current);
@@ -542,7 +524,6 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async playUpcoming(song: Song) {
-    this.haptics.light();
     await this.playerService.setSong(song);
   }
 
@@ -563,12 +544,10 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       triggerFileDownload(objectUrl, filename);
       URL.revokeObjectURL(objectUrl);
       void this.offlineStorage.rememberResponse(song, forVault);
-      this.haptics.success();
     } catch {
       // CORS: file via direct URL; still try vault with no-cors path.
       triggerFileDownload(url, filename);
-      this.haptics.success();
-      void this.offlineStorage.cacheSong(song, { silent: true });
+      void this.offlineStorage.cacheSong(song);
     } finally {
       if (!this.destroyed) this.isDownloadingMp3.set(false);
     }

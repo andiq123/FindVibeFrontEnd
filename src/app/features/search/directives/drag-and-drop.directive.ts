@@ -1,10 +1,9 @@
 import { Directive, HostListener, output, ElementRef, inject, Renderer2 } from '@angular/core';
+
+/** Only `.song-drag-handle` starts a drag — row taps (play) never reorder. */
 @Directive({
   selector: '[appDragAndDrop]',
   standalone: true,
-  host: {
-    draggable: 'true',
-  },
 })
 export class DragAndDropDirective {
   private el = inject(ElementRef);
@@ -13,8 +12,16 @@ export class DragAndDropDirective {
   reorderSongs = output<{ from: string; to: string }>();
   @HostListener('dragstart', ['$event'])
   onDragStart(event: DragEvent): void {
-    const target = this.el.nativeElement;
+    const handle = (event.target as HTMLElement | null)?.closest?.(
+      '.song-drag-handle',
+    );
+    if (!handle) {
+      event.preventDefault();
+      return;
+    }
+    const target = this.el.nativeElement as HTMLElement;
     event.dataTransfer?.setData('id', target.id);
+    event.dataTransfer!.effectAllowed = 'move';
     this.renderer.addClass(target, 'dragging');
   }
   @HostListener('dragend')

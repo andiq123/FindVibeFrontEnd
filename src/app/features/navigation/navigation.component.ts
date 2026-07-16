@@ -7,7 +7,6 @@ import {
   faGear,
 } from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
-import { HapticsService } from "../../core/services/haptics.service";
 
 @Component({
   selector: "app-navigation",
@@ -17,12 +16,6 @@ import { HapticsService } from "../../core/services/haptics.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavigationComponent {
-  private readonly haptics = inject(HapticsService);
-
-  onNavTap(): void {
-    this.haptics.selection();
-  }
-
   /** Short labels — tab bar space is tight on mobile. */
   readonly navList = [
     {

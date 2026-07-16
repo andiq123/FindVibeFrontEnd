@@ -15,8 +15,8 @@ import { SettingsService } from "./settings.service";
 import { PlaylistService } from "./playlist.service";
 import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
 import { AudioService } from "./audio.service";
-import { HapticsService } from "./haptics.service";
 import { ToastService } from "./toast.service";
+import { StorageService } from "./storage.service";
 import { upgradeToHttps } from "../utils/utils";
 
 /** Cap consecutive dead tracks so a broken queue can't spin forever. */
@@ -31,8 +31,8 @@ export class PlayerService implements OnDestroy {
   private readonly playlistService = inject(PlaylistService);
   private readonly offlineStorageService = inject(OfflineStorageService);
   private readonly audioService = inject(AudioService);
-  private readonly haptics = inject(HapticsService);
   private readonly toast = inject(ToastService);
+  private readonly storage = inject(StorageService);
   private currentObjectUrl: string | null = null;
   private handlingSongEnded = false;
   private handlingSongError = false;
@@ -68,7 +68,6 @@ export class PlayerService implements OnDestroy {
           this.playError.set("");
           this.allowErrorSkip = false;
           this.consecutiveErrorSkips = 0;
-          this.haptics.clearWarn();
           void this.requestWakeLock();
           this.startPersistLoop();
         });
@@ -95,9 +94,6 @@ export class PlayerService implements OnDestroy {
             this.handleSongError().finally(() => {
               this.handlingSongError = false;
             });
-          } else if (!this.allowErrorSkip && !this.handlingSongError) {
-            const key = this.playlistService.currentSong()?.link ?? "";
-            this.haptics.warnOnce(key);
           }
         });
       }
@@ -162,7 +158,6 @@ export class PlayerService implements OnDestroy {
           ? "Skipped unavailable track"
           : `Skipped ${skipped} unavailable tracks`,
       );
-      this.haptics.selection();
     }
     if (this.status() === PlayerStatus.Error) {
       this.allowErrorSkip = false;
@@ -298,14 +293,12 @@ export class PlayerService implements OnDestroy {
   playNext(song: Song): void {
     if (this.playlistService.playNext(song)) {
       this.toast.show("Playing next");
-      this.haptics.selection();
     }
   }
 
   addToQueue(song: Song): void {
     if (this.playlistService.addToQueue(song)) {
       this.toast.show("Added to queue");
-      this.haptics.selection();
     } else {
       this.toast.show("Already in queue");
     }
@@ -326,10 +319,10 @@ export class PlayerService implements OnDestroy {
   private startPersistLoop(): void {
     if (this.persistTimerId != null) return;
     this.persistNow();
-    this.persistTimerId = setInterval(
-      () => this.persistNow(),
-      PERSIST_EVERY_MS,
-    );
+    this.persistTimerId = setInterval(() => {
+      this.persistNow();
+      this.recordListenTick();
+    }, PERSIST_EVERY_MS);
   }
   private stopPersistLoop(): void {
     if (this.persistTimerId == null) return;
@@ -338,6 +331,11 @@ export class PlayerService implements OnDestroy {
   }
   private persistNow(): void {
     this.playlistService.persist(this.currentTime());
+  }
+  private recordListenTick(): void {
+    if (this.status() !== PlayerStatus.Playing) return;
+    const link = this.playlistService.currentSong()?.link;
+    if (link) this.storage.recordListenMs(link, PERSIST_EVERY_MS);
   }
   private onVisibility(): void {
     if (document.visibilityState === "hidden") this.persistNow();

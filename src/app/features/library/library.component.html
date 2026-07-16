@@ -3,16 +3,25 @@
 } @else {
   <app-page-content>
     <div class="w-full mb-4">
-      <div class="flex flex-col">
-        <span
-          class="text-[10px] font-bold text-base-content/50 uppercase tracking-[0.18em]"
-          >Your Library</span
-        >
-        <h1
-          class="font-bold text-2xl tracking-tight bg-gradient-to-br from-base-content via-base-content/95 to-primary/80 bg-clip-text text-transparent"
-        >
-          {{ username() ? (username() | titlecase) : "My" }}'s Vault
-        </h1>
+      <div class="flex flex-wrap items-end justify-between gap-x-3 gap-y-3">
+        <div class="flex flex-col min-w-0">
+          <span
+            class="text-[10px] font-bold text-base-content/50 uppercase tracking-[0.18em]"
+            >Your Library</span
+          >
+          <div class="flex items-baseline gap-2.5 min-w-0">
+            <h1
+              class="font-bold text-2xl tracking-tight bg-gradient-to-br from-base-content via-base-content/95 to-primary/80 bg-clip-text text-transparent truncate"
+            >
+              {{ username() ? (username() | titlecase) : "My" }}'s Vault
+            </h1>
+            <span class="shrink-0 text-xs text-base-content/40 tabular-nums">
+              {{ songCount() }}
+              {{ songCount() === 1 ? "song" : "songs" }}
+            </span>
+          </div>
+        </div>
+        <app-spotify-import />
       </div>
     </div>
 
@@ -22,6 +31,7 @@
           [songs]="songs()"
           [isLoading]="loadingSongs()"
           [allowReorder]="true"
+          [chunkSize]="24"
           emptyStateTitle="No vibes yet"
           emptyStateDescription="When you add songs to your library, they'll show up here."
           (reorder)="reorderSongs($event)"

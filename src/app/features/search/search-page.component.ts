@@ -19,7 +19,6 @@ import { SearchService } from "./services/search.service";
 import { SettingsService } from "../../core/services/settings.service";
 import { PlayerService } from "../../core/services/player.service";
 import { PlaylistService } from "../../core/services/playlist.service";
-import { HapticsService } from "../../core/services/haptics.service";
 import { EmptyStateComponent } from "../../shared/empty-state/empty-state.component";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PlayerButtonComponent } from "../../shared/player-button/player-button.component";
@@ -53,7 +52,6 @@ export class SearchPageComponent {
   private playlistService = inject(PlaylistService);
   public playerService = inject(PlayerService);
   private offlineStorageService = inject(OfflineStorageService);
-  private haptics = inject(HapticsService);
   private destroyRef = inject(DestroyRef);
   query = input<string>("");
   songs = computed(() => this.songsService.songs());
@@ -157,7 +155,6 @@ export class SearchPageComponent {
   async toggleTopSong(): Promise<void> {
     const song = this.topSong();
     if (!song || this.isTopSongUnavailable()) return;
-    this.haptics.light();
 
     const current = this.playlistService.currentSong();
     const isActive = !!current && current.link === song.link;

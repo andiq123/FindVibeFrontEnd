@@ -14,7 +14,6 @@ import {
 import { UserService } from "../../features/library/services/user.service";
 import { LibraryService } from "../../features/library/services/library.service";
 import { Song } from "../../core/models/song.model";
-import { HapticsService } from "../../core/services/haptics.service";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 @Component({
   selector: "app-favorite-button",
@@ -27,7 +26,6 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 export class FavoriteButtonComponent {
   private userService = inject(UserService);
   private libraryService = inject(LibraryService);
-  private haptics = inject(HapticsService);
   private destroyRef = inject(DestroyRef);
   forPlayer = input<boolean>(false);
   song = input.required<Song>();
@@ -53,13 +51,11 @@ export class FavoriteButtonComponent {
     const user = this.userService.user();
     if (!user) return;
     if (this.isFavorited()) {
-      this.haptics.selection();
       this.libraryService
         .removeFromFavorites(this.song().id, this.song().link)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe();
     } else {
-      this.haptics.success();
       this.libraryService.addToFavorites(this.song(), user.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe();

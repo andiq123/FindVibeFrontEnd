@@ -17,10 +17,9 @@ import { DragAndDropDirective } from "../../features/search/directives/drag-and-
 import { PlayerService } from "../../core/services/player.service";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
-import { HapticsService } from "../../core/services/haptics.service";
 import {
-  faCloudArrowDown,
   faForward,
+  faGripVertical,
   faListUl,
   faTriangleExclamation,
 } from "../icons";
@@ -44,21 +43,14 @@ export class SongComponent {
   private playlistService = inject(PlaylistService);
   private offlineStorageService = inject(OfflineStorageService);
   private settingsService = inject(SettingsService);
-  private haptics = inject(HapticsService);
   song = input.required<Song>();
   allowReorder = input<boolean>(false);
   loading = input<boolean>(false);
-  showOfflineIndicator = input<boolean>(true);
-  isFavoritePage = input<boolean>(false);
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
   isActive = () => sameSong(this.playlistService.currentSong(), this.song());
   status = () =>
     this.isActive() ? this.playerService.status() : PlayerStatus.Paused;
-  isDownloadingOffline = () =>
-    this.offlineStorageService
-      .currentLoadingDownloadSongIds()
-      .includes(this.song().id);
   isAvailableOffline = () =>
     this.offlineStorageService
       .availableOfflineSongIds()
@@ -66,11 +58,10 @@ export class SongComponent {
   isUnavailable = () =>
     this.settingsService.isNavigatorOffline() && !this.isAvailableOffline();
   isError = () => this.status() === PlayerStatus.Error;
-  playerStatus = PlayerStatus;
-  faCloudArrowDown = faCloudArrowDown;
   faTriangleExclamation = faTriangleExclamation;
   faForward = faForward;
   faListUl = faListUl;
+  faGripVertical = faGripVertical;
   sourceLabel = () => sourceHost(this.song().provider);
   async play() {
     if (this.isActive()) {
@@ -85,7 +76,6 @@ export class SongComponent {
   }
   async playOrPause() {
     if (this.isUnavailable()) return;
-    this.haptics.light();
     if (this.status() === PlayerStatus.Playing) {
       await this.pause();
     } else {
@@ -99,23 +89,14 @@ export class SongComponent {
   guardActions(event: Event) {
     event.stopPropagation();
   }
-  async saveOffline(event: Event) {
-    event.stopPropagation();
-    event.preventDefault();
-    if (this.isDownloadingOffline() || this.isAvailableOffline()) return;
-    this.haptics.light();
-    await this.offlineStorageService.cacheSong(this.song());
-  }
   playNext(event: Event) {
     event.stopPropagation();
     event.preventDefault();
-    this.haptics.light();
     this.playerService.playNext(this.song());
   }
   addToQueue(event: Event) {
     event.stopPropagation();
     event.preventDefault();
-    this.haptics.light();
     this.playerService.addToQueue(this.song());
   }
 }

@@ -122,23 +122,38 @@ export class LibraryService {
     );
   }
 
-  addToFavorites(song: Song, userId: string) {
+  /**
+   * Add to vault. Default: top of the list (newest first).
+   * Pass `order` to place explicitly (Spotify import keeps playlist order).
+   */
+  addToFavorites(song: Song, userId: string, opts?: { order?: number }) {
     this.trackLoadingFavorite(song.id, true);
-    const order = this.songs().length === 0 ? 1 : this.songs().length + 1;
+    const order = opts?.order ?? this.nextTopOrder();
     const favoriteSong: Song = { ...song, order };
     return this.libraryApiService.addToFavorites(favoriteSong, userId).pipe(
       tap({
         next: () => {
-          this.songs.update((prev) => [...prev, favoriteSong]);
-          // Native feel: vault save starts as soon as you heart it.
-          // silent: heart button already fired success haptic
-          void this.offlineStorageService.cacheSong(favoriteSong, {
-            silent: true,
-          });
+          this.songs.update((prev) => insertByOrder(prev, favoriteSong));
+          void this.offlineStorageService.cacheSong(favoriteSong);
         },
       }),
       finalize(() => this.trackLoadingFavorite(song.id, false)),
     );
+  }
+
+  /** Contiguous order values sitting above the current vault (playlist block). */
+  reserveTopOrders(count: number): number[] {
+    if (count < 1) return [];
+    const base = this.nextTopOrder() - (count - 1);
+    return Array.from({ length: count }, (_, i) => base + i);
+  }
+
+  private nextTopOrder(): number {
+    const prev = this.songs();
+    if (!prev.length) return 1;
+    let min = prev[0].order ?? 0;
+    for (const s of prev) min = Math.min(min, s.order ?? 0);
+    return min - 1;
   }
 
   removeFromFavorites(id: string, link: string) {
@@ -213,4 +228,13 @@ export class LibraryService {
   private trackLoadingFavorite(id: string, isLoading: boolean): void {
     trackLoadingState(this.currentLoadingFavoriteSongIds, id, isLoading);
   }
+}
+
+/** Keep vault array in ascending `order` (top of list = smallest order). */
+function insertByOrder(prev: Song[], song: Song): Song[] {
+  const without = prev.filter((s) => s.link !== song.link);
+  const order = song.order ?? 0;
+  const i = without.findIndex((s) => (s.order ?? 0) > order);
+  if (i === -1) return [...without, song];
+  return [...without.slice(0, i), song, ...without.slice(i)];
 }

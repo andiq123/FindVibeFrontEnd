@@ -13,13 +13,23 @@
 } @else {
   @if (allowReorder()) {
     <div
-      class="song-container group flex items-center gap-2.5 sm:gap-3 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-3 sm:px-4 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
+      class="song-container group flex items-center gap-1 sm:gap-2 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-2 sm:px-3 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
       [class.song-active]="isActive()"
       [class.opacity-50]="isUnavailable()"
       appDragAndDrop
       [id]="song().id"
       (reorderSongs)="emitReorder($any($event))"
     >
+      <button
+        type="button"
+        class="song-drag-handle shrink-0 w-9 h-11 flex items-center justify-center rounded-lg text-base-content/30 active:text-base-content/60 active:bg-base-content/10 cursor-grab active:cursor-grabbing touch-manipulation"
+        draggable="true"
+        aria-label="Drag to reorder"
+        title="Drag to reorder"
+        (click)="$event.preventDefault(); $event.stopPropagation()"
+      >
+        <fa-icon [icon]="faGripVertical" class="text-sm" />
+      </button>
       <ng-container *ngTemplateOutlet="default"></ng-container>
     </div>
   } @else {
@@ -104,55 +114,6 @@
     (pointerdown)="guardActions($event)"
     (click)="guardActions($event)"
   >
-    @if (showOfflineIndicator()) {
-      @if (isDownloadingOffline()) {
-        <div
-          class="relative w-11 h-11 flex items-center justify-center"
-          aria-label="Saving offline"
-        >
-          <div
-            class="absolute inset-2 border-2 border-primary/20 rounded-full"
-          ></div>
-          <div
-            class="absolute inset-2 border-2 border-primary rounded-full border-t-transparent animate-spin"
-          ></div>
-          <fa-icon [icon]="faCloudArrowDown" class="text-[10px] text-primary" />
-        </div>
-      } @else if (isAvailableOffline()) {
-        <div
-          class="flex items-center justify-center w-11 h-11 rounded-full text-primary anim-fade-in"
-          title="Available offline"
-          aria-label="Available offline"
-        >
-          <span
-            class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-3.5 h-3.5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </span>
-        </div>
-      } @else if (isFavoritePage()) {
-        <button
-          type="button"
-          class="song-action-btn"
-          (click)="saveOffline($event)"
-          aria-label="Save offline"
-          title="Save offline"
-        >
-          <fa-icon [icon]="faCloudArrowDown" class="text-sm" />
-        </button>
-      }
-    }
     @if (!allowReorder()) {
       <button
         type="button"

@@ -10,7 +10,6 @@ import {
 import { environment } from "../../../../environments/environment";
 import { StorageService } from "../../../core/services/storage.service";
 import { SettingsService } from "../../../core/services/settings.service";
-import { HapticsService } from "../../../core/services/haptics.service";
 
 const BASE_API_URL = environment.API_URL;
 const SEARCH_STORAGE_KEY = "search_state";
@@ -30,7 +29,6 @@ export class SearchService {
   private readonly httpClient = inject(HttpClient);
   private readonly storageService = inject(StorageService);
   private readonly settingsService = inject(SettingsService);
-  private readonly haptics = inject(HapticsService);
   private readonly _songs = signal<Song[]>([]);
   private readonly _searchStatus = signal<SearchStatus>(SearchStatus.None);
   private readonly _suggestions = signal<string[]>([]);
@@ -81,14 +79,12 @@ export class SearchService {
         this._searchStatus.set(SearchStatus.Finished);
         this._lastSearchQuery.set(searchTerm);
         this.saveState();
-        this.haptics.ready();
       }),
       catchError(() => {
         this._lastSearchQuery.set(searchTerm);
         this._currentPage.set(page);
         this._pagination.set(null);
         this._searchStatus.set(SearchStatus.Error);
-        this.haptics.warnOnce(`search:${searchTerm}:${page}`);
         return of({ songs: [], pagination: null });
       }),
     );

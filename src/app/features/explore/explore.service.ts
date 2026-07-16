@@ -3,15 +3,16 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Song } from "../../core/models/song.model";
 import { environment } from "../../../environments/environment";
-import { HapticsService } from "../../core/services/haptics.service";
 import { LibraryService } from "../library/services/library.service";
 import { StorageService } from "../../core/services/storage.service";
+import { rankByListen, rotateIndex } from "../../core/utils/listen-rank";
 
 /** Client-only shelf ids — never passed back into Fiber chart merge. */
 const LOCAL_SHELF = new Set(["vault", "recents", "because"]);
 const BECAUSE_KEY = "exploreBecause";
 /** ponytail: /recommend is the expensive personalization hit — once/day per seed. */
 const BECAUSE_TTL_MS = 24 * 60 * 60 * 1000;
+const DAY_MS = 86_400_000;
 
 export type ExploreSection = {
   id: string;
@@ -38,7 +39,6 @@ type BecauseCache = {
 @Injectable({ providedIn: "root" })
 export class ExploreService {
   private readonly http = inject(HttpClient);
-  private readonly haptics = inject(HapticsService);
   private readonly library = inject(LibraryService);
   private readonly storage = inject(StorageService);
 
@@ -56,6 +56,8 @@ export class ExploreService {
   private becauseSeed: string | null = null;
   private becauseFetchKey: string | null = null;
   private becauseFetchGen = 0;
+  /** Manual refresh bumps seed rotation within the same day. */
+  private seedBump = 0;
 
   /** Reuse in-memory shelves across navigations; server also caches charts 6h. */
   async load(refresh = false): Promise<void> {
@@ -84,7 +86,6 @@ export class ExploreService {
       this.hydrateBecauseFromCache();
       this.sections.set(this.merge(this.charts));
       this.loaded = true;
-      this.haptics.ready();
       // Force refresh awaits personalization; cold load paints charts first.
       if (refresh) await this.fetchBecauseIfNeeded(true);
       else void this.fetchBecauseIfNeeded(false);
@@ -97,20 +98,20 @@ export class ExploreService {
         this.loaded = true;
       } else if (!this.sections().length) {
         this.error.set("Couldn't load charts");
-        this.haptics.warnOnce("explore");
       }
     } finally {
       this.loading.set(false);
     }
   }
 
-  /** Manual / pull-to-refresh — bust charts + personalized 24h cache. */
+  /** Manual / pull-to-refresh — bust charts + personalized 24h cache, rotate seed. */
   refresh(): Promise<void> {
     this.storage.removeItem(BECAUSE_KEY);
     this.because = null;
     this.becauseSeed = null;
     this.becauseFetchKey = null;
     this.becauseFetchGen++;
+    this.seedBump++;
     this.triedSparseRefresh = false;
     return this.load(true);
   }
@@ -119,7 +120,12 @@ export class ExploreService {
   private merge(charts: ExploreSection[]): ExploreSection[] {
     const head: ExploreSection[] = [];
     if (this.because?.songs.length) head.push(this.because);
-    const vault = takeByLink(this.library.songs(), 10);
+    const day = Math.floor(Date.now() / DAY_MS);
+    const vault = rankByListen(
+      this.library.songs(),
+      this.storage.listenStats(),
+      day,
+    ).slice(0, 10);
     if (vault.length >= 3) {
       head.push({
         id: "vault",
@@ -128,7 +134,7 @@ export class ExploreService {
         songs: vault,
       });
     }
-    const recent = takeByLink(this.storage.recentSongs(), 10);
+    const recent = takeUnique(this.storage.recentSongs(), 10);
     if (recent.length >= 3) {
       head.push({
         id: "recents",
@@ -141,15 +147,42 @@ export class ExploreService {
     return [...head, ...charts.filter((s) => !seen.has(s.id))];
   }
 
-  private seedKey(): string | null {
-    const seed =
-      this.library.songs()[0] || this.storage.recentSongs()[0] || null;
-    if (!seed?.artist?.trim() || !seed?.title?.trim()) return null;
-    return `${seed.artist.trim()}\0${seed.title.trim()}`;
+  private seedKeyOf(song: Song): string {
+    return `${song.artist.trim()}\0${song.title.trim()}`;
   }
 
-  private seedSong(): Song | null {
-    return this.library.songs()[0] || this.storage.recentSongs()[0] || null;
+  /**
+   * Rotate seed daily (and on refresh bump) across vault — not always songs[0].
+   * Prefer vault; fall back to recents. Skip last cached seed when alternatives exist.
+   */
+  private pickSeedSong(): Song | null {
+    const day = Math.floor(Date.now() / DAY_MS);
+    const vault = this.library.songs();
+    const pool = vault.length
+      ? rankByListen(vault, this.storage.listenStats(), day)
+      : takeUnique(this.storage.recentSongs(), 50);
+    if (!pool.length) return null;
+
+    let idx = rotateIndex(pool.length, day, this.seedBump);
+    const last = this.storage.getItem<BecauseCache>(BECAUSE_KEY)?.seed;
+    let pick = pool[idx];
+    if (
+      last &&
+      pool.length > 1 &&
+      pick.artist?.trim() &&
+      this.seedKeyOf(pick) === last
+    ) {
+      idx = rotateIndex(pool.length, day, this.seedBump + 1);
+      pick = pool[idx];
+    }
+    if (!pick?.artist?.trim() || !pick?.title?.trim()) return null;
+    return pick;
+  }
+
+  private seedKey(): string | null {
+    const seed = this.pickSeedSong();
+    if (!seed) return null;
+    return this.seedKeyOf(seed);
   }
 
   /** Sync: paint from localStorage when same seed + fresh (<24h). */
@@ -174,8 +207,8 @@ export class ExploreService {
 
   /** Async: /recommend only on miss or forced refresh. */
   private async fetchBecauseIfNeeded(force: boolean): Promise<void> {
-    const seed = this.seedSong();
-    const key = this.seedKey();
+    const seed = this.pickSeedSong();
+    const key = seed ? this.seedKeyOf(seed) : null;
     if (!seed || !key) return;
     if (!force && this.readBecauseCache(key)) return;
     // Dedupe in-flight for same seed (double pull-to-refresh).
@@ -235,10 +268,16 @@ export class ExploreService {
   }
 }
 
-function takeByLink(songs: Song[], n: number): Song[] {
-  if (!songs.length) return [];
-  // ponytail: stable by link — no Math.random flicker on revisit
-  return [...songs].sort((a, b) => (a.link > b.link ? 1 : -1)).slice(0, n);
+function takeUnique(songs: Song[], n: number): Song[] {
+  const out: Song[] = [];
+  const seen = new Set<string>();
+  for (const s of songs) {
+    if (!s.link || seen.has(s.link)) continue;
+    seen.add(s.link);
+    out.push(s);
+    if (out.length >= n) break;
+  }
+  return out;
 }
 
 function artSparse(charts: ExploreSection[]): boolean {

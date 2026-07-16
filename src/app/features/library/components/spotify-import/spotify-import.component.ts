@@ -1,0 +1,470 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  computed,
+  inject,
+  signal,
+} from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import {
+  EmptyError,
+  Observable,
+  Subject,
+  firstValueFrom,
+  takeUntil,
+} from "rxjs";
+import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { environment } from "../../../../../environments/environment";
+import { Song, songKey } from "../../../../core/models/song.model";
+import { LibraryService } from "../../services/library.service";
+import { UserService } from "../../services/user.service";
+import { faLink, faXmark } from "../../../../shared/icons";
+
+type RowStatus =
+  | "pending"
+  | "adding"
+  | "added"
+  | "skipped"
+  | "miss"
+  | "cancelled";
+
+type ImportRow = {
+  artist: string;
+  title: string;
+  status: RowStatus;
+};
+
+type PlaylistPayload = {
+  name: string;
+  tracks: { artist: string; title: string }[];
+};
+
+@Component({
+  selector: "app-spotify-import",
+  standalone: true,
+  imports: [FontAwesomeModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: "contents",
+  },
+  template: `
+    @if (!open()) {
+      <button
+        type="button"
+        class="shrink-0 h-9 px-3 rounded-xl text-xs font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center gap-2"
+        (click)="open.set(true)"
+      >
+        <fa-icon [icon]="faLink" class="text-[11px]" />
+        Import Spotify
+      </button>
+    } @else {
+      <div
+        class="premium-card p-3.5 space-y-3 w-full basis-full col-span-full mt-3"
+        style="flex-basis: 100%; width: 100%"
+        aria-label="Import Spotify playlist"
+      >
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <h2 class="text-sm font-bold tracking-tight">Import Spotify</h2>
+            <p class="text-[11px] text-base-content/45 mt-0.5">
+              Public playlist · cancel anytime
+            </p>
+          </div>
+          <button
+            type="button"
+            class="w-8 h-8 rounded-full text-base-content/40 active:bg-base-content/10"
+            (click)="close()"
+            aria-label="Close import"
+          >
+            <fa-icon [icon]="faXmark" />
+          </button>
+        </div>
+
+        <div class="flex gap-2">
+          <input
+            type="url"
+            class="input input-sm grow bg-base-content/[0.06] border-0 focus:outline-none focus:ring-1 focus:ring-primary/40 rounded-xl"
+            placeholder="https://open.spotify.com/playlist/…"
+            [value]="url()"
+            [disabled]="running()"
+            (input)="url.set($any($event.target).value)"
+            (keydown.enter)="start()"
+          />
+          @if (running()) {
+            <button
+              type="button"
+              class="shrink-0 h-8 px-3 rounded-xl text-xs font-semibold bg-error/15 text-error"
+              (click)="cancel()"
+            >
+              Cancel
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="shrink-0 h-8 px-3 rounded-xl text-xs font-semibold bg-primary text-primary-content disabled:opacity-40"
+              [disabled]="!url().trim()"
+              (click)="start()"
+            >
+              Import
+            </button>
+          }
+        </div>
+
+        @if (error()) {
+          <p class="text-xs text-error/90">{{ error() }}</p>
+        }
+
+        @if (rows().length) {
+          <div class="space-y-1.5" aria-label="Import progress">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[11px] font-medium text-base-content/50 truncate min-w-0">
+                {{ playlistName() || "Playlist" }}
+                @if (done() && !running()) {
+                  · Done
+                }
+              </p>
+              <p
+                class="shrink-0 text-[11px] font-semibold tabular-nums text-base-content/60"
+              >
+                {{ progress().settled }}/{{ progress().total }}
+                · {{ progress().pct }}%
+              </p>
+            </div>
+
+            <div
+              class="h-2 w-full rounded-full bg-base-content/10 overflow-hidden flex"
+              role="progressbar"
+              [attr.aria-valuemin]="0"
+              [attr.aria-valuemax]="progress().total"
+              [attr.aria-valuenow]="progress().settled"
+              [attr.aria-valuetext]="progressText()"
+              [attr.aria-busy]="running()"
+            >
+              @if (progress().addedPct) {
+                <span
+                  class="h-full bg-success transition-[width] duration-300 ease-out"
+                  [style.width.%]="progress().addedPct"
+                ></span>
+              }
+              @if (progress().skippedPct) {
+                <span
+                  class="h-full bg-base-content/35 transition-[width] duration-300 ease-out"
+                  [style.width.%]="progress().skippedPct"
+                ></span>
+              }
+              @if (progress().missPct) {
+                <span
+                  class="h-full bg-warning/80 transition-[width] duration-300 ease-out"
+                  [style.width.%]="progress().missPct"
+                ></span>
+              }
+              @if (progress().cancelledPct) {
+                <span
+                  class="h-full bg-error/50 transition-[width] duration-300 ease-out"
+                  [style.width.%]="progress().cancelledPct"
+                ></span>
+              }
+              @if (progress().addingPct) {
+                <span
+                  class="h-full bg-primary/70 animate-pulse transition-[width] duration-300 ease-out"
+                  [style.width.%]="progress().addingPct"
+                ></span>
+              }
+            </div>
+
+            <p class="text-[10px] text-base-content/40 truncate">
+              {{ progressLabel() }}
+            </p>
+          </div>
+
+          <ul
+            class="max-h-56 overflow-y-auto space-y-1 pr-0.5 overscroll-contain"
+            aria-live="polite"
+          >
+            @for (row of rows(); track $index) {
+              <li
+                class="flex items-center gap-2 text-xs py-1.5 px-2 rounded-lg bg-base-content/[0.04]"
+              >
+                <span
+                  class="shrink-0 w-[4.25rem] text-[10px] font-bold uppercase tracking-wide"
+                  [class.text-base-content/35]="row.status === 'pending'"
+                  [class.text-primary]="row.status === 'adding'"
+                  [class.text-success]="row.status === 'added'"
+                  [class.text-base-content/45]="row.status === 'skipped'"
+                  [class.text-warning/80]="row.status === 'miss'"
+                  [class.text-error/70]="row.status === 'cancelled'"
+                >
+                  {{ statusLabel(row.status) }}
+                </span>
+                <span class="min-w-0 truncate text-base-content/75">
+                  {{ row.artist }} — {{ row.title }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  `,
+})
+export class SpotifyImportComponent implements OnDestroy {
+  private http = inject(HttpClient);
+  private library = inject(LibraryService);
+  private user = inject(UserService);
+
+  faLink = faLink;
+  faXmark = faXmark;
+
+  open = signal(false);
+  url = signal("");
+  error = signal("");
+  playlistName = signal("");
+  rows = signal<ImportRow[]>([]);
+  running = signal(false);
+  done = signal(false);
+
+  private stop$ = new Subject<void>();
+  private gen = 0;
+
+  ngOnDestroy(): void {
+    this.stop$.next();
+    this.stop$.complete();
+  }
+
+  progress = computed(() => {
+    const rows = this.rows();
+    const total = rows.length;
+    let added = 0;
+    let skipped = 0;
+    let miss = 0;
+    let cancelled = 0;
+    let adding = 0;
+    for (const r of rows) {
+      switch (r.status) {
+        case "added":
+          added++;
+          break;
+        case "skipped":
+          skipped++;
+          break;
+        case "miss":
+          miss++;
+          break;
+        case "cancelled":
+          cancelled++;
+          break;
+        case "adding":
+          adding++;
+          break;
+      }
+    }
+    const settled = added + skipped + miss + cancelled;
+    const pct = total ? Math.round((settled / total) * 100) : 0;
+    const share = (n: number) => (total ? (n / total) * 100 : 0);
+    return {
+      total,
+      added,
+      skipped,
+      miss,
+      cancelled,
+      adding,
+      settled,
+      pct,
+      addedPct: share(added),
+      skippedPct: share(skipped),
+      missPct: share(miss),
+      cancelledPct: share(cancelled),
+      addingPct: share(adding),
+    };
+  });
+
+  progressText(): string {
+    const p = this.progress();
+    if (!p.total) return "";
+    return `${p.settled} of ${p.total} tracks processed, ${p.pct} percent`;
+  }
+
+  progressLabel(): string {
+    const p = this.progress();
+    if (!p.total) return "";
+    const parts: string[] = [];
+    if (p.added) parts.push(`${p.added} added`);
+    if (p.skipped) parts.push(`${p.skipped} in vault`);
+    if (p.miss) parts.push(`${p.miss} missed`);
+    if (p.cancelled) parts.push(`${p.cancelled} cancelled`);
+    if (this.running()) {
+      if (p.adding) parts.push("importing…");
+      else if (!parts.length) parts.push("starting…");
+    } else if (this.done() && !parts.length) {
+      parts.push("Nothing to import");
+    }
+    return parts.join(" · ");
+  }
+
+  statusLabel(s: RowStatus): string {
+    switch (s) {
+      case "pending":
+        return "Queued";
+      case "adding":
+        return "Adding";
+      case "added":
+        return "Added";
+      case "skipped":
+        return "In vault";
+      case "miss":
+        return "No match";
+      case "cancelled":
+        return "Stopped";
+    }
+  }
+
+  cancel(): void {
+    this.gen++;
+    this.stop$.next();
+    this.rows.update((list) =>
+      list.map((r) =>
+        r.status === "pending" ? { ...r, status: "cancelled" as const } : r,
+      ),
+    );
+    this.running.set(false);
+    this.done.set(true);
+  }
+
+  close(): void {
+    if (this.running()) this.cancel();
+    this.open.set(false);
+    this.reset();
+  }
+
+  private reset() {
+    this.gen++;
+    this.stop$.next();
+    this.url.set("");
+    this.error.set("");
+    this.playlistName.set("");
+    this.rows.set([]);
+    this.done.set(false);
+    this.running.set(false);
+  }
+
+  async start() {
+    const link = this.url().trim();
+    const user = this.user.user();
+    if (!link || !user || this.running()) return;
+
+    this.gen++;
+    const gen = this.gen;
+    this.stop$.next();
+
+    this.running.set(true);
+    this.done.set(false);
+    this.error.set("");
+    this.rows.set([]);
+    this.playlistName.set("");
+
+    try {
+      const pl = await this.req(
+        this.http.get<PlaylistPayload>(
+          `${environment.API_URL}/spotify/playlist`,
+          { params: { url: link } },
+        ),
+      );
+      if (gen !== this.gen || !pl) return;
+
+      this.playlistName.set(pl.name || "Playlist");
+      const rows: ImportRow[] = (pl.tracks ?? []).map((t) => ({
+        artist: t.artist,
+        title: t.title,
+        status: "pending",
+      }));
+      this.rows.set(rows);
+
+      const vaultKeys = new Set(
+        this.library.songs().map((s) => songKey(s)).filter(Boolean),
+      );
+      const orders = this.library.reserveTopOrders(rows.length);
+      let orderIdx = 0;
+
+      for (let i = 0; i < rows.length; i++) {
+        if (gen !== this.gen) break;
+
+        const row = this.rows()[i];
+        if (!row || row.status === "cancelled") break;
+
+        const key = songKey(row);
+        if (key && vaultKeys.has(key)) {
+          this.patch(i, "skipped");
+          continue;
+        }
+
+        this.patch(i, "adding");
+        try {
+          const song = await this.req(
+            this.http.get<Song>(`${environment.API_URL}/resolve`, {
+              params: { artist: row.artist, title: row.title },
+            }),
+          );
+          if (gen !== this.gen) break;
+          if (song === null) {
+            this.patch(i, "cancelled");
+            break;
+          }
+
+          const sk = songKey(song);
+          if (sk && vaultKeys.has(sk)) {
+            this.patch(i, "skipped");
+            continue;
+          }
+
+          const order = orders[orderIdx++] ?? this.library.reserveTopOrders(1)[0];
+          const saved = await this.req(
+            this.library.addToFavorites(song, user.id, { order }),
+          );
+          if (gen !== this.gen || saved === null) {
+            if (this.rows()[i]?.status === "adding") this.patch(i, "cancelled");
+            break;
+          }
+          if (sk) vaultKeys.add(sk);
+          this.patch(i, "added");
+        } catch (err: unknown) {
+          if (gen !== this.gen) break;
+          const status = (err as { status?: number })?.status;
+          if (status === 409) {
+            this.patch(i, "skipped");
+          } else {
+            this.patch(i, "miss");
+          }
+        }
+      }
+
+      if (gen === this.gen) this.done.set(true);
+    } catch (e: unknown) {
+      if (gen !== this.gen) return;
+      const err = e as { error?: { error?: string } };
+      this.error.set(err?.error?.error || "Couldn't load that playlist");
+    } finally {
+      if (gen === this.gen) this.running.set(false);
+    }
+  }
+
+  /** firstValueFrom + takeUntil(stop$). null = cancelled mid-request. */
+  private async req<T>(source: Observable<T>): Promise<T | null> {
+    try {
+      return await firstValueFrom(source.pipe(takeUntil(this.stop$)));
+    } catch (e) {
+      if (e instanceof EmptyError) return null;
+      throw e;
+    }
+  }
+
+  private patch(i: number, status: RowStatus) {
+    this.rows.update((list) => {
+      if (i < 0 || i >= list.length) return list;
+      if (list[i].status === status) return list;
+      const next = list.slice();
+      next[i] = { ...next[i], status };
+      return next;
+    });
+  }
+}

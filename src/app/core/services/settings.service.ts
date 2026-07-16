@@ -36,8 +36,6 @@ export class SettingsService implements OnDestroy {
   private readonly _suggestRegion = signal<SuggestRegion>("ro");
   /** Full-player Save/Download MP3 button. */
   private readonly _showPlayerDownload = signal(true);
-  /** App haptics (Android vibrate). Off = silent everywhere. */
-  private readonly _hapticsEnabled = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
   private onlineHandler = () => this._isNavigatorOffline.set(false);
@@ -47,7 +45,6 @@ export class SettingsService implements OnDestroy {
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
   readonly suggestRegion = this._suggestRegion.asReadonly();
   readonly showPlayerDownload = this._showPlayerDownload.asReadonly();
-  readonly hapticsEnabled = this._hapticsEnabled.asReadonly();
   readonly isServerDown = computed(
     () => this._serverStatus() === ServerStatus.Down,
   );
@@ -81,8 +78,6 @@ export class SettingsService implements OnDestroy {
       this.storageService.getItem<SuggestRegion>("suggestRegion");
     const showPlayerDownload =
       this.storageService.getItem<boolean>("showPlayerDownload");
-    const hapticsEnabled =
-      this.storageService.getItem<boolean>("hapticsEnabled");
     if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
     if (suggestRegion === "ro" || suggestRegion === "device") {
@@ -90,9 +85,6 @@ export class SettingsService implements OnDestroy {
     }
     if (showPlayerDownload !== null) {
       this._showPlayerDownload.set(showPlayerDownload);
-    }
-    if (hapticsEnabled !== null) {
-      this._hapticsEnabled.set(hapticsEnabled);
     }
   }
 
@@ -131,15 +123,6 @@ export class SettingsService implements OnDestroy {
 
   toggleShowPlayerDownload(): void {
     this.setShowPlayerDownload(!this._showPlayerDownload());
-  }
-
-  setHapticsEnabled(on: boolean): void {
-    this._hapticsEnabled.set(on);
-    this.storageService.setItem("hapticsEnabled", on);
-  }
-
-  toggleHapticsEnabled(): void {
-    this.setHapticsEnabled(!this._hapticsEnabled());
   }
 
   setServerUp(): void {

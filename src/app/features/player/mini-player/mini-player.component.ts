@@ -20,7 +20,6 @@ import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.
 import { Song } from "../../../core/models/song.model";
 import { NgOptimizedImage } from "@angular/common";
 import { PlayerService } from "../../../core/services/player.service";
-import { HapticsService } from "../../../core/services/haptics.service";
 
 @Component({
   selector: "app-mini-player",
@@ -37,7 +36,6 @@ import { HapticsService } from "../../../core/services/haptics.service";
 })
 export class MiniPlayerComponent {
   private readonly playerService = inject(PlayerService);
-  private readonly haptics = inject(HapticsService);
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
   currentTime = input<number>(0);
@@ -60,7 +58,6 @@ export class MiniPlayerComponent {
   }
   async togglePlay($event: Event) {
     $event.stopPropagation();
-    this.haptics.light();
     if (this.status() === PlayerStatus.Playing) {
       this.playerService.pause();
     } else {
@@ -69,12 +66,10 @@ export class MiniPlayerComponent {
   }
   async previous($event: Event) {
     $event.stopPropagation();
-    this.haptics.light();
     await this.playerService.setPreviousSong();
   }
   async next($event: Event) {
     $event.stopPropagation();
-    this.haptics.light();
     await this.playerService.setNextSong();
   }
 }
