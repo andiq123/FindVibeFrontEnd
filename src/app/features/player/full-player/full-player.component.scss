@@ -75,7 +75,15 @@
   }
 }
 
+.artwork-container {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .artwork-wrapper {
+  /* Bigger art, still capped so controls don’t get crushed. */
+  width: min(100%, 320px, 78vw, 46dvh);
+  aspect-ratio: 1;
   transition: transform 0.8s cubic-bezier(0.32, 0.72, 0, 1);
   transform: scale(0.95);
   &.playing {
@@ -83,6 +91,10 @@
   }
   @media (max-width: 768px) {
     transition: transform 0.25s ease;
+    width: min(100%, 300px, 76vw, 44dvh);
+  }
+  @media (min-width: 1024px) {
+    width: min(100%, 288px, 42dvh);
   }
   @media (prefers-reduced-motion: reduce) {
     transition: none !important;
@@ -128,15 +140,14 @@
   isolation: isolate;
 }
 
-/* Short phones: shrink art so transport stays in the thumb zone. */
-@media (max-height: 700px) and (pointer: coarse) {
+@media (max-height: 700px) {
   .artwork-wrapper {
-    max-width: min(240px, 52vw);
+    width: min(100%, 260px, 68vw, 38dvh);
   }
 }
 
 @media (pointer: coarse) {
   .player-transport {
-    min-height: 5.25rem;
+    min-height: 4.25rem;
   }
 }

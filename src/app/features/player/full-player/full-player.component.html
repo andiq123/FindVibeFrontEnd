@@ -28,16 +28,16 @@
     class="player-content-card flex-1 flex flex-col rounded-t-[2.5rem] lg:rounded-[1.5rem] overflow-hidden relative pt-safe bg-base-100"
   >
     <div
-      class="w-full pt-4 pb-2 flex flex-col items-center justify-center shrink-0 relative z-20"
+      class="w-full pt-2 pb-0 flex flex-col items-center justify-center shrink-0 relative z-20"
     >
       <button
-        class="group w-full flex flex-col items-center justify-center -mt-2 pressable-native touch-manipulation px-4 py-3 min-h-12"
+        class="group w-full flex flex-col items-center justify-center pressable-native touch-manipulation px-4 py-2.5 min-h-11"
         (click)="toggleSize()"
         aria-label="Minimize player"
         type="button"
       >
         <div
-          class="w-14 h-1.5 bg-base-content/35 rounded-full group-active:bg-base-content/55 transition-colors duration-200"
+          class="w-12 h-1.5 bg-base-content/35 rounded-full group-active:bg-base-content/55 transition-colors duration-200"
         ></div>
       </button>
     </div>
@@ -66,13 +66,13 @@
       <div class="absolute inset-0 bg-base-100/50 player-bg-overlay"></div>
     </div>
     <div
-      class="flex-1 flex flex-col items-center justify-start px-4 sm:px-6 pb-safe pt-1 max-w-[600px] mx-auto relative z-10 w-full min-h-0 player-main"
+      class="flex-1 flex flex-col items-center justify-between px-4 sm:px-5 pb-safe pt-0 max-w-[600px] mx-auto relative z-10 w-full min-h-0 player-main gap-2"
     >
       <div
-        class="w-full flex-1 flex items-center justify-center artwork-container min-h-0 py-1 sm:py-2"
+        class="w-full flex items-center justify-center artwork-container min-h-0 shrink"
       >
         <div
-          class="relative w-full aspect-square max-w-[min(280px,62vw)] sm:max-w-[340px] group flex items-center justify-center artwork-wrapper"
+          class="relative group flex items-center justify-center artwork-wrapper"
           [class.playing]="
             status() === playerStatus.Playing && !isOpeningAnimation()
           "
@@ -114,13 +114,13 @@
           </div>
         </div>
       </div>
-      <div class="w-full mt-1 mb-1 space-y-3 shrink-0 player-controls">
-        <div class="flex items-center justify-between gap-3">
+      <div class="w-full space-y-2 shrink-0 player-controls">
+        <div class="flex items-center justify-between gap-2">
           <div class="flex-1 min-w-0">
             <app-moving-title
               [title]="song().title"
               [isBold]="true"
-              fontSize="1.5rem"
+              fontSize="1.35rem"
               color="var(--color-base-content)"
             />
             @if (status() === playerStatus.Error) {
@@ -130,7 +130,7 @@
               </p>
             } @else {
               <button
-                class="text-base-content/60 text-base sm:text-lg truncate mt-0.5 min-h-11 py-2 -my-1 active:text-base-content/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-base-content/80"
+                class="text-base-content/60 text-base truncate mt-0.5 min-h-10 py-1.5 active:text-base-content/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-base-content/80"
                 (click)="navigateToArtist()"
                 [attr.aria-label]="'View songs by ' + song().artist"
                 type="button"
@@ -139,11 +139,11 @@
               </button>
             }
           </div>
-          <div class="flex items-center gap-1.5 shrink-0">
+          <div class="flex items-center gap-1 shrink-0">
             @if (settingsService.showPlayerDownload()) {
               <button
                 type="button"
-                class="player-chip w-14 h-14 rounded-full bg-base-content/5 border border-base-content/10 flex items-center justify-center text-base-content/50 active:bg-base-content/10 active:scale-90 transition-colors pressable-native outline-none select-none disabled:opacity-50 touch-manipulation"
+                class="player-chip w-12 h-12 rounded-full bg-base-content/5 border border-base-content/10 flex items-center justify-center text-base-content/50 active:bg-base-content/10 active:scale-90 transition-colors pressable-native outline-none select-none disabled:opacity-50 touch-manipulation"
                 animate.enter="player-chip-in"
                 animate.leave="player-chip-out"
                 (click)="downloadMp3()"
@@ -161,10 +161,10 @@
                 }
               </button>
             }
-            <app-favorite-button [song]="song()" [forPlayer]="true" />
+            <app-favorite-button [song]="song()" />
           </div>
         </div>
-        <div class="seek space-y-0.5">
+        <div class="seek -mt-0.5">
           <div
             class="seek-bar"
             [class.seek-bar--dragging]="isDraggingTime()"
@@ -202,10 +202,10 @@
             <span>{{ duration() | timeFormat }}</span>
           </div>
         </div>
-        <div class="flex items-center justify-between gap-1 pt-0.5 player-transport">
+        <div class="flex items-center justify-between gap-0.5 player-transport">
           <button
             type="button"
-            class="w-14 h-14 rounded-full flex items-center justify-center touch-manipulation text-base-content/45 active:scale-[0.92] active:bg-base-content/8 transition-colors"
+            class="w-12 h-12 rounded-full flex items-center justify-center touch-manipulation text-base-content/45 active:scale-[0.92] active:bg-base-content/8 transition-colors"
             [class.text-primary]="settingsService.isShuffle()"
             [attr.aria-label]="
               settingsService.isShuffle() ? 'Disable shuffle' : 'Enable shuffle'
@@ -213,21 +213,21 @@
             [attr.aria-pressed]="settingsService.isShuffle()"
             (click)="toggleShuffle()"
           >
-            <fa-icon [icon]="faShuffle" class="text-2xl" />
+            <fa-icon [icon]="faShuffle" class="text-xl" />
           </button>
 
-          <div class="flex items-center gap-1 sm:gap-2">
+          <div class="flex items-center gap-0.5 sm:gap-1">
             <button
               type="button"
-              class="w-16 h-16 rounded-full flex items-center justify-center touch-manipulation text-base-content/80 active:scale-[0.92] active:bg-base-content/8"
+              class="w-14 h-14 rounded-full flex items-center justify-center touch-manipulation text-base-content/80 active:scale-[0.92] active:bg-base-content/8"
               aria-label="Previous track"
               (click)="previous()"
             >
-              <fa-icon [icon]="faStepBackward" class="text-3xl" />
+              <fa-icon [icon]="faStepBackward" class="text-2xl" />
             </button>
             <button
               type="button"
-              class="w-20 h-20 sm:w-[5.25rem] sm:h-[5.25rem] flex items-center justify-center rounded-full bg-base-content text-base-100 active:scale-95 transition-transform touch-manipulation shadow-lg shadow-black/20"
+              class="w-[4.25rem] h-[4.25rem] flex items-center justify-center rounded-full bg-base-content text-base-100 active:scale-95 transition-transform touch-manipulation shadow-lg shadow-black/20"
               [class.bg-primary]="status() === playerStatus.Playing"
               [attr.aria-label]="
                 status() === playerStatus.Error
@@ -240,30 +240,30 @@
             >
               <fa-icon
                 [icon]="status() === playerStatus.Playing ? faPause : faPlay"
-                class="text-3xl"
+                class="text-2xl"
               />
             </button>
             <button
               type="button"
-              class="w-16 h-16 rounded-full flex items-center justify-center touch-manipulation text-base-content/80 active:scale-[0.92] active:bg-base-content/8"
+              class="w-14 h-14 rounded-full flex items-center justify-center touch-manipulation text-base-content/80 active:scale-[0.92] active:bg-base-content/8"
               aria-label="Next track"
               (click)="next()"
             >
-              <fa-icon [icon]="faStepForward" class="text-3xl" />
+              <fa-icon [icon]="faStepForward" class="text-2xl" />
             </button>
           </div>
 
           <button
             type="button"
-            class="relative w-14 h-14 rounded-full flex items-center justify-center touch-manipulation text-base-content/45 active:scale-[0.92] active:bg-base-content/8 transition-colors"
+            class="relative w-12 h-12 rounded-full flex items-center justify-center touch-manipulation text-base-content/45 active:scale-[0.92] active:bg-base-content/8 transition-colors"
             [class.text-primary]="settingsService.repeatMode() !== repeatModes.OFF"
             [attr.aria-label]="repeatLabel()"
             (click)="toggleRepeat()"
           >
-            <fa-icon [icon]="faRepeat" class="text-2xl" />
+            <fa-icon [icon]="faRepeat" class="text-xl" />
             @if (settingsService.repeatMode() === repeatModes.ONE) {
               <span
-                class="absolute right-2 bottom-2 w-4 h-4 rounded-full bg-primary text-primary-content text-[9px] font-extrabold flex items-center justify-center pointer-events-none"
+                class="absolute right-1.5 bottom-1.5 w-3.5 h-3.5 rounded-full bg-primary text-primary-content text-[8px] font-extrabold flex items-center justify-center pointer-events-none"
                 aria-hidden="true"
                 >1</span
               >
@@ -271,12 +271,12 @@
           </button>
         </div>
 
-        <div class="relative pt-1 pb-1">
+        <div class="relative pb-0.5">
           <div class="player-chip-row flex items-center justify-end gap-2 flex-wrap">
             @if (playlistService.upcoming().length; as n) {
               <button
                 type="button"
-                class="player-chip inline-flex items-center gap-2 min-h-12 h-12 px-4 rounded-full bg-base-content/5 text-base-content/60 text-base font-medium touch-manipulation active:bg-base-content/10"
+                class="player-chip inline-flex items-center gap-1.5 min-h-11 h-11 px-3.5 rounded-full bg-base-content/5 text-base-content/60 text-sm font-medium touch-manipulation active:bg-base-content/10"
                 animate.enter="player-chip-in"
                 animate.leave="player-chip-out"
                 (click)="toggleUpNext()"
@@ -293,19 +293,19 @@
             }
             <button
               type="button"
-              class="player-chip inline-flex items-center gap-2 min-h-12 h-12 px-4 rounded-full bg-base-content/5 text-base-content/60 text-base font-medium touch-manipulation active:bg-base-content/10 transition-colors duration-200"
+              class="player-chip inline-flex items-center gap-1.5 min-h-11 h-11 px-3.5 rounded-full bg-base-content/5 text-base-content/60 text-sm font-medium touch-manipulation active:bg-base-content/10 transition-colors duration-200"
               [class.text-primary]="lyricsOpen()"
               [class.bg-primary/15]="lyricsOpen()"
               (click)="toggleLyrics()"
               [attr.aria-expanded]="lyricsOpen()"
               aria-label="Show lyrics"
             >
-              <fa-icon [icon]="faMusic" class="text-sm" />
+              <fa-icon [icon]="faMusic" class="text-xs" />
               Lyrics
             </button>
             <button
               type="button"
-              class="player-chip inline-flex items-center gap-2 min-h-12 h-12 px-4 rounded-full bg-primary/15 text-primary text-base font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50 transition-shadow duration-200"
+              class="player-chip inline-flex items-center gap-1.5 min-h-11 h-11 px-3.5 rounded-full bg-primary/15 text-primary text-sm font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50 transition-shadow duration-200"
               (click)="startRadio()"
               [disabled]="radioService.loading()"
               [class.ring-1]="playlistService.radioActive()"
