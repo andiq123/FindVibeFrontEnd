@@ -19,6 +19,7 @@ import { Router } from "@angular/router";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
   faArrowDown,
+  faChevronRight,
   faPause,
   faPlay,
   faRepeat,
@@ -26,6 +27,8 @@ import {
   faStepBackward,
   faStepForward,
   faTriangleExclamation,
+  faWaveSquare,
+  faXmark,
 } from "../../../shared/icons";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
 import { SettingsService } from "../../../core/services/settings.service";
@@ -33,6 +36,7 @@ import { FavoriteButtonComponent } from "../../../shared/favorite-button/favorit
 import { SwipeDownDirective } from "../directives/swipe-down.directive";
 import { PlayerService } from "../../../core/services/player.service";
 import { PlaylistService } from "../../../core/services/playlist.service";
+import { RadioService } from "../../../core/services/radio.service";
 import { Song } from "../../../core/models/song.model";
 import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.component";
 import { TimeFormatPipe } from "../../../shared/pipes/time-format.pipe";
@@ -64,7 +68,8 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly settingsService = inject(SettingsService);
   private offlineStorage = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
-  private playlistService = inject(PlaylistService);
+  readonly playlistService = inject(PlaylistService);
+  readonly radioService = inject(RadioService);
   private http = inject(HttpClient);
   private router = inject(Router);
   private renderer = inject(Renderer2);
@@ -87,7 +92,14 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   faShuffle = faShuffle;
   faTriangleExclamation = faTriangleExclamation;
   faArrowDown = faArrowDown;
+  faWaveSquare = faWaveSquare;
+  faXmark = faXmark;
+  faChevronRight = faChevronRight;
   isDownloadingMp3 = signal(false);
+  /** Up next sheet — keep mounted while closing so exit anim can finish. */
+  upNextOpen = signal(false);
+  upNextClosing = signal(false);
+  private upNextCloseId: ReturnType<typeof setTimeout> | null = null;
   isClosingAnimation = signal(false);
   isOpeningAnimation = signal(false);
   isOpened = signal(false);
@@ -179,6 +191,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderer.removeStyle(this.document.body, "overflow");
     if (this.openFallbackId != null) clearTimeout(this.openFallbackId);
     if (this.closeFallbackId != null) clearTimeout(this.closeFallbackId);
+    if (this.upNextCloseId != null) clearTimeout(this.upNextCloseId);
   }
   private closeAndEmit(): void {
     if (this.closeFallbackId != null) {
@@ -273,6 +286,57 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigate(["/songs", artistName]);
     }
   }
+  toggleUpNext(): void {
+    if (this.upNextOpen() || this.upNextClosing()) this.closeUpNext();
+    else this.openUpNext();
+  }
+
+  openUpNext(): void {
+    if (!this.playlistService.upcoming().length) return;
+    if (this.upNextCloseId != null) {
+      clearTimeout(this.upNextCloseId);
+      this.upNextCloseId = null;
+    }
+    this.upNextClosing.set(false);
+    this.upNextOpen.set(true);
+  }
+
+  closeUpNext(): void {
+    if (!this.upNextOpen() || this.upNextClosing()) return;
+    this.upNextClosing.set(true);
+    this.upNextCloseId = setTimeout(() => {
+      this.upNextCloseId = null;
+      if (this.destroyed) return;
+      this.upNextOpen.set(false);
+      this.upNextClosing.set(false);
+    }, 280);
+  }
+
+  onUpNextAnimEnd(event: AnimationEvent): void {
+    if (!this.upNextClosing()) return;
+    if (!(event.animationName ?? "").includes("up-next-sheet-out")) return;
+    if (this.upNextCloseId != null) {
+      clearTimeout(this.upNextCloseId);
+      this.upNextCloseId = null;
+    }
+    this.upNextOpen.set(false);
+    this.upNextClosing.set(false);
+  }
+
+  async startRadio() {
+    const current = this.song();
+    const ok = await this.radioService.start(current);
+    if (!ok) return;
+    this.openUpNext();
+    if (this.status() !== PlayerStatus.Playing) {
+      await this.playerService.setSong(current);
+    }
+  }
+
+  async playUpcoming(song: Song) {
+    await this.playerService.setSong(song);
+  }
+
   async downloadMp3() {
     if (this.isDownloadingMp3()) return;
     const song = this.song();

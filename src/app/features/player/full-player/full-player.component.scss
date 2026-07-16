@@ -170,3 +170,186 @@
     appearance: none;
   }
 }
+
+.radio-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.85rem;
+  background: color-mix(in oklab, var(--color-error) 12%, var(--color-base-100));
+  border: 1px solid color-mix(in oklab, var(--color-error) 28%, transparent);
+  animation: fade-in var(--anim-duration-fast) var(--anim-ease-ios);
+}
+.radio-error-icon {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  color: var(--color-error);
+}
+.radio-error-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: color-mix(in oklab, var(--color-error) 85%, var(--color-base-content));
+}
+.radio-error-dismiss {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--color-error) 70%, transparent);
+  touch-action: manipulation;
+  &:active {
+    background: color-mix(in oklab, var(--color-error) 12%, transparent);
+  }
+}
+
+// Up next bottom sheet — slide + fade, tap scrim to dismiss.
+.up-next-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.35);
+  animation: up-next-scrim-in var(--anim-duration-fast) var(--anim-ease-ios) forwards;
+  &.is-out {
+    animation: up-next-scrim-out var(--anim-duration-fast) var(--anim-ease-ios) forwards;
+  }
+}
+
+.up-next-sheet {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  max-height: min(42dvh, 360px);
+  border-radius: 1.5rem 1.5rem 0 0;
+  border-top: 1px solid color-mix(in oklab, var(--color-base-content) 10%, transparent);
+  background: color-mix(in oklab, var(--color-base-100) 94%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.25);
+  animation: up-next-sheet-in var(--anim-duration-normal) var(--anim-ease-ios) forwards;
+  &.is-out {
+    animation: up-next-sheet-out var(--anim-duration-fast) var(--anim-ease-ios) forwards;
+  }
+}
+
+.up-next-handle {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1rem 0.35rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.up-next-handle-bar {
+  width: 2.5rem;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--color-base-content) 25%, transparent);
+}
+.up-next-handle-label {
+  margin-top: 0.45rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
+}
+
+.up-next-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.25rem 1rem 0.75rem;
+  min-height: 0;
+}
+
+.up-next-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: 0.75rem;
+  text-align: left;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease;
+  &:active {
+    background: color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  }
+  @media (hover: hover) {
+    &:hover {
+      background: color-mix(in oklab, var(--color-base-content) 6%, transparent);
+    }
+  }
+}
+
+.up-next-art {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.65rem;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--color-base-300);
+}
+
+.up-next-title {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--color-base-content) 88%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.up-next-artist {
+  display: block;
+  font-size: 0.75rem;
+  color: color-mix(in oklab, var(--color-base-content) 45%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes up-next-scrim-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes up-next-scrim-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes up-next-sheet-in {
+  from { transform: translateY(100%); opacity: 0.85; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes up-next-sheet-out {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(100%); opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .up-next-scrim,
+  .up-next-sheet {
+    animation: none !important;
+  }
+  .up-next-scrim.is-out,
+  .up-next-sheet.is-out {
+    opacity: 0;
+  }
+}

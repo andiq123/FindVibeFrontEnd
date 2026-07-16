@@ -114,7 +114,7 @@
           </div>
         </div>
       </div>
-      <div class="w-full mt-2 mb-6 sm:mb-10 space-y-2 shrink-0">
+      <div class="w-full mt-1 mb-2 space-y-2 shrink-0">
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1 min-w-0">
             <app-moving-title
@@ -255,8 +255,108 @@
             }
           </button>
         </div>
+
+        <div class="pt-2 flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary/15 text-primary text-sm font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50"
+            (click)="startRadio()"
+            [disabled]="radioService.loading()"
+            [class.ring-1]="playlistService.radioActive()"
+            [class.ring-primary/40]="playlistService.radioActive()"
+            aria-label="Start radio from this track"
+          >
+            @if (radioService.loading()) {
+              <span class="loading loading-spinner loading-xs"></span>
+            } @else {
+              <fa-icon [icon]="faWaveSquare" class="text-xs" />
+            }
+            Radio
+          </button>
+          @if (playlistService.upcoming().length; as n) {
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
+              (click)="toggleUpNext()"
+              [attr.aria-expanded]="upNextOpen()"
+              [attr.aria-label]="upNextOpen() ? 'Hide up next' : 'Show up next'"
+            >
+              Up next · {{ n }}
+              <fa-icon
+                [icon]="faChevronRight"
+                class="text-[10px] transition-transform"
+                [class.rotate-90]="upNextOpen()"
+              />
+            </button>
+          }
+        </div>
+        @if (radioService.error(); as err) {
+          <div class="radio-error" role="alert">
+            <fa-icon [icon]="faTriangleExclamation" class="radio-error-icon" />
+            <span class="radio-error-text">{{ err }}</span>
+            <button
+              type="button"
+              class="radio-error-dismiss"
+              (click)="radioService.clearError()"
+              aria-label="Dismiss"
+            >
+              <fa-icon [icon]="faXmark" class="text-[10px]" />
+            </button>
+          </div>
+        }
       </div>
     </div>
+
+    @if (upNextOpen() || upNextClosing()) {
+      <button
+        type="button"
+        class="up-next-scrim"
+        [class.is-out]="upNextClosing()"
+        (click)="closeUpNext()"
+        aria-label="Close up next"
+      ></button>
+      <div
+        class="up-next-sheet"
+        [class.is-out]="upNextClosing()"
+        (animationend)="onUpNextAnimEnd($event)"
+        role="dialog"
+        aria-label="Up next"
+      >
+        <button
+          type="button"
+          class="up-next-handle pressable-native"
+          (click)="closeUpNext()"
+          aria-label="Hide up next"
+        >
+          <span class="up-next-handle-bar"></span>
+          <span class="up-next-handle-label">Up next</span>
+        </button>
+        <div class="up-next-list">
+          @for (track of playlistService.upcoming(); track track.link) {
+            <button
+              type="button"
+              class="up-next-row"
+              (click)="playUpcoming(track)"
+            >
+              <img
+                [src]="track.image || 'no_album_art.jpg'"
+                [alt]="track.title"
+                width="40"
+                height="40"
+                class="up-next-art"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                (error)="$any($event.target).src = 'no_album_art.jpg'"
+              />
+              <span class="min-w-0 flex-1">
+                <span class="up-next-title">{{ track.title }}</span>
+                <span class="up-next-artist">{{ track.artist }}</span>
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+    }
   </div>
   </div>
 </div>

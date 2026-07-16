@@ -10,12 +10,33 @@ export class PlaylistService {
   private readonly originalList = signal<Song[]>([]);
   private readonly queue = signal<Song[]>([]);
   private readonly currentIndex = signal<number>(-1);
+  private readonly _radioActive = signal(false);
+  readonly radioActive = this._radioActive.asReadonly();
   readonly queueLength = computed(() => this.queue().length);
   readonly currentSong = computed(() => {
     const q = this.queue();
     const i = this.currentIndex();
     return i >= 0 && i < q.length ? q[i] : null;
   });
+  /** Tracks left after now-playing (for infinite radio prefetch). */
+  readonly remaining = computed(() => {
+    const i = this.currentIndex();
+    if (i < 0) return 0;
+    return Math.max(0, this.queue().length - i - 1);
+  });
+  /** Next tracks after now-playing (for Radio / queue strip). */
+  readonly upcoming = computed(() => {
+    const q = this.queue();
+    const i = this.currentIndex();
+    if (i < 0) return [];
+    return q.slice(i + 1, i + 6);
+  });
+  queueLinks(): string[] {
+    return this.queue().map((s) => s.link);
+  }
+  queueSongs(): Song[] {
+    return this.queue();
+  }
   setCurrentSong(song: Song | null): void {
     if (!song) {
       this.currentIndex.set(-1);
@@ -24,7 +45,26 @@ export class PlaylistService {
     const index = this.queue().findIndex((s) => s.id === song.id);
     this.currentIndex.set(index !== -1 ? index : -1);
   }
+  /** Search / library / recent — exits radio mode. */
   setCurrentPlaylist(songs: Song[]): void {
+    this._radioActive.set(false);
+    this.applyPlaylist(songs);
+  }
+  /** Radio start — arms infinite extend. */
+  setRadioPlaylist(songs: Song[]): void {
+    this._radioActive.set(true);
+    this.applyPlaylist(songs);
+  }
+  appendSongs(songs: Song[]): number {
+    if (!songs.length) return 0;
+    const seen = new Set(this.queue().map((s) => s.link));
+    const add = songs.filter((s) => s.link && !seen.has(s.link));
+    if (!add.length) return 0;
+    this.queue.update((q) => [...q, ...add]);
+    this.originalList.update((q) => [...q, ...add]);
+    return add.length;
+  }
+  private applyPlaylist(songs: Song[]): void {
     this.originalList.set(songs);
     if (this.settingsService.isShuffle()) {
       const current = this.currentSong();
@@ -88,6 +128,7 @@ export class PlaylistService {
     }
   }
   reset(): void {
+    this._radioActive.set(false);
     this.originalList.set([]);
     this.queue.set([]);
     this.currentIndex.set(-1);
