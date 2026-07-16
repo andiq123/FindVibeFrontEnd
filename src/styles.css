@@ -865,6 +865,34 @@ body {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
+.up-next-row-in {
+  animation: up-next-row-in 300ms var(--anim-ease-ios) both;
+  animation-delay: calc(min(var(--i, 0), 10) * 32ms);
+}
+.up-next-row-out {
+  animation: up-next-row-out var(--anim-duration-fast) var(--anim-ease-ios) both;
+  pointer-events: none;
+}
+@keyframes up-next-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes up-next-row-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
 .up-next-row:active {
   background: color-mix(in oklab, var(--color-base-content) 8%, transparent);
 }
@@ -912,11 +940,45 @@ body {
 
 .lyrics-sheet { max-height: min(58dvh, 480px); }
 .lyrics-body {
+  /* Stack panes so leave/enter crossfade instead of hard-cut */
+  display: grid;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   padding: 0.25rem 1.25rem 1.25rem;
   min-height: 0;
+}
+.lyrics-pane {
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 0;
+}
+.lyrics-pane-in {
+  animation: lyrics-pane-in var(--anim-duration-normal) var(--anim-ease-ios) both;
+}
+.lyrics-pane-out {
+  animation: lyrics-pane-out var(--anim-duration-fast) var(--anim-ease-ios) both;
+  pointer-events: none;
+}
+@keyframes lyrics-pane-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes lyrics-pane-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 .lyrics-text {
   margin: 0;
@@ -978,7 +1040,11 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .up-next-scrim,
-  .up-next-sheet {
+  .up-next-sheet,
+  .lyrics-pane-in,
+  .lyrics-pane-out,
+  .up-next-row-in,
+  .up-next-row-out {
     animation: none !important;
   }
   .up-next-scrim.is-out,

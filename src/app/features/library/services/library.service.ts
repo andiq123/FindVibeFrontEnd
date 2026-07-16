@@ -82,15 +82,23 @@ export class LibraryService {
             return;
           }
           const sortedSongs = [...songs].sort((a, b) => a.order - b.order);
-          // Keep local cover if API row is still empty (e.g. PATCH blocked before CORS fix).
+          // Keep local cover/lyrics if API row is still empty (PATCH lag / offline).
           const merged = sortedSongs.map((s) => {
-            if (s.image?.trim()) return s;
             const prev = currentSongs.find((l) => l.link === s.link);
-            if (!prev?.image?.trim()) return s;
-            this.libraryApiService
-              .updateFavoriteImage(s.id, prev.image)
-              .subscribe({ error: () => {} });
-            return { ...s, image: prev.image };
+            let out = s;
+            if (!s.image?.trim() && prev?.image?.trim()) {
+              this.libraryApiService
+                .updateFavoriteImage(s.id, prev.image)
+                .subscribe({ error: () => {} });
+              out = { ...out, image: prev.image };
+            }
+            if (!s.lyrics?.trim() && prev?.lyrics?.trim()) {
+              this.libraryApiService
+                .updateFavoriteLyrics(s.id, prev.lyrics)
+                .subscribe({ error: () => {} });
+              out = { ...out, lyrics: prev.lyrics };
+            }
+            return out;
           });
           this.songs.set(merged);
           void this.offlineStorageService.syncOfflineSongs(merged);
@@ -164,6 +172,19 @@ export class LibraryService {
       prev.map((s) => (s.link === link ? { ...s, image } : s)),
     );
     this.libraryApiService.updateFavoriteImage(vault.id, image).subscribe({
+      error: () => {},
+    });
+  }
+
+  /** Persist lyrics on a vault track after first explicit open. No-op if not favorited. */
+  persistSongLyrics(link: string, lyrics: string): void {
+    const text = lyrics.trim();
+    const vault = this.songs().find((s) => s.link === link);
+    if (!vault || !text || vault.lyrics === text) return;
+    this.songs.update((prev) =>
+      prev.map((s) => (s.link === link ? { ...s, lyrics: text } : s)),
+    );
+    this.libraryApiService.updateFavoriteLyrics(vault.id, text).subscribe({
       error: () => {},
     });
   }

@@ -27,4 +27,9 @@ export class LibraryApiService {
       image,
     });
   }
+  updateFavoriteLyrics(songId: string, lyrics: string): Observable<unknown> {
+    return this.httpClient.patch(`${BASE_API_URL}/favorites/${songId}/lyrics`, {
+      lyrics,
+    });
+  }
 }

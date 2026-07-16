@@ -374,6 +374,16 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.lyricsText.set("");
     this.lyricsError.set("");
     this.lyricsErrorHard.set(false);
+
+    // Vault cache — only after user opened lyrics once; never prefetch.
+    const cached =
+      this.libraryService.songs().find((x) => x.link === s.link)?.lyrics?.trim() ||
+      s.lyrics?.trim();
+    if (cached) {
+      this.lyricsText.set(cached);
+      return;
+    }
+
     this.lyricsLoading.set(true);
     try {
       const r = await firstValueFrom(
@@ -388,6 +398,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       this.lyricsText.set(text);
+      this.libraryService.persistSongLyrics(s.link, text);
     } catch (e: unknown) {
       if (this.destroyed || this.lyricsKey !== key) return;
       const err = e as {

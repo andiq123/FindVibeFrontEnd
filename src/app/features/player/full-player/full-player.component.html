@@ -351,10 +351,13 @@
           <span class="up-next-handle-label">Up next</span>
         </button>
         <div class="up-next-list">
-          @for (track of playlistService.upcoming(); track track.link) {
+          @for (track of playlistService.upcoming(); track track.link; let i = $index) {
             <button
               type="button"
               class="up-next-row"
+              animate.enter="up-next-row-in"
+              animate.leave="up-next-row-out"
+              [style.--i]="i"
               (click)="playUpcoming(track)"
             >
               <img
@@ -403,13 +406,21 @@
         </button>
         <div class="lyrics-body">
           @if (lyricsLoading()) {
-            <div class="lyrics-empty" role="status" aria-live="polite">
+            <div
+              class="lyrics-pane lyrics-empty"
+              animate.enter="lyrics-pane-in"
+              animate.leave="lyrics-pane-out"
+              role="status"
+              aria-live="polite"
+            >
               <span class="loading loading-spinner loading-sm text-primary"></span>
               <p class="lyrics-empty-title">Looking up lyrics…</p>
             </div>
           } @else if (lyricsError(); as err) {
             <div
-              class="lyrics-empty"
+              class="lyrics-pane lyrics-empty"
+              animate.enter="lyrics-pane-in"
+              animate.leave="lyrics-pane-out"
               [class.lyrics-empty--hard]="lyricsErrorHard()"
               [attr.role]="lyricsErrorHard() ? 'alert' : 'status'"
             >
@@ -435,8 +446,12 @@
                 Try again
               </button>
             </div>
-          } @else {
-            <pre class="lyrics-text">{{ lyricsText() }}</pre>
+          } @else if (lyricsText(); as text) {
+            <pre
+              class="lyrics-pane lyrics-text"
+              animate.enter="lyrics-pane-in"
+              animate.leave="lyrics-pane-out"
+            >{{ text }}</pre>
           }
         </div>
       </div>

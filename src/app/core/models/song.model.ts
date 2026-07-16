@@ -5,6 +5,8 @@ export interface Song {
   image: string;
   link: string;
   order: number;
+  /** Cached lyrics for vault tracks (filled after first explicit open). */
+  lyrics?: string;
   /** Search source name from API (e.g. MuzJam, Mp3mn). */
   provider?: string;
 }
