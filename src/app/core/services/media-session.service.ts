@@ -1,81 +1,171 @@
-import { Injectable, inject, effect, OnDestroy } from '@angular/core';
-import { PlaylistService } from './playlist.service';
-import { PlayerService } from './player.service';
-import { PlayerStatus } from '../../features/player/models/player.model';
+import { Injectable, inject, effect, OnDestroy, untracked } from "@angular/core";
+import { PlaylistService } from "./playlist.service";
+import { PlayerService } from "./player.service";
+import { PlayerStatus } from "../../features/player/models/player.model";
+import { Song } from "../models/song.model";
+
+/** Absolute https/blob URL for lock-screen artwork, or "". */
+export function mediaArtworkSrc(image: string): string {
+  const raw = image?.trim();
+  if (!raw || raw === "no_album_art.jpg") return "";
+  try {
+    const u = new URL(
+      raw,
+      typeof location !== "undefined" ? location.href : "https://localhost/",
+    );
+    if (u.protocol === "http:") u.protocol = "https:";
+    if (u.protocol !== "https:" && u.protocol !== "blob:") return "";
+    return u.href;
+  } catch {
+    return "";
+  }
+}
+
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class MediaSessionService implements OnDestroy {
-  private readonly playlistService = inject(PlaylistService);
-  private readonly playerService = inject(PlayerService);
-  private lastPositionUpdateTime = 0;
-  private readonly POSITION_UPDATE_THROTTLE_MS = 1000;
-  private positionUpdateInterval: number | null = null;
-  private lastSongId: string | null = null;
+  private readonly playlist = inject(PlaylistService);
+  private readonly player = inject(PlayerService);
+  private lastMetaKey = "";
   private lastStatus: PlayerStatus | null = null;
+  private positionTimer: ReturnType<typeof setInterval> | null = null;
+
   constructor() {
     effect(() => {
-      if (!('mediaSession' in navigator)) return;
-      const song = this.playlistService.currentSong();
-      const status = this.playerService.status();
-      const songId = song?.id || null;
-      if (songId !== this.lastSongId) {
-        this.lastSongId = songId;
-        if (song) {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: song.title,
-            artist: song.artist,
-            artwork: [
-              {
-                src: song.image || '',
-                sizes: '512x512',
-                type: 'image/png',
-              },
-            ],
-          });
-        }
-      }
-      if (status !== this.lastStatus) {
-        this.lastStatus = status;
-        navigator.mediaSession.playbackState = status === PlayerStatus.Playing ? 'playing' : 'paused';
-      }
+      if (!("mediaSession" in navigator)) return;
+      const song = this.playlist.currentSong();
+      const status = this.player.status();
+      untracked(() => this.sync(song, status));
     });
-    if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
-      this.positionUpdateInterval = window.setInterval(() => {
-        const currentTime = this.playerService.currentTime();
-        const duration = this.playerService.duration();
-        const now = Date.now();
-        if (now - this.lastPositionUpdateTime >= this.POSITION_UPDATE_THROTTLE_MS) {
-          if (duration > 0 && currentTime <= duration) {
-            navigator.mediaSession.setPositionState({
-              duration,
-              playbackRate: 1,
-              position: currentTime,
-            });
-            this.lastPositionUpdateTime = now;
-          }
-        }
-      }, this.POSITION_UPDATE_THROTTLE_MS);
-    }
   }
-  ngOnDestroy() {
-    if (this.positionUpdateInterval !== null) {
-      clearInterval(this.positionUpdateInterval);
-      this.positionUpdateInterval = null;
-    }
-  }
+
   initialize(): void {
-    if (!('mediaSession' in navigator)) return;
+    if (!("mediaSession" in navigator)) return;
     const ms = navigator.mediaSession;
-    ms.setActionHandler('nexttrack', () => this.playerService.setNextSong());
-    ms.setActionHandler('previoustrack', () => this.playerService.setPreviousSong());
-    ms.setActionHandler('play', () => this.playerService.play());
-    ms.setActionHandler('pause', () => this.playerService.pause());
-    ms.setActionHandler('stop', () => this.playerService.pause());
-    ms.setActionHandler('seekto', (details) => {
-      if (details.seekTime !== undefined) {
-        this.playerService.seek(details.seekTime);
+    const seekBy = (offset: number) => {
+      const next = this.player.currentTime() + offset;
+      const duration = this.player.duration();
+      this.player.seek(
+        Math.max(0, duration > 0 ? Math.min(next, duration) : next),
+      );
+      this.pushPosition();
+    };
+    const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [
+      ["play", () => void this.player.play()],
+      ["pause", () => this.player.pause()],
+      ["stop", () => this.player.pause()],
+      ["previoustrack", () => void this.player.setPreviousSong()],
+      ["nexttrack", () => void this.player.setNextSong()],
+      ["seekbackward", (d) => seekBy(-(d.seekOffset || 10))],
+      ["seekforward", (d) => seekBy(d.seekOffset || 10)],
+      [
+        "seekto",
+        (d) => {
+          if (d.seekTime != null) {
+            this.player.seek(d.seekTime);
+            this.pushPosition();
+          }
+        },
+      ],
+    ];
+    for (const [action, handler] of handlers) {
+      try {
+        ms.setActionHandler(action, handler);
+      } catch {
+        // ponytail: not every action is supported on every OS
       }
-    });
+    }
+  }
+
+  private sync(song: Song | null | undefined, status: PlayerStatus): void {
+    const ms = navigator.mediaSession;
+    const key = song
+      ? `${song.link}\0${song.image}\0${song.title}\0${song.artist}`
+      : "";
+    if (key !== this.lastMetaKey) {
+      this.lastMetaKey = key;
+      if (song) {
+        const src = mediaArtworkSrc(song.image);
+        ms.metadata = new MediaMetadata({
+          title: song.title || "Unknown",
+          artist: song.artist || "Unknown",
+          // omit type — covers are often jpeg/webp, wrong mime drops artwork
+          artwork: src
+            ? [
+                { src, sizes: "512x512" },
+                { src, sizes: "256x256" },
+              ]
+            : [],
+        });
+      } else {
+        ms.metadata = null;
+      }
+    }
+
+    if (status === this.lastStatus) return;
+    this.lastStatus = status;
+    ms.playbackState =
+      status === PlayerStatus.Playing
+        ? "playing"
+        : status === PlayerStatus.Paused || status === PlayerStatus.Loading
+          ? "paused"
+          : "none";
+
+    const playing = status === PlayerStatus.Playing;
+    this.armPositionTimer(playing);
+    if (playing) this.pushPosition();
+    else if (
+      status === PlayerStatus.Stopped ||
+      status === PlayerStatus.Ended ||
+      status === PlayerStatus.Error
+    ) {
+      try {
+        // empty state clears the scrubber on the lock screen
+        ms.setPositionState({});
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  private armPositionTimer(playing: boolean): void {
+    if (playing) {
+      if (this.positionTimer == null) {
+        this.positionTimer = setInterval(() => this.pushPosition(), 1000);
+      }
+      return;
+    }
+    if (this.positionTimer != null) {
+      clearInterval(this.positionTimer);
+      this.positionTimer = null;
+    }
+  }
+
+  private pushPosition(): void {
+    const ms = navigator.mediaSession;
+    if (!("setPositionState" in ms)) return;
+    const duration = this.player.duration();
+    const position = this.player.currentTime();
+    // setPositionState throws on NaN / position > duration
+    if (!(duration > 0) || !Number.isFinite(duration) || !Number.isFinite(position)) {
+      return;
+    }
+    try {
+      ms.setPositionState({
+        duration,
+        playbackRate: 1,
+        position: Math.min(Math.max(0, position), duration),
+      });
+    } catch {
+      /* ignore */
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.positionTimer != null) {
+      clearInterval(this.positionTimer);
+      this.positionTimer = null;
+    }
   }
 }

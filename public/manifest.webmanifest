@@ -2,10 +2,9 @@
   "name": "FindVibe - Discover Your Music",
   "short_name": "FindVibe",
   "description": "Discover and play your favorite music with an iOS-native experience. Search songs, create playlists, and enjoy high-quality audio streaming.",
-  "theme_color": "#0f172a",
-  "background_color": "#0f172a",
+  "theme_color": "#1e1b24",
+  "background_color": "#1e1b24",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait-primary",
   "scope": "./",
   "start_url": "./",
@@ -99,42 +98,6 @@
           "type": "image/png"
         }
       ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "FindVibe music player interface"
-    }
-  ],
-  "share_target": {
-    "action": "/songs",
-    "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
-  "file_handlers": [
-    {
-      "action": "/songs",
-      "accept": {
-        "audio/mpeg": [".mp3"],
-        "audio/mp4": [".m4a"],
-        "audio/wav": [".wav"],
-        "audio/ogg": [".ogg"]
-      }
-    }
-  ],
-  "protocol_handlers": [
-    {
-      "protocol": "web+findvibe",
-      "url": "/songs?track=%s"
     }
   ]
 }

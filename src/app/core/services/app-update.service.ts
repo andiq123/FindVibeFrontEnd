@@ -55,9 +55,14 @@ export class AppUpdateService {
       this.swUpdate.checkForUpdate();
     }
   }
-  applyUpdate(): void {
+  async applyUpdate(): Promise<void> {
     this.updateLoading.set(true);
-    document.location.reload();
+    try {
+      // Activate waiting SW first — bare reload can keep the old worker.
+      if (this.swUpdate.isEnabled) await this.swUpdate.activateUpdate();
+    } finally {
+      document.location.reload();
+    }
   }
   private countdown(startTimer: number) {
     return interval(1000).pipe(

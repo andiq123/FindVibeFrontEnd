@@ -19,6 +19,9 @@ export class AudioService implements OnDestroy {
     this.audio = new Audio();
     this.audio.volume = 1.0;
     this.audio.preload = "auto";
+    // iOS: keep playback eligible for lock-screen / Now Playing controls
+    this.audio.setAttribute("playsinline", "true");
+    this.audio.setAttribute("webkit-playsinline", "true");
     this.abortController = new AbortController();
     const signal = this.abortController.signal;
     this.audio.addEventListener(
