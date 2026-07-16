@@ -85,6 +85,14 @@ export class SearchService {
       }),
     );
   }
+  /** Browser locale → Google hl/gl (e.g. en-US → hl=en&gl=US). */
+  private readonly suggestLocale = (() => {
+    const [lang, region] = (navigator.language || "en").split("-");
+    const hl = (lang || "en").slice(0, 2).toLowerCase();
+    const gl = (region || lang || "US").slice(0, 2).toUpperCase();
+    return { hl, gl };
+  })();
+
   getSuggestions(term: string): Observable<string[]> {
     const q = term.trim();
     this.suggestQuery = q;
@@ -93,8 +101,11 @@ export class SearchService {
       return of([]);
     }
     this._suggestionsLoading.set(true);
+    const { hl, gl } = this.suggestLocale;
     return this.httpClient
-      .get<string[]>(`${BASE_API_URL}/suggest?q=${encodeURIComponent(q)}`)
+      .get<string[]>(
+        `${BASE_API_URL}/suggest?q=${encodeURIComponent(q)}&hl=${hl}&gl=${gl}`,
+      )
       .pipe(
         tap({
           next: (result) => {
