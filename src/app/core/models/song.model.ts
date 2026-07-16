@@ -5,15 +5,13 @@ export interface Song {
   image: string;
   link: string;
   order: number;
-  /** Search source name from API (e.g. MuzJam, Mp3mn). */
+  /** Search source name from API (e.g. Mp3mn). */
   provider?: string;
 }
 
 /** Short host label for source badges. */
 export function sourceHost(provider?: string): string {
   switch (provider) {
-    case "MuzJam":
-      return "muzjam.org";
     case "Mp3mn":
       return "mp3mn.net";
     default:

@@ -45,7 +45,6 @@
       "name": "album-art",
       "urls": [
         "https://lh3.googleusercontent.com/*",
-        "https://jpg.muzjam.org/*",
         "https://*.mzstatic.com/**"
       ],
       "cacheConfig": {
@@ -58,7 +57,6 @@
     {
       "name": "audio-files",
       "urls": [
-        "https://song.muzvibe.org/*",
         "https://mn1.sunproxy.net/*",
         "https://*.mp3",
         "https://*.m4a",
