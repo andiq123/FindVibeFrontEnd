@@ -3,13 +3,11 @@
     <app-search-bar [query]="query()" />
 
     @if (!hasActiveSearch()) {
-      <div class="premium-card">
-        <app-empty-state
-          [icon]="faMagnifyingGlass"
-          title="Find your next favorite"
-          description="Search for vibes, artists, or songs."
-        />
-      </div>
+      <app-empty-state
+        [icon]="faMagnifyingGlass"
+        title="Find your next favorite"
+        description="Search for vibes, artists, or songs."
+      />
     } @else {
       <div class="space-y-3">
         @if (pagination(); as pages) {
