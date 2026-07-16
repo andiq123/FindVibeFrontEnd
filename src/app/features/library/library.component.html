@@ -15,55 +15,57 @@
         </h1>
       </div>
     </div>
-    <div class="relative pb-12">
-        @if (hasReordered()) {
-          <div class="flex gap-3 mb-4 sticky top-0 z-20 pb-3">
-            <button
-              class="flex-1 py-3 px-4 rounded-2xl bg-primary text-primary-content font-bold text-sm transition-all active:scale-95 [@media(hover:hover)]:hover:bg-primary/90 flex items-center justify-center gap-2"
-              (click)="saveReorders()"
-              [disabled]="loadingReorder()"
-              aria-label="Save reorder"
-            >
-              @if (loadingReorder()) {
-                <span class="loading loading-spinner loading-xs"></span>
-                <span>Saving</span>
-              } @else {
-                <fa-icon [icon]="faCheck" />
-                <span>Save</span>
-              }
-            </button>
-            <button
-              class="flex-1 py-3 px-4 rounded-2xl bg-base-200/60 border border-black/35 text-base-content/70 font-bold text-sm transition-colors active:scale-95 [@media(hover:hover)]:hover:bg-base-200 flex items-center justify-center gap-2"
-              (click)="cancelReorders()"
-              [disabled]="loadingReorder()"
-              aria-label="Cancel reorder"
-            >
-              <fa-icon [icon]="faXmark" />
-              <span>Cancel</span>
-            </button>
-          </div>
-        }
-        <div class="premium-card">
-          @if (loadingReorder()) {
-            <div
-              class="bg-base-200/80 absolute w-full h-full inset-0 z-10 flex flex-col gap-3 items-center justify-center rounded-[2.5rem]"
-            >
-              <span class="text-base font-medium text-base-content/70 mb-2"
-                >Applying changes...</span
-              >
-              <span class="loading loading-md text-primary"></span>
-            </div>
-          }
-          <app-song-list
-            [songs]="songs()"
-            [isLoading]="loadingSongs()"
-            [allowReorder]="true"
-            emptyStateTitle="No vibes yet"
-            emptyStateDescription="When you add songs to your library, they'll show up here."
-            (reorder)="reorderSongs($event)"
-            (playlistChange)="onChangePlaylist()"
-          />
+
+    <div class="relative" [class.vault-list--bar]="hasReordered()">
+      <div class="premium-card">
+        <app-song-list
+          [songs]="songs()"
+          [isLoading]="loadingSongs()"
+          [allowReorder]="true"
+          emptyStateTitle="No vibes yet"
+          emptyStateDescription="When you add songs to your library, they'll show up here."
+          (reorder)="reorderSongs($event)"
+          (playlistChange)="onChangePlaylist()"
+        />
+      </div>
+    </div>
+
+    @if (hasReordered()) {
+      <div
+        class="vault-reorder-bar"
+        [class.vault-reorder-bar--above-mini]="aboveMini()"
+        role="dialog"
+        aria-label="Confirm playlist order"
+      >
+        <p class="vault-reorder-bar__label">Keep this order?</p>
+        <div class="vault-reorder-bar__actions">
+          <button
+            type="button"
+            class="vault-reorder-bar__btn vault-reorder-bar__btn--ghost"
+            (click)="cancelReorders()"
+            [disabled]="loadingReorder()"
+            aria-label="Discard reorder"
+          >
+            <fa-icon [icon]="faXmark" />
+            <span>Discard</span>
+          </button>
+          <button
+            type="button"
+            class="vault-reorder-bar__btn vault-reorder-bar__btn--primary"
+            (click)="saveReorders()"
+            [disabled]="loadingReorder()"
+            aria-label="Save reorder"
+          >
+            @if (loadingReorder()) {
+              <span class="loading loading-spinner loading-xs"></span>
+              <span>Saving</span>
+            } @else {
+              <fa-icon [icon]="faCheck" />
+              <span>Save</span>
+            }
+          </button>
         </div>
       </div>
+    }
   </app-page-content>
 }

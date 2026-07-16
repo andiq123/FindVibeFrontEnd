@@ -256,66 +256,73 @@
           </button>
         </div>
 
-        <div class="pt-2 flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary/15 text-primary text-sm font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50"
-            (click)="startRadio()"
-            [disabled]="radioService.loading()"
-            [class.ring-1]="playlistService.radioActive()"
-            [class.ring-primary/40]="playlistService.radioActive()"
-            aria-label="Start radio from this track"
-          >
-            @if (radioService.loading()) {
-              <span class="loading loading-spinner loading-xs"></span>
-            } @else {
-              <fa-icon [icon]="faWaveSquare" class="text-xs" />
-            }
-            Radio
-          </button>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
-            [class.text-primary]="lyricsOpen()"
-            [class.bg-primary/15]="lyricsOpen()"
-            (click)="toggleLyrics()"
-            [attr.aria-expanded]="lyricsOpen()"
-            aria-label="Show lyrics"
-          >
-            <fa-icon [icon]="faMusic" class="text-xs" />
-            Lyrics
-          </button>
-          @if (playlistService.upcoming().length; as n) {
+        <div class="relative pt-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary/15 text-primary text-sm font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50"
+              (click)="startRadio()"
+              [disabled]="radioService.loading()"
+              [class.ring-1]="playlistService.radioActive()"
+              [class.ring-primary/40]="playlistService.radioActive()"
+              aria-label="Start radio from this track"
+            >
+              @if (radioService.loading()) {
+                <span class="loading loading-spinner loading-xs"></span>
+              } @else {
+                <fa-icon [icon]="faWaveSquare" class="text-xs" />
+              }
+              Radio
+            </button>
             <button
               type="button"
               class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
-              (click)="toggleUpNext()"
-              [attr.aria-expanded]="upNextOpen()"
-              [attr.aria-label]="upNextOpen() ? 'Hide up next' : 'Show up next'"
+              [class.text-primary]="lyricsOpen()"
+              [class.bg-primary/15]="lyricsOpen()"
+              (click)="toggleLyrics()"
+              [attr.aria-expanded]="lyricsOpen()"
+              aria-label="Show lyrics"
             >
-              Up next · {{ n }}
-              <fa-icon
-                [icon]="faChevronRight"
-                class="text-[10px] transition-transform"
-                [class.rotate-90]="upNextOpen()"
-              />
+              <fa-icon [icon]="faMusic" class="text-xs" />
+              Lyrics
             </button>
+            @if (playlistService.upcoming().length; as n) {
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
+                (click)="toggleUpNext()"
+                [attr.aria-expanded]="upNextOpen()"
+                [attr.aria-label]="upNextOpen() ? 'Hide up next' : 'Show up next'"
+              >
+                Up next · {{ n }}
+                <fa-icon
+                  [icon]="faChevronRight"
+                  class="text-[10px] transition-transform"
+                  [class.rotate-90]="upNextOpen()"
+                />
+              </button>
+            }
+          </div>
+          @if (radioService.error(); as err) {
+            <div class="player-toast player-toast--error" role="alert">
+              <fa-icon [icon]="faTriangleExclamation" class="player-toast-icon" />
+              <span class="player-toast-text">{{ err }}</span>
+              <button
+                type="button"
+                class="player-toast-dismiss"
+                (click)="radioService.clearError()"
+                aria-label="Dismiss"
+              >
+                <fa-icon [icon]="faXmark" class="text-[10px]" />
+              </button>
+            </div>
+          } @else if (radioConfirm()) {
+            <div class="player-toast player-toast--ok" role="status" aria-live="polite">
+              <fa-icon [icon]="faCheck" class="player-toast-icon" />
+              <span class="player-toast-text">Radio queued</span>
+            </div>
           }
         </div>
-        @if (radioService.error(); as err) {
-          <div class="radio-error" role="alert">
-            <fa-icon [icon]="faTriangleExclamation" class="radio-error-icon" />
-            <span class="radio-error-text">{{ err }}</span>
-            <button
-              type="button"
-              class="radio-error-dismiss"
-              (click)="radioService.clearError()"
-              aria-label="Dismiss"
-            >
-              <fa-icon [icon]="faXmark" class="text-[10px]" />
-            </button>
-          </div>
-        }
       </div>
     </div>
 

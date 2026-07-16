@@ -1,10 +1,13 @@
-.dragging { opacity: 0.3; }
+.dragging {
+  opacity: 0.45;
+  transition: opacity 120ms ease;
+}
 
 .song-container.dragTarget {
-  background: color-mix(in oklab, var(--color-accent) 25%, transparent) !important;
-  border: 3px solid var(--color-accent) !important;
-  border-radius: 0.75rem !important;
-  transform: scale(1.03) !important;
+  background: color-mix(in oklab, var(--color-primary) 12%, transparent) !important;
+  box-shadow: inset 3px 0 0 0 var(--color-primary);
+  border-radius: 0.85rem !important;
+  transform: none !important;
 }
 
 .song-container {

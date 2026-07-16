@@ -30,6 +30,7 @@ import {
   faTriangleExclamation,
   faWaveSquare,
   faXmark,
+  faCheck,
 } from "../../../shared/icons";
 import { firstValueFrom } from "rxjs";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
@@ -97,8 +98,12 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   faWaveSquare = faWaveSquare;
   faMusic = faMusic;
   faXmark = faXmark;
+  faCheck = faCheck;
   faChevronRight = faChevronRight;
   isDownloadingMp3 = signal(false);
+  /** Brief green confirm after radio starts (no Up next sheet). */
+  radioConfirm = signal(false);
+  private radioConfirmId: ReturnType<typeof setTimeout> | null = null;
   /** Bottom sheets — stay mounted while closing so exit anim can finish. */
   upNextOpen = signal(false);
   upNextClosing = signal(false);
@@ -206,6 +211,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.closeFallbackId != null) clearTimeout(this.closeFallbackId);
     if (this.upNextCloseId != null) clearTimeout(this.upNextCloseId);
     if (this.lyricsCloseId != null) clearTimeout(this.lyricsCloseId);
+    if (this.radioConfirmId != null) clearTimeout(this.radioConfirmId);
   }
   private closeAndEmit(): void {
     if (this.closeFallbackId != null) {
@@ -433,10 +439,19 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     const current = this.song();
     const ok = await this.radioService.start(current);
     if (!ok) return;
-    this.openUpNext();
+    this.flashRadioConfirm();
     if (this.status() !== PlayerStatus.Playing) {
       await this.playerService.setSong(current);
     }
+  }
+
+  private flashRadioConfirm(): void {
+    if (this.radioConfirmId != null) clearTimeout(this.radioConfirmId);
+    this.radioConfirm.set(true);
+    this.radioConfirmId = setTimeout(() => {
+      this.radioConfirmId = null;
+      if (!this.destroyed) this.radioConfirm.set(false);
+    }, 2200);
   }
 
   async playUpcoming(song: Song) {

@@ -727,44 +727,68 @@ body {
   touch-action: none;
 }
 
-/* Full-player sheets */
-.radio-error {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin-top: 0.35rem;
-  padding: 0.55rem 0.65rem;
-  border-radius: 0.85rem;
-  background: color-mix(in oklab, var(--color-error) 12%, var(--color-base-100));
-  border: 1px solid color-mix(in oklab, var(--color-error) 28%, transparent);
-  animation: fade-in var(--anim-duration-fast) var(--anim-ease-ios);
+/* Full-player floating toast — absolute, zero layout shift */
+.player-toast {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 0.4rem);
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: min(100%, 18rem);
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  pointer-events: none;
+  box-shadow: 0 8px 24px color-mix(in oklab, #000 28%, transparent);
+  animation: player-toast-in 220ms var(--anim-ease-ios) both;
 }
-.radio-error-icon {
+.player-toast--ok {
+  background: color-mix(in oklab, var(--color-success) 88%, var(--color-base-100));
+  color: var(--color-success-content);
+}
+.player-toast--error {
+  pointer-events: auto;
+  background: color-mix(in oklab, var(--color-error) 88%, var(--color-base-100));
+  color: var(--color-error-content);
+}
+.player-toast-icon {
   flex-shrink: 0;
-  margin-top: 0.1rem;
-  font-size: 0.75rem;
-  color: var(--color-error);
+  font-size: 0.7rem;
 }
-.radio-error-text {
-  flex: 1;
+.player-toast-text {
   min-width: 0;
   font-size: 0.75rem;
-  line-height: 1.35;
-  color: color-mix(in oklab, var(--color-error) 85%, var(--color-base-content));
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.radio-error-dismiss {
+.player-toast-dismiss {
   flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.35rem;
+  height: 1.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  color: color-mix(in oklab, var(--color-error) 70%, transparent);
+  color: inherit;
+  opacity: 0.85;
   touch-action: manipulation;
 }
-.radio-error-dismiss:active {
-  background: color-mix(in oklab, var(--color-error) 12%, transparent);
+.player-toast-dismiss:active {
+  background: color-mix(in oklab, #000 12%, transparent);
+}
+@keyframes player-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .up-next-scrim {

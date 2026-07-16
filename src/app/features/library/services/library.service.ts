@@ -179,6 +179,11 @@ export class LibraryService {
     });
   }
 
+  /** Instant local restore after Discard (no network). */
+  replaceSongs(songs: Song[]): void {
+    this.songs.set(songs);
+  }
+
   private trackLoadingFavorite(id: string, isLoading: boolean): void {
     trackLoadingState(this.currentLoadingFavoriteSongIds, id, isLoading);
   }
