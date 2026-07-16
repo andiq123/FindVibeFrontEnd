@@ -20,6 +20,9 @@ enum ServerStatus {
   Down = "down",
 }
 
+/** Where Google music suggestions are biased. Default Romania. */
+export type SuggestRegion = "ro" | "device";
+
 @Injectable({
   providedIn: "root",
 })
@@ -30,6 +33,7 @@ export class SettingsService implements OnDestroy {
   private readonly _repeatMode = signal<RepeatMode>(RepeatMode.OFF);
   private readonly _isShuffle = signal(false);
   private readonly _isMiniPlayer = signal(true);
+  private readonly _suggestRegion = signal<SuggestRegion>("ro");
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
   private onlineHandler = () => this._isNavigatorOffline.set(false);
@@ -37,6 +41,7 @@ export class SettingsService implements OnDestroy {
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
+  readonly suggestRegion = this._suggestRegion.asReadonly();
   readonly isServerDown = computed(
     () => this._serverStatus() === ServerStatus.Down,
   );
@@ -49,14 +54,30 @@ export class SettingsService implements OnDestroy {
   readonly isOffline = computed(
     () => this._isNavigatorOffline() || this.isServerDown(),
   );
+  /** Google suggest hl/gl — Romania by default, or browser locale. */
+  readonly suggestLocale = computed(() => {
+    if (this._suggestRegion() === "device") {
+      const [lang, region] = (navigator.language || "en").split("-");
+      return {
+        hl: (lang || "en").slice(0, 2).toLowerCase(),
+        gl: (region || lang || "US").slice(0, 2).toUpperCase(),
+      };
+    }
+    return { hl: "ro", gl: "RO" };
+  });
 
   initialize(): void {
     window.addEventListener("online", this.onlineHandler);
     window.addEventListener("offline", this.offlineHandler);
     const repeatMode = this.storageService.getItem<RepeatMode>("repeatMode");
     const isShuffle = this.storageService.getItem<boolean>("isShuffle");
+    const suggestRegion =
+      this.storageService.getItem<SuggestRegion>("suggestRegion");
     if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
+    if (suggestRegion === "ro" || suggestRegion === "device") {
+      this._suggestRegion.set(suggestRegion);
+    }
   }
 
   ngOnDestroy(): void {
@@ -80,6 +101,11 @@ export class SettingsService implements OnDestroy {
     const newValue = !this._isShuffle();
     this._isShuffle.set(newValue);
     this.storageService.setItem("isShuffle", newValue);
+  }
+
+  setSuggestRegion(region: SuggestRegion): void {
+    this._suggestRegion.set(region);
+    this.storageService.setItem("suggestRegion", region);
   }
 
   setServerUp(): void {

@@ -14,6 +14,10 @@ import { PageContentComponent } from "../../shared/components/page-content/page-
 import { StorageInfoComponent } from "../library/components/storage-info/storage-info.component";
 import { UserService } from "../library/services/user.service";
 import { PlaylistService } from "../../core/services/playlist.service";
+import {
+  SettingsService,
+  SuggestRegion,
+} from "../../core/services/settings.service";
 import { environment } from "../../../environments/environment";
 import {
   faCircleNotch,
@@ -49,6 +53,41 @@ interface SourcesResponse {
 
         <section class="premium-card p-3.5" aria-label="Offline vault">
           <app-storage-info />
+        </section>
+
+        <section class="premium-card p-3.5 space-y-2.5" aria-label="Suggestions">
+          <div>
+            <h2 class="text-sm font-bold tracking-tight">Suggestion region</h2>
+            <p class="text-[11px] text-base-content/45 mt-0.5">
+              Music autocomplete bias. Default Romania.
+            </p>
+          </div>
+          <div
+            class="grid grid-cols-2 gap-1 p-1 rounded-xl bg-base-content/[0.06]"
+            role="group"
+            aria-label="Suggestion region"
+          >
+            <button
+              type="button"
+              class="h-9 rounded-lg text-xs font-semibold transition-colors"
+              [class.bg-base-100]="suggestRegion() === 'ro'"
+              [class.text-base-content]="suggestRegion() === 'ro'"
+              [class.text-base-content/50]="suggestRegion() !== 'ro'"
+              (click)="setSuggestRegion('ro')"
+            >
+              Romania
+            </button>
+            <button
+              type="button"
+              class="h-9 rounded-lg text-xs font-semibold transition-colors"
+              [class.bg-base-100]="suggestRegion() === 'device'"
+              [class.text-base-content]="suggestRegion() === 'device'"
+              [class.text-base-content/50]="suggestRegion() !== 'device'"
+              (click)="setSuggestRegion('device')"
+            >
+              My device
+            </button>
+          </div>
         </section>
 
         <section class="space-y-2" aria-label="Source health">
@@ -140,6 +179,7 @@ export class SettingsPageComponent {
   private http = inject(HttpClient);
   private userService = inject(UserService);
   private playlistService = inject(PlaylistService);
+  private settingsService = inject(SettingsService);
   private router = inject(Router);
   faCircleNotch = faCircleNotch;
   faCheckCircle = faCheckCircle;
@@ -148,6 +188,7 @@ export class SettingsPageComponent {
   checkedAt = signal("");
   isLoggedIn = computed(() => !!this.userService.user());
   username = computed(() => this.userService.user()?.username || "");
+  suggestRegion = this.settingsService.suggestRegion;
 
   sources = resource({
     loader: async () => {
@@ -158,6 +199,10 @@ export class SettingsPageComponent {
       return data;
     },
   });
+
+  setSuggestRegion(region: SuggestRegion) {
+    this.settingsService.setSuggestRegion(region);
+  }
 
   reload() {
     this.sources.reload();
