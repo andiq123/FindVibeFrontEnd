@@ -273,6 +273,18 @@
             }
             Radio
           </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
+            [class.text-primary]="lyricsOpen()"
+            [class.bg-primary/15]="lyricsOpen()"
+            (click)="toggleLyrics()"
+            [attr.aria-expanded]="lyricsOpen()"
+            aria-label="Show lyrics"
+          >
+            <fa-icon [icon]="faMusic" class="text-xs" />
+            Lyrics
+          </button>
           @if (playlistService.upcoming().length; as n) {
             <button
               type="button"
@@ -353,6 +365,71 @@
                 <span class="up-next-artist">{{ track.artist }}</span>
               </span>
             </button>
+          }
+        </div>
+      </div>
+    }
+
+    @if (lyricsOpen() || lyricsClosing()) {
+      <button
+        type="button"
+        class="up-next-scrim"
+        [class.is-out]="lyricsClosing()"
+        (click)="closeLyrics()"
+        aria-label="Close lyrics"
+      ></button>
+      <div
+        class="up-next-sheet lyrics-sheet"
+        [class.is-out]="lyricsClosing()"
+        (animationend)="onLyricsAnimEnd($event)"
+        role="dialog"
+        aria-label="Lyrics"
+      >
+        <button
+          type="button"
+          class="up-next-handle pressable-native"
+          (click)="closeLyrics()"
+          aria-label="Hide lyrics"
+        >
+          <span class="up-next-handle-bar"></span>
+          <span class="up-next-handle-label">Lyrics</span>
+        </button>
+        <div class="lyrics-body">
+          @if (lyricsLoading()) {
+            <div class="lyrics-empty" role="status" aria-live="polite">
+              <span class="loading loading-spinner loading-sm text-primary"></span>
+              <p class="lyrics-empty-title">Looking up lyrics…</p>
+            </div>
+          } @else if (lyricsError(); as err) {
+            <div
+              class="lyrics-empty"
+              [class.lyrics-empty--hard]="lyricsErrorHard()"
+              [attr.role]="lyricsErrorHard() ? 'alert' : 'status'"
+            >
+              <fa-icon
+                [icon]="
+                  lyricsErrorHard() ? faTriangleExclamation : faMusic
+                "
+                class="lyrics-empty-icon"
+              />
+              <p class="lyrics-empty-title">{{ err }}</p>
+              <p class="lyrics-empty-hint">
+                @if (lyricsErrorHard()) {
+                  Check your connection, then try again.
+                } @else {
+                  LRCLIB doesn’t have this one yet.
+                }
+              </p>
+              <button
+                type="button"
+                class="lyrics-empty-retry"
+                (click)="retryLyrics()"
+              >
+                Try again
+              </button>
+            </div>
+          } @else {
+            <pre class="lyrics-text">{{ lyricsText() }}</pre>
           }
         </div>
       </div>

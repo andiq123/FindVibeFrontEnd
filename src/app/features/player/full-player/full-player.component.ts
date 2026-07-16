@@ -26,10 +26,12 @@ import {
   faShuffle,
   faStepBackward,
   faStepForward,
+  faMusic,
   faTriangleExclamation,
   faWaveSquare,
   faXmark,
 } from "../../../shared/icons";
+import { firstValueFrom } from "rxjs";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
 import { SettingsService } from "../../../core/services/settings.service";
 import { FavoriteButtonComponent } from "../../../shared/favorite-button/favorite-button.component";
@@ -93,13 +95,23 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   faTriangleExclamation = faTriangleExclamation;
   faArrowDown = faArrowDown;
   faWaveSquare = faWaveSquare;
+  faMusic = faMusic;
   faXmark = faXmark;
   faChevronRight = faChevronRight;
   isDownloadingMp3 = signal(false);
-  /** Up next sheet — keep mounted while closing so exit anim can finish. */
+  /** Bottom sheets — stay mounted while closing so exit anim can finish. */
   upNextOpen = signal(false);
   upNextClosing = signal(false);
   private upNextCloseId: ReturnType<typeof setTimeout> | null = null;
+  lyricsOpen = signal(false);
+  lyricsClosing = signal(false);
+  lyricsLoading = signal(false);
+  /** Soft empty (404) vs hard failure (network/upstream). */
+  lyricsError = signal("");
+  lyricsErrorHard = signal(false);
+  lyricsText = signal("");
+  private lyricsKey = "";
+  private lyricsCloseId: ReturnType<typeof setTimeout> | null = null;
   isClosingAnimation = signal(false);
   isOpeningAnimation = signal(false);
   isOpened = signal(false);
@@ -192,6 +204,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.openFallbackId != null) clearTimeout(this.openFallbackId);
     if (this.closeFallbackId != null) clearTimeout(this.closeFallbackId);
     if (this.upNextCloseId != null) clearTimeout(this.upNextCloseId);
+    if (this.lyricsCloseId != null) clearTimeout(this.lyricsCloseId);
   }
   private closeAndEmit(): void {
     if (this.closeFallbackId != null) {
@@ -293,6 +306,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openUpNext(): void {
     if (!this.playlistService.upcoming().length) return;
+    this.closeLyrics();
     if (this.upNextCloseId != null) {
       clearTimeout(this.upNextCloseId);
       this.upNextCloseId = null;
@@ -321,6 +335,97 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.upNextOpen.set(false);
     this.upNextClosing.set(false);
+  }
+
+  toggleLyrics(): void {
+    if (this.lyricsOpen() || this.lyricsClosing()) this.closeLyrics();
+    else void this.openLyrics();
+  }
+
+  retryLyrics(): void {
+    this.lyricsKey = "";
+    this.lyricsError.set("");
+    this.lyricsErrorHard.set(false);
+    this.lyricsText.set("");
+    void this.openLyrics();
+  }
+
+  async openLyrics(): Promise<void> {
+    this.closeUpNext();
+    if (this.lyricsCloseId != null) {
+      clearTimeout(this.lyricsCloseId);
+      this.lyricsCloseId = null;
+    }
+    this.lyricsClosing.set(false);
+    this.lyricsOpen.set(true);
+
+    const s = this.song();
+    const key = `${s.artist}\0${s.title}`;
+    if (key === this.lyricsKey && (this.lyricsText() || this.lyricsError())) return;
+
+    this.lyricsKey = key;
+    this.lyricsText.set("");
+    this.lyricsError.set("");
+    this.lyricsErrorHard.set(false);
+    this.lyricsLoading.set(true);
+    try {
+      const r = await firstValueFrom(
+        this.http.get<{ lyrics?: string }>(`${environment.API_URL}/lyrics`, {
+          params: { artist: s.artist, title: s.title },
+        }),
+      );
+      if (this.destroyed || this.lyricsKey !== key) return;
+      const text = r?.lyrics?.trim();
+      if (!text) {
+        this.lyricsError.set("No lyrics for this track");
+        return;
+      }
+      this.lyricsText.set(text);
+    } catch (e: unknown) {
+      if (this.destroyed || this.lyricsKey !== key) return;
+      const err = e as {
+        error?: { error?: string; code?: string };
+        status?: number;
+      };
+      const status = err?.status ?? 0;
+      const code = err?.error?.code;
+      const msg = err?.error?.error;
+      if (status === 0) {
+        this.lyricsErrorHard.set(true);
+        this.lyricsError.set("Can't reach the server");
+      } else if (status >= 500 || code === "upstream") {
+        this.lyricsErrorHard.set(true);
+        this.lyricsError.set(msg || "Couldn't reach lyrics service");
+      } else {
+        // 404 not_found / instrumental — calm empty state, not an alarm.
+        this.lyricsErrorHard.set(false);
+        this.lyricsError.set(msg || "No lyrics for this track");
+      }
+    } finally {
+      if (!this.destroyed) this.lyricsLoading.set(false);
+    }
+  }
+
+  closeLyrics(): void {
+    if (!this.lyricsOpen() || this.lyricsClosing()) return;
+    this.lyricsClosing.set(true);
+    this.lyricsCloseId = setTimeout(() => {
+      this.lyricsCloseId = null;
+      if (this.destroyed) return;
+      this.lyricsOpen.set(false);
+      this.lyricsClosing.set(false);
+    }, 280);
+  }
+
+  onLyricsAnimEnd(event: AnimationEvent): void {
+    if (!this.lyricsClosing()) return;
+    if (!(event.animationName ?? "").includes("up-next-sheet-out")) return;
+    if (this.lyricsCloseId != null) {
+      clearTimeout(this.lyricsCloseId);
+      this.lyricsCloseId = null;
+    }
+    this.lyricsOpen.set(false);
+    this.lyricsClosing.set(false);
   }
 
   async startRadio() {
