@@ -69,11 +69,17 @@
             : 'text-sm font-medium block'
         "
       />
-      <app-moving-title
-        [title]="song().artist"
-        [isActive]="status() === playerStatus.Playing"
-        classes="text-xs text-base-content/50 block"
-      />
+      @if (status() === playerStatus.Error) {
+        <p class="text-xs text-error/90 truncate" role="status">
+          {{ playError() || "Couldn't play — tap play to retry" }}
+        </p>
+      } @else {
+        <app-moving-title
+          [title]="song().artist"
+          [isActive]="status() === playerStatus.Playing"
+          classes="text-xs text-base-content/50 block"
+        />
+      }
     </div>
     <div class="hidden lg:flex items-center gap-1 shrink-0" (click)="$event.stopPropagation()">
       <button
@@ -92,7 +98,13 @@
         [class.text-base-content/70]="status() !== playerStatus.Playing"
         [class.hover:bg-base-content/15]="status() !== playerStatus.Playing"
         (click)="togglePlay($event)"
-        [attr.aria-label]="status() === playerStatus.Playing ? 'Pause' : 'Play'"
+        [attr.aria-label]="
+          status() === playerStatus.Error
+            ? 'Retry playback'
+            : status() === playerStatus.Playing
+              ? 'Pause'
+              : 'Play'
+        "
       >
         @if (status() === playerStatus.Loading) {
           <span class="loading loading-spinner loading-sm text-current"></span>

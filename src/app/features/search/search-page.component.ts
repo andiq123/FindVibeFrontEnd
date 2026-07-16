@@ -160,11 +160,11 @@ export class SearchPageComponent {
     const isActive = !!current && current.link === song.link;
 
     if (isActive) {
-      if (this.playerService.status() === PlayerStatus.Paused) {
-        await this.playerService.play();
-      } else {
-        // Includes Loading/Playing/Error/Ended; best-effort pause keeps UX consistent.
+      if (this.playerService.status() === PlayerStatus.Playing) {
         this.playerService.pause();
+      } else {
+        // Paused / Error / Ended → play (Error hard-retries the stream).
+        await this.playerService.play();
       }
       return;
     }

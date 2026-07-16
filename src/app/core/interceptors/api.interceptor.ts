@@ -4,7 +4,7 @@ import {
   HttpInterceptorFn,
 } from "@angular/common/http";
 import { inject } from "@angular/core";
-import { retry, tap, timeout, timer, TimeoutError } from "rxjs";
+import { catchError, retry, tap, throwError, timeout, timer, TimeoutError } from "rxjs";
 import { environment } from "../../../environments/environment";
 import { SettingsService } from "../services/settings.service";
 
@@ -40,6 +40,11 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     }),
     tap((event) => {
       if (event.type === HttpEventType.Response) settings.setServerUp();
+    }),
+    catchError((err) => {
+      // Exhausted cold-start / network — surface the chip. 4xx stays quiet.
+      if (!isHealth && isTransient(err)) settings.setServerDown();
+      return throwError(() => err);
     }),
   );
 };

@@ -73,11 +73,11 @@ export class SongComponent implements OnDestroy {
   }
   async playOrPause() {
     if (this.isUnavailable()) return;
-    const currentStatus = this.status();
-    if (currentStatus === PlayerStatus.Paused) {
-      await this.play();
-    } else {
+    // Playing → pause. Error/Ended/Paused/Stopped → play (Error hard-retries).
+    if (this.status() === PlayerStatus.Playing) {
       await this.pause();
+    } else {
+      await this.play();
     }
   }
   emitReorder(data: { from: string; to: string }) {

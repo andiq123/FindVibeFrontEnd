@@ -123,14 +123,21 @@
               fontSize="1.5rem"
               color="var(--color-base-content)"
             />
-            <button
-              class="text-base-content/60 text-lg truncate mt-1 active:text-base-content/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-base-content/80"
-              (click)="navigateToArtist()"
-              [attr.aria-label]="'View songs by ' + song().artist"
-              type="button"
-            >
-              {{ song().artist }}
-            </button>
+            @if (status() === playerStatus.Error) {
+              <p class="text-error/90 text-sm mt-1 truncate" role="status">
+                {{ playerService.playError() || "Couldn't play this track" }}
+                <span class="text-base-content/45"> · tap play to retry</span>
+              </p>
+            } @else {
+              <button
+                class="text-base-content/60 text-lg truncate mt-1 active:text-base-content/90 transition-colors duration-150 text-left w-full touch-manipulation [@media(hover:hover)]:hover:text-base-content/80"
+                (click)="navigateToArtist()"
+                [attr.aria-label]="'View songs by ' + song().artist"
+                type="button"
+              >
+                {{ song().artist }}
+              </button>
+            }
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <button
@@ -219,7 +226,11 @@
               class="w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] flex items-center justify-center rounded-full bg-base-content text-base-100 active:scale-95 transition-transform touch-manipulation"
               [class.bg-primary]="status() === playerStatus.Playing"
               [attr.aria-label]="
-                status() === playerStatus.Playing ? 'Pause' : 'Play'
+                status() === playerStatus.Error
+                  ? 'Retry playback'
+                  : status() === playerStatus.Playing
+                    ? 'Pause'
+                    : 'Play'
               "
               (click)="togglePlay()"
             >

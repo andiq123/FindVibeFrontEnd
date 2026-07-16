@@ -41,6 +41,7 @@ export class MiniPlayerComponent {
   currentTime = input<number>(0);
   duration = input<number>(0);
   toggleSizeEvent = output<void>();
+  readonly playError = this.playerService.playError;
   playerStatus = PlayerStatus;
   faArrowUp = faArrowUp;
   faPlay = faPlay;
