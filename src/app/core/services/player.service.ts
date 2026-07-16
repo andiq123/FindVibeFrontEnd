@@ -92,6 +92,18 @@ export class PlayerService implements OnDestroy {
   seek(time: number): void {
     this.audioService.seek(time);
   }
+  /** Flip shuffle and rebuild the queue around the current track. */
+  toggleShuffle(): void {
+    this.settingsService.toggleShuffle();
+    if (this.settingsService.isShuffle()) {
+      this.playlistService.enableShuffle();
+    } else {
+      this.playlistService.disableShuffle();
+    }
+  }
+  toggleRepeat(): void {
+    this.settingsService.toggleRepeat();
+  }
   async setPreviousSong(): Promise<Song | undefined> {
     if (this.currentTime() > 5) {
       return this.replayCurrentSong();

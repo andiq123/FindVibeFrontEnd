@@ -70,8 +70,8 @@ export class SettingsService implements OnDestroy {
 
   toggleRepeat(): void {
     const modes = [RepeatMode.OFF, RepeatMode.ALL, RepeatMode.ONE];
-    const currentIndex = modes.indexOf(this._repeatMode());
-    const nextMode = modes[(currentIndex + 1) % modes.length];
+    const i = modes.indexOf(this._repeatMode());
+    const nextMode = modes[((i < 0 ? 0 : i) + 1) % modes.length];
     this._repeatMode.set(nextMode);
     this.storageService.setItem("repeatMode", nextMode);
   }

@@ -111,10 +111,10 @@
               {{ song().artist }}
             </button>
           </div>
-          <div class="flex items-center gap-1 shrink-0">
+          <div class="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              class="tap-target-44 w-11 h-11 rounded-full bg-black/20 border border-black/30 flex items-center justify-center transition-all duration-200 pressable-native outline-none select-none active:bg-black/30 active:scale-90"
+              class="w-9 h-9 rounded-full bg-base-content/5 border border-base-content/10 flex items-center justify-center text-base-content/40 active:bg-base-content/10 active:scale-90 transition-all pressable-native outline-none select-none disabled:opacity-50"
               (click)="downloadMp3()"
               [disabled]="isDownloadingMp3()"
               [attr.aria-label]="
@@ -126,123 +126,107 @@
                   class="loading loading-spinner loading-xs text-primary"
                 ></span>
               } @else {
-                <fa-icon
-                  [icon]="faArrowDown"
-                  size="lg"
-                  class="text-white/40"
-                />
+                <fa-icon [icon]="faArrowDown" class="text-sm" />
               }
             </button>
             <app-favorite-button [song]="song()" />
           </div>
         </div>
-        <div class="space-y-2">
+        <div class="seek space-y-1.5">
           <div
-            class="ios-slider-container relative w-full h-12 flex items-center touch-none select-none"
+            class="seek-bar"
+            [class.seek-bar--dragging]="isDraggingTime()"
           >
+            <div class="seek-track" aria-hidden="true">
+              <div
+                class="seek-fill"
+                [style.width.%]="progressPercent()"
+              ></div>
+            </div>
             <input
-              #timeSlider
               type="range"
+              class="seek-input"
               min="0"
               [max]="duration() || 0"
-              step="0.1"
+              step="any"
               [value]="displayTime()"
+              (pointerdown)="onTimeDragStart(); $event.stopPropagation()"
               (input)="onTimeChange($event)"
-              (touchstart)="onTimeDragStart(); $event.stopPropagation()"
-              (touchmove)="$event.stopPropagation()"
-              (mousedown)="onTimeDragStart()"
-              (touchend)="onTimeDragEnd($event); $event.stopPropagation()"
-              (mouseup)="onTimeDragEnd($event)"
+              (pointerup)="onTimeDragEnd($event); $event.stopPropagation()"
+              (pointercancel)="onTimeDragEnd($event)"
               (change)="onTimeDragEnd($event)"
               aria-label="Seek"
               role="slider"
               [attr.aria-valuemin]="0"
               [attr.aria-valuemax]="duration()"
               [attr.aria-valuenow]="displayTime()"
-              [attr.aria-valuetext]="displayTime() + ' seconds'"
+              [attr.aria-valuetext]="(displayTime() | timeFormat)"
             />
-            <div
-              class="absolute w-full h-2.5 bg-base-content/20 rounded-full left-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none overflow-visible"
-            >
-              <div
-                class="relative h-full bg-gradient-to-r from-primary to-primary/90 rounded-full origin-left transition-all duration-300"
-                [style.width.%]="progressPercent()"
-              >
-                <div
-                  class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-base-content rounded-full ring-2 ring-primary/30 transition-transform duration-200"
-                  [class.scale-110]="isDraggingTime()"
-                ></div>
-              </div>
-            </div>
           </div>
           <div
-            class="flex justify-between text-xs font-medium text-base-content/40 tabular-nums"
+            class="flex justify-between text-[11px] font-medium text-base-content/45 tabular-nums px-0.5"
           >
             <span>{{ displayTime() | timeFormat }}</span>
             <span>{{ duration() | timeFormat }}</span>
           </div>
         </div>
-        <div class="flex items-center justify-between pt-0">
+        <div class="flex items-center justify-between gap-1 pt-1">
           <button
-            class="p-4 transition-all duration-200 touch-manipulation active:scale-95"
-            [class.text-primary]="settingsService.isShuffle()"
-            [class.text-base-content/40]="!settingsService.isShuffle()"
+            type="button"
+            class="transport-side"
+            [class.is-on]="settingsService.isShuffle()"
             [attr.aria-label]="
               settingsService.isShuffle() ? 'Disable shuffle' : 'Enable shuffle'
             "
             [attr.aria-pressed]="settingsService.isShuffle()"
             (click)="toggleShuffle()"
-            type="button"
           >
-            <fa-icon [icon]="faShuffle" size="lg" />
+            <fa-icon [icon]="faShuffle" class="text-lg" />
           </button>
-          <div class="flex items-center gap-4">
-          <button
-            class="p-4 text-base-content/70 active:text-primary transition-all duration-200 touch-manipulation active:scale-90 [@media(hover:hover)]:hover:text-primary [@media(hover:hover)]:hover:scale-110"
-            aria-label="Previous track"
-            (click)="previous()"
-            type="button"
-          >
-            <fa-icon [icon]="faStepBackward" size="2xl" />
-          </button>
+
+          <div class="flex items-center gap-1 sm:gap-3">
             <button
-              class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center bg-base-content text-base-100 rounded-full active:scale-95 transition-transform duration-200 touch-manipulation"
+              type="button"
+              class="transport-skip"
+              aria-label="Previous track"
+              (click)="previous()"
+            >
+              <fa-icon [icon]="faStepBackward" class="text-2xl" />
+            </button>
+            <button
+              type="button"
+              class="w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] flex items-center justify-center rounded-full bg-base-content text-base-100 active:scale-95 transition-transform touch-manipulation"
               [class.bg-primary]="status() === playerStatus.Playing"
-              [class.ring-primary/20]="status() === playerStatus.Playing"
               [attr.aria-label]="
                 status() === playerStatus.Playing ? 'Pause' : 'Play'
               "
               (click)="togglePlay()"
-              type="button"
             >
               <fa-icon
                 [icon]="status() === playerStatus.Playing ? faPause : faPlay"
-                size="xl"
+                class="text-xl"
               />
             </button>
             <button
-              class="p-4 text-base-content/70 active:text-primary transition-all duration-200 touch-manipulation active:scale-90 [@media(hover:hover)]:hover:text-primary [@media(hover:hover)]:hover:scale-110"
+              type="button"
+              class="transport-skip"
               aria-label="Next track"
               (click)="next()"
-              type="button"
             >
-              <fa-icon [icon]="faStepForward" size="2xl" />
+              <fa-icon [icon]="faStepForward" class="text-2xl" />
             </button>
           </div>
+
           <button
-            class="p-4 transition-all duration-200 relative touch-manipulation active:scale-95"
-            [class.text-primary]="settingsService.repeatMode() !== repeatModes.OFF"
-            [class.text-base-content/40]="settingsService.repeatMode() === repeatModes.OFF"
-            [attr.aria-label]="'Repeat mode: ' + settingsService.repeatMode()"
-            (click)="toggleRepeat()"
             type="button"
+            class="transport-side relative"
+            [class.is-on]="settingsService.repeatMode() !== repeatModes.OFF"
+            [attr.aria-label]="repeatLabel()"
+            (click)="toggleRepeat()"
           >
-            <fa-icon [icon]="faRepeat" size="lg" />
+            <fa-icon [icon]="faRepeat" class="text-lg" />
             @if (settingsService.repeatMode() === repeatModes.ONE) {
-              <span
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8px] font-black text-primary-content bg-primary rounded-full w-3 h-3 flex items-center justify-center border border-base-100 mt-1 ml-1 scale-90"
-                >1</span
-              >
+              <span class="repeat-one" aria-hidden="true">1</span>
             }
           </button>
         </div>

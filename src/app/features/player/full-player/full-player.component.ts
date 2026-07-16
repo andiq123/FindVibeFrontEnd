@@ -1,10 +1,9 @@
 import {
   Component,
-  ElementRef,
+  computed,
   input,
   output,
   signal,
-  viewChild,
   inject,
   OnInit,
   AfterViewInit,
@@ -86,12 +85,14 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   isOpened = signal(false);
   isDraggingTime = signal(false);
   dragTime = signal(0);
-  displayTime = () => this.isDraggingTime() ? this.dragTime() : this.currentTime();
-  progressPercent = () => {
+  displayTime = computed(() =>
+    this.isDraggingTime() ? this.dragTime() : this.currentTime(),
+  );
+  progressPercent = computed(() => {
     const dur = this.duration();
     if (dur <= 0) return 0;
-    return (this.displayTime() / dur) * 100;
-  };
+    return Math.min(100, (this.displayTime() / dur) * 100);
+  });
   ngOnInit() {
     this.renderer.setStyle(this.document.body, "overflow", "hidden");
   }
@@ -170,11 +171,14 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
   onTimeDragStart() {
+    this.dragTime.set(this.currentTime());
     this.isDraggingTime.set(true);
   }
   onTimeChange(event: Event) {
     const value = +(event.target as HTMLInputElement).value;
     this.dragTime.set(value);
+    // Live scrub — instant UI + audio, no wait for pointerup.
+    this.playerService.seek(value);
   }
   onTimeDragEnd(event: Event) {
     const value = +(event.target as HTMLInputElement).value;
@@ -188,10 +192,20 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     await this.playerService.setPreviousSong();
   }
   toggleRepeat() {
-    this.settingsService.toggleRepeat();
+    this.playerService.toggleRepeat();
   }
   toggleShuffle() {
-    this.settingsService.toggleShuffle();
+    this.playerService.toggleShuffle();
+  }
+  repeatLabel(): string {
+    switch (this.settingsService.repeatMode()) {
+      case RepeatMode.ONE:
+        return "Repeat one";
+      case RepeatMode.ALL:
+        return "Repeat all";
+      default:
+        return "Repeat off";
+    }
   }
   navigateToArtist() {
     const artistName = this.song().artist;
