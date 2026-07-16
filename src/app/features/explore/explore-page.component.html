@@ -1,8 +1,8 @@
 <app-page-content>
-  <div class="explore space-y-5 pt-1">
+  <div class="explore space-y-4 sm:space-y-5 pt-1">
     <app-search-bar />
 
-    <div class="flex items-end justify-between gap-3 px-0.5">
+    <div class="explore-header flex items-end justify-between gap-3">
       <div class="min-w-0">
         <span
           class="text-[10px] font-bold text-base-content/50 uppercase tracking-[0.18em]"
@@ -38,14 +38,16 @@
             <div class="h-3 w-24 rounded bg-base-content/10 animate-pulse"></div>
             <div class="h-5 w-36 rounded bg-base-content/8 animate-pulse mt-1.5"></div>
           </div>
-          <div class="explore-rail">
-            @for (n of [1, 2, 3, 4]; track n) {
-              <div class="explore-card explore-card--ghost">
-                <div class="explore-art animate-pulse bg-base-content/8"></div>
-                <div class="h-3 w-[85%] rounded bg-base-content/8 animate-pulse mt-2.5"></div>
-                <div class="h-2.5 w-[55%] rounded bg-base-content/6 animate-pulse mt-1.5"></div>
-              </div>
-            }
+          <div class="explore-rail-wrap">
+            <div class="explore-rail">
+              @for (n of [1, 2, 3, 4]; track n) {
+                <div class="explore-card explore-card--ghost">
+                  <div class="explore-art animate-pulse bg-base-content/8"></div>
+                  <div class="h-3 w-[85%] rounded bg-base-content/8 animate-pulse mt-2.5"></div>
+                  <div class="h-2.5 w-[55%] rounded bg-base-content/6 animate-pulse mt-1.5"></div>
+                </div>
+              }
+            </div>
           </div>
         </section>
       }
@@ -60,30 +62,32 @@
             <p class="explore-kicker">{{ section.subtitle }}</p>
             <h2 class="explore-title">{{ section.title }}</h2>
           </div>
-          <div class="explore-rail" role="list">
-            @for (song of section.songs; track song.link) {
-              <button
-                type="button"
-                class="explore-card"
-                role="listitem"
-                (click)="playFromShelf(section, song)"
-                [attr.aria-label]="'Play ' + song.title + ' by ' + song.artist"
-              >
-                <div class="explore-art">
-                  <img
-                    [src]="cover(song)"
-                    [alt]="''"
-                    width="140"
-                    height="140"
-                    loading="lazy"
-                    decoding="async"
-                    draggable="false"
-                  />
-                </div>
-                <span class="explore-card-title">{{ song.title }}</span>
-                <span class="explore-card-artist">{{ song.artist }}</span>
-              </button>
-            }
+          <div class="explore-rail-wrap">
+            <div class="explore-rail" role="list">
+              @for (song of section.songs; track song.link) {
+                <button
+                  type="button"
+                  class="explore-card"
+                  role="listitem"
+                  (click)="playFromShelf(section, song)"
+                  [attr.aria-label]="'Play ' + song.title + ' by ' + song.artist"
+                >
+                  <div class="explore-art">
+                    <img
+                      [src]="cover(song)"
+                      [alt]="''"
+                      width="140"
+                      height="140"
+                      loading="lazy"
+                      decoding="async"
+                      draggable="false"
+                    />
+                  </div>
+                  <span class="explore-card-title">{{ song.title }}</span>
+                  <span class="explore-card-artist">{{ song.artist }}</span>
+                </button>
+              }
+            </div>
           </div>
         </section>
       }

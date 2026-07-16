@@ -964,6 +964,25 @@ body {
 }
 
 /* Explore shelves — kept global to stay under anyComponentStyle budget */
+.explore {
+  /* mobile: slightly tighter than page px-4 */
+  margin-inline: -0.5rem;
+}
+@media (min-width: 640px) {
+  .explore {
+    margin-inline: 0;
+  }
+}
+.explore-header,
+.explore-shelf-head {
+  padding-inline: 0.25rem; /* align with first card */
+}
+@media (min-width: 640px) {
+  .explore-header,
+  .explore-shelf-head {
+    padding-inline: 0;
+  }
+}
 .explore-refresh {
   flex-shrink: 0;
   display: grid;
@@ -991,7 +1010,7 @@ body {
   }
 }
 .explore-empty {
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 0.25rem;
   text-align: center;
   font-size: 0.875rem;
   color: color-mix(in oklab, var(--color-base-content) 55%, transparent);
@@ -999,10 +1018,7 @@ body {
 .explore-shelf {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-.explore-shelf-head {
-  padding-inline: 0.125rem;
+  gap: 0.65rem;
 }
 .explore-kicker {
   margin: 0;
@@ -1014,22 +1030,45 @@ body {
 }
 .explore-title {
   margin: 0.15rem 0 0;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.2;
   color: var(--color-base-content);
 }
+@media (min-width: 640px) {
+  .explore-title {
+    font-size: 1.2rem;
+  }
+}
+.explore-rail-wrap {
+  position: relative;
+}
+/* Desktop: whisper fade on the trailing edge only (mask, not a dark slab) */
+@media (min-width: 1024px) {
+  .explore-rail-wrap {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      #000 0%,
+      #000 calc(100% - 2rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      #000 0%,
+      #000 calc(100% - 2rem),
+      transparent 100%
+    );
+  }
+}
 .explore-rail {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.65rem;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding: 0.15rem 0 0.35rem;
-  margin-inline: -1rem;
-  padding-inline: 1rem;
+  padding: 0.1rem 0.25rem 0.35rem; /* same inset as titles */
   scrollbar-width: none;
 }
 .explore-rail::-webkit-scrollbar {
@@ -1037,14 +1076,16 @@ body {
 }
 @media (min-width: 640px) {
   .explore-rail {
-    margin-inline: -1.25rem;
-    padding-inline: 1.25rem;
     gap: 0.875rem;
+    padding: 0.15rem 0 0.35rem;
+    /* peek the next card past the column without misaligning the first */
+    margin-right: -1.25rem;
+    padding-right: 1.25rem;
   }
 }
 .explore-card {
   flex: 0 0 auto;
-  width: 8.25rem;
+  width: 7.5rem;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -1062,7 +1103,7 @@ body {
 }
 @media (min-width: 640px) {
   .explore-card {
-    width: 9rem;
+    width: 8.75rem;
   }
 }
 .explore-card--ghost {
@@ -1071,10 +1112,15 @@ body {
 .explore-art {
   aspect-ratio: 1;
   width: 100%;
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   overflow: hidden;
   background: color-mix(in oklab, var(--color-base-300) 80%, transparent);
-  box-shadow: 0 8px 24px color-mix(in oklab, #000 18%, transparent);
+  box-shadow: 0 6px 18px color-mix(in oklab, #000 14%, transparent);
+}
+@media (min-width: 640px) {
+  .explore-art {
+    border-radius: 1rem;
+  }
 }
 .explore-art img {
   width: 100%;
@@ -1091,7 +1137,7 @@ body {
   white-space: nowrap;
 }
 .explore-card-title {
-  margin-top: 0.55rem;
+  margin-top: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: -0.01em;
