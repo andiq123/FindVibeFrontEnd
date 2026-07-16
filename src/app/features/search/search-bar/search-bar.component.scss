@@ -33,11 +33,14 @@ input[type="search"]::-webkit-search-cancel-button {
   z-index: 50;
 }
 
-ul[role="listbox"] {
+/* Solid panel — translucent glass let the empty state bleed through. */
+.suggestions-panel {
+  background: var(--color-base-100);
+  box-shadow: 0 16px 40px color-mix(in oklab, #000 55%, transparent);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 
-  li button {
+  button {
     -webkit-tap-highlight-color: transparent;
   }
 }

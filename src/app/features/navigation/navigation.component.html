@@ -1,5 +1,4 @@
-<nav class="nav-desktop fixed left-0 top-0 bottom-0 w-[72px] hidden lg:flex flex-col items-center py-5 border-r border-base-content/[0.06] z-[var(--z-navigation)]"
-  style="background: var(--glass-bg-light); backdrop-filter: blur(var(--glass-blur-medium)); -webkit-backdrop-filter: blur(var(--glass-blur-medium));">
+<nav class="nav-desktop fixed left-0 top-0 bottom-0 w-[72px] hidden lg:flex flex-col items-center py-5 border-r border-base-content/[0.06] z-[var(--z-navigation)] bg-base-100">
   <div class="mb-4 px-2 py-1 rounded-lg">
     <span class="text-[11px] font-bold tracking-[0.2em] text-primary/90 uppercase">FV</span>
   </div>
@@ -22,15 +21,17 @@
   }
 </nav>
 <ul
-  class="nav-mobile grid grid-cols-4 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[600px] w-full glass-suggestions rounded-t-[2rem] border-t border-black/40 pt-5 pb-10 px-4 gap-1 lg:hidden"
+  class="nav-mobile grid grid-cols-4 fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[600px] w-full bg-base-100 rounded-t-[1.75rem] border-t border-base-content/12 pt-2 px-3 gap-0.5 lg:hidden shadow-[0_-8px_28px_rgba(0,0,0,0.55)]"
   style="
-    padding-bottom: max(2.5rem, env(safe-area-inset-bottom, 2.5rem));
+    padding-bottom: max(0.5rem, var(--safe-bottom));
+    padding-left: max(0.75rem, var(--safe-left));
+    padding-right: max(0.75rem, var(--safe-right));
     z-index: var(--z-navigation);
   "
 >
   @for (navItem of navList(); track navItem.name) {
     <li
-      class="relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 group min-h-[56px]"
+      class="relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 group min-h-[52px]"
       [routerLink]="navItem.link"
       routerLinkActive="active-tab"
       tabindex="0"
@@ -38,15 +39,15 @@
       [attr.aria-label]="'Navigate to ' + navItem.name"
     >
       <div
-        class="relative flex items-center justify-center w-12 h-10 rounded-2xl transition-all duration-300 group-[.active-tab]:bg-primary/20"
+        class="relative flex items-center justify-center w-11 h-9 rounded-2xl transition-all duration-300 group-[.active-tab]:bg-primary/20"
       >
         <fa-icon
           [icon]="navItem.icon"
-          class="text-[1.35rem] text-base-content/45 transition-all duration-300 group-[.active-tab]:text-primary relative z-10"
+          class="text-[1.25rem] text-base-content/55 transition-all duration-300 group-[.active-tab]:text-primary relative z-10"
         ></fa-icon>
       </div>
       <span
-        class="text-[11px] font-medium tracking-wide mt-1.5 text-base-content/40 transition-all duration-300 group-[.active-tab]:text-primary group-[.active-tab]:font-semibold"
+        class="text-[10px] font-medium tracking-wide mt-0.5 text-base-content/50 transition-all duration-300 group-[.active-tab]:text-primary group-[.active-tab]:font-semibold"
       >
         {{ navItem.name }}
       </span>

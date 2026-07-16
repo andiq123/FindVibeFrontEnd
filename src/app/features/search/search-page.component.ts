@@ -21,7 +21,6 @@ import { PlayerService } from "../../core/services/player.service";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { EmptyStateComponent } from "../../shared/empty-state/empty-state.component";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { SkeletonComponent } from "../../shared/components/skeleton/skeleton.component";
 import { PlayerButtonComponent } from "../../shared/player-button/player-button.component";
 import { FavoriteButtonComponent } from "../../shared/favorite-button/favorite-button.component";
 import {
@@ -40,7 +39,6 @@ import { PlayerStatus } from "../player/models/player.model";
     PageContentComponent,
     SongListComponent,
     PaginationComponent,
-    SkeletonComponent,
     PlayerButtonComponent,
     FavoriteButtonComponent,
   ],
@@ -64,8 +62,6 @@ export class SearchPageComponent {
   faMagnifyingGlass = faMagnifyingGlass;
   faTriangleExclamation = faTriangleExclamation;
   sourceHost = sourceHost;
-
-  displayQuery = computed(() => this.songsService.lastQuery());
 
   /** Idle only when the route has no query and we are not mid-search. */
   hasActiveSearch = computed(

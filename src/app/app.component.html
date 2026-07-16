@@ -1,34 +1,34 @@
-<app-connection-status />
-@defer (when newUpdateAvailable()) {
-  <app-update-overlay />
-}
-<div class="app-main-container">
-  <div class="route-container route-transition-wrap">
-    <router-outlet />
-  </div>
-</div>
-@if (playlistService.currentSong(); as song) {
-  @if (settingsService.isMiniPlayer()) {
-    <app-mini-player
-      (toggleSizeEvent)="onToggleSize()"
-      [song]="song"
-      [status]="playerService.status()"
-      [currentTime]="playerService.currentTime()"
-      [duration]="playerService.duration()"
-    />
-  } @else {
-    <app-full-player
-      (toggleSizeEvent)="onToggleSize()"
-      [song]="song"
-      [status]="playerService.status()"
-      [currentTime]="playerService.currentTime()"
-      [duration]="playerService.duration()"
-    />
+<div class="app-shell">
+  <app-connection-status />
+  @defer (when newUpdateAvailable()) {
+    <app-update-overlay />
   }
-}
-@defer (on idle) {
+  <div class="app-main-container">
+    <div class="route-container route-transition-wrap">
+      <router-outlet />
+    </div>
+  </div>
+  @if (playlistService.currentSong(); as song) {
+    @if (settingsService.isMiniPlayer()) {
+      <app-mini-player
+        (toggleSizeEvent)="onToggleSize()"
+        [song]="song"
+        [status]="playerService.status()"
+        [currentTime]="playerService.currentTime()"
+        [duration]="playerService.duration()"
+      />
+    } @else {
+      <app-full-player
+        (toggleSizeEvent)="onToggleSize()"
+        [song]="song"
+        [status]="playerService.status()"
+        [currentTime]="playerService.currentTime()"
+        [duration]="playerService.duration()"
+      />
+    }
+  }
   <app-navigation />
-}
-@defer (when modalService.isOpen()) {
-  <app-global-modal />
-}
+  @defer (when modalService.isOpen()) {
+    <app-global-modal />
+  }
+</div>

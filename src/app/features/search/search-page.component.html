@@ -1,5 +1,5 @@
-<app-page-content [isServerReady]="true">
-  <div class="space-y-5 pb-32 pt-4">
+<app-page-content>
+  <div class="space-y-4 sm:space-y-5 pt-1">
     <app-search-bar [query]="query()" />
 
     @if (!hasActiveSearch()) {
@@ -11,60 +11,62 @@
         />
       </div>
     } @else {
-      <div class="flex items-end justify-between flex-wrap gap-4">
-        <div class="min-w-0">
-          <p
-            class="text-base-content/45 font-semibold tracking-[0.14em] text-[11px] uppercase mb-1.5"
-          >
-            Search results
-          </p>
-          <h2
-            class="text-3xl sm:text-4xl font-bold tracking-tight text-base-content leading-none truncate"
-          >
-            {{ displayQuery() || query() }}
-          </h2>
-        </div>
-
-        @if (pagination() && pagination()!.totalResults > 0) {
-          <div
-            class="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-base-200/50 border border-base-content/8 text-sm"
-          >
-            <span class="text-base-content/45 text-xs uppercase tracking-wide"
-              >Page</span
+      <div class="space-y-3">
+        @if (pagination(); as pages) {
+          @if (pages.totalResults > 0) {
+            <div
+              class="grid grid-cols-2 gap-px rounded-2xl overflow-hidden bg-base-content/[0.06] border border-base-content/[0.08]"
+              role="group"
+              aria-label="Search page info"
             >
-            <span class="text-primary font-semibold">{{
-              pagination()!.currentPage
-            }}</span>
-            <span class="text-base-content/35">/</span>
-            <span class="text-base-content/70">{{
-              pagination()!.totalPages
-            }}</span>
-            <span class="w-px h-3.5 bg-base-content/10"></span>
-            <span class="text-primary font-semibold">{{
-              pagination()!.totalResults
-            }}</span>
-            <span class="text-base-content/45 text-xs">results</span>
-          </div>
+              <div
+                class="bg-base-200/70 px-3.5 py-2.5 sm:px-4 sm:py-3 flex flex-col gap-0.5"
+              >
+                <span
+                  class="text-[10px] font-semibold uppercase tracking-[0.12em] text-base-content/40"
+                  >Page</span
+                >
+                <p class="text-sm sm:text-base font-semibold tabular-nums leading-none">
+                  <span class="text-primary">{{ pages.currentPage }}</span>
+                  <span class="text-base-content/30 mx-1">/</span>
+                  <span class="text-base-content/70">{{ pages.totalPages }}</span>
+                </p>
+              </div>
+              <div
+                class="bg-base-200/70 px-3.5 py-2.5 sm:px-4 sm:py-3 flex flex-col gap-0.5"
+              >
+                <span
+                  class="text-[10px] font-semibold uppercase tracking-[0.12em] text-base-content/40"
+                  >Results</span
+                >
+                <p
+                  class="text-sm sm:text-base font-semibold tabular-nums text-base-content leading-none"
+                >
+                  {{ pages.totalResults }}
+                </p>
+              </div>
+            </div>
+          }
         }
       </div>
 
       @if (status() === searchStatus.None || status() === searchStatus.Loading) {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          <div class="lg:col-span-1 space-y-3">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-start">
+          <div class="lg:col-span-1 space-y-2 sm:space-y-3">
             <h3
-              class="text-[11px] font-semibold text-base-content/45 uppercase tracking-[0.14em]"
+              class="text-[10px] sm:text-[11px] font-semibold text-base-content/45 uppercase tracking-[0.14em]"
             >
               Top match
             </h3>
-            <app-skeleton type="card" [count]="1" />
+            <div class="premium-card max-lg:h-[4.5rem] lg:aspect-square animate-pulse bg-base-content/5"></div>
           </div>
-          <div class="lg:col-span-2 space-y-3">
+          <div class="lg:col-span-2 space-y-2 sm:space-y-3">
             <h3
-              class="text-[11px] font-semibold text-base-content/45 uppercase tracking-[0.14em]"
+              class="text-[10px] sm:text-[11px] font-semibold text-base-content/45 uppercase tracking-[0.14em]"
             >
               Songs
             </h3>
-            <div class="premium-card min-h-[320px]">
+            <div class="premium-card min-h-[240px] sm:min-h-[320px]">
               <app-song-list
                 [songs]="[]"
                 [isLoading]="true"
@@ -91,16 +93,16 @@
           />
         </div>
       } @else {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          <div class="lg:col-span-1 space-y-3">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-start">
+          <div class="lg:col-span-1 space-y-2 sm:space-y-3">
             <h3
-              class="text-[11px] font-semibold text-base-content/45 uppercase tracking-[0.14em]"
+              class="text-[10px] sm:text-[11px] font-semibold text-base-content/45 uppercase tracking-[0.14em]"
             >
               Top match
             </h3>
             @if (topSong(); as featuredSong) {
               <div
-                class="premium-card group relative aspect-square overflow-hidden cursor-pointer"
+                class="premium-card group relative overflow-hidden cursor-pointer max-lg:flex max-lg:items-center max-lg:gap-3 max-lg:p-2.5 lg:aspect-square"
                 (click)="toggleTopSong()"
                 role="button"
                 tabindex="0"
@@ -115,40 +117,61 @@
                 [class.pointer-events-none]="isTopSongUnavailable()"
                 [attr.aria-disabled]="isTopSongUnavailable()"
               >
-                <img
-                  class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500 bg-base-300"
-                  [src]="featuredSong.image || 'no_album_art.jpg'"
-                  [alt]="featuredSong.title + ' by ' + featuredSong.artist"
-                  width="512"
-                  height="512"
-                  loading="lazy"
-                  decoding="async"
-                  referrerpolicy="no-referrer"
-                  (error)="$any($event.target).src = 'no_album_art.jpg'"
-                />
                 <div
-                  class="absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/40 to-transparent"
-                ></div>
+                  class="relative shrink-0 overflow-hidden bg-base-300 ring-1 ring-inset ring-base-content/10 max-lg:w-14 max-lg:h-14 max-lg:rounded-xl lg:absolute lg:inset-0 lg:rounded-none lg:ring-0"
+                >
+                  <img
+                    class="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-transform duration-500"
+                    [src]="featuredSong.image || 'no_album_art.jpg'"
+                    [alt]="featuredSong.title + ' by ' + featuredSong.artist"
+                    width="512"
+                    height="512"
+                    loading="lazy"
+                    decoding="async"
+                    referrerpolicy="no-referrer"
+                    (error)="$any($event.target).src = 'no_album_art.jpg'"
+                  />
+                  <div
+                    class="absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/40 to-transparent max-lg:hidden"
+                  ></div>
+                </div>
 
-                <div class="relative z-10 p-5 flex flex-col h-full justify-end">
-                  <span
-                    class="px-2 py-0.5 bg-primary/20 text-primary text-[10px] font-bold rounded uppercase tracking-wider mb-2 inline-block w-fit"
-                  >
-                    Top
-                  </span>
-                  <h4
-                    class="text-2xl sm:text-3xl font-bold text-base-content leading-tight mb-1 truncate"
-                  >
-                    {{ featuredSong.artist }}
-                  </h4>
-                  <p class="text-base-content/60 text-sm truncate">
-                    {{ featuredSong.title }}
-                  </p>
+                <div
+                  class="relative z-10 min-w-0 flex-1 max-lg:flex max-lg:items-center max-lg:gap-2 lg:absolute lg:inset-0 lg:p-5 lg:flex lg:flex-col lg:justify-end"
+                >
+                  <div class="min-w-0 flex-1 lg:contents">
+                    <div class="flex items-center gap-1.5 mb-0.5 lg:mb-2">
+                      <span
+                        class="px-1.5 py-0.5 bg-primary/20 text-primary text-[9px] font-bold rounded uppercase tracking-wider"
+                      >
+                        Top
+                      </span>
+                      @if (sourceHost(featuredSong.provider); as src) {
+                        <span
+                          class="px-1.5 py-0.5 bg-base-content/8 text-base-content/45 text-[9px] font-bold rounded uppercase tracking-wider truncate"
+                        >
+                          {{ src }}
+                        </span>
+                      }
+                    </div>
+                    <h4
+                      class="text-sm sm:text-base lg:text-2xl xl:text-3xl font-bold text-base-content leading-tight truncate"
+                    >
+                      {{ featuredSong.title }}
+                    </h4>
+                    <p
+                      class="text-base-content/50 text-xs truncate mt-0.5"
+                    >
+                      {{ featuredSong.artist }}
+                    </p>
+                  </div>
 
-                  <div class="mt-5 flex gap-2.5 items-center">
+                  <div
+                    class="flex gap-1 items-center shrink-0 max-lg:ml-auto lg:mt-4"
+                  >
                     <button
                       type="button"
-                      class="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-content active:scale-90 transition-transform"
+                      class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-content active:scale-90 transition-transform"
                       (click)="toggleTopSong(); $event.stopPropagation()"
                       [disabled]="isTopSongUnavailable()"
                       [attr.aria-disabled]="isTopSongUnavailable()"
@@ -157,20 +180,12 @@
                       @if (isTopSongError()) {
                         <fa-icon
                           [icon]="faTriangleExclamation"
-                          class="text-lg"
+                          class="text-sm"
                         />
                       } @else {
                         <app-player-button [status]="topPlayerStatus()" />
                       }
                     </button>
-                    @if (sourceHost(featuredSong.provider); as src) {
-                      <span
-                        class="px-2 py-0.5 bg-base-content/15 text-base-content/70 text-[10px] font-bold rounded uppercase tracking-wider"
-                      >
-                        {{ src }}
-                      </span>
-                    }
-                    <!-- Hidden until logged in (favorite-button no-ops without a user). -->
                     <app-favorite-button
                       [song]="featuredSong"
                       (click)="$event.stopPropagation()"
@@ -181,13 +196,13 @@
             }
           </div>
 
-          <div class="lg:col-span-2 space-y-3">
+          <div class="lg:col-span-2 space-y-2 sm:space-y-3">
             <h3
-              class="text-[11px] font-semibold text-base-content/45 uppercase tracking-[0.14em]"
+              class="text-[10px] sm:text-[11px] font-semibold text-base-content/45 uppercase tracking-[0.14em]"
             >
               Songs
             </h3>
-            <div class="premium-card min-h-[320px]">
+            <div class="premium-card min-h-[240px] sm:min-h-[320px]">
               <app-song-list
                 [songs]="remainingSongs()"
                 [isLoading]="false"

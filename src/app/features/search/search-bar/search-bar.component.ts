@@ -16,7 +16,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faMagnifyingGlass, faArrowUp } from "../../../shared/icons";
 import { FormsModule } from "@angular/forms";
-import { TitleCasePipe } from "@angular/common";
 import { Router } from "@angular/router";
 import { SearchService } from "../services/search.service";
 import { SearchStatus } from "../../../core/models/song.model";
@@ -27,10 +26,11 @@ import {
   switchMap,
   of,
 } from "rxjs";
+
 @Component({
   selector: "app-search-bar",
   standalone: true,
-  imports: [FontAwesomeModule, FormsModule, TitleCasePipe],
+  imports: [FontAwesomeModule, FormsModule],
   templateUrl: "./search-bar.component.html",
   styleUrl: "./search-bar.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,8 +46,17 @@ export class SearchBarComponent implements OnDestroy {
   private destroyRef = inject(DestroyRef);
   suggestions = computed(() => this.searchService.suggestions());
   suggestionsLoading = computed(() => this.searchService.suggestionsLoading());
+  showSuggestions = computed(
+    () =>
+      this.searchTerm().trim().length > 0 &&
+      (this.suggestions().length > 0 || this.suggestionsLoading()),
+  );
+  showCancel = computed(
+    () => this.isFocused() || this.searchTerm().length > 0,
+  );
   faMagnifyingGlass = faMagnifyingGlass;
   faArrowUpLeft = faArrowUp;
+
   constructor() {
     effect(() => {
       const q = this.query();
@@ -63,55 +72,64 @@ export class SearchBarComponent implements OnDestroy {
       if (q !== lastQuery || searchStatus === SearchStatus.None) {
         this.submitSearchSongs(1);
       }
-      this.searchService.resetSuggestions();
+      this.dismissSuggestions();
     });
+
     this.searchSubject
       .pipe(
-        debounceTime(300),
+        debounceTime(280),
         distinctUntilChanged(),
         switchMap((term) => {
-          if (term.trim()) {
-            return this.searchService.getSuggestions(term);
-          } else {
+          const q = term.trim();
+          if (!q) {
             this.searchService.resetSuggestions();
             return of([]);
           }
+          return this.searchService.getSuggestions(q);
         }),
         takeUntilDestroyed(),
       )
       .subscribe();
   }
+
+  /** Fill the field only — keep focus, refresh suggests for the filled term. */
   fillSuggestion(suggestion: string, event: Event): void {
+    event.preventDefault();
     event.stopPropagation();
     this.searchTerm.set(suggestion);
+    this.searchSubject.next(suggestion);
   }
+
   async searchBySuggestion(suggestion: string): Promise<void> {
     this.searchTerm.set(suggestion);
     await this.submit();
   }
+
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.searchTerm.set(value);
-    if (value.trim()) {
-      this.searchSubject.next(value);
-    } else {
-      this.searchService.resetSuggestions();
-    }
+    // Always push — empty string cancels in-flight suggest via switchMap.
+    this.searchSubject.next(value);
   }
+
   clearSearch(input: HTMLInputElement): void {
     this.searchTerm.set("");
-    this.searchService.resetSuggestions();
+    this.dismissSuggestions();
     input.focus();
   }
+
   async cancelSearch(): Promise<void> {
     this.searchTerm.set("");
+    this.dismissSuggestions();
+    this.isFocused.set(false);
     this.searchService.resetSearch();
     await this.router.navigate(["/songs"], { replaceUrl: true });
   }
+
   async submit(): Promise<void> {
     const term = this.searchTerm().trim();
     if (!term) return;
-    this.searchService.resetSuggestions();
+    this.dismissSuggestions();
     this.isFocused.set(false);
     if (this.query() !== term) {
       await this.router.navigate([`/songs/${term}`], { replaceUrl: true });
@@ -119,21 +137,26 @@ export class SearchBarComponent implements OnDestroy {
       this.submitSearchSongs();
     }
   }
+
   @HostListener("document:click", ["$event"])
   onClickOutside(event: Event): void {
-    const clickedInside = this.elementRef.nativeElement.contains(event.target);
-    if (
-      !clickedInside &&
-      (this.suggestions().length > 0 || this.suggestionsLoading())
-    ) {
-      this.searchService.resetSuggestions();
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.dismissSuggestions();
     }
   }
+
+  private dismissSuggestions(): void {
+    this.searchSubject.next("");
+    this.searchService.resetSuggestions();
+  }
+
   private submitSearchSongs(page = 1): void {
-    this.searchService.searchSongs(this.searchTerm(), page)
+    this.searchService
+      .searchSongs(this.searchTerm(), page)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }
+
   ngOnDestroy(): void {
     this.searchSubject.complete();
   }

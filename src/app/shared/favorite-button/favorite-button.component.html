@@ -1,27 +1,28 @@
 @if (isAbleToAddToFav()) {
 <button
   class="flex items-center justify-center transition-all duration-300 pressable-native outline-none select-none"
-  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform' : 'tap-target-44 w-11 h-11 rounded-full bg-black/20 border border-black/30 active:bg-black/30'"
+  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform' : 'w-9 h-9 rounded-full bg-base-content/5 border border-base-content/10 active:bg-base-content/10'"
   (click)="toggleAddToFavorite()"
   [disabled]="isLoadingFavorite()"
   aria-label="Toggle favorite"
 >
-  @if(isLoadingFavorite()){
+  @if (isLoadingFavorite()) {
     <span class="loading loading-spinner loading-xs mx-auto text-primary"></span>
-  }@else{ 
-    @if (isFavorited()) {
-      <fa-icon 
-        [icon]="favoritedHeart" 
-        [size]="forPlayer() ? '2x' : 'lg'" 
-        class="text-accent animate-heart-pop" 
-      />
-    } @else {
-      <fa-icon 
-        [icon]="unFavoritedHeart" 
-        [size]="forPlayer() ? '2x' : 'lg'" 
-        class="text-white/40 active:text-accent transition-colors duration-200" 
-      />
-    } 
+  } @else if (forPlayer()) {
+    <fa-icon
+      [icon]="isFavorited() ? favoritedHeart : unFavoritedHeart"
+      size="2x"
+      [class]="isFavorited() ? 'text-primary animate-heart-pop' : 'text-base-content/35 active:text-primary transition-colors duration-200'"
+    />
+  } @else {
+    <fa-icon
+      [icon]="isFavorited() ? favoritedHeart : unFavoritedHeart"
+      class="text-sm"
+      [class.text-primary]="isFavorited()"
+      [class.animate-heart-pop]="isFavorited()"
+      [class.text-base-content/35]="!isFavorited()"
+      [class.active:text-primary]="!isFavorited()"
+    />
   }
 </button>
 }

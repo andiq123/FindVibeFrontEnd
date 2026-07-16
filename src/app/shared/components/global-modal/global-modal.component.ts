@@ -27,7 +27,8 @@ import { SwipeDownDirective } from "../../../features/player/directives/swipe-do
         role="presentation"
       ></div>
       <div
-        class="fixed bottom-0 left-0 right-0 bg-base-200/80 rounded-t-[2.5rem] z-[200] pb-safe max-h-[92vh] flex flex-col border-t border-black/40 backdrop-blur-[24px]"
+        class="fixed bottom-0 left-0 right-0 bg-base-200/80 rounded-t-[2.5rem] z-[200] max-h-[92vh] flex flex-col border-t border-black/40 backdrop-blur-[24px]"
+        style="padding-bottom: max(1rem, var(--safe-bottom)); padding-left: var(--safe-left); padding-right: var(--safe-right);"
         [class.anim-slide-up]="isOpening()"
         [class.anim-slide-down]="isClosing()"
         #modalContainer

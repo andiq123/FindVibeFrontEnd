@@ -15,7 +15,12 @@ import {
   Router,
 } from "@angular/router";
 import { routes } from "./app.routes";
-import { provideHttpClient, withFetch } from "@angular/common/http";
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from "@angular/common/http";
+import { apiInterceptor } from "./core/interceptors/api.interceptor";
 import { provideServiceWorker } from "@angular/service-worker";
 import { CustomReuseStrategy } from "./core/strategies/custom-reuse-strategy";
 import type { ActivatedRouteSnapshot } from "@angular/router";
@@ -25,7 +30,7 @@ function routeOrder(path: string): number {
   if (path.startsWith("songs")) return 1;
   if (path === "library") return 2;
   if (path === "recent") return 3;
-  if (path === "status") return 4;
+  if (path === "settings") return 4;
   return 0;
 }
 
@@ -83,7 +88,7 @@ export const appConfig: ApplicationConfig = {
       }),
     ),
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([apiInterceptor])),
     provideServiceWorker("ngsw-worker.js", {
       enabled: !isDevMode(),
       registrationStrategy: "registerWhenStable:30000",

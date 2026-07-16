@@ -9,7 +9,7 @@ import {
   faCompass,
   faBookmark,
   faClock,
-  faWaveSquare,
+  faGear,
 } from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { SearchService } from "../search/services/search.service";
@@ -42,9 +42,9 @@ export class NavigationComponent {
         link: "/recent",
       },
       {
-        name: "Status",
-        icon: faWaveSquare,
-        link: "/status",
+        name: "Settings",
+        icon: faGear,
+        link: "/settings",
       },
     ];
   });

@@ -1,17 +1,16 @@
 <div
-  class="connection-status-wrapper"
-  [class.visible]="shouldShow()"
-  [class.pending]="isPending()"
+  class="status-chip"
+  [class.visible]="!!label()"
+  [class.waking]="waking()"
+  role="status"
+  aria-live="polite"
 >
-  <div class="status-content">
-    @if (isPending()) {
-      <svg class="spinner" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" />
-      </svg>
-      <span class="status-text">Connecting...</span>
+  @if (label(); as text) {
+    @if (waking()) {
+      <span class="spinner" aria-hidden="true"></span>
     } @else {
-      <span class="status-dot"></span>
-      <span class="status-text">Offline</span>
+      <span class="dot" aria-hidden="true"></span>
     }
-  </div>
+    <span>{{ text }}</span>
+  }
 </div>

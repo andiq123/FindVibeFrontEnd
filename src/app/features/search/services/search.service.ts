@@ -28,6 +28,8 @@ export class SearchService {
   private readonly _searchStatus = signal<SearchStatus>(SearchStatus.None);
   private readonly _suggestions = signal<string[]>([]);
   private readonly _suggestionsLoading = signal<boolean>(false);
+  /** Active suggest query — drop responses that no longer match (clear/cancel). */
+  private suggestQuery = "";
   private readonly _lastSearchQuery = signal<string>("");
   private readonly _pagination = signal<PaginationInfo | null>(null);
   private readonly _currentPage = signal<number>(1);
@@ -84,29 +86,40 @@ export class SearchService {
     );
   }
   getSuggestions(term: string): Observable<string[]> {
+    const q = term.trim();
+    this.suggestQuery = q;
+    if (!q) {
+      this.resetSuggestions();
+      return of([]);
+    }
     this._suggestionsLoading.set(true);
     return this.httpClient
-      .get<string[]>(`${BASE_API_URL}/suggest?q=${encodeURIComponent(term)}`)
+      .get<string[]>(`${BASE_API_URL}/suggest?q=${encodeURIComponent(q)}`)
       .pipe(
         tap({
           next: (result) => {
-            this._suggestions.set(result);
+            if (this.suggestQuery !== q) return;
+            this._suggestions.set(Array.isArray(result) ? result : []);
             this._suggestionsLoading.set(false);
           },
           error: () => {
+            if (this.suggestQuery !== q) return;
             this._suggestionsLoading.set(false);
             this._suggestions.set([]);
           },
         }),
+        catchError(() => of([])),
       );
   }
   resetSuggestions(): void {
+    this.suggestQuery = "";
     this._suggestions.set([]);
+    this._suggestionsLoading.set(false);
   }
   resetSearch(): void {
     this._songs.set([]);
     this._searchStatus.set(SearchStatus.None);
-    this._suggestions.set([]);
+    this.resetSuggestions();
     this._lastSearchQuery.set("");
     this._pagination.set(null);
     this._currentPage.set(1);

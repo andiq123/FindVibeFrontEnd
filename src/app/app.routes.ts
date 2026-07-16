@@ -41,11 +41,16 @@ export const routes: Routes = [
     data: { animation: 3 },
   },
   {
-    path: "status",
+    path: "settings",
     loadComponent: () =>
-      import("./features/status/status-page.component").then(
-        (c) => c.StatusPageComponent,
+      import("./features/settings/settings-page.component").then(
+        (c) => c.SettingsPageComponent,
       ),
     data: { animation: 4 },
+  },
+  {
+    path: "status",
+    redirectTo: "settings",
+    pathMatch: "full",
   },
 ];

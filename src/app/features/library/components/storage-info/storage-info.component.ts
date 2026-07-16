@@ -6,6 +6,7 @@ import {
   inject,
   ChangeDetectionStrategy,
 } from "@angular/core";
+import { DecimalPipe } from "@angular/common";
 import { OfflineStorageService } from "../../services/offline-storage.service";
 import { LibraryService } from "../../services/library.service";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
@@ -14,7 +15,7 @@ import { faTrash, faCloudArrowDown } from "../../../../shared/icons";
 @Component({
   selector: "app-storage-info",
   standalone: true,
-  imports: [FontAwesomeModule],
+  imports: [FontAwesomeModule, DecimalPipe],
   templateUrl: "./storage-info.component.html",
   styleUrl: "./storage-info.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,

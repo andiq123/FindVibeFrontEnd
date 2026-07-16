@@ -1,24 +1,36 @@
-<nav class="flex items-center justify-center gap-2 sm:gap-3 w-full px-4 py-8 box-border" role="navigation" aria-label="Pagination">
-  @if (pagination().hasPrevPage) {
-    <button
-      type="button"
-      class="flex items-center justify-center min-w-[2.75rem] h-11 rounded-xl bg-base-content/3 border border-base-content/10 text-base-content/80 text-sm transition-all duration-200 cursor-pointer backdrop-blur-md shrink-0 hover:bg-base-content/10 hover:border-base-content/20 hover:-translate-y-px active:scale-95 active:translate-y-0"
-      (click)="onPageChange(pagination().currentPage - 1)"
-      aria-label="Previous page"
-    >
-      <fa-icon [icon]="faChevronLeft" class="text-sm" />
-    </button>
-  }
-  <div class="flex gap-1 sm:gap-2 overflow-x-auto p-1 -m-1 scrollbar-none touch-pan-x">
+<nav
+  class="flex items-center justify-between gap-2 w-full px-1 sm:px-2 py-5 sm:py-6 box-border"
+  role="navigation"
+  aria-label="Pagination"
+>
+  <button
+    type="button"
+    class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl border text-sm transition-all duration-200 shrink-0 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+    [class.bg-base-content/5]="pagination().hasPrevPage"
+    [class.border-base-content/10]="pagination().hasPrevPage"
+    [class.text-base-content/80]="pagination().hasPrevPage"
+    [class.bg-transparent]="!pagination().hasPrevPage"
+    [class.border-transparent]="!pagination().hasPrevPage"
+    [disabled]="!pagination().hasPrevPage"
+    (click)="onPageChange(pagination().currentPage - 1)"
+    aria-label="Previous page"
+  >
+    <fa-icon [icon]="faChevronLeft" class="text-sm" />
+  </button>
+
+  <div
+    class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto max-w-[min(100%,18rem)] sm:max-w-none scrollbar-none touch-pan-x px-0.5"
+  >
     @for (page of pageNumbers(); track $index) {
       @if (isNumber(page)) {
         <button
           type="button"
-          class="min-w-10 sm:min-w-[2.75rem] h-10 sm:h-11 p-0 flex items-center justify-center rounded-lg sm:rounded-xl bg-transparent border border-transparent text-base-content/60 text-sm font-medium transition-all duration-200 cursor-pointer shrink-0 hover:bg-base-content/10 hover:text-base-content active:scale-90"
+          class="min-w-9 sm:min-w-10 h-9 sm:h-10 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer shrink-0 active:scale-90"
           [class.bg-primary]="page === pagination().currentPage"
           [class.text-primary-content]="page === pagination().currentPage"
-          [class.font-bold]="page === pagination().currentPage"
-          [class.hover:bg-primary/90]="page === pagination().currentPage"
+          [class.shadow-sm]="page === pagination().currentPage"
+          [class.text-base-content/55]="page !== pagination().currentPage"
+          [class.hover:bg-base-content/8]="page !== pagination().currentPage"
           [attr.aria-label]="'Page ' + page"
           [attr.aria-current]="
             page === pagination().currentPage ? 'page' : null
@@ -28,18 +40,27 @@
           {{ page }}
         </button>
       } @else {
-        <span class="min-w-8 sm:min-w-[2.75rem] h-10 sm:h-11 flex items-center justify-center text-base-content/30 text-sm">{{ page }}</span>
+        <span
+          class="min-w-6 h-9 sm:h-10 flex items-center justify-center text-base-content/25 text-xs shrink-0"
+          aria-hidden="true"
+          >{{ page }}</span
+        >
       }
     }
   </div>
-  @if (pagination().hasNextPage) {
-    <button
-      type="button"
-      class="flex items-center justify-center min-w-[2.75rem] h-11 rounded-xl bg-base-content/3 border border-base-content/10 text-base-content/80 text-sm transition-all duration-200 cursor-pointer backdrop-blur-md shrink-0 hover:bg-base-content/10 hover:border-base-content/20 hover:-translate-y-px active:scale-95 active:translate-y-0"
-      (click)="onPageChange(pagination().currentPage + 1)"
-      aria-label="Next page"
-    >
-      <fa-icon [icon]="faChevronRight" class="text-sm" />
-    </button>
-  }
+
+  <button
+    type="button"
+    class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl border text-sm transition-all duration-200 shrink-0 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+    [class.bg-base-content/5]="pagination().hasNextPage"
+    [class.border-base-content/10]="pagination().hasNextPage"
+    [class.text-base-content/80]="pagination().hasNextPage"
+    [class.bg-transparent]="!pagination().hasNextPage"
+    [class.border-transparent]="!pagination().hasNextPage"
+    [disabled]="!pagination().hasNextPage"
+    (click)="onPageChange(pagination().currentPage + 1)"
+    aria-label="Next page"
+  >
+    <fa-icon [icon]="faChevronRight" class="text-sm" />
+  </button>
 </nav>

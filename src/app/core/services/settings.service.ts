@@ -32,9 +32,7 @@ export class SettingsService implements OnDestroy {
   private readonly _isMiniPlayer = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
-  private onlineHandler = () => {
-    this._isNavigatorOffline.set(false);
-  };
+  private onlineHandler = () => this._isNavigatorOffline.set(false);
   private offlineHandler = () => this._isNavigatorOffline.set(true);
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
@@ -92,28 +90,25 @@ export class SettingsService implements OnDestroy {
     this._serverStatus.set(ServerStatus.Down);
   }
 
-  setIsCheckedServerPending(): void {
-    this._serverStatus.set(ServerStatus.Unchecked);
-  }
-
   wakeServer(): Observable<void> {
     return this.httpClient.get<void>(this.healthUrl);
   }
 
   /**
-   * Probe /health until Render answers. Free tier cold-starts with 504s
-   * until the process listens — keep retrying; UI stays usable via banner.
+   * Probe /health until Render answers. Starts Unchecked → banner "Waking…".
+   * On failure stays Down (no flash back to Unchecked). Recurses every 20s.
    */
   wakeUntilUp(): Observable<void> {
-    this.setIsCheckedServerPending();
-    return defer(() => this.wakeServer()).pipe(
-      // Render gateway often 504s ~30s; don't hold one request that long.
-      timeout({ first: 12_000 }),
-      retry({
-        count: 12,
-        delay: (_err, n) => timer(Math.min(2000 * n, 12_000)),
-      }),
-      tap(() => this.setServerUp()),
+    return defer(() =>
+      this.wakeServer().pipe(
+        timeout({ first: 12_000 }),
+        retry({
+          count: 12,
+          delay: (_err, n) => timer(Math.min(2000 * n, 12_000)),
+        }),
+        tap(() => this.setServerUp()),
+      ),
+    ).pipe(
       catchError(() => {
         this.setServerDown();
         // ponytail: free Render sleeps — keep poking every 20s

@@ -4,7 +4,6 @@ import { UserService } from "./user.service";
 import {
   finalize,
   tap,
-  timeout,
   catchError,
   throwError,
   Subscription,
@@ -73,8 +72,8 @@ export class LibraryService {
     if (currentSongs.length === 0) {
       this.loadingSongs.set(true);
     }
+    // Timeout + cold-start retry handled by apiInterceptor.
     return this.libraryApiService.getFavoritesSong(userId).pipe(
-      timeout(10000),
       tap({
         next: (songs: Song[]) => {
           if (!Array.isArray(songs)) {
