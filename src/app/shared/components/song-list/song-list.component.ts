@@ -29,8 +29,11 @@ import { faMusic, IconDefinition } from "../../icons";
             <app-song
               [song]="song"
               [allowReorder]="allowReorder()"
+              [selectMode]="selectMode()"
+              [selected]="selectedIds().has(song.id)"
               (reorder)="emitReorder($event)"
               (playlistChange)="emitPlaylistChange()"
+              (toggleSelect)="toggleSelect.emit($event)"
             />
           </li>
         } @empty {
@@ -65,6 +68,8 @@ export class SongListComponent implements OnDestroy {
   songs = input.required<Song[]>();
   isLoading = input(false);
   allowReorder = input(false);
+  selectMode = input(false);
+  selectedIds = input<ReadonlySet<string>>(new Set());
   /** 0 = render all. Vault passes e.g. 24 and grows on scroll. */
   chunkSize = input(0);
   skeletonCount = input(5);
@@ -73,6 +78,7 @@ export class SongListComponent implements OnDestroy {
   emptyStateDescription = input("Try searching for something else.");
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
+  toggleSelect = output<string>();
 
   private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
   private visibleCount = signal(0);

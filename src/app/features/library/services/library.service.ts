@@ -220,6 +220,17 @@ export class LibraryService {
     });
   }
 
+  /** Move selected ids as one block; relative order preserved. */
+  moveSelected(
+    ids: string[],
+    dest: "top" | "bottom" | "up" | "down",
+  ): boolean {
+    const next = moveSelectedSongs(this.songs(), ids, dest);
+    if (!next) return false;
+    this.songs.set(next);
+    return true;
+  }
+
   /** Instant local restore after Discard (no network). */
   replaceSongs(songs: Song[]): void {
     this.songs.set(songs);
@@ -237,4 +248,56 @@ function insertByOrder(prev: Song[], song: Song): Song[] {
   const i = without.findIndex((s) => (s.order ?? 0) > order);
   if (i === -1) return [...without, song];
   return [...without.slice(0, i), song, ...without.slice(i)];
+}
+
+/** Pure reorder helper — null when nothing moves. Exported for the self-check. */
+export function moveSelectedSongs(
+  songs: Song[],
+  ids: string[],
+  dest: "top" | "bottom" | "up" | "down",
+): Song[] | null {
+  if (!ids.length || !songs.length) return null;
+  const want = new Set(ids);
+  const picked: Song[] = [];
+  const rest: Song[] = [];
+  const indexes: number[] = [];
+  songs.forEach((s, i) => {
+    if (want.has(s.id)) {
+      picked.push(s);
+      indexes.push(i);
+    } else {
+      rest.push(s);
+    }
+  });
+  if (!picked.length) return null;
+
+  const min = indexes[0];
+  const max = indexes[indexes.length - 1];
+  let insertAt: number;
+  switch (dest) {
+    case "top":
+      insertAt = 0;
+      break;
+    case "bottom":
+      insertAt = rest.length;
+      break;
+    case "up":
+      if (min === 0) return null;
+      insertAt = min - 1;
+      break;
+    case "down":
+      if (max === songs.length - 1) return null;
+      // After removal, the slot just below the old block is max - picked.length + 1.
+      insertAt = max - picked.length + 2;
+      break;
+  }
+  insertAt = Math.max(0, Math.min(rest.length, insertAt));
+  const next = [
+    ...rest.slice(0, insertAt),
+    ...picked,
+    ...rest.slice(insertAt),
+  ];
+  // Same sequence → no-op (e.g. already at top).
+  if (next.every((s, i) => s.id === songs[i].id)) return null;
+  return next.map((song, i) => ({ ...song, order: i + 1 }));
 }

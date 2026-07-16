@@ -11,7 +11,31 @@
     </div>
   </div>
 } @else {
-  @if (allowReorder()) {
+  @if (selectMode()) {
+    <div
+      class="song-container group flex items-center gap-1 sm:gap-2 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-2 sm:px-3 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
+      [class.song-active]="isActive()"
+      [class.ring-1]="selected()"
+      [class.ring-primary/40]="selected()"
+      [class.bg-primary/5]="selected()"
+      [class.opacity-50]="isUnavailable()"
+      [id]="song().id"
+    >
+      <label
+        class="shrink-0 w-9 h-11 flex items-center justify-center touch-manipulation cursor-pointer"
+        (click)="onSelectToggle($event)"
+      >
+        <input
+          type="checkbox"
+          class="checkbox checkbox-sm checkbox-primary pointer-events-none"
+          [checked]="selected()"
+          tabindex="-1"
+          [attr.aria-label]="'Select ' + song().title"
+        />
+      </label>
+      <ng-container *ngTemplateOutlet="default"></ng-container>
+    </div>
+  } @else if (allowReorder()) {
     <div
       class="song-container group flex items-center gap-1 sm:gap-2 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-2 sm:px-3 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
       [class.song-active]="isActive()"
@@ -20,9 +44,10 @@
       [id]="song().id"
       (reorderSongs)="emitReorder($any($event))"
     >
+      <ng-container *ngTemplateOutlet="default"></ng-container>
       <button
         type="button"
-        class="song-drag-handle shrink-0 w-9 h-11 flex items-center justify-center rounded-lg text-base-content/30 active:text-base-content/60 active:bg-base-content/10 cursor-grab active:cursor-grabbing touch-manipulation"
+        class="song-drag-handle shrink-0 w-9 h-11 flex items-center justify-center self-start mt-0.5 rounded-lg text-base-content/30 active:text-base-content/60 active:bg-base-content/10 cursor-grab active:cursor-grabbing touch-manipulation"
         draggable="true"
         aria-label="Drag to reorder"
         title="Drag to reorder"
@@ -30,7 +55,6 @@
       >
         <fa-icon [icon]="faGripVertical" class="text-sm" />
       </button>
-      <ng-container *ngTemplateOutlet="default"></ng-container>
     </div>
   } @else {
     <div
@@ -109,31 +133,33 @@
       }
     </div>
   </div>
-  <div
-    class="song-actions flex gap-0.5 items-center relative z-20 shrink-0 pl-1 touch-manipulation"
-    (pointerdown)="guardActions($event)"
-    (click)="guardActions($event)"
-  >
-    @if (!allowReorder()) {
-      <button
-        type="button"
-        class="song-action-btn"
-        (click)="playNext($event)"
-        aria-label="Play next"
-        title="Play next"
-      >
-        <fa-icon [icon]="faForward" class="text-xs" />
-      </button>
-      <button
-        type="button"
-        class="song-action-btn"
-        (click)="addToQueue($event)"
-        aria-label="Add to queue"
-        title="Add to queue"
-      >
-        <fa-icon [icon]="faListUl" class="text-xs" />
-      </button>
-    }
-    <app-favorite-button [song]="song()" />
-  </div>
+  @if (!selectMode()) {
+    <div
+      class="song-actions flex gap-0.5 items-center relative z-20 shrink-0 pl-1 touch-manipulation"
+      (pointerdown)="guardActions($event)"
+      (click)="guardActions($event)"
+    >
+      @if (!allowReorder()) {
+        <button
+          type="button"
+          class="song-action-btn"
+          (click)="playNext($event)"
+          aria-label="Play next"
+          title="Play next"
+        >
+          <fa-icon [icon]="faForward" class="text-xs" />
+        </button>
+        <button
+          type="button"
+          class="song-action-btn"
+          (click)="addToQueue($event)"
+          aria-label="Add to queue"
+          title="Add to queue"
+        >
+          <fa-icon [icon]="faListUl" class="text-xs" />
+        </button>
+      }
+      <app-favorite-button [song]="song()" />
+    </div>
+  }
 </ng-template>

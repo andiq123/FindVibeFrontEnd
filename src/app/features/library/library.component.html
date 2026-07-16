@@ -21,8 +21,72 @@
             </span>
           </div>
         </div>
-        <app-spotify-import />
+        <div class="flex items-center gap-2 shrink-0">
+          @if (songCount() > 1) {
+            <button
+              type="button"
+              class="h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation {{
+                selectMode()
+                  ? 'bg-primary text-primary-content'
+                  : 'bg-base-content/10 text-base-content/70'
+              }}"
+              (click)="toggleSelectMode()"
+            >
+              {{ selectMode() ? "Done" : "Select" }}
+            </button>
+          }
+          <app-spotify-import />
+        </div>
       </div>
+
+      @if (selectMode() && selectedCount() > 0) {
+        <div
+          class="mt-3 flex flex-wrap items-center gap-2 text-xs"
+          role="toolbar"
+          [attr.aria-label]="selectedCount() + ' songs selected'"
+        >
+          <span class="font-semibold tabular-nums text-base-content/55 mr-1">
+            {{ selectedCount() }} selected
+          </span>
+          <button
+            type="button"
+            class="h-8 px-2.5 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary"
+            (click)="moveSelected('top')"
+          >
+            Top
+          </button>
+          <button
+            type="button"
+            class="h-8 w-8 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center justify-center"
+            (click)="moveSelected('up')"
+            aria-label="Move up"
+          >
+            <fa-icon [icon]="faArrowUp" class="text-[11px]" />
+          </button>
+          <button
+            type="button"
+            class="h-8 w-8 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center justify-center"
+            (click)="moveSelected('down')"
+            aria-label="Move down"
+          >
+            <fa-icon [icon]="faArrowDown" class="text-[11px]" />
+          </button>
+          <button
+            type="button"
+            class="h-8 px-2.5 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary"
+            (click)="moveSelected('bottom')"
+          >
+            Bottom
+          </button>
+          <button
+            type="button"
+            class="h-8 px-2.5 rounded-lg font-semibold text-base-content/45 active:text-base-content/70"
+            (click)="clearSelection()"
+          >
+            Clear
+          </button>
+        </div>
+      }
     </div>
 
     <div class="relative" [class.vault-list--bar]="hasReordered()">
@@ -30,12 +94,15 @@
         <app-song-list
           [songs]="songs()"
           [isLoading]="loadingSongs()"
-          [allowReorder]="true"
+          [allowReorder]="!selectMode()"
+          [selectMode]="selectMode()"
+          [selectedIds]="selectedIds()"
           [chunkSize]="24"
           emptyStateTitle="No vibes yet"
           emptyStateDescription="When you add songs to your library, they'll show up here."
           (reorder)="reorderSongs($event)"
           (playlistChange)="onChangePlaylist()"
+          (toggleSelect)="toggleSongSelect($event)"
         />
       </div>
     </div>

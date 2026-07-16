@@ -45,9 +45,13 @@ export class SongComponent {
   private settingsService = inject(SettingsService);
   song = input.required<Song>();
   allowReorder = input<boolean>(false);
+  /** Vault select-to-reorder — checkbox replaces drag; row tap toggles. */
+  selectMode = input(false);
+  selected = input(false);
   loading = input<boolean>(false);
   reorder = output<{ from: string; to: string }>();
   playlistChange = output<void>();
+  toggleSelect = output<string>();
   isActive = () => sameSong(this.playlistService.currentSong(), this.song());
   status = () =>
     this.isActive() ? this.playerService.status() : PlayerStatus.Paused;
@@ -75,12 +79,21 @@ export class SongComponent {
     this.playerService.pause();
   }
   async playOrPause() {
+    if (this.selectMode()) {
+      this.toggleSelect.emit(this.song().id);
+      return;
+    }
     if (this.isUnavailable()) return;
     if (this.status() === PlayerStatus.Playing) {
       await this.pause();
     } else {
       await this.play();
     }
+  }
+  onSelectToggle(event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.toggleSelect.emit(this.song().id);
   }
   emitReorder(data: { from: string; to: string }) {
     this.reorder.emit(data);
