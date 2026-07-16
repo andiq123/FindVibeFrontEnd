@@ -132,7 +132,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private coverLink = "";
 
   constructor() {
-    // ponytail: vault-only fill. Reset on track change only — not on library/playlist writes.
+    // ponytail: vault art first, else iTunes /cover. Reset on track change only.
     effect((onCleanup) => {
       const s = this.song();
       if (s.link !== this.coverLink) {
@@ -145,8 +145,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       const vault = untracked(() =>
         this.libraryService.songs().find((x) => x.link === s.link),
       );
-      if (!vault) return;
-      if (vault.image?.trim()) {
+      if (vault?.image?.trim()) {
         this.coverImage.set(vault.image);
         return;
       }
@@ -161,7 +160,8 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
           next: (r) => {
             if (!r?.image || this.coverLink !== s.link) return;
             this.coverImage.set(r.image);
-            this.libraryService.persistSongImage(s.link, r.image);
+            // only favorites live in DB — never PATCH search-only tracks
+            if (vault) this.libraryService.persistSongImage(s.link, r.image);
           },
           error: () => {},
         });
@@ -173,6 +173,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.coverReady.set(true);
     const image = this.coverImage();
     const link = this.song().link;
+    // in-memory queue / Media Session only — DB persist stays vault-gated above
     if (image && link) this.playlistService.patchSongImage(link, image);
   }
 
