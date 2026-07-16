@@ -19,6 +19,7 @@ import { Router } from "@angular/router";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
   faArrowDown,
+  faArrowUp,
   faChevronRight,
   faPause,
   faPlay,
@@ -27,10 +28,10 @@ import {
   faStepBackward,
   faStepForward,
   faMusic,
+  faTrash,
   faTriangleExclamation,
   faWaveSquare,
   faXmark,
-  faCheck,
 } from "../../../shared/icons";
 import { firstValueFrom } from "rxjs";
 import { PlayerStatus, RepeatMode } from "../models/player.model";
@@ -47,6 +48,7 @@ import { upgradeToHttps } from "../../../core/utils/utils";
 import { OfflineStorageService } from "../../library/services/offline-storage.service";
 import { LibraryService } from "../../library/services/library.service";
 import { HapticsService } from "../../../core/services/haptics.service";
+import { ToastService } from "../../../core/services/toast.service";
 import { environment } from "../../../../environments/environment";
 
 const OPEN_ANIM_MS = 500;
@@ -73,6 +75,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private offlineStorage = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
   private readonly haptics = inject(HapticsService);
+  private readonly toast = inject(ToastService);
   readonly playlistService = inject(PlaylistService);
   readonly radioService = inject(RadioService);
   private http = inject(HttpClient);
@@ -97,15 +100,17 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   faShuffle = faShuffle;
   faTriangleExclamation = faTriangleExclamation;
   faArrowDown = faArrowDown;
+  faArrowUp = faArrowUp;
   faWaveSquare = faWaveSquare;
   faMusic = faMusic;
   faXmark = faXmark;
-  faCheck = faCheck;
   faChevronRight = faChevronRight;
+  faTrash = faTrash;
   isDownloadingMp3 = signal(false);
-  /** Brief green confirm after radio starts (no Up next sheet). */
-  radioConfirm = signal(false);
-  private radioConfirmId: ReturnType<typeof setTimeout> | null = null;
+  similarOpen = signal(false);
+  similarLoading = signal(false);
+  similarArtists = signal<string[]>([]);
+  private similarArtistKey = "";
   /** Bottom sheets — stay mounted while closing so exit anim can finish. */
   upNextOpen = signal(false);
   upNextClosing = signal(false);
@@ -213,7 +218,6 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.closeFallbackId != null) clearTimeout(this.closeFallbackId);
     if (this.upNextCloseId != null) clearTimeout(this.upNextCloseId);
     if (this.lyricsCloseId != null) clearTimeout(this.lyricsCloseId);
-    if (this.radioConfirmId != null) clearTimeout(this.radioConfirmId);
   }
   private closeAndEmit(): void {
     if (this.closeFallbackId != null) {
@@ -307,11 +311,73 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
   navigateToArtist() {
-    const artistName = this.song().artist;
-    if (artistName) {
-      this.toggleSize();
-      this.router.navigate(["/songs", artistName]);
+    void this.openSimilar();
+  }
+
+  async openSimilar(): Promise<void> {
+    const artist = this.song().artist?.trim();
+    if (!artist) return;
+    this.closeUpNext();
+    this.closeLyrics();
+    this.similarOpen.set(true);
+    if (artist === this.similarArtistKey && this.similarArtists().length) return;
+    this.similarArtistKey = artist;
+    this.similarLoading.set(true);
+    this.similarArtists.set([]);
+    try {
+      const r = await firstValueFrom(
+        this.http.get<{ artists?: string[] }>(
+          `${environment.API_URL}/similar-artists`,
+          { params: { artist } },
+        ),
+      );
+      if (!this.destroyed && this.similarArtistKey === artist) {
+        this.similarArtists.set(r?.artists ?? []);
+      }
+    } catch {
+      if (!this.destroyed && this.similarArtistKey === artist) {
+        this.similarArtists.set([]);
+      }
+    } finally {
+      if (!this.destroyed && this.similarArtistKey === artist) {
+        this.similarLoading.set(false);
+      }
     }
+  }
+
+  closeSimilar(): void {
+    this.similarOpen.set(false);
+  }
+
+  searchArtist(name: string): void {
+    if (!name) return;
+    this.closeSimilar();
+    this.toggleSize();
+    void this.router.navigate(["/songs", name]);
+  }
+
+  searchCurrentArtist(): void {
+    this.searchArtist(this.song().artist);
+  }
+
+  removeUpcoming(track: Song, event: Event): void {
+    event.stopPropagation();
+    this.playlistService.removeUpcoming(track.link);
+    this.haptics.selection();
+    if (!this.playlistService.upcoming().length) this.closeUpNext();
+  }
+
+  clearUpcoming(event: Event): void {
+    event.stopPropagation();
+    this.playlistService.clearUpcoming();
+    this.haptics.selection();
+    this.closeUpNext();
+  }
+
+  moveUpcoming(track: Song, dir: -1 | 1, event: Event): void {
+    event.stopPropagation();
+    this.playlistService.moveUpcoming(track.link, dir);
+    this.haptics.selection();
   }
   toggleUpNext(): void {
     if (this.upNextOpen() || this.upNextClosing()) this.closeUpNext();
@@ -436,7 +502,9 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
         this.haptics.ready();
       }
     } finally {
-      if (!this.destroyed) this.lyricsLoading.set(false);
+      if (!this.destroyed && this.lyricsKey === key) {
+        this.lyricsLoading.set(false);
+      }
     }
   }
 
@@ -466,20 +534,11 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     const current = this.song();
     const ok = await this.radioService.start(current);
     if (!ok) return;
-    this.flashRadioConfirm();
+    this.haptics.success();
+    this.toast.show("Radio queued");
     if (this.status() !== PlayerStatus.Playing) {
       await this.playerService.setSong(current);
     }
-  }
-
-  private flashRadioConfirm(): void {
-    if (this.radioConfirmId != null) clearTimeout(this.radioConfirmId);
-    this.haptics.success();
-    this.radioConfirm.set(true);
-    this.radioConfirmId = setTimeout(() => {
-      this.radioConfirmId = null;
-      if (!this.destroyed) this.radioConfirm.set(false);
-    }, 2200);
   }
 
   async playUpcoming(song: Song) {

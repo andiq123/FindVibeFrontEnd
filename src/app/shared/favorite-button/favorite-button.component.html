@@ -1,8 +1,10 @@
 @if (isAbleToAddToFav()) {
 <button
-  class="flex items-center justify-center transition-all duration-300 pressable-native outline-none select-none"
-  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform' : 'w-9 h-9 rounded-full bg-base-content/5 border border-base-content/10 active:bg-base-content/10'"
-  (click)="toggleAddToFavorite()"
+  type="button"
+  class="flex items-center justify-center transition-all duration-300 pressable-native outline-none select-none touch-manipulation"
+  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform min-w-11 min-h-11' : 'w-11 h-11 rounded-full bg-base-content/5 border border-base-content/10 active:bg-base-content/10'"
+  (pointerdown)="$event.stopPropagation()"
+  (click)="onToggle($event)"
   [disabled]="isLoadingFavorite()"
   aria-label="Toggle favorite"
 >

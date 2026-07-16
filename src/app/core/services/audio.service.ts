@@ -94,6 +94,11 @@ export class AudioService implements OnDestroy {
     this.status.set(PlayerStatus.Error);
   }
 
+  /** Continue-listening restore — loaded but not playing. */
+  markPaused(): void {
+    this.status.set(PlayerStatus.Paused);
+  }
+
   async play(): Promise<void> {
     if (!this.audio) return;
     try {

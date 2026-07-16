@@ -8,6 +8,10 @@
       "resources": {
         "files": [
           "/favicon.ico",
+          "/favicon-16x16.png",
+          "/favicon-32x32.png",
+          "/apple-touch-icon.png",
+          "/icons/icon.svg",
           "/index.html",
           "/manifest.webmanifest",
           "/*.css",
@@ -28,11 +32,24 @@
   ],
   "dataGroups": [
     {
-      "name": "api-songs",
+      "name": "api-fiber",
       "urls": [
-        "https://*/api/songs/*",
-        "https://*/api/search/*",
-        "https://*/api/library/*"
+        "http://localhost:8080/search*",
+        "http://localhost:8080/explore*",
+        "http://localhost:8080/recommend*",
+        "http://localhost:8080/similar-artists*",
+        "http://localhost:8080/favorites/**",
+        "http://localhost:8080/cover*",
+        "http://localhost:8080/lyrics*",
+        "http://localhost:8080/suggest*",
+        "https://*/search*",
+        "https://*/explore*",
+        "https://*/recommend*",
+        "https://*/similar-artists*",
+        "https://*/favorites/**",
+        "https://*/cover*",
+        "https://*/lyrics*",
+        "https://*/suggest*"
       ],
       "cacheConfig": {
         "maxSize": 100,

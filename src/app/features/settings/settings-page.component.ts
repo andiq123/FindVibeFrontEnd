@@ -6,6 +6,7 @@ import {
   resource,
   signal,
 } from "@angular/core";
+import { DecimalPipe } from "@angular/common";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
@@ -13,11 +14,18 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { StorageInfoComponent } from "../library/components/storage-info/storage-info.component";
 import { UserService } from "../library/services/user.service";
-import { PlaylistService } from "../../core/services/playlist.service";
+import { PlayerService } from "../../core/services/player.service";
 import {
   SettingsService,
   SuggestRegion,
 } from "../../core/services/settings.service";
+import {
+  HapticsService,
+  HapticPreset,
+} from "../../core/services/haptics.service";
+import { StorageService } from "../../core/services/storage.service";
+import { ToastService } from "../../core/services/toast.service";
+import { ExploreService } from "../explore/explore.service";
 import { environment } from "../../../environments/environment";
 import {
   faCircleNotch,
@@ -40,7 +48,12 @@ interface SourcesResponse {
 @Component({
   selector: "app-settings-page",
   standalone: true,
-  imports: [PageContentComponent, StorageInfoComponent, FontAwesomeModule],
+  imports: [
+    PageContentComponent,
+    StorageInfoComponent,
+    FontAwesomeModule,
+    DecimalPipe,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-page-content>
@@ -55,7 +68,7 @@ interface SourcesResponse {
           <app-storage-info />
         </section>
 
-        <section class="premium-card p-3.5 space-y-2.5" aria-label="Player">
+        <section class="premium-card p-3.5 space-y-3" aria-label="Player">
           <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
               <h2 class="text-sm font-bold tracking-tight">Download button</h2>
@@ -78,6 +91,120 @@ interface SourcesResponse {
                 [class.translate-x-5]="showPlayerDownload()"
               ></span>
             </button>
+          </div>
+          <div class="flex items-center justify-between gap-3 pt-1 border-t border-base-content/8">
+            <div class="min-w-0">
+              <h2 class="text-sm font-bold tracking-tight">Haptics</h2>
+              <p class="text-[11px] text-base-content/45 mt-0.5">
+                Tap feedback via vibrate (Android) or iOS switch fallback.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              class="shrink-0 w-11 h-6 rounded-full transition-colors relative"
+              [class.bg-primary]="hapticsEnabled()"
+              [class.bg-base-content/15]="!hapticsEnabled()"
+              [attr.aria-checked]="hapticsEnabled()"
+              aria-label="Enable haptics"
+              (click)="toggleHaptics()"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-base-100 transition-transform"
+                [class.translate-x-5]="hapticsEnabled()"
+              ></span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between gap-3 pt-1 border-t border-base-content/8">
+            <div class="min-w-0">
+              <h2 class="text-sm font-bold tracking-tight">Clear history</h2>
+              <p class="text-[11px] text-base-content/45 mt-0.5">
+                Remove local listen history ({{ recentCount() }} tracks).
+              </p>
+            </div>
+            <button
+              type="button"
+              class="shrink-0 h-8 px-2.5 rounded-lg text-xs font-semibold text-error/80 active:bg-error/10 disabled:opacity-40"
+              [disabled]="!recentCount()"
+              (click)="clearHistory()"
+            >
+              Clear
+            </button>
+          </div>
+          <div class="flex items-center justify-between gap-3 pt-1 border-t border-base-content/8">
+            <div class="min-w-0">
+              <h2 class="text-sm font-bold tracking-tight">Refresh Explore</h2>
+              <p class="text-[11px] text-base-content/45 mt-0.5">
+                Re-fetch charts + personalized shelves (bypasses 24h cache).
+              </p>
+            </div>
+            <button
+              type="button"
+              class="shrink-0 h-8 px-2.5 rounded-lg text-xs font-semibold text-primary active:bg-primary/10 disabled:opacity-40"
+              [disabled]="exploreRefreshing()"
+              (click)="refreshExplore()"
+            >
+              @if (exploreRefreshing()) {
+                Refreshing…
+              } @else {
+                Refresh
+              }
+            </button>
+          </div>
+        </section>
+
+        <section class="premium-card p-3.5 space-y-3" aria-label="Haptics test">
+          <div>
+            <h2 class="text-sm font-bold tracking-tight">Haptics test</h2>
+            <p class="text-[11px] text-base-content/45 mt-0.5">
+              @if (hasVibrateApi) {
+                Vibration API — Android Chrome path.
+              } @else if (isAppleTouch) {
+                iOS switch fallback (no Vibration API). Feel taps on device;
+                silent if iOS 26.5+ patched programmatic click.
+              } @else {
+                No vibrate here — test uses a short click sound.
+              }
+            </p>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-medium text-base-content/60"
+                >Intensity</span
+              >
+              <span class="text-xs font-semibold tabular-nums text-primary">{{
+                hapticIntensity() | number: "1.0-2"
+              }}</span>
+            </div>
+            <input
+              type="range"
+              min="0.1"
+              max="1"
+              step="0.05"
+              class="range range-primary range-xs w-full"
+              [value]="hapticIntensity()"
+              (input)="onHapticIntensity($event)"
+              aria-label="Haptic intensity"
+            />
+            <div
+              class="flex justify-between text-[10px] text-base-content/35 px-0.5"
+            >
+              <span>Soft</span>
+              <span>Max</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-1.5">
+            @for (p of hapticPresets; track p.id) {
+              <button
+                type="button"
+                class="h-9 rounded-lg bg-base-content/[0.06] text-[11px] font-semibold text-base-content/70 active:scale-[0.96] active:bg-primary/20 active:text-primary transition-colors"
+                (click)="testHaptic(p.id)"
+              >
+                {{ p.label }}
+              </button>
+            }
           </div>
         </section>
 
@@ -187,6 +314,14 @@ interface SourcesResponse {
           }
         </section>
 
+        <section class="premium-card p-3.5 space-y-1.5" aria-label="Privacy">
+          <h2 class="text-sm font-bold tracking-tight">Account note</h2>
+          <p class="text-[11px] text-base-content/45 leading-relaxed">
+            Username is your only sign-in. Anyone who knows it can load that
+            vault. Prefer a unique username; sign out on shared devices.
+          </p>
+        </section>
+
         @if (isLoggedIn()) {
           <button
             type="button"
@@ -204,9 +339,14 @@ interface SourcesResponse {
 export class SettingsPageComponent {
   private http = inject(HttpClient);
   private userService = inject(UserService);
-  private playlistService = inject(PlaylistService);
+  private playerService = inject(PlayerService);
   private settingsService = inject(SettingsService);
+  private storage = inject(StorageService);
+  private explore = inject(ExploreService);
+  private toast = inject(ToastService);
+  private haptics = inject(HapticsService);
   private router = inject(Router);
+  exploreRefreshing = this.explore.loading;
   faCircleNotch = faCircleNotch;
   faCheckCircle = faCheckCircle;
   faTriangleExclamation = faTriangleExclamation;
@@ -216,6 +356,22 @@ export class SettingsPageComponent {
   username = computed(() => this.userService.user()?.username || "");
   suggestRegion = this.settingsService.suggestRegion;
   showPlayerDownload = this.settingsService.showPlayerDownload;
+  hapticsEnabled = this.settingsService.hapticsEnabled;
+  recentCount = computed(() => this.storage.recentSongs().length);
+  readonly hasVibrateApi = this.haptics.hasVibrateApi;
+  readonly isAppleTouch = this.haptics.isAppleTouch;
+  hapticIntensity = signal(0.7);
+  readonly hapticPresets: { id: HapticPreset; label: string }[] = [
+    { id: "selection", label: "Select" },
+    { id: "light", label: "Light" },
+    { id: "soft", label: "Soft" },
+    { id: "medium", label: "Medium" },
+    { id: "heavy", label: "Heavy" },
+    { id: "success", label: "Success" },
+    { id: "warning", label: "Warn" },
+    { id: "error", label: "Error" },
+    { id: "buzz", label: "Buzz" },
+  ];
 
   sources = resource({
     loader: async () => {
@@ -235,12 +391,37 @@ export class SettingsPageComponent {
     this.settingsService.toggleShowPlayerDownload();
   }
 
+  toggleHaptics() {
+    this.settingsService.toggleHapticsEnabled();
+  }
+
+  clearHistory() {
+    this.storage.clearRecents();
+  }
+
+  async refreshExplore() {
+    if (this.explore.loading()) return;
+    await this.explore.refresh();
+    this.toast.show(
+      this.explore.error() ? "Explore refresh failed" : "Explore refreshed",
+    );
+  }
+
+  onHapticIntensity(event: Event) {
+    const v = +(event.target as HTMLInputElement).value;
+    if (Number.isFinite(v)) this.hapticIntensity.set(v);
+  }
+
+  testHaptic(preset: HapticPreset) {
+    this.haptics.test(preset, this.hapticIntensity());
+  }
+
   reload() {
     this.sources.reload();
   }
 
   signOut() {
-    this.playlistService.reset();
+    this.playerService.reset();
     this.userService.resetUser();
     void this.router.navigateByUrl("/library");
   }

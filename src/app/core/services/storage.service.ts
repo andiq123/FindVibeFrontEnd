@@ -1,7 +1,7 @@
 import { Injectable, signal } from "@angular/core";
 import { Song } from "../models/song.model";
 const RECENT_SONGS_KEY = "recentLibrary";
-const RECENT_SONGS_LIMIT = 20;
+const RECENT_SONGS_LIMIT = 50;
 @Injectable({
   providedIn: "root",
 })
@@ -30,6 +30,10 @@ export class StorageService {
     const updatedSongs = [song, ...filtered].slice(0, RECENT_SONGS_LIMIT);
     this._recentSongs.set(updatedSongs);
     this.setItem(RECENT_SONGS_KEY, updatedSongs);
+  }
+  clearRecents(): void {
+    this._recentSongs.set([]);
+    this.removeItem(RECENT_SONGS_KEY);
   }
   private getRecentSongsFromStorage(): Song[] {
     return this.getItem<Song[]>(RECENT_SONGS_KEY) || [];

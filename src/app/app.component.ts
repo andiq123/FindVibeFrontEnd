@@ -23,6 +23,7 @@ import { ModalService } from "./core/services/modal.service";
 import { AppUpdateService } from "./core/services/app-update.service";
 import { PlayerService } from "./core/services/player.service";
 import { PlaylistService } from "./core/services/playlist.service";
+import { ToastService } from "./core/services/toast.service";
 @Component({
   selector: "app-root",
   standalone: true,
@@ -51,6 +52,7 @@ export class AppComponent implements OnInit {
   readonly playerService = inject(PlayerService);
   readonly settingsService = inject(SettingsService);
   readonly modalService = inject(ModalService);
+  readonly toast = inject(ToastService);
   ngOnInit(): void {
     this.initializeServices();
     this.settingsService
@@ -66,5 +68,7 @@ export class AppComponent implements OnInit {
     this.settingsService.initialize();
     this.mediaSessionService.initialize();
     this.offlineStorageService.initialize();
+    // Continue listening — restore queue + position (paused; autoplay blocked).
+    void this.playerService.restoreSession();
   }
 }

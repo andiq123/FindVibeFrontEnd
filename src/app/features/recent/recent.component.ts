@@ -4,6 +4,7 @@ import { PlaylistService } from "../../core/services/playlist.service";
 import { PageLayoutComponent } from "../../shared/components/page-layout/page-layout.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
 import { PlayerService } from "../../core/services/player.service";
+import { HapticsService } from "../../core/services/haptics.service";
 @Component({
   selector: "app-recent",
   standalone: true,
@@ -15,9 +16,20 @@ import { PlayerService } from "../../core/services/player.service";
 export class RecentComponent {
   private storageService = inject(StorageService);
   private playlistService = inject(PlaylistService);
-  public playerService = inject(PlayerService);
+  private playerService = inject(PlayerService);
+  private haptics = inject(HapticsService);
   songs = this.storageService.recentSongs;
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
+  }
+  playAll(): void {
+    const list = this.songs();
+    if (!list.length) return;
+    this.haptics.light();
+    void this.playerService.playFromList(list, list[0]);
+  }
+  clearHistory(): void {
+    this.storageService.clearRecents();
+    this.haptics.selection();
   }
 }

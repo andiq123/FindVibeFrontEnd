@@ -16,10 +16,12 @@ import { PlaylistService } from "./playlist.service";
 import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
 import { AudioService } from "./audio.service";
 import { HapticsService } from "./haptics.service";
+import { ToastService } from "./toast.service";
 import { upgradeToHttps } from "../utils/utils";
 
 /** Cap consecutive dead tracks so a broken queue can't spin forever. */
 const MAX_ERROR_SKIPS = 10;
+const PERSIST_EVERY_MS = 5_000;
 
 @Injectable({
   providedIn: "root",
@@ -30,12 +32,18 @@ export class PlayerService implements OnDestroy {
   private readonly offlineStorageService = inject(OfflineStorageService);
   private readonly audioService = inject(AudioService);
   private readonly haptics = inject(HapticsService);
+  private readonly toast = inject(ToastService);
   private currentObjectUrl: string | null = null;
   private handlingSongEnded = false;
   private handlingSongError = false;
   /** True only when advancing the queue (ended / next / prev) — not a user pick. */
   private allowErrorSkip = false;
   private consecutiveErrorSkips = 0;
+  private wakeLock: WakeLockSentinel | null = null;
+  private wakeLockGen = 0;
+  private loadGen = 0;
+  private persistTimerId: ReturnType<typeof setInterval> | null = null;
+  private visibilityHandler = () => this.onVisibility();
   readonly status = this.audioService.status;
   readonly currentTime = this.audioService.currentTime;
   readonly duration = this.audioService.duration;
@@ -61,9 +69,22 @@ export class PlayerService implements OnDestroy {
           this.allowErrorSkip = false;
           this.consecutiveErrorSkips = 0;
           this.haptics.clearWarn();
+          void this.requestWakeLock();
+          this.startPersistLoop();
         });
         return;
       }
+      untracked(() => {
+        this.stopPersistLoop();
+        void this.releaseWakeLock();
+        if (
+          status === PlayerStatus.Paused ||
+          status === PlayerStatus.Stopped ||
+          status === PlayerStatus.Ended
+        ) {
+          this.persistNow();
+        }
+      });
       if (status === PlayerStatus.Error) {
         untracked(() => {
           if (!this.playError()) {
@@ -75,13 +96,28 @@ export class PlayerService implements OnDestroy {
               this.handlingSongError = false;
             });
           } else if (!this.allowErrorSkip && !this.handlingSongError) {
-            // User-picked / exhausted skip — soft warn once, never on each auto-skip.
             const key = this.playlistService.currentSong()?.link ?? "";
             this.haptics.warnOnce(key);
           }
         });
       }
     });
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", this.visibilityHandler);
+    }
+  }
+
+  /** Hydrate queue + load track paused at saved position (continue listening). */
+  async restoreSession(): Promise<void> {
+    if (!this.playlistService.restoreSession()) return;
+    const song = this.playlistService.currentSong();
+    if (!song) return;
+    const seek = this.playlistService.takePendingSeek();
+    const gen = await this.loadSong(song, {
+      fromQueue: false,
+      autoplay: false,
+    });
+    if (gen === this.loadGen && seek > 0) this.audioService.seek(seek);
   }
 
   private async handleSongEnded(): Promise<void> {
@@ -109,14 +145,24 @@ export class PlayerService implements OnDestroy {
       MAX_ERROR_SKIPS,
       Math.max(1, this.playlistService.queueLength()),
     );
+    let skipped = 0;
     while (
       this.allowErrorSkip &&
       this.status() === PlayerStatus.Error &&
       this.consecutiveErrorSkips < budget
     ) {
       this.consecutiveErrorSkips++;
+      skipped++;
       const advanced = await this.setNextSong();
       if (!advanced) break;
+    }
+    if (skipped > 0 && this.status() !== PlayerStatus.Error) {
+      this.toast.show(
+        skipped === 1
+          ? "Skipped unavailable track"
+          : `Skipped ${skipped} unavailable tracks`,
+      );
+      this.haptics.selection();
     }
     if (this.status() === PlayerStatus.Error) {
       this.allowErrorSkip = false;
@@ -131,30 +177,53 @@ export class PlayerService implements OnDestroy {
     song: Song,
     opts?: { fromQueue?: boolean },
   ): Promise<void> {
+    await this.loadSong(song, {
+      fromQueue: opts?.fromQueue === true,
+      autoplay: true,
+    });
+  }
+
+  /** Explore / search / vault / history — same Song shape, no remap. */
+  async playFromList(songs: Song[], song: Song): Promise<void> {
+    this.playlistService.setCurrentPlaylist(songs);
+    await this.setSong(song);
+  }
+
+  /** @returns load generation that won (for restore seek guard). */
+  private async loadSong(
+    song: Song,
+    opts: { fromQueue: boolean; autoplay: boolean },
+  ): Promise<number> {
+    const gen = ++this.loadGen;
     this.cleanupObjectUrl();
     this.handlingSongEnded = false;
     this.playError.set("");
-    // Search / explore / vault click → stay on Error. Queue advance → auto-skip.
-    this.allowErrorSkip = opts?.fromQueue === true;
+    this.allowErrorSkip = opts.fromQueue;
     this.playlistService.setCurrentSong(song);
     this.audioService.pause();
     this.audioService.seek(0);
     const secureLink = upgradeToHttps(song.link);
     const offlineResponse =
       await this.offlineStorageService.isAvailableOffline(secureLink);
+    if (gen !== this.loadGen) return gen;
     if (offlineResponse) {
       const blob = await offlineResponse.blob();
+      if (gen !== this.loadGen) return gen;
       this.currentObjectUrl = URL.createObjectURL(blob);
       this.audioService.setSource(this.currentObjectUrl);
     } else if (this.settingsService.isNavigatorOffline()) {
       this.playError.set("Not available offline");
       this.audioService.fail();
-      return;
+      this.persistNow();
+      return gen;
     } else {
-      // API-down is fine: stream from CDN / service worker cache.
       this.audioService.setSource(secureLink);
     }
-    await this.audioService.play();
+    if (gen !== this.loadGen) return gen;
+    if (opts.autoplay) await this.audioService.play();
+    else this.audioService.markPaused();
+    if (gen === this.loadGen) this.persistNow();
+    return gen;
   }
 
   /** Retry hard-reloads the current track when we're on Error/Ended. */
@@ -172,11 +241,12 @@ export class PlayerService implements OnDestroy {
 
   pause(): void {
     this.audioService.pause();
+    this.persistNow();
   }
   seek(time: number): void {
     this.audioService.seek(time);
+    this.persistNow();
   }
-  /** Flip shuffle and rebuild the queue around the current track. */
   toggleShuffle(): void {
     this.settingsService.toggleShuffle();
     if (this.settingsService.isShuffle()) {
@@ -224,9 +294,25 @@ export class PlayerService implements OnDestroy {
     }
     return undefined;
   }
+
+  playNext(song: Song): void {
+    if (this.playlistService.playNext(song)) {
+      this.toast.show("Playing next");
+      this.haptics.selection();
+    }
+  }
+
+  addToQueue(song: Song): void {
+    if (this.playlistService.addToQueue(song)) {
+      this.toast.show("Added to queue");
+      this.haptics.selection();
+    } else {
+      this.toast.show("Already in queue");
+    }
+  }
+
   private async replayCurrentSong(): Promise<undefined> {
     this.audioService.seek(0);
-    // Repeat One must not inherit queue-skip — replay is a deliberate stay.
     this.allowErrorSkip = false;
     await this.audioService.play();
     return undefined;
@@ -237,7 +323,64 @@ export class PlayerService implements OnDestroy {
       this.currentObjectUrl = null;
     }
   }
+  private startPersistLoop(): void {
+    if (this.persistTimerId != null) return;
+    this.persistNow();
+    this.persistTimerId = setInterval(
+      () => this.persistNow(),
+      PERSIST_EVERY_MS,
+    );
+  }
+  private stopPersistLoop(): void {
+    if (this.persistTimerId == null) return;
+    clearInterval(this.persistTimerId);
+    this.persistTimerId = null;
+  }
+  private persistNow(): void {
+    this.playlistService.persist(this.currentTime());
+  }
+  private onVisibility(): void {
+    if (document.visibilityState === "hidden") this.persistNow();
+    if (
+      document.visibilityState === "visible" &&
+      this.status() === PlayerStatus.Playing
+    ) {
+      void this.requestWakeLock();
+    }
+  }
+  private async requestWakeLock(): Promise<void> {
+    // ponytail: Screen Wake Lock — no-op where unsupported (Safari < 16.4)
+    const wl = navigator.wakeLock;
+    if (!wl || this.status() !== PlayerStatus.Playing) return;
+    if (this.wakeLock) return;
+    const gen = ++this.wakeLockGen;
+    try {
+      const lock = await wl.request("screen");
+      if (gen !== this.wakeLockGen || this.status() !== PlayerStatus.Playing) {
+        void lock.release();
+        return;
+      }
+      this.wakeLock = lock;
+      lock.addEventListener("release", () => {
+        if (this.wakeLock === lock) this.wakeLock = null;
+      });
+    } catch {
+      if (gen === this.wakeLockGen) this.wakeLock = null;
+    }
+  }
+  private async releaseWakeLock(): Promise<void> {
+    this.wakeLockGen++;
+    const lock = this.wakeLock;
+    this.wakeLock = null;
+    try {
+      await lock?.release();
+    } catch {
+      /* ignore */
+    }
+  }
   reset(): void {
+    this.loadGen++;
+    this.stopPersistLoop();
     this.audioService.pause();
     this.audioService.setSource("");
     this.playlistService.reset();
@@ -245,8 +388,15 @@ export class PlayerService implements OnDestroy {
     this.allowErrorSkip = false;
     this.consecutiveErrorSkips = 0;
     this.playError.set("");
+    void this.releaseWakeLock();
   }
   ngOnDestroy(): void {
+    this.loadGen++;
     this.cleanupObjectUrl();
+    this.stopPersistLoop();
+    if (typeof document !== "undefined") {
+      document.removeEventListener("visibilitychange", this.visibilityHandler);
+    }
+    void this.releaseWakeLock();
   }
 }

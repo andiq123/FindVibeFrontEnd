@@ -1,6 +1,12 @@
 <nav class="nav-desktop fixed left-0 top-0 bottom-0 w-[72px] hidden lg:flex flex-col items-center py-5 border-r border-base-content/[0.06] z-[var(--z-navigation)] bg-base-100">
-  <div class="mb-4 px-2 py-1 rounded-lg">
-    <span class="text-[11px] font-bold tracking-[0.2em] text-primary/90 uppercase">FV</span>
+  <div class="mb-4 flex items-center justify-center" aria-label="FindVibe">
+    <img
+      src="icons/icon.svg"
+      alt=""
+      width="36"
+      height="36"
+      class="w-9 h-9 rounded-[0.65rem] shadow-sm shadow-black/20"
+    />
   </div>
   @for (navItem of navList; track navItem.name) {
     <a

@@ -342,11 +342,6 @@
                 <fa-icon [icon]="faXmark" class="text-[10px]" />
               </button>
             </div>
-          } @else if (radioConfirm()) {
-            <div class="player-toast player-toast--ok" role="status" aria-live="polite">
-              <fa-icon [icon]="faCheck" class="player-toast-icon" />
-              <span class="player-toast-text">Radio queued</span>
-            </div>
           }
         </div>
       </div>
@@ -367,40 +362,142 @@
         role="dialog"
         aria-label="Up next"
       >
-        <button
-          type="button"
-          class="up-next-handle pressable-native"
-          (click)="closeUpNext()"
-          aria-label="Hide up next"
-        >
-          <span class="up-next-handle-bar"></span>
-          <span class="up-next-handle-label">Up next</span>
-        </button>
+        <div class="up-next-handle pressable-native flex items-center gap-2 px-4">
+          <button
+            type="button"
+            class="flex-1 flex flex-col items-center min-w-0"
+            (click)="closeUpNext()"
+            aria-label="Hide up next"
+          >
+            <span class="up-next-handle-bar"></span>
+            <span class="up-next-handle-label">Up next</span>
+          </button>
+          <button
+            type="button"
+            class="shrink-0 h-8 px-2.5 rounded-lg text-[11px] font-semibold text-error/80 active:bg-error/10"
+            (click)="clearUpcoming($event)"
+            aria-label="Clear up next"
+          >
+            Clear
+          </button>
+        </div>
         <div class="up-next-list">
-          @for (track of playlistService.upcoming(); track track.link; let i = $index) {
-            <button
-              type="button"
+          @for (track of playlistService.upcoming(); track track.link; let i = $index; let last = $last) {
+            <div
               class="up-next-row"
               animate.enter="up-next-row-in"
               animate.leave="up-next-row-out"
               [style.--i]="i"
-              (click)="playUpcoming(track)"
             >
-              <img
-                [src]="track.image || 'no_album_art.jpg'"
-                [alt]="track.title"
-                width="40"
-                height="40"
-                class="up-next-art"
-                loading="lazy"
-                referrerpolicy="no-referrer"
-                (error)="$any($event.target).src = 'no_album_art.jpg'"
-              />
-              <span class="min-w-0 flex-1">
-                <span class="up-next-title">{{ track.title }}</span>
-                <span class="up-next-artist">{{ track.artist }}</span>
-              </span>
-            </button>
+              <button
+                type="button"
+                class="flex items-center gap-2.5 min-w-0 flex-1 text-left"
+                (click)="playUpcoming(track)"
+              >
+                <img
+                  [src]="track.image || 'no_album_art.jpg'"
+                  [alt]="track.title"
+                  width="40"
+                  height="40"
+                  class="up-next-art"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                  (error)="$any($event.target).src = 'no_album_art.jpg'"
+                />
+                <span class="min-w-0 flex-1">
+                  <span class="up-next-title">{{ track.title }}</span>
+                  <span class="up-next-artist">{{ track.artist }}</span>
+                </span>
+              </button>
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button
+                  type="button"
+                  class="w-8 h-8 rounded-full text-base-content/35 active:bg-base-content/10 disabled:opacity-25"
+                  [disabled]="i === 0"
+                  (click)="moveUpcoming(track, -1, $event)"
+                  aria-label="Move up"
+                >
+                  <fa-icon [icon]="faArrowUp" class="text-[10px]" />
+                </button>
+                <button
+                  type="button"
+                  class="w-8 h-8 rounded-full text-base-content/35 active:bg-base-content/10 disabled:opacity-25"
+                  [disabled]="last"
+                  (click)="moveUpcoming(track, 1, $event)"
+                  aria-label="Move down"
+                >
+                  <fa-icon [icon]="faArrowDown" class="text-[10px]" />
+                </button>
+                <button
+                  type="button"
+                  class="w-8 h-8 rounded-full text-base-content/35 active:text-error active:bg-error/10"
+                  (click)="removeUpcoming(track, $event)"
+                  aria-label="Remove from queue"
+                >
+                  <fa-icon [icon]="faTrash" class="text-[10px]" />
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (similarOpen()) {
+      <button
+        type="button"
+        class="up-next-scrim"
+        (click)="closeSimilar()"
+        aria-label="Close similar artists"
+      ></button>
+      <div
+        class="up-next-sheet"
+        role="dialog"
+        aria-label="Similar artists"
+      >
+        <button
+          type="button"
+          class="up-next-handle pressable-native"
+          (click)="closeSimilar()"
+          aria-label="Hide similar artists"
+        >
+          <span class="up-next-handle-bar"></span>
+          <span class="up-next-handle-label">Similar artists</span>
+        </button>
+        <div class="up-next-list px-1 pb-4">
+          <button
+            type="button"
+            class="up-next-row"
+            (click)="searchCurrentArtist()"
+          >
+            <span class="min-w-0 flex-1">
+              <span class="up-next-title">Search {{ song().artist }}</span>
+              <span class="up-next-artist">All songs by this artist</span>
+            </span>
+            <fa-icon [icon]="faChevronRight" class="text-base-content/30 text-xs" />
+          </button>
+          @if (similarLoading()) {
+            <div class="py-6 flex justify-center">
+              <span class="loading loading-spinner loading-sm text-primary"></span>
+            </div>
+          } @else if (similarArtists().length === 0) {
+            <p class="px-4 py-3 text-xs text-base-content/45">
+              No similar artists found.
+            </p>
+          } @else {
+            @for (name of similarArtists(); track name) {
+              <button
+                type="button"
+                class="up-next-row"
+                (click)="searchArtist(name)"
+              >
+                <span class="min-w-0 flex-1">
+                  <span class="up-next-title">{{ name }}</span>
+                  <span class="up-next-artist">Similar artist</span>
+                </span>
+                <fa-icon [icon]="faChevronRight" class="text-base-content/30 text-xs" />
+              </button>
+            }
           }
         </div>
       </div>

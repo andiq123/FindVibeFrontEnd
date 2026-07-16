@@ -44,6 +44,11 @@ export class FavoriteButtonComponent {
       .songs()
       .some((song: Song) => song.link === this.song().link),
   );
+  onToggle(event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.toggleAddToFavorite();
+  }
   toggleAddToFavorite() {
     const user = this.userService.user();
     if (!user) return;

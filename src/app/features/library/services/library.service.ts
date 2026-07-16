@@ -81,7 +81,9 @@ export class LibraryService {
             this.userService.resetUser();
             return;
           }
-          const sortedSongs = [...songs].sort((a, b) => a.order - b.order);
+          const sortedSongs = [...songs].sort(
+            (a, b) => (a.order ?? 0) - (b.order ?? 0),
+          );
           // Keep local cover/lyrics if API row is still empty (PATCH lag / offline).
           const merged = sortedSongs.map((s) => {
             const prev = currentSongs.find((l) => l.link === s.link);
@@ -160,9 +162,9 @@ export class LibraryService {
   }
 
   saveReorders() {
-    const reorders: Reorder[] = this.songs().map((x) => ({
+    const reorders: Reorder[] = this.songs().map((x, i) => ({
       songId: x.id,
-      order: x.order,
+      order: x.order ?? i + 1,
     }));
     return this.libraryApiService.reorderSongs(reorders);
   }

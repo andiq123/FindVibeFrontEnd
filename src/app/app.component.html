@@ -28,6 +28,9 @@
     }
   }
   <app-navigation />
+  @if (toast.message(); as msg) {
+    <div class="app-toast" role="status" aria-live="polite">{{ msg }}</div>
+  }
   @defer (when modalService.isOpen()) {
     <app-global-modal />
   }

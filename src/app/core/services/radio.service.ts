@@ -7,7 +7,7 @@ import {
 } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
-import { Song } from "../models/song.model";
+import { Song, songKey } from "../models/song.model";
 import { PlaylistService } from "./playlist.service";
 import { environment } from "../../../environments/environment";
 
@@ -104,22 +104,6 @@ export class RadioService {
     }
     return out;
   }
-}
-
-/** Collapse remix/feat noise — matches Fiber coreTitle. */
-function songKey(s: Pick<Song, "artist" | "title">): string {
-  const artist = (s.artist || "").toLowerCase().trim();
-  let title = (s.title || "").toLowerCase().trim();
-  title = title
-    .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
-    .replace(/\s*(feat\.?|ft\.?|featuring)\s+.*/g, " ")
-    .replace(
-      /\b(original\s+mix|extended\s+mix|radio\s+edit|club\s+mix|remix|bootleg|edit|mix|version|remaster(ed)?|instrumental|karaoke|live|acoustic|dub)\b/g,
-      " ",
-    )
-    .replace(/\s+/g, " ")
-    .trim();
-  return artist && title ? `${artist}|${title}` : "";
 }
 
 function apiError(e: unknown): string {

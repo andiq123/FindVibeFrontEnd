@@ -16,7 +16,7 @@ import { faMusic, IconDefinition } from "../../icons";
       <app-skeleton type="song" [count]="skeletonCount()" />
     } @else {
       <ul class="flex flex-col">
-        @for (song of songs(); track song.id) {
+        @for (song of songs(); track song.link) {
           <li class="group/item list-none">
             <app-song
               [song]="song"

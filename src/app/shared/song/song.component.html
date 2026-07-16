@@ -34,7 +34,7 @@
 }
 <ng-template #default>
   <div
-    class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 transition-transform duration-200 cursor-pointer"
+    class="song-play flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 transition-transform duration-200 cursor-pointer touch-manipulation"
     [class.unavailable]="isUnavailable()"
     (click)="playOrPause()"
     (keydown.enter)="playOrPause()"
@@ -99,44 +99,52 @@
       }
     </div>
   </div>
-  <div class="flex gap-1 sm:gap-1.5 items-center relative z-10 shrink-0">
+  <div
+    class="song-actions flex gap-0.5 items-center relative z-20 shrink-0 pl-1 touch-manipulation"
+    (pointerdown)="guardActions($event)"
+    (click)="guardActions($event)"
+  >
     @if (showOfflineIndicator()) {
       @if (isDownloadingOffline()) {
         <div
-          class="relative w-8 h-8 flex items-center justify-center"
+          class="relative w-11 h-11 flex items-center justify-center"
           aria-label="Saving offline"
         >
           <div
-            class="absolute inset-1 border-2 border-primary/20 rounded-full"
+            class="absolute inset-2 border-2 border-primary/20 rounded-full"
           ></div>
           <div
-            class="absolute inset-1 border-2 border-primary rounded-full border-t-transparent animate-spin"
+            class="absolute inset-2 border-2 border-primary rounded-full border-t-transparent animate-spin"
           ></div>
           <fa-icon [icon]="faCloudArrowDown" class="text-[10px] text-primary" />
         </div>
       } @else if (isAvailableOffline()) {
         <div
-          class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary anim-fade-in"
+          class="flex items-center justify-center w-11 h-11 rounded-full text-primary anim-fade-in"
           title="Available offline"
           aria-label="Available offline"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-3.5 h-3.5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+          <span
+            class="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10"
           >
-            <path
-              fill-rule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clip-rule="evenodd"
-            />
-          </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-3.5 h-3.5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </span>
         </div>
       } @else if (isFavoritePage()) {
         <button
           type="button"
-          class="flex items-center justify-center w-8 h-8 rounded-full text-base-content/35 active:text-primary active:bg-primary/10 transition-colors"
+          class="song-action-btn"
           (click)="saveOffline($event)"
           aria-label="Save offline"
           title="Save offline"
@@ -144,6 +152,26 @@
           <fa-icon [icon]="faCloudArrowDown" class="text-sm" />
         </button>
       }
+    }
+    @if (!allowReorder()) {
+      <button
+        type="button"
+        class="song-action-btn"
+        (click)="playNext($event)"
+        aria-label="Play next"
+        title="Play next"
+      >
+        <fa-icon [icon]="faForward" class="text-xs" />
+      </button>
+      <button
+        type="button"
+        class="song-action-btn"
+        (click)="addToQueue($event)"
+        aria-label="Add to queue"
+        title="Add to queue"
+      >
+        <fa-icon [icon]="faListUl" class="text-xs" />
+      </button>
     }
     <app-favorite-button [song]="song()" />
   </div>

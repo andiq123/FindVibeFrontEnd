@@ -2,12 +2,13 @@ import { Component, ChangeDetectionStrategy, inject } from "@angular/core";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import {
   faCompass,
-  faBookmark,
-  faClock,
+  faHeart,
+  faClockRotateLeft,
   faGear,
 } from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { HapticsService } from "../../core/services/haptics.service";
+
 @Component({
   selector: "app-navigation",
   standalone: true,
@@ -22,6 +23,7 @@ export class NavigationComponent {
     this.haptics.selection();
   }
 
+  /** Short labels — tab bar space is tight on mobile. */
   readonly navList = [
     {
       name: "Explore",
@@ -30,12 +32,12 @@ export class NavigationComponent {
     },
     {
       name: "Vault",
-      icon: faBookmark,
+      icon: faHeart,
       link: "/library",
     },
     {
-      name: "History",
-      icon: faClock,
+      name: "Recent",
+      icon: faClockRotateLeft,
       link: "/recent",
     },
     {
