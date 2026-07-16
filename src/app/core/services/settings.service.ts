@@ -34,6 +34,8 @@ export class SettingsService implements OnDestroy {
   private readonly _isShuffle = signal(false);
   private readonly _isMiniPlayer = signal(true);
   private readonly _suggestRegion = signal<SuggestRegion>("ro");
+  /** Full-player Save/Download MP3 button. */
+  private readonly _showPlayerDownload = signal(true);
   private readonly _serverStatus = signal(ServerStatus.Unchecked);
   private readonly _isNavigatorOffline = signal(!navigator.onLine);
   private onlineHandler = () => this._isNavigatorOffline.set(false);
@@ -42,6 +44,7 @@ export class SettingsService implements OnDestroy {
   readonly isShuffle = this._isShuffle.asReadonly();
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
   readonly suggestRegion = this._suggestRegion.asReadonly();
+  readonly showPlayerDownload = this._showPlayerDownload.asReadonly();
   readonly isServerDown = computed(
     () => this._serverStatus() === ServerStatus.Down,
   );
@@ -73,10 +76,15 @@ export class SettingsService implements OnDestroy {
     const isShuffle = this.storageService.getItem<boolean>("isShuffle");
     const suggestRegion =
       this.storageService.getItem<SuggestRegion>("suggestRegion");
+    const showPlayerDownload =
+      this.storageService.getItem<boolean>("showPlayerDownload");
     if (repeatMode !== null) this._repeatMode.set(repeatMode);
     if (isShuffle !== null) this._isShuffle.set(isShuffle);
     if (suggestRegion === "ro" || suggestRegion === "device") {
       this._suggestRegion.set(suggestRegion);
+    }
+    if (showPlayerDownload !== null) {
+      this._showPlayerDownload.set(showPlayerDownload);
     }
   }
 
@@ -106,6 +114,15 @@ export class SettingsService implements OnDestroy {
   setSuggestRegion(region: SuggestRegion): void {
     this._suggestRegion.set(region);
     this.storageService.setItem("suggestRegion", region);
+  }
+
+  setShowPlayerDownload(show: boolean): void {
+    this._showPlayerDownload.set(show);
+    this.storageService.setItem("showPlayerDownload", show);
+  }
+
+  toggleShowPlayerDownload(): void {
+    this.setShowPlayerDownload(!this._showPlayerDownload());
   }
 
   setServerUp(): void {

@@ -29,7 +29,10 @@
       margin: 0 auto 1.5rem;
       border-radius: 1.5rem;
       overflow: hidden;
-      border: 1px solid rgba(0, 0, 0, 0.4);
+      /* No stroke — mismatched radius + border was reading as a ghost corner. */
+      border: 0;
+      isolation: isolate;
+      background: var(--color-base-100);
       transform: translateY(calc(100% + 2rem));
       &.opened { transform: translateY(0); }
       &.anim-slide-up {
@@ -92,4 +95,8 @@
   @media (max-width: 768px) {
     background: color-mix(in oklab, var(--color-base-100) 60%, transparent);
   }
+}
+
+.player-content-card {
+  isolation: isolate;
 }

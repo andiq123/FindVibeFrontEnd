@@ -25,7 +25,7 @@
     (closePanel)="onSwipeClose()"
   >
   <div
-    class="player-content-card flex-1 flex flex-col rounded-t-[2.5rem] overflow-hidden relative pt-safe"
+    class="player-content-card flex-1 flex flex-col rounded-t-[2.5rem] lg:rounded-[1.5rem] overflow-hidden relative pt-safe bg-base-100"
   >
     <div
       class="w-full pt-4 pb-2 flex flex-col items-center justify-center shrink-0 relative z-20"
@@ -41,7 +41,7 @@
         ></div>
       </button>
     </div>
-    <div class="absolute inset-0 -z-20 overflow-hidden bg-base-100">
+    <div class="absolute inset-0 z-0 overflow-hidden bg-base-100 rounded-[inherit]">
       <img
         [ngSrc]="displayImage()"
         alt="Song Art BG"
@@ -140,23 +140,27 @@
             }
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              class="w-9 h-9 rounded-full bg-base-content/5 border border-base-content/10 flex items-center justify-center text-base-content/40 active:bg-base-content/10 active:scale-90 transition-all pressable-native outline-none select-none disabled:opacity-50"
-              (click)="downloadMp3()"
-              [disabled]="isDownloadingMp3()"
-              [attr.aria-label]="
-                isDownloadingMp3() ? 'Downloading MP3' : 'Download MP3'
-              "
-            >
-              @if (isDownloadingMp3()) {
-                <span
-                  class="loading loading-spinner loading-xs text-primary"
-                ></span>
-              } @else {
-                <fa-icon [icon]="faArrowDown" class="text-sm" />
-              }
-            </button>
+            @if (settingsService.showPlayerDownload()) {
+              <button
+                type="button"
+                class="player-chip w-9 h-9 rounded-full bg-base-content/5 border border-base-content/10 flex items-center justify-center text-base-content/40 active:bg-base-content/10 active:scale-90 transition-colors pressable-native outline-none select-none disabled:opacity-50"
+                animate.enter="player-chip-in"
+                animate.leave="player-chip-out"
+                (click)="downloadMp3()"
+                [disabled]="isDownloadingMp3()"
+                [attr.aria-label]="
+                  isDownloadingMp3() ? 'Downloading MP3' : 'Download MP3'
+                "
+              >
+                @if (isDownloadingMp3()) {
+                  <span
+                    class="loading loading-spinner loading-xs text-primary"
+                  ></span>
+                } @else {
+                  <fa-icon [icon]="faArrowDown" class="text-sm" />
+                }
+              </button>
+            }
             <app-favorite-button [song]="song()" />
           </div>
         </div>
@@ -268,26 +272,28 @@
         </div>
 
         <div class="relative pt-2">
-          <div class="flex items-center gap-2 flex-wrap">
+          <div class="player-chip-row flex items-center justify-end gap-2 flex-wrap">
+            @if (playlistService.upcoming().length; as n) {
+              <button
+                type="button"
+                class="player-chip inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
+                animate.enter="player-chip-in"
+                animate.leave="player-chip-out"
+                (click)="toggleUpNext()"
+                [attr.aria-expanded]="upNextOpen()"
+                [attr.aria-label]="upNextOpen() ? 'Hide up next' : 'Show up next'"
+              >
+                <span class="player-chip-label">Up next · {{ n }}</span>
+                <fa-icon
+                  [icon]="faChevronRight"
+                  class="text-[10px] transition-transform duration-200"
+                  [class.rotate-90]="upNextOpen()"
+                />
+              </button>
+            }
             <button
               type="button"
-              class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary/15 text-primary text-sm font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50"
-              (click)="startRadio()"
-              [disabled]="radioService.loading()"
-              [class.ring-1]="playlistService.radioActive()"
-              [class.ring-primary/40]="playlistService.radioActive()"
-              aria-label="Start radio from this track"
-            >
-              @if (radioService.loading()) {
-                <span class="loading loading-spinner loading-xs"></span>
-              } @else {
-                <fa-icon [icon]="faWaveSquare" class="text-xs" />
-              }
-              Radio
-            </button>
-            <button
-              type="button"
-              class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
+              class="player-chip inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10 transition-colors duration-200"
               [class.text-primary]="lyricsOpen()"
               [class.bg-primary/15]="lyricsOpen()"
               (click)="toggleLyrics()"
@@ -297,22 +303,31 @@
               <fa-icon [icon]="faMusic" class="text-xs" />
               Lyrics
             </button>
-            @if (playlistService.upcoming().length; as n) {
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-base-content/5 text-base-content/55 text-sm font-medium touch-manipulation active:bg-base-content/10"
-                (click)="toggleUpNext()"
-                [attr.aria-expanded]="upNextOpen()"
-                [attr.aria-label]="upNextOpen() ? 'Hide up next' : 'Show up next'"
-              >
-                Up next · {{ n }}
+            <button
+              type="button"
+              class="player-chip inline-flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary/15 text-primary text-sm font-semibold touch-manipulation active:scale-[0.97] disabled:opacity-50 transition-shadow duration-200"
+              (click)="startRadio()"
+              [disabled]="radioService.loading()"
+              [class.ring-1]="playlistService.radioActive()"
+              [class.ring-primary/40]="playlistService.radioActive()"
+              aria-label="Start radio from this track"
+            >
+              @if (radioService.loading()) {
+                <span
+                  class="loading loading-spinner loading-xs"
+                  animate.enter="player-chip-in"
+                  animate.leave="player-chip-out"
+                ></span>
+              } @else {
                 <fa-icon
-                  [icon]="faChevronRight"
-                  class="text-[10px] transition-transform"
-                  [class.rotate-90]="upNextOpen()"
+                  [icon]="faWaveSquare"
+                  class="text-xs"
+                  animate.enter="player-chip-in"
+                  animate.leave="player-chip-out"
                 />
-              </button>
-            }
+              }
+              Radio
+            </button>
           </div>
           @if (radioService.error(); as err) {
             <div class="player-toast player-toast--error" role="alert">

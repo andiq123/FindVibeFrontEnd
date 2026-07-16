@@ -55,6 +55,32 @@ interface SourcesResponse {
           <app-storage-info />
         </section>
 
+        <section class="premium-card p-3.5 space-y-2.5" aria-label="Player">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <h2 class="text-sm font-bold tracking-tight">Download button</h2>
+              <p class="text-[11px] text-base-content/45 mt-0.5">
+                Show Save MP3 on the full player.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              class="shrink-0 w-11 h-6 rounded-full transition-colors relative"
+              [class.bg-primary]="showPlayerDownload()"
+              [class.bg-base-content/15]="!showPlayerDownload()"
+              [attr.aria-checked]="showPlayerDownload()"
+              aria-label="Show download button in full player"
+              (click)="toggleShowPlayerDownload()"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-base-100 transition-transform"
+                [class.translate-x-5]="showPlayerDownload()"
+              ></span>
+            </button>
+          </div>
+        </section>
+
         <section class="premium-card p-3.5 space-y-2.5" aria-label="Suggestions">
           <div>
             <h2 class="text-sm font-bold tracking-tight">Suggestion region</h2>
@@ -189,6 +215,7 @@ export class SettingsPageComponent {
   isLoggedIn = computed(() => !!this.userService.user());
   username = computed(() => this.userService.user()?.username || "");
   suggestRegion = this.settingsService.suggestRegion;
+  showPlayerDownload = this.settingsService.showPlayerDownload;
 
   sources = resource({
     loader: async () => {
@@ -202,6 +229,10 @@ export class SettingsPageComponent {
 
   setSuggestRegion(region: SuggestRegion) {
     this.settingsService.setSuggestRegion(region);
+  }
+
+  toggleShowPlayerDownload() {
+    this.settingsService.toggleShowPlayerDownload();
   }
 
   reload() {
