@@ -52,7 +52,10 @@ import { SwipeDownDirective } from "../../../features/player/directives/swipe-do
             class="w-9 h-[5px] bg-white/20 rounded-full transition-colors group-hover:bg-white/30"
           ></div>
         </div>
-        <div class="flex-1 overflow-y-auto px-5 pb-5 overscroll-contain">
+        <div
+          class="flex-1 overflow-y-auto px-5 pb-5 overscroll-contain"
+          data-swipe-scroll
+        >
           <ng-container
             *ngComponentOutlet="activeComponent(); inputs: componentInputs()"
           />

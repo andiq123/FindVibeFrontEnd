@@ -870,9 +870,11 @@ body {
   color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
 }
 .up-next-list {
+  flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   padding: 0.25rem 1rem 0.75rem;
   min-height: 0;
 }
@@ -1004,9 +1006,11 @@ body {
 .lyrics-body {
   /* Stack panes so leave/enter crossfade instead of hard-cut */
   display: grid;
+  flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   padding: 0.25rem 1.25rem 1.25rem;
   min-height: 0;
 }

@@ -8,6 +8,10 @@ import {
   OnInit,
   OnDestroy,
 } from "@angular/core";
+
+/** Nested scroll panes must own vertical touch; swipe-to-dismiss must not steal them. */
+const SCROLL_IGNORE = ".lyrics-body, .up-next-list, [data-swipe-scroll]";
+
 @Directive({
   selector: "[appSwipeDown]",
   standalone: true,
@@ -57,10 +61,15 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   onStart(event: TouchEvent) {
     if (this.isDismissing || this.disabled()) return;
     const target = event.target as HTMLElement;
+    if (target.closest(SCROLL_IGNORE)) return;
     const selector = this.handleSelector();
-    const isButton = !!target.closest('button, input, a, [role="button"], fa-icon');
+    const isButton = !!target.closest(
+      'button, input, a, [role="button"], fa-icon',
+    );
     const isGrabBar = !!target.closest(".pressable-native");
-    const isControlsArea = !!target.closest('.ios-slider-container, button, input, a, [role="button"], .flex.items-center.justify-between.pt-2');
+    const isControlsArea = !!target.closest(
+      '.ios-slider-container, button, input, a, [role="button"], .flex.items-center.justify-between.pt-2',
+    );
     if (isButton && !isGrabBar) return;
     if (selector) {
       const allowedElement = target.closest(selector);
@@ -82,8 +91,9 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   }
   onMove(event: TouchEvent) {
     if (!this.isSwiping || this.isDismissing) return;
-    if (event.cancelable) event.preventDefault();
     let deltaY = event.touches[0].clientY - this.startY;
+    // Don't lock the page until the gesture clearly commits downward.
+    if (deltaY > 6 && event.cancelable) event.preventDefault();
     if (deltaY < 0) {
       deltaY = this.calculateRubberBand(deltaY);
     }
@@ -150,7 +160,11 @@ export class SwipeDownDirective implements OnInit, OnDestroy {
   }
   private performSnapBack() {
     const el = this.el.nativeElement;
-    el.style.setProperty("transition", "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)", "important");
+    el.style.setProperty(
+      "transition",
+      "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+      "important",
+    );
     el.style.transform = "translate3d(0, 0, 0)";
     const onTransitionEnd = (e: TransitionEvent) => {
       if (e.propertyName !== "transform") return;

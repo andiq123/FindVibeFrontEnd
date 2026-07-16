@@ -12,6 +12,7 @@ import { firstValueFrom } from "rxjs";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { StorageInfoComponent } from "../library/components/storage-info/storage-info.component";
+import { SpotifyImportComponent } from "../library/components/spotify-import/spotify-import.component";
 import { UserService } from "../library/services/user.service";
 import { PlayerService } from "../../core/services/player.service";
 import {
@@ -43,7 +44,12 @@ interface SourcesResponse {
 @Component({
   selector: "app-settings-page",
   standalone: true,
-  imports: [PageContentComponent, StorageInfoComponent, FontAwesomeModule],
+  imports: [
+    PageContentComponent,
+    StorageInfoComponent,
+    SpotifyImportComponent,
+    FontAwesomeModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-page-content>
@@ -57,6 +63,10 @@ interface SourcesResponse {
         <section class="premium-card p-3.5" aria-label="Offline vault">
           <app-storage-info />
         </section>
+
+        @if (isLoggedIn()) {
+          <app-spotify-import />
+        }
 
         <section class="premium-card p-3.5 space-y-3" aria-label="Player">
           <div class="flex items-center justify-between gap-3">

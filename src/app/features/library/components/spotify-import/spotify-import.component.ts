@@ -46,13 +46,13 @@ type PlaylistPayload = {
   imports: [FontAwesomeModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: "contents",
+    class: "block",
   },
   template: `
     @if (!open()) {
       <button
         type="button"
-        class="shrink-0 h-9 px-3 rounded-xl text-xs font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center gap-2"
+        class="w-full h-10 px-3.5 rounded-xl text-xs font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center justify-center gap-2"
         (click)="open.set(true)"
       >
         <fa-icon [icon]="faLink" class="text-[11px]" />
@@ -60,8 +60,7 @@ type PlaylistPayload = {
       </button>
     } @else {
       <div
-        class="premium-card p-3.5 space-y-3 w-full basis-full col-span-full mt-3"
-        style="flex-basis: 100%; width: 100%"
+        class="premium-card p-3.5 space-y-3"
         aria-label="Import Spotify playlist"
       >
         <div class="flex items-start justify-between gap-2">
@@ -179,7 +178,7 @@ type PlaylistPayload = {
           </div>
 
           <ul
-            class="max-h-56 overflow-y-auto space-y-1 pr-0.5 overscroll-contain"
+            class="max-h-56 overflow-y-auto space-y-1 pr-0.5 overscroll-contain touch-pan-y"
             aria-live="polite"
           >
             @for (row of rows(); track $index) {

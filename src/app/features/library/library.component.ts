@@ -24,7 +24,6 @@ import { SettingsService } from "../../core/services/settings.service";
 import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
 import { Song } from "../../core/models/song.model";
-import { SpotifyImportComponent } from "./components/spotify-import/spotify-import.component";
 
 @Component({
   selector: "app-library",
@@ -35,7 +34,6 @@ import { SpotifyImportComponent } from "./components/spotify-import/spotify-impo
     FontAwesomeModule,
     PageContentComponent,
     SongListComponent,
-    SpotifyImportComponent,
   ],
   templateUrl: "./library.component.html",
   styleUrl: "./library.component.scss",

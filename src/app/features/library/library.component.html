@@ -3,8 +3,8 @@
 } @else {
   <app-page-content>
     <div class="w-full mb-4">
-      <div class="flex flex-wrap items-end justify-between gap-x-3 gap-y-3">
-        <div class="flex flex-col min-w-0">
+      <div class="flex items-end gap-3">
+        <div class="flex flex-col min-w-0 flex-1">
           <span
             class="text-[10px] font-bold text-base-content/50 uppercase tracking-[0.18em]"
             >Your Library</span
@@ -21,22 +21,19 @@
             </span>
           </div>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
-          @if (songCount() > 1) {
-            <button
-              type="button"
-              class="h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation {{
-                selectMode()
-                  ? 'bg-primary text-primary-content'
-                  : 'bg-base-content/10 text-base-content/70'
-              }}"
-              (click)="toggleSelectMode()"
-            >
-              {{ selectMode() ? "Done" : "Select" }}
-            </button>
-          }
-          <app-spotify-import />
-        </div>
+        @if (songCount() > 1) {
+          <button
+            type="button"
+            class="shrink-0 ml-auto h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation {{
+              selectMode()
+                ? 'bg-primary text-primary-content'
+                : 'bg-base-content/10 text-base-content/70'
+            }}"
+            (click)="toggleSelectMode()"
+          >
+            {{ selectMode() ? "Done" : "Select" }}
+          </button>
+        }
       </div>
 
       @if (selectMode() && selectedCount() > 0) {
