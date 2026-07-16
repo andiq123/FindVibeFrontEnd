@@ -46,6 +46,7 @@ import { TimeFormatPipe } from "../../../shared/pipes/time-format.pipe";
 import { upgradeToHttps } from "../../../core/utils/utils";
 import { OfflineStorageService } from "../../library/services/offline-storage.service";
 import { LibraryService } from "../../library/services/library.service";
+import { HapticsService } from "../../../core/services/haptics.service";
 import { environment } from "../../../../environments/environment";
 
 const OPEN_ANIM_MS = 500;
@@ -71,6 +72,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly settingsService = inject(SettingsService);
   private offlineStorage = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
+  private readonly haptics = inject(HapticsService);
   readonly playlistService = inject(PlaylistService);
   readonly radioService = inject(RadioService);
   private http = inject(HttpClient);
@@ -256,6 +258,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }, CLOSE_ANIM_MS);
   }
   async togglePlay() {
+    this.haptics.light();
     if (this.status() === PlayerStatus.Playing) {
       this.playerService.pause();
     } else {
@@ -278,15 +281,19 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isDraggingTime.set(false);
   }
   async next() {
+    this.haptics.light();
     await this.playerService.setNextSong();
   }
   async previous() {
+    this.haptics.light();
     await this.playerService.setPreviousSong();
   }
   toggleRepeat() {
+    this.haptics.selection();
     this.playerService.toggleRepeat();
   }
   toggleShuffle() {
+    this.haptics.selection();
     this.playerService.toggleShuffle();
   }
   repeatLabel(): string {
@@ -458,6 +465,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private flashRadioConfirm(): void {
     if (this.radioConfirmId != null) clearTimeout(this.radioConfirmId);
+    this.haptics.success();
     this.radioConfirm.set(true);
     this.radioConfirmId = setTimeout(() => {
       this.radioConfirmId = null;
@@ -466,6 +474,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async playUpcoming(song: Song) {
+    this.haptics.light();
     await this.playerService.setSong(song);
   }
 

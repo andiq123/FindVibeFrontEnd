@@ -18,6 +18,7 @@ import { DragAndDropDirective } from "../../features/search/directives/drag-and-
 import { PlayerService } from "../../core/services/player.service";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
+import { HapticsService } from "../../core/services/haptics.service";
 import { faCloudArrowDown, faTriangleExclamation } from "../icons";
 @Component({
   selector: "app-song",
@@ -39,6 +40,7 @@ export class SongComponent implements OnDestroy {
   private playlistService = inject(PlaylistService);
   private offlineStorageService = inject(OfflineStorageService);
   private settingsService = inject(SettingsService);
+  private haptics = inject(HapticsService);
   song = input.required<Song>();
   allowReorder = input<boolean>(false);
   loading = input<boolean>(false);
@@ -73,6 +75,7 @@ export class SongComponent implements OnDestroy {
   }
   async playOrPause() {
     if (this.isUnavailable()) return;
+    this.haptics.light();
     // Playing → pause. Error/Ended/Paused/Stopped → play (Error hard-retries).
     if (this.status() === PlayerStatus.Playing) {
       await this.pause();

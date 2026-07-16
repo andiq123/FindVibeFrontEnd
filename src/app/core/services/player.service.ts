@@ -15,6 +15,7 @@ import { SettingsService } from "./settings.service";
 import { PlaylistService } from "./playlist.service";
 import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
 import { AudioService } from "./audio.service";
+import { HapticsService } from "./haptics.service";
 import { upgradeToHttps } from "../utils/utils";
 
 /** Cap consecutive dead tracks so a broken queue can't spin forever. */
@@ -28,6 +29,7 @@ export class PlayerService implements OnDestroy {
   private readonly playlistService = inject(PlaylistService);
   private readonly offlineStorageService = inject(OfflineStorageService);
   private readonly audioService = inject(AudioService);
+  private readonly haptics = inject(HapticsService);
   private currentObjectUrl: string | null = null;
   private handlingSongEnded = false;
   private handlingSongError = false;
@@ -58,6 +60,7 @@ export class PlayerService implements OnDestroy {
           this.playError.set("");
           this.allowErrorSkip = false;
           this.consecutiveErrorSkips = 0;
+          this.haptics.clearWarn();
         });
         return;
       }
@@ -71,6 +74,10 @@ export class PlayerService implements OnDestroy {
             this.handleSongError().finally(() => {
               this.handlingSongError = false;
             });
+          } else if (!this.allowErrorSkip && !this.handlingSongError) {
+            // User-picked / exhausted skip — soft warn once, never on each auto-skip.
+            const key = this.playlistService.currentSong()?.link ?? "";
+            this.haptics.warnOnce(key);
           }
         });
       }

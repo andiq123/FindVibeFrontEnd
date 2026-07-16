@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, inject } from "@angular/core";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import {
   faCompass,
@@ -7,6 +7,7 @@ import {
   faGear,
 } from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
+import { HapticsService } from "../../core/services/haptics.service";
 @Component({
   selector: "app-navigation",
   standalone: true,
@@ -15,6 +16,12 @@ import { RouterLink, RouterLinkActive } from "@angular/router";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavigationComponent {
+  private readonly haptics = inject(HapticsService);
+
+  onNavTap(): void {
+    this.haptics.selection();
+  }
+
   readonly navList = [
     {
       name: "Explore",

@@ -16,6 +16,7 @@ import { faCheck, faXmark } from "../../shared/icons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
+import { HapticsService } from "../../core/services/haptics.service";
 import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
 import { SongListComponent } from "../../shared/components/song-list/song-list.component";
 import { Song } from "../../core/models/song.model";
@@ -39,6 +40,7 @@ export class LibraryComponent {
   private userService = inject(UserService);
   private playlistService = inject(PlaylistService);
   private settingsService = inject(SettingsService);
+  private haptics = inject(HapticsService);
   private destroyRef = inject(DestroyRef);
 
   songs = computed(() => this.libraryService.songs());
@@ -70,6 +72,7 @@ export class LibraryComponent {
     }
     this.libraryService.changePlaces(data.from, data.to);
     this.hasReordered.set(true);
+    this.haptics.selection();
   }
 
   saveReorders() {
@@ -83,6 +86,7 @@ export class LibraryComponent {
       )
       .subscribe({
         next: () => {
+          this.haptics.success();
           this.hasReordered.set(false);
           this.reorderSnapshot = null;
         },
@@ -91,6 +95,7 @@ export class LibraryComponent {
 
   cancelReorders() {
     if (this.loadingReorder()) return;
+    this.haptics.selection();
     if (this.reorderSnapshot) {
       this.libraryService.replaceSongs(this.reorderSnapshot);
     }
