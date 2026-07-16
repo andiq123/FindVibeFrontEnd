@@ -70,7 +70,7 @@ export class SearchBarComponent implements OnDestroy {
       const lastQuery = untracked(() => this.searchService.lastQuery());
       const searchStatus = untracked(() => this.searchService.status());
       if (q !== lastQuery || searchStatus === SearchStatus.None) {
-        this.submitSearchSongs(1);
+        this.submitSearchSongs();
       }
       this.dismissSuggestions();
     });
@@ -150,9 +150,9 @@ export class SearchBarComponent implements OnDestroy {
     this.searchService.resetSuggestions();
   }
 
-  private submitSearchSongs(page = 1): void {
+  private submitSearchSongs(): void {
     this.searchService
-      .searchSongs(this.searchTerm(), page)
+      .searchSongs(this.searchTerm())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }

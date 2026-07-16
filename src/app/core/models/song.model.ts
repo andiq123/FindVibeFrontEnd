@@ -18,16 +18,8 @@ export function sourceHost(provider?: string): string {
       return provider ?? "";
   }
 }
-export interface PaginationInfo {
-  currentPage: number;
-  totalResults: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-  totalPages: number;
-}
 export interface SearchResponse {
   songs: Song[];
-  pagination: PaginationInfo | null;
 }
 export enum SearchStatus {
   None,
