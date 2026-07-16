@@ -39,6 +39,11 @@ export class ExplorePageComponent implements OnInit {
     void this.player.playFromList(section.songs, song);
   }
 
+  /** Because title seed — play that track alone. */
+  playSeed(song: Song): void {
+    void this.player.playFromList([song], song);
+  }
+
   cover(song: Song): string {
     return song.image?.trim() || "no_album_art.jpg";
   }

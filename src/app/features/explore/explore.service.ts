@@ -23,6 +23,8 @@ export type ExploreSection = {
   subtitle: string;
   /** Already Fiber-resolved search songs (same Song as /search). */
   songs: Song[];
+  /** Because shelf: seed track shown in the title (click to play). */
+  seedSong?: Song;
 };
 
 export type ExploreResponse = {
@@ -37,6 +39,7 @@ type BecauseCache = {
   title: string;
   subtitle: string;
   songs: Song[];
+  seedSong?: Song;
 };
 
 type ChartsCache = {
@@ -282,6 +285,7 @@ export class ExploreService {
         title: `Because you liked ${seed.title}`,
         subtitle: seed.artist,
         songs,
+        seedSong: seed,
       };
       this.becauseSeed = key;
       this.storage.setItem(BECAUSE_KEY, {
@@ -290,6 +294,7 @@ export class ExploreService {
         title: this.because.title,
         subtitle: this.because.subtitle,
         songs,
+        seedSong: seed,
       } satisfies BecauseCache);
       this.sections.set(this.merge(this.charts));
     } catch {
@@ -317,7 +322,18 @@ export class ExploreService {
       title: c.title,
       subtitle: c.subtitle,
       songs: c.songs,
+      seedSong: c.seedSong ?? this.songFromSeedKey(seedKey),
     };
+  }
+
+  private songFromSeedKey(key: string): Song | undefined {
+    for (const s of this.library.songs()) {
+      if (this.seedKeyOf(s) === key) return s;
+    }
+    for (const s of this.storage.recentSongs()) {
+      if (this.seedKeyOf(s) === key) return s;
+    }
+    return undefined;
   }
 }
 

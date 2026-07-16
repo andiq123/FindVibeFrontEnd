@@ -64,7 +64,21 @@
         >
           <div class="explore-shelf-head">
             <p class="explore-kicker">{{ section.subtitle }}</p>
-            <h2 class="explore-title">{{ section.title }}</h2>
+            <h2 class="explore-title">
+              @if (section.seedSong; as seed) {
+                Because you liked
+                <button
+                  type="button"
+                  class="explore-title-seed"
+                  (click)="playSeed(seed)"
+                  [attr.aria-label]="'Play ' + seed.title + ' by ' + seed.artist"
+                >
+                  {{ seed.title }}
+                </button>
+              } @else {
+                {{ section.title }}
+              }
+            </h2>
           </div>
           <div class="explore-rail-wrap">
             <div class="explore-rail" role="list">

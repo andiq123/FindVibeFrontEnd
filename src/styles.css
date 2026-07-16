@@ -1343,6 +1343,34 @@ body {
   line-height: 1.2;
   color: var(--color-base-content);
 }
+.explore-title-seed {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  color: var(--color-primary);
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1.5px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.explore-title-seed:active {
+  opacity: 0.75;
+}
+@media (hover: hover) {
+  .explore-title-seed:hover {
+    text-decoration-color: var(--color-primary);
+  }
+}
 @media (min-width: 640px) {
   .explore-title {
     font-size: 1.2rem;
