@@ -19,7 +19,6 @@
   }
 }
 
-/* Play region only — action taps must not look/feel like "play row". */
 .song-play {
   transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   &:hover {
@@ -30,16 +29,21 @@
   }
   @media (max-width: 768px) {
     transition: transform 0.1s ease;
-    &:hover { transform: none; }
-    &:active { transform: scale(0.97); }
+    &:hover {
+      transform: none;
+    }
+    &:active {
+      transform: scale(0.97);
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     transition: none !important;
-    &:active { transform: none !important; }
+    &:active {
+      transform: none !important;
+    }
   }
 }
 
-/* 44×44 min hit target; icon stays visually light. */
 .song-action-btn {
   display: flex;
   align-items: center;
@@ -50,7 +54,9 @@
   color: color-mix(in oklab, var(--color-base-content) 35%, transparent);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
   &:active {
     color: var(--color-primary);
     background: color-mix(in oklab, var(--color-primary) 12%, transparent);
@@ -61,18 +67,25 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.album-art {
-  &.loading { background: color-mix(in oklab, var(--color-base-content) 5%, transparent); }
+.album-art.loading {
+  background: color-mix(in oklab, var(--color-base-content) 5%, transparent);
 }
 
 @keyframes pulse-opacity {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .skeleton-song {
   pointer-events: none;
-  .skeleton-image, .skeleton-title, .skeleton-artist {
+  .skeleton-image,
+  .skeleton-title,
+  .skeleton-artist {
     animation: pulse-opacity 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
@@ -98,9 +111,16 @@
     background: var(--color-primary);
     border-radius: 0 4px 4px 0;
   }
-  app-moving-title :first-child { color: var(--color-primary); font-weight: 600; }
-  &:hover { background: color-mix(in oklab, var(--color-primary) 14%, var(--color-base-200)); }
-  .song-play:active { transform: scale(0.99); }
+  app-moving-title :first-child {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  &:hover {
+    background: color-mix(in oklab, var(--color-primary) 14%, var(--color-base-200));
+  }
+  .song-play:active {
+    transform: scale(0.99);
+  }
 }
 
 .song-active [class*="text-accent/70"] {

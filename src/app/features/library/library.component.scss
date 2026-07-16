@@ -1,17 +1,16 @@
-/* Extra list clearance when confirm bar shares the screen with mini player */
 .vault-list--bar {
   padding-bottom: 4.5rem;
 }
 
 .vault-reorder-bar {
+  --vault-bar-bottom: calc(max(0.5rem, var(--safe-bottom)) + 3.6rem);
   position: fixed;
   z-index: calc(var(--z-mini-player) + 1);
   left: 50%;
+  bottom: var(--vault-bar-bottom);
   transform: translateX(-50%);
   width: calc(100% - 1.25rem);
   max-width: 600px;
-  /* Same slot as mini-player when no track is playing */
-  bottom: calc(max(0.5rem, var(--safe-bottom)) + 3.6rem);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -23,13 +22,13 @@
   backdrop-filter: blur(var(--glass-blur-medium));
   -webkit-backdrop-filter: blur(var(--glass-blur-medium));
   box-shadow: 0 10px 28px color-mix(in oklab, #000 22%, transparent);
-  animation: vault-reorder-in 240ms var(--anim-ease-ios, cubic-bezier(0.32, 0.72, 0, 1)) both;
+  animation: vault-reorder-in 240ms var(--anim-ease-ios, cubic-bezier(0.32, 0.72, 0, 1))
+    both;
   pointer-events: auto;
 }
 
 .vault-reorder-bar--above-mini {
-  /* Mini height (~4.5rem) + gap */
-  bottom: calc(max(0.5rem, var(--safe-bottom)) + 3.6rem + 5.1rem);
+  --vault-bar-bottom: calc(max(0.5rem, var(--safe-bottom)) + 3.6rem + 5.1rem);
 }
 
 .vault-reorder-bar__label {
@@ -79,12 +78,6 @@
   background: color-mix(in oklab, var(--color-base-200) 70%, transparent);
   color: color-mix(in oklab, var(--color-base-content) 72%, transparent);
   border: 1px solid color-mix(in oklab, var(--color-base-content) 10%, transparent);
-  @media (hover: hover) {
-    &:hover:not(:disabled) {
-      background: var(--color-base-200);
-      color: var(--color-base-content);
-    }
-  }
 }
 
 .vault-reorder-bar__btn--primary {
@@ -92,11 +85,6 @@
   color: var(--color-primary-content);
   border: 1px solid transparent;
   min-width: 5.5rem;
-  @media (hover: hover) {
-    &:hover:not(:disabled) {
-      background: color-mix(in oklab, var(--color-primary) 90%, #000);
-    }
-  }
 }
 
 @keyframes vault-reorder-in {
@@ -118,22 +106,22 @@
     max-width: 520px;
     margin-inline: auto;
     transform: none;
-    bottom: 1.5rem;
+    --vault-bar-bottom: 1.5rem;
+    animation-name: vault-reorder-in-desk;
   }
-
   .vault-reorder-bar--above-mini {
-    bottom: calc(1.5rem + 5.1rem);
+    --vault-bar-bottom: calc(1.5rem + 5.1rem);
   }
+}
 
-  @keyframes vault-reorder-in {
-    from {
-      opacity: 0;
-      transform: translateY(10px) scale(0.98);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+@keyframes vault-reorder-in-desk {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -158,5 +146,15 @@
   }
   .vault-reorder-bar__btn:active:not(:disabled) {
     transform: none;
+  }
+}
+
+@media (hover: hover) {
+  .vault-reorder-bar__btn--ghost:hover:not(:disabled) {
+    background: var(--color-base-200);
+    color: var(--color-base-content);
+  }
+  .vault-reorder-bar__btn--primary:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--color-primary) 90%, #000);
   }
 }
