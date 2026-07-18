@@ -10,13 +10,9 @@ import {
   faClockRotateLeft,
   faCloudArrowDown,
   faCompass,
-  faExclamationCircle,
-  faExclamationTriangle,
-  faForward,
   faGear,
   faGripVertical,
   faHeart,
-  faInfoCircle,
   faLink,
   faListUl,
   faMagnifyingGlass,
@@ -28,7 +24,6 @@ import {
   faShuffle,
   faStepBackward,
   faStepForward,
-  faTimes,
   faTrash,
   faTriangleExclamation,
   faWaveSquare,
@@ -37,6 +32,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faHeart as faHeartRegular } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as faHeartSolid } from "@fortawesome/free-solid-svg-icons";
+
 export {
   IconDefinition,
   faArrowDown,
@@ -50,13 +46,9 @@ export {
   faClockRotateLeft,
   faCloudArrowDown,
   faCompass,
-  faExclamationCircle,
-  faExclamationTriangle,
-  faForward,
   faGear,
   faGripVertical,
   faHeart,
-  faInfoCircle,
   faLink,
   faListUl,
   faMagnifyingGlass,
@@ -68,7 +60,6 @@ export {
   faShuffle,
   faStepBackward,
   faStepForward,
-  faTimes,
   faTrash,
   faTriangleExclamation,
   faWaveSquare,

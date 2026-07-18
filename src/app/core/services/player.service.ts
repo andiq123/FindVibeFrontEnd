@@ -15,6 +15,7 @@ import { SettingsService } from "./settings.service";
 import { PlaylistService } from "./playlist.service";
 import { OfflineStorageService } from "../../features/library/services/offline-storage.service";
 import { AudioService } from "./audio.service";
+import { RadioService } from "./radio.service";
 import { ToastService } from "./toast.service";
 import { StorageService } from "./storage.service";
 import { upgradeToHttps } from "../utils/utils";
@@ -31,6 +32,7 @@ export class PlayerService implements OnDestroy {
   private readonly playlistService = inject(PlaylistService);
   private readonly offlineStorageService = inject(OfflineStorageService);
   private readonly audioService = inject(AudioService);
+  private readonly radioService = inject(RadioService);
   private readonly toast = inject(ToastService);
   private readonly storage = inject(StorageService);
   private currentObjectUrl: string | null = null;
@@ -142,7 +144,12 @@ export class PlayerService implements OnDestroy {
       await this.replayCurrentSong();
       return;
     }
-    const nextSong = this.playlistService.next();
+    let nextSong = this.playlistService.next();
+    if (!nextSong && this.playlistService.radioActive()) {
+      // Queue drained while /recommend was still in flight — wait, don't hard-stop.
+      const gotMore = await this.radioService.ensureMoreTracks();
+      if (gotMore) nextSong = this.playlistService.next();
+    }
     if (nextSong) {
       await this.setSong(nextSong, { fromQueue: true });
     } else if (mode === RepeatMode.ALL) {
@@ -211,7 +218,8 @@ export class PlayerService implements OnDestroy {
   ): Promise<number> {
     const gen = ++this.loadGen;
     this.cleanupObjectUrl();
-    this.handlingSongEnded = false;
+    // Don't clear handlingSongEnded here — effect finally owns it; clearing
+    // mid-flight re-enters Ended→next and skips tracks.
     this.playError.set("");
     this.allowErrorSkip = opts.fromQueue;
     this.playlistService.setCurrentSong(song);
@@ -313,7 +321,11 @@ export class PlayerService implements OnDestroy {
     return undefined;
   }
   async setNextSong(): Promise<Song | undefined> {
-    const nextSong = this.playlistService.next();
+    let nextSong = this.playlistService.next();
+    if (!nextSong && this.playlistService.radioActive()) {
+      const gotMore = await this.radioService.ensureMoreTracks();
+      if (gotMore) nextSong = this.playlistService.next();
+    }
     if (nextSong) {
       await this.setSong(nextSong, { fromQueue: true });
       return nextSong;
@@ -382,6 +394,10 @@ export class PlayerService implements OnDestroy {
     }
     // Foreground again — poke Fiber (Render sleep) + re-arm wake lock / preload.
     this.settingsService.nudgeWake();
+    // Resume auto-next that the browser blocked while backgrounded.
+    if (this.audioService.hasPlayBlocked()) {
+      void this.audioService.play();
+    }
     if (this.status() === PlayerStatus.Playing) {
       void this.requestWakeLock();
       this.warmNextTrack();

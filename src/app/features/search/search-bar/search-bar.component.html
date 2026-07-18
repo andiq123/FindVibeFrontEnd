@@ -13,7 +13,7 @@
     <input
       #searchInput
       type="search"
-      placeholder="Artists, songs, lyrics"
+      placeholder="Artists or songs"
       name="searchTerm"
       class="w-full h-12 text-[17px] leading-[22px] -tracking-[0.41px] text-base-content pr-11 pl-12 rounded-[1.25rem] border outline-none ring-0 transition-[border-color,background-color,box-shadow] duration-200 ease-out touch-manipulation bg-base-200/80 border-base-content/10"
       [class.border-primary]="isFocused()"
@@ -26,7 +26,7 @@
       autocorrect="off"
       autocapitalize="off"
       spellcheck="false"
-      aria-label="Search for artists, songs, or lyrics"
+      aria-label="Search for artists or songs"
       [attr.aria-expanded]="showSuggestions()"
       [attr.aria-controls]="showSuggestions() ? 'search-suggestions' : null"
       aria-autocomplete="list"

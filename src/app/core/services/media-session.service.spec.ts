@@ -3,6 +3,7 @@ import {
   mediaPlaybackState,
   tabTitle,
 } from "./media-session.service";
+import { playbackBusy } from "./app-update.service";
 import { PlayerStatus } from "../../features/player/models/player.model";
 
 describe("mediaArtworkSrc", () => {
@@ -27,6 +28,16 @@ describe("mediaPlaybackState", () => {
     expect(mediaPlaybackState(PlayerStatus.Stopped)).toBe("none");
     expect(mediaPlaybackState(PlayerStatus.Error)).toBe("none");
     expect(mediaPlaybackState(PlayerStatus.Error, true)).toBe("paused");
+  });
+});
+
+describe("playbackBusy", () => {
+  it("keeps SW update from reloading across track gaps", () => {
+    expect(playbackBusy(PlayerStatus.Playing)).toBe(true);
+    expect(playbackBusy(PlayerStatus.Loading)).toBe(true);
+    expect(playbackBusy(PlayerStatus.Ended)).toBe(true);
+    expect(playbackBusy(PlayerStatus.Paused)).toBe(false);
+    expect(playbackBusy(PlayerStatus.Stopped)).toBe(false);
   });
 });
 

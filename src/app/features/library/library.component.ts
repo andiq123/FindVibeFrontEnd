@@ -17,7 +17,6 @@ import {
   faArrowUp,
   faCheck,
   faWaveSquare,
-  faXmark,
 } from "../../shared/icons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PlaylistService } from "../../core/services/playlist.service";
@@ -55,10 +54,10 @@ export class LibraryComponent {
   private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
+  /** Select + drag reorder — one organize mode. */
+  editMode = signal(false);
   hasReordered = signal(false);
-  selectMode = signal(false);
   selectedIds = signal<ReadonlySet<string>>(new Set());
-  /** Vault order as stored (newest / Spotify block on top). */
   songs = this.libraryService.songs;
   songCount = computed(() => this.songs().length);
   selectedCount = computed(() => this.selectedIds().size);
@@ -66,7 +65,6 @@ export class LibraryComponent {
   username = computed(() => this.userService.user()?.username || "");
   loadingSongs = this.libraryService.loadingSongs;
   loadingReorder = signal(false);
-  /** Mini player visible → bar sits above it; else occupies the mini slot. */
   aboveMini = computed(
     () =>
       !!this.playlistService.currentSong() &&
@@ -74,22 +72,20 @@ export class LibraryComponent {
   );
 
   faCheck = faCheck;
-  faXmark = faXmark;
   faArrowUp = faArrowUp;
   faArrowDown = faArrowDown;
   faWaveSquare = faWaveSquare;
   radioLoading = this.radioService.loading;
 
-  /** Snapshot before first drag/bulk move — instant Discard, no refetch. */
+  /** Snapshot before first drag/bulk move — Cancel restores this. */
   private reorderSnapshot: Song[] | null = null;
 
   onChangePlaylist() {
     this.playlistService.setCurrentPlaylist(this.songs());
   }
 
-  /** Smart vault radio — liked seed, discover tracks not already in the vault. */
   async startVaultRadio(): Promise<void> {
-    if (this.radioLoading() || this.selectMode()) return;
+    if (this.radioLoading() || this.editMode()) return;
     const seed = await this.radioService.startFromVault(
       this.songs(),
       this.storage.listenStats(),
@@ -102,13 +98,13 @@ export class LibraryComponent {
     await this.playerService.setSong(seed, { fromQueue: true });
   }
 
-  toggleSelectMode() {
-    if (this.selectMode()) {
-      this.selectMode.set(false);
-      this.selectedIds.set(new Set());
+  toggleEditMode() {
+    if (this.loadingReorder()) return;
+    if (this.editMode()) {
+      this.discardEdits();
       return;
     }
-    this.selectMode.set(true);
+    this.editMode.set(true);
   }
 
   toggleSongSelect(id: string) {
@@ -118,16 +114,11 @@ export class LibraryComponent {
     this.selectedIds.set(next);
   }
 
-  clearSelection() {
-    this.selectedIds.set(new Set());
-  }
-
   moveSelected(dest: "top" | "bottom" | "up" | "down") {
     const ids = [...this.selectedIds()];
     if (!ids.length) return;
     this.markReordered();
     if (!this.libraryService.moveSelected(ids, dest)) {
-      // No-op at edge — drop dirty flag if nothing else changed.
       if (this.reorderSnapshot) {
         const same = this.songs().every(
           (s, i) => s.id === this.reorderSnapshot![i]?.id,
@@ -145,8 +136,9 @@ export class LibraryComponent {
     this.libraryService.changePlaces(data.from, data.to);
   }
 
-  saveReorders() {
-    if (this.loadingReorder()) return;
+  /** Single confirm — persist order and leave edit mode. */
+  saveEdits() {
+    if (this.loadingReorder() || !this.hasReordered()) return;
     this.loadingReorder.set(true);
     this.libraryService
       .saveReorders()
@@ -158,18 +150,21 @@ export class LibraryComponent {
         next: () => {
           this.hasReordered.set(false);
           this.reorderSnapshot = null;
+          this.selectedIds.set(new Set());
+          this.editMode.set(false);
         },
       });
   }
 
-  cancelReorders() {
-    if (this.loadingReorder()) return;
+  /** Cancel exits edit mode and restores order. */
+  private discardEdits() {
     if (this.reorderSnapshot) {
       this.libraryService.replaceSongs(this.reorderSnapshot);
     }
     this.hasReordered.set(false);
     this.reorderSnapshot = null;
     this.selectedIds.set(new Set());
+    this.editMode.set(false);
   }
 
   private markReordered() {

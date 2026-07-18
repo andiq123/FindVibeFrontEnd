@@ -22,12 +22,12 @@
           </div>
         </div>
         <div class="shrink-0 ml-auto flex items-center gap-2">
-          @if (songCount() >= 1) {
+          @if (songCount() >= 1 && !editMode()) {
             <button
               type="button"
               class="h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation inline-flex items-center gap-1.5 bg-primary/15 text-primary disabled:opacity-45"
               (click)="startVaultRadio()"
-              [disabled]="radioLoading() || selectMode()"
+              [disabled]="radioLoading()"
               aria-label="Start radio from your vault"
             >
               @if (radioLoading()) {
@@ -42,37 +42,43 @@
             <button
               type="button"
               class="h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation {{
-                selectMode()
-                  ? 'bg-primary text-primary-content'
-                  : 'bg-base-content/10 text-base-content/70'
+                editMode()
+                  ? 'bg-base-content/10 text-base-content/70'
+                  : 'bg-primary/15 text-primary'
               }}"
-              (click)="toggleSelectMode()"
+              (click)="toggleEditMode()"
+              [disabled]="loadingReorder()"
             >
-              {{ selectMode() ? "Done" : "Select" }}
+              {{ editMode() ? "Cancel" : "Edit" }}
             </button>
           }
         </div>
       </div>
 
-      @if (selectMode() && selectedCount() > 0) {
+      @if (editMode() && selectedCount() > 0) {
         <div
-          class="mt-3 flex flex-wrap items-center gap-2 text-xs"
+          class="vault-bulk-toolbar mt-3 flex flex-wrap items-center gap-2 text-xs"
           role="toolbar"
           [attr.aria-label]="selectedCount() + ' songs selected'"
         >
-          <span class="font-semibold tabular-nums text-base-content/55 mr-1">
+          <span
+            class="vault-bulk-item font-semibold tabular-nums text-base-content/55 mr-1"
+            style="--i: 0"
+          >
             {{ selectedCount() }} selected
           </span>
           <button
             type="button"
-            class="h-8 px-2.5 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary"
+            class="vault-bulk-item h-8 px-2.5 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary"
+            style="--i: 1"
             (click)="moveSelected('top')"
           >
             Top
           </button>
           <button
             type="button"
-            class="h-8 w-8 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center justify-center"
+            class="vault-bulk-item h-8 w-8 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center justify-center"
+            style="--i: 2"
             (click)="moveSelected('up')"
             aria-label="Move up"
           >
@@ -80,7 +86,8 @@
           </button>
           <button
             type="button"
-            class="h-8 w-8 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center justify-center"
+            class="vault-bulk-item h-8 w-8 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary inline-flex items-center justify-center"
+            style="--i: 3"
             (click)="moveSelected('down')"
             aria-label="Move down"
           >
@@ -88,65 +95,53 @@
           </button>
           <button
             type="button"
-            class="h-8 px-2.5 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary"
+            class="vault-bulk-item h-8 px-2.5 rounded-lg font-semibold bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary"
+            style="--i: 4"
             (click)="moveSelected('bottom')"
           >
             Bottom
-          </button>
-          <button
-            type="button"
-            class="h-8 px-2.5 rounded-lg font-semibold text-base-content/45 active:text-base-content/70"
-            (click)="clearSelection()"
-          >
-            Clear
           </button>
         </div>
       }
     </div>
 
-    <div class="relative" [class.vault-list--bar]="hasReordered()">
-      <div class="premium-card">
-        <app-song-list
-          [songs]="songs()"
-          [isLoading]="loadingSongs()"
-          [allowReorder]="!selectMode()"
-          [selectMode]="selectMode()"
-          [selectedIds]="selectedIds()"
-          [chunkSize]="24"
-          emptyStateTitle="No vibes yet"
-          emptyStateDescription="When you add songs to your library, they'll show up here."
-          (reorder)="reorderSongs($event)"
-          (playlistChange)="onChangePlaylist()"
-          (toggleSelect)="toggleSongSelect($event)"
-        />
-      </div>
+    <div
+      class="vault-songs relative -mx-1"
+      [class.vault-list--bar]="editMode() && hasReordered()"
+    >
+      <app-song-list
+        [songs]="songs()"
+        [isLoading]="loadingSongs()"
+        [selectMode]="editMode()"
+        [radioAction]="true"
+        [selectedIds]="selectedIds()"
+        [chunkSize]="24"
+        emptyStateTitle="No vibes yet"
+        emptyStateDescription="When you add songs to your library, they'll show up here."
+        (reorder)="reorderSongs($event)"
+        (playlistChange)="onChangePlaylist()"
+        (toggleSelect)="toggleSongSelect($event)"
+      />
     </div>
 
-    @if (hasReordered()) {
+    @if (editMode() && hasReordered()) {
       <div
         class="vault-reorder-bar"
         [class.vault-reorder-bar--above-mini]="aboveMini()"
         role="dialog"
-        aria-label="Confirm playlist order"
+        aria-label="Save playlist order"
       >
-        <p class="vault-reorder-bar__label">Keep this order?</p>
+        <p class="vault-reorder-bar__label">
+          {{ selectedCount() ? selectedCount() + " selected · " : "" }}Order
+          changed
+        </p>
         <div class="vault-reorder-bar__actions">
           <button
             type="button"
-            class="vault-reorder-bar__btn vault-reorder-bar__btn--ghost"
-            (click)="cancelReorders()"
-            [disabled]="loadingReorder()"
-            aria-label="Discard reorder"
-          >
-            <fa-icon [icon]="faXmark" />
-            <span>Discard</span>
-          </button>
-          <button
-            type="button"
             class="vault-reorder-bar__btn vault-reorder-bar__btn--primary"
-            (click)="saveReorders()"
+            (click)="saveEdits()"
             [disabled]="loadingReorder()"
-            aria-label="Save reorder"
+            aria-label="Save order"
           >
             @if (loadingReorder()) {
               <span class="loading loading-spinner loading-xs"></span>

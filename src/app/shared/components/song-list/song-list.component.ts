@@ -28,11 +28,11 @@ import { faMusic, IconDefinition } from "../../icons";
           <li class="group/item list-none">
             <app-song
               [song]="song"
-              [allowReorder]="allowReorder()"
               [selectMode]="selectMode()"
               [selected]="selectedIds().has(song.id)"
-              (reorder)="emitReorder($event)"
-              (playlistChange)="emitPlaylistChange()"
+              [radioAction]="radioAction()"
+              (reorder)="reorder.emit($event)"
+              (playlistChange)="playlistChange.emit()"
               (toggleSelect)="toggleSelect.emit($event)"
             />
           </li>
@@ -67,8 +67,9 @@ import { faMusic, IconDefinition } from "../../icons";
 export class SongListComponent implements OnDestroy {
   songs = input.required<Song[]>();
   isLoading = input(false);
-  allowReorder = input(false);
   selectMode = input(false);
+  /** Vault rows: radio mini-button instead of add-to-queue. */
+  radioAction = input(false);
   selectedIds = input<ReadonlySet<string>>(new Set());
   /** 0 = render all. Vault passes e.g. 24 and grows on scroll. */
   chunkSize = input(0);
@@ -119,13 +120,6 @@ export class SongListComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.teardownObserver();
-  }
-
-  emitReorder(event: { from: string; to: string }) {
-    this.reorder.emit(event);
-  }
-  emitPlaylistChange() {
-    this.playlistChange.emit();
   }
 
   private revealMore() {

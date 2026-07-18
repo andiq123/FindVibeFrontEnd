@@ -22,14 +22,12 @@
   font-weight: 700;
   letter-spacing: -0.01em;
   box-shadow: none;
-  transition: filter 0.15s ease, transform 0.15s ease;
+  transition:
+    filter 0.15s ease,
+    scale var(--press-duration, 0.18s) var(--press-ease, cubic-bezier(0.32, 0.72, 0, 1));
 
   &:hover:not(:disabled) {
     filter: brightness(1.06);
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.97);
   }
 
   &:disabled {

@@ -1,12 +1,18 @@
 .mini-player-container {
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.15s ease, border-color 0.2s ease;
+  transition:
+    transform 0.15s cubic-bezier(0.32, 0.72, 0, 1),
+    scale var(--press-duration, 0.18s) var(--press-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    box-shadow 0.15s ease,
+    border-color 0.2s ease;
 
-  &:active { transform: translate(-50%, 0) scale(0.98); }
+  &:active {
+    scale: var(--press-scale, 0.96);
+    transition-duration: var(--press-duration-in, 0.1s);
+  }
 
   @media (max-width: 768px) {
     will-change: auto;
-    transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.15s ease;
   }
 
   @media (min-width: 1024px) {
@@ -19,13 +25,14 @@
     margin-right: auto;
     transform: none !important;
     bottom: 1.5rem !important;
-    &:active { transform: scale(0.98) !important; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     transition: none !important;
     will-change: auto !important;
-    &:active { transform: none !important; }
+    &:active {
+      scale: 1;
+    }
   }
 }
 
@@ -81,6 +88,7 @@
 }
 
 .btn {
-  transition: color 0.2s ease, transform 0.15s ease;
-  &:active { transform: scale(0.95); }
+  transition:
+    color 0.2s ease,
+    scale var(--press-duration, 0.18s) var(--press-ease, cubic-bezier(0.32, 0.72, 0, 1));
 }

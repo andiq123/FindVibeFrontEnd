@@ -171,6 +171,33 @@ export class RadioService {
     return s;
   }
 
+  /**
+   * End-of-queue while radio is on: wait for in-flight extend or kick one
+   * so background playback doesn't hard-pause while /recommend is mid-flight.
+   */
+  async ensureMoreTracks(timeoutMs = 20_000): Promise<boolean> {
+    if (!this.playlist.radioActive()) return false;
+    if (this.playlist.remaining() > 0) return true;
+
+    const deadline = Date.now() + timeoutMs;
+    while (this.extending && Date.now() < deadline) {
+      await sleep(150);
+      if (this.playlist.remaining() > 0) return true;
+    }
+    if (this.playlist.remaining() > 0) return true;
+
+    // Fresh attempts — clear key so extend isn't skipped as a duplicate.
+    this.lastExtendKey = "";
+    await this.extend();
+    if (this.playlist.remaining() > 0) return true;
+
+    if (Date.now() < deadline) {
+      this.lastExtendKey = "";
+      await this.extend();
+    }
+    return this.playlist.remaining() > 0;
+  }
+
   private async extend(): Promise<void> {
     if (!this.playlist.radioActive() || this.extending) return;
     const seed = this.pickExtendSeed();
@@ -249,4 +276,8 @@ function apiError(e: unknown): string {
   };
   if (err?.status === 0) return "Can't reach the server";
   return err?.error?.error || "Couldn't start radio — try another track";
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }

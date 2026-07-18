@@ -1,4 +1,10 @@
-import { Injectable, inject, signal, effect } from "@angular/core";
+import {
+  Injectable,
+  OnDestroy,
+  inject,
+  signal,
+  effect,
+} from "@angular/core";
 import { SwUpdate, VersionReadyEvent } from "@angular/service-worker";
 import {
   filter,
@@ -13,11 +19,21 @@ import { PlayerService } from "./player.service";
 import { PlayerStatus } from "../../features/player/models/player.model";
 
 const UPDATE_COUNTDOWN_SECONDS = 3;
+/** Ignore brief Paused blips during cold track changes before reloading. */
+const IDLE_SETTLE_MS = 2500;
+
+export function playbackBusy(status: PlayerStatus): boolean {
+  return (
+    status === PlayerStatus.Playing ||
+    status === PlayerStatus.Loading ||
+    status === PlayerStatus.Ended
+  );
+}
 
 @Injectable({
   providedIn: "root",
 })
-export class AppUpdateService {
+export class AppUpdateService implements OnDestroy {
   private readonly swUpdate = inject(SwUpdate);
   private readonly player = inject(PlayerService);
   readonly newUpdateAvailable = signal(false);
@@ -27,6 +43,8 @@ export class AppUpdateService {
   private versionUpdatesSubscription: Subscription | null = null;
   /** Reload deferred until playback stops — don't kill background audio. */
   private pendingApply = false;
+  private settleTimer: ReturnType<typeof setTimeout> | null = null;
+  private visibilityHandler = () => this.onVisibility();
 
   constructor() {
     effect((onCleanup) => {
@@ -68,20 +86,20 @@ export class AppUpdateService {
       });
     });
 
-    // If we deferred for playback, apply once the queue is idle.
+    // If we deferred for playback, apply once truly idle in the foreground.
     effect(() => {
       if (!this.pendingApply) return;
       const status = this.player.status();
-      if (
-        status === PlayerStatus.Playing ||
-        status === PlayerStatus.Loading ||
-        status === PlayerStatus.Ended
-      ) {
+      if (playbackBusy(status)) {
+        this.clearSettle();
         return;
       }
-      this.pendingApply = false;
-      void this.applyUpdate();
+      this.scheduleIdleApply();
     });
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", this.visibilityHandler);
+    }
   }
 
   private checkForUpdate(): void {
@@ -92,15 +110,59 @@ export class AppUpdateService {
 
   private async applyUpdateWhenIdle(): Promise<void> {
     const status = this.player.status();
+    if (playbackBusy(status)) {
+      this.pendingApply = true;
+      return;
+    }
+    // Visible + settled — apply now. Background pause blips stay deferred.
     if (
-      status === PlayerStatus.Playing ||
-      status === PlayerStatus.Loading ||
-      status === PlayerStatus.Ended
+      typeof document !== "undefined" &&
+      document.visibilityState !== "visible"
     ) {
       this.pendingApply = true;
       return;
     }
     await this.applyUpdate();
+  }
+
+  private scheduleIdleApply(): void {
+    if (
+      typeof document !== "undefined" &&
+      document.visibilityState !== "visible"
+    ) {
+      return;
+    }
+    this.clearSettle();
+    this.settleTimer = setTimeout(() => {
+      this.settleTimer = null;
+      if (!this.pendingApply) return;
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+      if (playbackBusy(this.player.status())) return;
+      this.pendingApply = false;
+      void this.applyUpdate();
+    }, IDLE_SETTLE_MS);
+  }
+
+  private onVisibility(): void {
+    if (!this.pendingApply) return;
+    if (document.visibilityState !== "visible") {
+      this.clearSettle();
+      return;
+    }
+    if (!playbackBusy(this.player.status())) {
+      this.scheduleIdleApply();
+    }
+  }
+
+  private clearSettle(): void {
+    if (this.settleTimer == null) return;
+    clearTimeout(this.settleTimer);
+    this.settleTimer = null;
   }
 
   async applyUpdate(): Promise<void> {
@@ -118,5 +180,12 @@ export class AppUpdateService {
       map((i) => startTimer - i),
       takeWhile((val) => val >= 0),
     );
+  }
+
+  ngOnDestroy(): void {
+    this.clearSettle();
+    if (typeof document !== "undefined") {
+      document.removeEventListener("visibilitychange", this.visibilityHandler);
+    }
   }
 }

@@ -36,6 +36,8 @@ export class AudioService implements OnDestroy {
   private preloadEl?: HTMLAudioElement;
   private abortController?: AbortController;
   private alreadyAddedToRecents = false;
+  /** Background auto-next hit NotAllowedError — retry on foreground / MS play. */
+  private playBlocked = false;
   readonly status = signal<PlayerStatus>(PlayerStatus.Stopped);
   readonly currentTime = signal<number>(0);
   readonly duration = signal<number>(0);
@@ -56,6 +58,7 @@ export class AudioService implements OnDestroy {
       "playing",
       (e) => {
         if (e.target !== this.audio) return;
+        this.playBlocked = false;
         this.status.set(PlayerStatus.Playing);
       },
       { signal },
@@ -65,8 +68,14 @@ export class AudioService implements OnDestroy {
       (e) => {
         if (e.target !== this.audio) return;
         const s = this.status();
-        // Don't clobber Loading / Error — pause is often a no-op after a failed load.
-        if (s === PlayerStatus.Loading || s === PlayerStatus.Error) return;
+        // Src/load() emits pause before loadstart — don't latch car/MS to paused.
+        if (
+          s === PlayerStatus.Loading ||
+          s === PlayerStatus.Error ||
+          s === PlayerStatus.Ended
+        ) {
+          return;
+        }
         this.status.set(PlayerStatus.Paused);
       },
       { signal },
@@ -122,6 +131,8 @@ export class AudioService implements OnDestroy {
     if (!this.audio) this.initialize();
     if (!this.audio) return;
     this.alreadyAddedToRecents = false;
+    // Before src/load() so the abort-pause can't flip status to Paused.
+    if (src) this.status.set(PlayerStatus.Loading);
     this.audio.src = src;
     this.audio.load();
   }
@@ -186,13 +197,19 @@ export class AudioService implements OnDestroy {
     if (!this.audio) return;
     try {
       await this.audio.play();
+      this.playBlocked = false;
     } catch (e) {
       if (e instanceof DOMException) {
         // Interrupted by a newer setSong — ignore.
         if (e.name === "AbortError") return;
-        // Browser blocked autoplay — needs a gesture, not a "broken track".
+        // Background auto-next often blocked — keep Loading so car/MS don't
+        // latch paused; retry on foreground or Media Session play.
         if (e.name === "NotAllowedError") {
-          this.status.set(PlayerStatus.Paused);
+          this.playBlocked = true;
+          const s = this.status();
+          if (s !== PlayerStatus.Loading && s !== PlayerStatus.Ended) {
+            this.status.set(PlayerStatus.Paused);
+          }
           return;
         }
       }
@@ -200,7 +217,12 @@ export class AudioService implements OnDestroy {
     }
   }
 
+  hasPlayBlocked(): boolean {
+    return this.playBlocked;
+  }
+
   pause(): void {
+    this.playBlocked = false;
     this.audio?.pause();
   }
 

@@ -150,11 +150,50 @@
   --page-transition-duration: 0.28s;
   --page-transition-ease: cubic-bezier(0.32, 0.72, 0, 1);
 
+  /* Mobile press — CSS `scale` (not transform) so translates stay intact */
+  --press-scale: 0.96;
+  --press-duration: 0.18s;
+  --press-duration-in: 0.1s;
+  --press-ease: cubic-bezier(0.32, 0.72, 0, 1);
+
   /* iOS / PWA notch + home indicator (needs viewport-fit=cover) */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/*
+ * Smooth tap scale on coarse pointers (phones / car touch).
+ * Opt out: .no-press or data-no-press. Scrims excluded (full-bleed).
+ */
+@media (pointer: coarse) {
+  :where(
+    button,
+    [role="button"],
+    .btn,
+    a.btn,
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"]
+  ):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim) {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: scale var(--press-duration) var(--press-ease);
+  }
+
+  :where(
+    button,
+    [role="button"],
+    .btn,
+    a.btn,
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"]
+  ):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim):active {
+    scale: var(--press-scale);
+    transition-duration: var(--press-duration-in);
+  }
 }
 
 @utility pt-safe {
@@ -172,6 +211,9 @@
     --anim-duration-normal: 0.01s;
     --anim-duration-slow: 0.01s;
     --anim-duration-slower: 0.01s;
+    --press-scale: 1;
+    --press-duration: 0.01s;
+    --press-duration-in: 0.01s;
   }
 }
 
@@ -962,10 +1004,9 @@ body {
   transition:
     background 160ms ease,
     color 160ms ease,
-    transform 120ms ease;
+    scale var(--press-duration) var(--press-ease);
 }
 .player-action:active {
-  transform: scale(0.97);
   background: color-mix(in oklab, var(--color-base-content) 11%, transparent);
 }
 .player-action--active {
@@ -1208,9 +1249,7 @@ body {
   color: var(--color-primary);
   background: color-mix(in oklab, var(--color-primary) 14%, transparent);
   touch-action: manipulation;
-}
-.lyrics-empty-retry:active {
-  transform: scale(0.97);
+  transition: scale var(--press-duration) var(--press-ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1261,12 +1300,9 @@ body {
   background: color-mix(in oklab, var(--color-base-200) 70%, transparent);
   color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
   transition:
-    transform 160ms ease,
+    scale var(--press-duration) var(--press-ease),
     background 160ms ease,
     opacity 160ms ease;
-}
-.explore-refresh:active {
-  transform: scale(0.95);
 }
 .explore-refresh:disabled {
   opacity: 0.5;
@@ -1428,10 +1464,7 @@ body {
   padding: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 160ms cubic-bezier(0.32, 0.72, 0, 1);
-}
-.explore-card:active {
-  transform: scale(0.96);
+  transition: scale var(--press-duration) var(--press-ease);
 }
 @media (min-width: 640px) {
   .explore-card {

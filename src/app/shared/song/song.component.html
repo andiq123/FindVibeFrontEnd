@@ -10,61 +10,50 @@
       </div>
     </div>
   </div>
+} @else if (selectMode()) {
+  <div
+    class="song-container group flex items-center gap-1 sm:gap-2 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-2 sm:px-3 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
+    [class.song-active]="isActive()"
+    [class.ring-1]="selected()"
+    [class.ring-primary/40]="selected()"
+    [class.bg-primary/5]="selected()"
+    [class.opacity-50]="isUnavailable()"
+    [id]="song().id"
+    appDragAndDrop
+    (reorderSongs)="reorder.emit($any($event))"
+  >
+    <label
+      class="shrink-0 w-9 h-11 flex items-center justify-center touch-manipulation cursor-pointer"
+      (click)="onSelectToggle($event)"
+    >
+      <input
+        type="checkbox"
+        class="checkbox checkbox-sm checkbox-primary pointer-events-none"
+        [checked]="selected()"
+        tabindex="-1"
+        [attr.aria-label]="'Select ' + song().title"
+      />
+    </label>
+    <ng-container *ngTemplateOutlet="default"></ng-container>
+    <button
+      type="button"
+      class="song-drag-handle shrink-0 w-9 h-11 flex items-center justify-center self-start mt-0.5 rounded-lg text-base-content/30 active:text-base-content/60 active:bg-base-content/10 cursor-grab active:cursor-grabbing touch-manipulation"
+      draggable="true"
+      aria-label="Drag to reorder"
+      title="Drag to reorder"
+      (click)="$event.preventDefault(); $event.stopPropagation()"
+    >
+      <fa-icon [icon]="faGripVertical" class="text-sm" />
+    </button>
+  </div>
 } @else {
-  @if (selectMode()) {
-    <div
-      class="song-container group flex items-center gap-1 sm:gap-2 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-2 sm:px-3 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
-      [class.song-active]="isActive()"
-      [class.ring-1]="selected()"
-      [class.ring-primary/40]="selected()"
-      [class.bg-primary/5]="selected()"
-      [class.opacity-50]="isUnavailable()"
-      [id]="song().id"
-    >
-      <label
-        class="shrink-0 w-9 h-11 flex items-center justify-center touch-manipulation cursor-pointer"
-        (click)="onSelectToggle($event)"
-      >
-        <input
-          type="checkbox"
-          class="checkbox checkbox-sm checkbox-primary pointer-events-none"
-          [checked]="selected()"
-          tabindex="-1"
-          [attr.aria-label]="'Select ' + song().title"
-        />
-      </label>
-      <ng-container *ngTemplateOutlet="default"></ng-container>
-    </div>
-  } @else if (allowReorder()) {
-    <div
-      class="song-container group flex items-center gap-1 sm:gap-2 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-2 sm:px-3 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
-      [class.song-active]="isActive()"
-      [class.opacity-50]="isUnavailable()"
-      appDragAndDrop
-      [id]="song().id"
-      (reorderSongs)="emitReorder($any($event))"
-    >
-      <ng-container *ngTemplateOutlet="default"></ng-container>
-      <button
-        type="button"
-        class="song-drag-handle shrink-0 w-9 h-11 flex items-center justify-center self-start mt-0.5 rounded-lg text-base-content/30 active:text-base-content/60 active:bg-base-content/10 cursor-grab active:cursor-grabbing touch-manipulation"
-        draggable="true"
-        aria-label="Drag to reorder"
-        title="Drag to reorder"
-        (click)="$event.preventDefault(); $event.stopPropagation()"
-      >
-        <fa-icon [icon]="faGripVertical" class="text-sm" />
-      </button>
-    </div>
-  } @else {
-    <div
-      class="song-container group flex items-center gap-2.5 sm:gap-3 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-3 sm:px-4 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
-      [class.song-active]="isActive()"
-      [class.opacity-50]="isUnavailable()"
-    >
-      <ng-container *ngTemplateOutlet="default"></ng-container>
-    </div>
-  }
+  <div
+    class="song-container group flex items-center gap-2.5 sm:gap-3 py-2.5 sm:py-3.5 transition-all duration-200 relative overflow-hidden px-3 sm:px-4 w-full touch-manipulation hover:bg-base-200/50 rounded-2xl"
+    [class.song-active]="isActive()"
+    [class.opacity-50]="isUnavailable()"
+  >
+    <ng-container *ngTemplateOutlet="default"></ng-container>
+  </div>
 }
 <ng-template #default>
   <div
@@ -139,7 +128,22 @@
       (pointerdown)="guardActions($event)"
       (click)="guardActions($event)"
     >
-      @if (!allowReorder()) {
+      @if (radioAction()) {
+        <button
+          type="button"
+          class="song-action-btn"
+          (click)="startRadio($event)"
+          [disabled]="radioLoading()"
+          aria-label="Start radio from this song"
+          title="Start radio"
+        >
+          @if (radioLoading()) {
+            <span class="loading loading-spinner loading-xs"></span>
+          } @else {
+            <fa-icon [icon]="faWaveSquare" class="text-xs" />
+          }
+        </button>
+      } @else {
         <button
           type="button"
           class="song-action-btn"
