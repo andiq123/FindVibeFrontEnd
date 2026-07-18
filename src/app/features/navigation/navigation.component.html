@@ -37,7 +37,7 @@
 >
   @for (navItem of navList; track navItem.name) {
     <li
-      class="relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 active:scale-95 group min-h-[52px]"
+      class="relative flex flex-col items-center justify-center cursor-pointer transition-[scale,colors] duration-[400ms] ease-[cubic-bezier(0.32,0.72,0,1)] group min-h-[52px] [--press-scale:0.97]"
       [routerLink]="navItem.link"
       routerLinkActive="active-tab"
       tabindex="0"

@@ -150,11 +150,11 @@
   --page-transition-duration: 0.28s;
   --page-transition-ease: cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* Mobile press — CSS `scale` (not transform) so translates stay intact */
-  --press-scale: 0.96;
-  --press-scale-card: 0.92;
-  --press-duration: 0.18s;
-  --press-duration-in: 0.08s;
+  /* Mobile press — slow premium squash (iOS-friendly curve) */
+  --press-scale: 0.97;
+  --press-scale-card: 0.95;
+  --press-duration: 0.34s;
+  --press-duration-in: 0.28s;
   --press-ease: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* iOS / PWA notch + home indicator (needs viewport-fit=cover) */
@@ -197,15 +197,13 @@
   transition-duration: var(--press-duration-in);
 }
 
-/* Touch: slightly snappier press-in */
+/* Touch: even slower, softer press — premium over snappy */
 @media (hover: none) {
-  :where(
-    button,
-    [role="button"],
-    .btn,
-    a.btn
-  ):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim):active {
-    transition-duration: 0.06s;
+  :root {
+    --press-scale: 0.975;
+    --press-scale-card: 0.96;
+    --press-duration: 0.4s;
+    --press-duration-in: 0.32s;
   }
 }
 
@@ -1383,6 +1381,67 @@ body {
   .explore-card-in {
     animation: none;
   }
+}
+.explore-shelf-head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.explore-shelf-radio {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  background: color-mix(in oklab, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    scale var(--press-duration) var(--press-ease),
+    background 200ms ease,
+    opacity 200ms ease;
+}
+.explore-shelf-radio:disabled {
+  opacity: 0.45;
+}
+.explore-nudge {
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--color-primary) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-primary) 18%, transparent);
+}
+.explore-nudge-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-base-content);
+}
+.explore-nudge-body {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--color-base-content) 55%, transparent);
+}
+.explore-nudge-cta {
+  display: inline-flex;
+  margin-top: 0.65rem;
+  height: 2rem;
+  padding: 0 0.85rem;
+  align-items: center;
+  border-radius: 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  background: color-mix(in oklab, var(--color-primary) 18%, transparent);
+  color: var(--color-primary);
+  text-decoration: none;
 }
 .explore-kicker {
   margin: 0;
