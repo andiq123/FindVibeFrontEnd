@@ -72,14 +72,25 @@ export class ExploreService {
   /**
    * Paint from disk instantly, then revalidate /explore in the background.
    * Vault / recents are always local; because uses its own 24h cache.
+   *
+   * Warm re-entry (Vault → Explore) must still ensure the Because shelf —
+   * skipping /recommend left it missing until a full refresh.
    */
   async load(refresh = false): Promise<void> {
-    if (this.loading()) return;
+    // In-flight load — still paint memory so re-entry isn't blank.
+    if (this.loading()) {
+      if (this.charts.length || this.because?.songs.length) {
+        this.hydrateBecauseFromCache();
+        this.sections.set(this.merge(this.charts));
+      }
+      return;
+    }
 
-    // Warm in-memory session — skip network.
+    // Warm session — charts stay; always re-check Because (cache or fetch).
     if (!refresh && this.loaded && this.charts.length) {
       this.hydrateBecauseFromCache();
       this.sections.set(this.merge(this.charts));
+      void this.ensureBecause(false);
       return;
     }
 
@@ -102,8 +113,8 @@ export class ExploreService {
       this.sections.set(this.merge(this.charts));
       this.loaded = true;
       // Force refresh awaits personalization; cold load paints charts first.
-      if (refresh) await this.fetchBecauseIfNeeded(true);
-      else void this.fetchBecauseIfNeeded(false);
+      if (refresh) await this.ensureBecause(true);
+      else void this.ensureBecause(false);
     } catch {
       // Keep disk/memory shelves — only error when nothing to show.
       if (!this.charts.length) this.hydrateChartsFromCache(true);
@@ -115,6 +126,8 @@ export class ExploreService {
       } else if (!this.sections().length) {
         this.error.set("Couldn't load charts");
       }
+      // Charts may be local-only — still try Because from cache/network.
+      void this.ensureBecause(false);
     } finally {
       this.loading.set(false);
     }
@@ -239,7 +252,7 @@ export class ExploreService {
     return this.seedKeyOf(seed);
   }
 
-  /** Sync: paint from localStorage when same seed + fresh (<24h). */
+  /** Sync: paint from localStorage / memory when same seed + fresh (<24h). */
   private hydrateBecauseFromCache(): void {
     const key = this.seedKey();
     if (!key) {
@@ -247,25 +260,46 @@ export class ExploreService {
       this.becauseSeed = null;
       return;
     }
+    // Memory hit for current seed — keep (survives Vault → Explore).
+    if (this.becauseSeed === key && this.because?.songs.length) return;
+
     const hit = this.readBecauseCache(key);
     if (hit) {
       this.because = hit;
       this.becauseSeed = key;
       return;
     }
+    // Seed rotated (listen stats / day) — drop stale memory; fetch will refill.
     if (this.becauseSeed && this.becauseSeed !== key) {
       this.because = null;
       this.becauseSeed = null;
     }
   }
 
-  /** Async: /recommend only on miss or forced refresh. */
-  private async fetchBecauseIfNeeded(force: boolean): Promise<void> {
+  /**
+   * Ensure Because shelf for the current seed: memory → 24h disk → /recommend.
+   * Safe to call on every Explore entry (deduped).
+   */
+  private async ensureBecause(force: boolean): Promise<void> {
     const seed = this.pickSeedSong();
     const key = seed ? this.seedKeyOf(seed) : null;
     if (!seed || !key) return;
-    if (!force && this.readBecauseCache(key)) return;
-    // Dedupe in-flight for same seed (double pull-to-refresh).
+
+    if (!force && this.becauseSeed === key && this.because?.songs.length) {
+      return;
+    }
+
+    if (!force) {
+      const hit = this.readBecauseCache(key);
+      if (hit) {
+        this.because = hit;
+        this.becauseSeed = key;
+        this.sections.set(this.merge(this.charts));
+        return;
+      }
+    }
+
+    // Dedupe in-flight for same seed (re-entry while /recommend is running).
     if (!force && this.becauseFetchKey === key) return;
 
     const gen = ++this.becauseFetchGen;
@@ -299,10 +333,13 @@ export class ExploreService {
       this.sections.set(this.merge(this.charts));
     } catch {
       if (gen !== this.becauseFetchGen) return;
+      // Prefer any usable shelf — stale disk, then keep memory if same seed.
       const stale = this.readBecauseCache(key, true);
-      if (stale && !this.because) {
+      if (stale) {
         this.because = stale;
         this.becauseSeed = key;
+        this.sections.set(this.merge(this.charts));
+      } else if (this.becauseSeed === key && this.because?.songs.length) {
         this.sections.set(this.merge(this.charts));
       }
     } finally {

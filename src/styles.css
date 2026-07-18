@@ -152,8 +152,9 @@
 
   /* Mobile press — CSS `scale` (not transform) so translates stay intact */
   --press-scale: 0.96;
+  --press-scale-card: 0.92;
   --press-duration: 0.18s;
-  --press-duration-in: 0.1s;
+  --press-duration-in: 0.08s;
   --press-ease: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* iOS / PWA notch + home indicator (needs viewport-fit=cover) */
@@ -165,7 +166,9 @@
 
 /*
  * Smooth tap scale on buttons / role=button (touch + mouse).
+ * Uses CSS `scale` so it doesn’t stomp translate-based layouts.
  * Opt out: .no-press or data-no-press. Scrims excluded (full-bleed).
+ * iOS needs the document touchstart in AppComponent for :active to fire.
  */
 :where(
   button,
@@ -192,6 +195,18 @@
 ):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim):active {
   scale: var(--press-scale);
   transition-duration: var(--press-duration-in);
+}
+
+/* Touch: slightly snappier press-in */
+@media (hover: none) {
+  :where(
+    button,
+    [role="button"],
+    .btn,
+    a.btn
+  ):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim):active {
+    transition-duration: 0.06s;
+  }
 }
 
 @utility pt-safe {
@@ -1336,36 +1351,31 @@ body {
   flex-direction: column;
   gap: 0.65rem;
 }
-/* Enter only — opacity + translate. Never animate `scale` here: cards also
-   transition scale for press, and animation→transition handoff glitches. */
+/* Enter: opacity only — filled translate blocks mobile press `scale` on WebKit. */
 .explore-shelf-in {
   animation: explore-shelf-in var(--anim-duration-slow) var(--anim-ease-ios) both;
   animation-delay: calc(min(var(--i, 0), 8) * 45ms);
 }
 .explore-card-in {
-  animation: explore-card-in var(--anim-duration-normal) var(--anim-ease-ios) both;
+  animation: explore-card-in var(--anim-duration-fast) var(--anim-ease-ios) both;
   animation-delay: calc(
-    min(var(--i, 0), 8) * 45ms + min(var(--c, 0), 6) * 28ms
+    min(var(--i, 0), 8) * 40ms + min(var(--c, 0), 6) * 24ms
   );
 }
 @keyframes explore-shelf-in {
   from {
     opacity: 0;
-    translate: 0 14px;
   }
   to {
     opacity: 1;
-    translate: 0;
   }
 }
 @keyframes explore-card-in {
   from {
     opacity: 0;
-    translate: 0 10px;
   }
   to {
     opacity: 1;
-    translate: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1471,8 +1481,7 @@ body {
   }
 }
 .explore-card {
-  /* Slightly deeper squash than default buttons — shelf tiles read as media. */
-  --press-scale: 0.94;
+  --press-scale: var(--press-scale-card);
   flex: 0 0 auto;
   width: 7.5rem;
   scroll-snap-align: start;
@@ -1485,10 +1494,18 @@ body {
   padding: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
   transition: scale var(--press-duration) var(--press-ease);
 }
 .explore-card:active {
-  scale: var(--press-scale);
+  scale: var(--press-scale-card);
+  transition-duration: var(--press-duration-in);
+}
+/* Art uses transform — reliable on iOS even inside horizontal scroll rails. */
+.explore-card:active .explore-art {
+  transform: scale(0.94);
   transition-duration: var(--press-duration-in);
 }
 @media (min-width: 640px) {
@@ -1506,6 +1523,8 @@ body {
   overflow: hidden;
   background: color-mix(in oklab, var(--color-base-300) 80%, transparent);
   box-shadow: 0 6px 18px color-mix(in oklab, #000 14%, transparent);
+  transform-origin: center center;
+  transition: transform var(--press-duration) var(--press-ease);
 }
 @media (min-width: 640px) {
   .explore-art {
@@ -1518,6 +1537,7 @@ body {
   object-fit: cover;
   display: block;
   user-select: none;
+  pointer-events: none;
 }
 .explore-card-title,
 .explore-card-artist {

@@ -24,6 +24,10 @@ import { AppUpdateService } from "./core/services/app-update.service";
 import { PlayerService } from "./core/services/player.service";
 import { PlaylistService } from "./core/services/playlist.service";
 import { ToastService } from "./core/services/toast.service";
+
+/** Enables :active styles on iOS — no-op handler, passive. */
+function noopTouch(): void {}
+
 @Component({
   selector: "app-root",
   standalone: true,
@@ -55,6 +59,11 @@ export class AppComponent implements OnInit {
   readonly toast = inject(ToastService);
   ngOnInit(): void {
     this.initializeServices();
+    // iOS Safari: :active (press scale) only fires if a touch listener exists.
+    document.addEventListener("touchstart", noopTouch, { passive: true });
+    this.destroyRef.onDestroy(() =>
+      document.removeEventListener("touchstart", noopTouch),
+    );
     this.settingsService
       .wakeUntilUp()
       .pipe(takeUntilDestroyed(this.destroyRef))
