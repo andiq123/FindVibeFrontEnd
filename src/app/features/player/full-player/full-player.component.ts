@@ -7,6 +7,7 @@ import {
   signal,
   inject,
   untracked,
+  viewChild,
   OnInit,
   AfterViewInit,
   OnDestroy,
@@ -38,6 +39,10 @@ import { PlayerStatus, RepeatMode } from "../models/player.model";
 import { SettingsService } from "../../../core/services/settings.service";
 import { FavoriteButtonComponent } from "../../../shared/favorite-button/favorite-button.component";
 import { SwipeDownDirective } from "../directives/swipe-down.directive";
+import {
+  SheetDragDirective,
+  SHEET_ANIM_MS,
+} from "../directives/sheet-drag.directive";
 import { PlayerService } from "../../../core/services/player.service";
 import { PlaylistService } from "../../../core/services/playlist.service";
 import { RadioService } from "../../../core/services/radio.service";
@@ -48,6 +53,7 @@ import { upgradeToHttps } from "../../../core/utils/utils";
 import { OfflineStorageService } from "../../library/services/offline-storage.service";
 import { LibraryService } from "../../library/services/library.service";
 import { ToastService } from "../../../core/services/toast.service";
+import { LyricsCacheService } from "../../../core/services/lyrics-cache.service";
 import { environment } from "../../../../environments/environment";
 
 const OPEN_ANIM_MS = 500;
@@ -61,6 +67,7 @@ const CLOSE_ANIM_MS = 350;
     NgOptimizedImage,
     FavoriteButtonComponent,
     SwipeDownDirective,
+    SheetDragDirective,
     MovingTitleComponent,
     TimeFormatPipe,
   ],
@@ -73,6 +80,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly settingsService = inject(SettingsService);
   private offlineStorage = inject(OfflineStorageService);
   private libraryService = inject(LibraryService);
+  private readonly lyricsCache = inject(LyricsCacheService);
   private readonly toast = inject(ToastService);
   readonly playlistService = inject(PlaylistService);
   readonly radioService = inject(RadioService);
@@ -106,9 +114,11 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   faTrash = faTrash;
   isDownloadingMp3 = signal(false);
   similarOpen = signal(false);
+  similarClosing = signal(false);
   similarLoading = signal(false);
   similarArtists = signal<string[]>([]);
   private similarArtistKey = "";
+  private similarCloseId: ReturnType<typeof setTimeout> | null = null;
   /** Bottom sheets — stay mounted while closing so exit anim can finish. */
   upNextOpen = signal(false);
   upNextClosing = signal(false);
@@ -122,6 +132,10 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   lyricsText = signal("");
   private lyricsKey = "";
   private lyricsCloseId: ReturnType<typeof setTimeout> | null = null;
+  private readonly upNextSheetDrag = viewChild<SheetDragDirective>("upNextSheet");
+  private readonly lyricsSheetDrag = viewChild<SheetDragDirective>("lyricsSheet");
+  private readonly similarSheetDrag =
+    viewChild<SheetDragDirective>("similarSheet");
   isClosingAnimation = signal(false);
   isOpeningAnimation = signal(false);
   isOpened = signal(false);
@@ -216,6 +230,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.closeFallbackId != null) clearTimeout(this.closeFallbackId);
     if (this.upNextCloseId != null) clearTimeout(this.upNextCloseId);
     if (this.lyricsCloseId != null) clearTimeout(this.lyricsCloseId);
+    if (this.similarCloseId != null) clearTimeout(this.similarCloseId);
   }
   private closeAndEmit(): void {
     if (this.closeFallbackId != null) {
@@ -379,6 +394,11 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!artist) return;
     this.closeUpNext();
     this.closeLyrics();
+    if (this.similarCloseId != null) {
+      clearTimeout(this.similarCloseId);
+      this.similarCloseId = null;
+    }
+    this.similarClosing.set(false);
     this.similarOpen.set(true);
     if (artist === this.similarArtistKey && this.similarArtists().length) return;
     this.similarArtistKey = artist;
@@ -406,7 +426,26 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeSimilar(): void {
+    if (!this.similarOpen() || this.similarClosing()) return;
+    this.similarSheetDrag()?.prepareExit();
+    this.similarClosing.set(true);
+    this.similarCloseId = setTimeout(() => {
+      this.similarCloseId = null;
+      if (this.destroyed) return;
+      this.similarOpen.set(false);
+      this.similarClosing.set(false);
+    }, SHEET_ANIM_MS);
+  }
+
+  onSimilarAnimEnd(event: AnimationEvent): void {
+    if (!this.similarClosing()) return;
+    if (!(event.animationName ?? "").includes("up-next-sheet-out")) return;
+    if (this.similarCloseId != null) {
+      clearTimeout(this.similarCloseId);
+      this.similarCloseId = null;
+    }
     this.similarOpen.set(false);
+    this.similarClosing.set(false);
   }
 
   searchArtist(name: string): void {
@@ -443,6 +482,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openUpNext(): void {
     this.closeLyrics();
+    this.closeSimilar();
     if (this.upNextCloseId != null) {
       clearTimeout(this.upNextCloseId);
       this.upNextCloseId = null;
@@ -453,13 +493,14 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   closeUpNext(): void {
     if (!this.upNextOpen() || this.upNextClosing()) return;
+    this.upNextSheetDrag()?.prepareExit();
     this.upNextClosing.set(true);
     this.upNextCloseId = setTimeout(() => {
       this.upNextCloseId = null;
       if (this.destroyed) return;
       this.upNextOpen.set(false);
       this.upNextClosing.set(false);
-    }, 280);
+    }, SHEET_ANIM_MS);
   }
 
   onUpNextAnimEnd(event: AnimationEvent): void {
@@ -488,6 +529,7 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async openLyrics(): Promise<void> {
     this.closeUpNext();
+    this.closeSimilar();
     if (this.lyricsCloseId != null) {
       clearTimeout(this.lyricsCloseId);
       this.lyricsCloseId = null;
@@ -506,12 +548,24 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.lyricsError.set("");
     this.lyricsErrorHard.set(false);
 
-    // Vault cache — only after user opened lyrics once; never prefetch.
+    // Vault / song payload — only after user opened lyrics once; never prefetch.
     const cached =
       this.libraryService.songs().find((x) => x.link === s.link)?.lyrics?.trim() ||
       s.lyrics?.trim();
     if (cached) {
       this.lyricsText.set(cached);
+      this.lyricsCache.setHit(key, cached);
+      return;
+    }
+    const sessionHit = this.lyricsCache.getHit(key);
+    if (sessionHit) {
+      this.lyricsText.set(sessionHit);
+      return;
+    }
+    const sessionMiss = this.lyricsCache.getMiss(key);
+    if (sessionMiss) {
+      this.lyricsErrorHard.set(sessionMiss.hard);
+      this.lyricsError.set(sessionMiss.message);
       return;
     }
 
@@ -525,10 +579,13 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.destroyed || this.lyricsKey !== key) return;
       const text = r?.lyrics?.trim();
       if (!text) {
-        this.lyricsError.set("No lyrics for this track");
+        const msg = "No lyrics for this track";
+        this.lyricsError.set(msg);
+        this.lyricsCache.setMiss(key, msg, false);
         return;
       }
       this.lyricsText.set(text);
+      this.lyricsCache.setHit(key, text);
       this.libraryService.persistSongLyrics(s.link, text);
     } catch (e: unknown) {
       if (this.destroyed || this.lyricsKey !== key) return;
@@ -542,13 +599,16 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       if (status === 0) {
         this.lyricsErrorHard.set(true);
         this.lyricsError.set("Can't reach the server");
+        // Don't session-cache hard failures — allow retry when network returns.
       } else if (status >= 500 || code === "upstream") {
         this.lyricsErrorHard.set(true);
         this.lyricsError.set(msg || "Couldn't reach lyrics service");
       } else {
         // 404 not_found / instrumental — calm empty state, not an alarm.
+        const message = msg || "No lyrics for this track";
         this.lyricsErrorHard.set(false);
-        this.lyricsError.set(msg || "No lyrics for this track");
+        this.lyricsError.set(message);
+        this.lyricsCache.setMiss(key, message, false);
       }
     } finally {
       if (!this.destroyed && this.lyricsKey === key) {
@@ -559,13 +619,14 @@ export class FullPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   closeLyrics(): void {
     if (!this.lyricsOpen() || this.lyricsClosing()) return;
+    this.lyricsSheetDrag()?.prepareExit();
     this.lyricsClosing.set(true);
     this.lyricsCloseId = setTimeout(() => {
       this.lyricsCloseId = null;
       if (this.destroyed) return;
       this.lyricsOpen.set(false);
       this.lyricsClosing.set(false);
-    }, 280);
+    }, SHEET_ANIM_MS);
   }
 
   onLyricsAnimEnd(event: AnimationEvent): void {

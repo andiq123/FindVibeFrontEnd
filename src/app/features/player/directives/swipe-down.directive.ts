@@ -9,9 +9,9 @@ import {
   OnDestroy,
 } from "@angular/core";
 
-/** Nested scroll panes / scrubbers own touch; swipe-to-dismiss must not steal them. */
+/** Nested panes own touch; swipe-to-dismiss must not steal them. */
 const SCROLL_IGNORE =
-  ".lyrics-body, .up-next-list, .seek-bar, [data-swipe-scroll]";
+  ".up-next-sheet, .up-next-scrim, .lyrics-body, .up-next-list, .seek-bar, [data-swipe-scroll]";
 
 @Directive({
   selector: "[appSwipeDown]",

@@ -21,7 +21,15 @@
     (animationend)="onAnimationEnd($event)"
     appSwipeDown
     [handleSelector]="'.player-content-card, .artwork-wrapper, .pressable-native'"
-    [disabled]="isOpeningAnimation()"
+    [disabled]="
+      isOpeningAnimation() ||
+      upNextOpen() ||
+      upNextClosing() ||
+      lyricsOpen() ||
+      lyricsClosing() ||
+      similarOpen() ||
+      similarClosing()
+    "
     (closePanel)="onSwipeClose()"
   >
   <div
@@ -354,12 +362,17 @@
         (animationend)="onUpNextAnimEnd($event)"
         role="dialog"
         aria-label="Up next"
+        appSheetDrag
+        #upNextSheet="sheetDrag"
+        [midRatio]="0.48"
+        [maxRatio]="0.92"
+        (dismiss)="closeUpNext()"
       >
         <div class="up-next-handle pressable-native flex items-center gap-2 px-4">
           <button
             type="button"
             class="flex-1 flex flex-col items-center min-w-0"
-            (click)="closeUpNext()"
+            (click)="upNextSheet.collapseOrDismiss()"
             aria-label="Hide up next"
           >
             <span class="up-next-handle-bar"></span>
@@ -444,22 +457,30 @@
       </div>
     }
 
-    @if (similarOpen()) {
+    @if (similarOpen() || similarClosing()) {
       <button
         type="button"
         class="up-next-scrim"
+        [class.is-out]="similarClosing()"
         (click)="closeSimilar()"
         aria-label="Close similar artists"
       ></button>
       <div
         class="up-next-sheet"
+        [class.is-out]="similarClosing()"
+        (animationend)="onSimilarAnimEnd($event)"
         role="dialog"
         aria-label="Similar artists"
+        appSheetDrag
+        #similarSheet="sheetDrag"
+        [midRatio]="0.48"
+        [maxRatio]="0.92"
+        (dismiss)="closeSimilar()"
       >
         <button
           type="button"
           class="up-next-handle pressable-native"
-          (click)="closeSimilar()"
+          (click)="similarSheet.collapseOrDismiss()"
           aria-label="Hide similar artists"
         >
           <span class="up-next-handle-bar"></span>
@@ -518,11 +539,16 @@
         (animationend)="onLyricsAnimEnd($event)"
         role="dialog"
         aria-label="Lyrics"
+        appSheetDrag
+        #lyricsSheet="sheetDrag"
+        [midRatio]="0.55"
+        [maxRatio]="0.92"
+        (dismiss)="closeLyrics()"
       >
         <button
           type="button"
           class="up-next-handle pressable-native"
-          (click)="closeLyrics()"
+          (click)="lyricsSheet.collapseOrDismiss()"
           aria-label="Hide lyrics"
         >
           <span class="up-next-handle-bar"></span>

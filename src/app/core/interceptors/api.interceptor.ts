@@ -18,23 +18,27 @@ function isTransient(err: unknown): boolean {
 }
 
 /**
- * Single HTTP policy for all API calls: 15s timeout, and transient
- * cold-start failures on GETs retried with backoff (1s/2s/4s).
+ * Single HTTP policy for all API calls: timeout + transient GET retries.
  * /health is excluded — wakeUntilUp() owns its own retry loop.
- * Any successful response marks the server up.
+ * /lyrics + /recommend: longer one-shot timeout, never retry TimeoutError
+ * (retries turned one slow radio into ~minute waits). Still retry 503/504 cold starts.
  */
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(environment.API_URL)) return next(req);
   const settings = inject(SettingsService);
   const isHealth = req.url.includes("/health");
+  const isSlow =
+    req.url.includes("/lyrics") || req.url.includes("/recommend");
   // ponytail: mutations are not retried — a duplicated POST is worse than a failed one
-  const retries = req.method === "GET" && !isHealth ? 3 : 0;
+  const retries = req.method === "GET" && !isHealth ? (isSlow ? 2 : 3) : 0;
   return next(req).pipe(
-    timeout(15_000),
+    timeout(isSlow ? 22_000 : 15_000),
     retry({
       count: retries,
       delay: (err, n) => {
         if (!isTransient(err)) throw err;
+        // Don't triple-pay a slow LRCLIB / Last.fm resolve.
+        if (isSlow && err instanceof TimeoutError) throw err;
         return timer(1000 * 2 ** (n - 1));
       },
     }),

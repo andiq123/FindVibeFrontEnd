@@ -924,30 +924,53 @@ body {
   padding: 0;
   cursor: pointer;
   background: rgba(0, 0, 0, 0.35);
-  animation: up-next-scrim-in var(--anim-duration-fast) var(--anim-ease-ios) forwards;
+  opacity: 0;
+  animation: up-next-scrim-in var(--anim-duration-normal) var(--anim-ease-ios) forwards;
 }
 .up-next-scrim.is-out {
-  animation: up-next-scrim-out var(--anim-duration-fast) var(--anim-ease-ios) forwards;
+  animation: up-next-scrim-out var(--anim-duration-normal) var(--anim-ease-ios) forwards;
+  pointer-events: none;
 }
 .up-next-sheet {
+  --sheet-peek: 48dvh;
+  --sheet-ty: calc(100% - var(--sheet-peek));
   position: absolute;
   inset-inline: 0;
   bottom: 0;
   z-index: 40;
   display: flex;
   flex-direction: column;
-  max-height: min(42dvh, 360px);
+  height: min(92dvh, calc(100dvh - 2rem));
+  max-height: min(92dvh, calc(100dvh - 2rem));
   border-radius: 1.5rem 1.5rem 0 0;
   border-top: 1px solid color-mix(in oklab, var(--color-base-content) 10%, transparent);
+  background: var(--color-base-100);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  box-shadow: none;
+  /* Off-screen until enter keyframes run — avoids border/shadow flash. */
+  transform: translate3d(0, 100%, 0);
+  animation: up-next-sheet-in var(--anim-duration-normal) var(--anim-ease-ios) forwards;
+  backface-visibility: hidden;
+}
+.up-next-sheet.is-ready:not(.is-out) {
+  animation: none !important;
   background: color-mix(in oklab, var(--color-base-100) 94%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  padding-bottom: env(safe-area-inset-bottom, 0);
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.25);
-  animation: up-next-sheet-in var(--anim-duration-normal) var(--anim-ease-ios) forwards;
+  transform: translate3d(0, calc(100% - var(--sheet-peek)), 0);
+}
+.up-next-sheet.is-ready.sheet-expanded:not(.is-out) {
+  transform: translate3d(0, 0, 0);
 }
 .up-next-sheet.is-out {
-  animation: up-next-sheet-out var(--anim-duration-fast) var(--anim-ease-ios) forwards;
+  /* Transform-only exit from --sheet-ty (set by prepareExit). No blur during leave. */
+  animation: up-next-sheet-out var(--anim-duration-normal) var(--anim-ease-ios) forwards !important;
+  background: var(--color-base-100);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
 }
 .up-next-handle {
   width: 100%;
@@ -1168,23 +1191,26 @@ body {
 }
 
 @keyframes up-next-scrim-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  /* Sheet leads; dim follows. */
+  0%, 35% { opacity: 0; }
+  100% { opacity: 1; }
 }
 @keyframes up-next-scrim-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  /* Dim clears with the sheet, not before. */
+  0% { opacity: 1; }
+  55% { opacity: 1; }
+  100% { opacity: 0; }
 }
 @keyframes up-next-sheet-in {
-  from { transform: translateY(100%); opacity: 0.85; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translate3d(0, 100%, 0); }
+  to { transform: translate3d(0, calc(100% - var(--sheet-peek)), 0); }
 }
 @keyframes up-next-sheet-out {
-  from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(100%); opacity: 0.85; }
+  from { transform: translate3d(0, var(--sheet-ty, calc(100% - var(--sheet-peek))), 0); }
+  to { transform: translate3d(0, 100%, 0); }
 }
 
-.lyrics-sheet { max-height: min(58dvh, 480px); }
+.lyrics-sheet { --sheet-peek: 55dvh; }
 .lyrics-body {
   /* Stack panes so leave/enter crossfade instead of hard-cut */
   display: grid;
@@ -1295,9 +1321,19 @@ body {
   .player-chip-out {
     animation: none !important;
   }
+  .up-next-sheet:not(.is-out) {
+    transform: translate3d(0, calc(100% - var(--sheet-peek)), 0);
+  }
+  .up-next-sheet.is-ready.sheet-expanded:not(.is-out) {
+    transform: translate3d(0, 0, 0);
+  }
+  .up-next-scrim:not(.is-out) {
+    opacity: 1;
+  }
   .up-next-scrim.is-out,
   .up-next-sheet.is-out {
     opacity: 0;
+    transform: translate3d(0, 100%, 0);
   }
 }
 
