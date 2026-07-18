@@ -164,36 +164,34 @@
 }
 
 /*
- * Smooth tap scale on coarse pointers (phones / car touch).
+ * Smooth tap scale on buttons / role=button (touch + mouse).
  * Opt out: .no-press or data-no-press. Scrims excluded (full-bleed).
  */
-@media (pointer: coarse) {
-  :where(
-    button,
-    [role="button"],
-    .btn,
-    a.btn,
-    input[type="button"],
-    input[type="submit"],
-    input[type="reset"]
-  ):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim) {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    transition: scale var(--press-duration) var(--press-ease);
-  }
+:where(
+  button,
+  [role="button"],
+  .btn,
+  a.btn,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"]
+):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: scale var(--press-duration) var(--press-ease);
+}
 
-  :where(
-    button,
-    [role="button"],
-    .btn,
-    a.btn,
-    input[type="button"],
-    input[type="submit"],
-    input[type="reset"]
-  ):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim):active {
-    scale: var(--press-scale);
-    transition-duration: var(--press-duration-in);
-  }
+:where(
+  button,
+  [role="button"],
+  .btn,
+  a.btn,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"]
+):not(:disabled):not([disabled]):not([aria-disabled="true"]):not(.no-press):not([data-no-press]):not(.up-next-scrim):active {
+  scale: var(--press-scale);
+  transition-duration: var(--press-duration-in);
 }
 
 @utility pt-safe {
@@ -1338,7 +1336,8 @@ body {
   flex-direction: column;
   gap: 0.65rem;
 }
-/* Enter only — tracked @for keeps existing shelves; late shelves (e.g. because) animate in. */
+/* Enter only — opacity + translate. Never animate `scale` here: cards also
+   transition scale for press, and animation→transition handoff glitches. */
 .explore-shelf-in {
   animation: explore-shelf-in var(--anim-duration-slow) var(--anim-ease-ios) both;
   animation-delay: calc(min(var(--i, 0), 8) * 45ms);
@@ -1352,21 +1351,21 @@ body {
 @keyframes explore-shelf-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    translate: 0 14px;
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    translate: 0;
   }
 }
 @keyframes explore-card-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.96);
+    translate: 0 10px;
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    translate: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1392,6 +1391,7 @@ body {
   color: var(--color-base-content);
 }
 .explore-title-seed {
+  --press-scale: 0.98;
   display: inline;
   margin: 0;
   padding: 0;
@@ -1410,9 +1410,13 @@ body {
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  transition:
+    scale var(--press-duration) var(--press-ease),
+    opacity 0.15s ease,
+    text-decoration-color 0.15s ease;
 }
 .explore-title-seed:active {
-  opacity: 0.75;
+  opacity: 0.85;
 }
 @media (hover: hover) {
   .explore-title-seed:hover {
@@ -1467,6 +1471,8 @@ body {
   }
 }
 .explore-card {
+  /* Slightly deeper squash than default buttons — shelf tiles read as media. */
+  --press-scale: 0.94;
   flex: 0 0 auto;
   width: 7.5rem;
   scroll-snap-align: start;
@@ -1480,6 +1486,10 @@ body {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: scale var(--press-duration) var(--press-ease);
+}
+.explore-card:active {
+  scale: var(--press-scale);
+  transition-duration: var(--press-duration-in);
 }
 @media (min-width: 640px) {
   .explore-card {
