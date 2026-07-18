@@ -78,7 +78,8 @@ export class SongComponent {
   faListUl = faListUl;
   faWaveSquare = faWaveSquare;
   faGripVertical = faGripVertical;
-  radioLoading = () => this.radioService.loading();
+  radioBusy = () => this.radioService.loading();
+  radioLoading = () => this.radioService.isLoadingSong(this.song());
   sourceLabel = () => sourceHost(this.song().provider);
   async play() {
     if (this.isActive()) {
@@ -127,6 +128,7 @@ export class SongComponent {
     const ok = await this.radioService.start(seed, {
       excludeLinks: vault.map((s) => s.link).filter(Boolean),
       excludeKeys: vault.map((s) => songKey(s)).filter(Boolean),
+      loadingKey: songKey(seed),
     });
     if (!ok) {
       this.toast.show(this.radioService.error() || "Couldn't start radio");

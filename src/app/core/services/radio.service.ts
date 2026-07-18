@@ -39,10 +39,23 @@ export class RadioService {
   private vaultBump = 0;
 
   readonly loading = signal(false);
+  /** Non-empty while a specific track’s radio button is starting (not header/station). */
+  readonly loadingKey = signal("");
   readonly error = signal("");
 
   clearError(): void {
     this.error.set("");
+  }
+
+  /** True while this track’s row radio control should show a spinner. */
+  isLoadingSong(song: Song): boolean {
+    const key = songKey(song);
+    return !!key && this.loading() && this.loadingKey() === key;
+  }
+
+  /** Header / full-player radio — busy when loading without a per-song focus. */
+  isLoadingStation(): boolean {
+    return this.loading() && !this.loadingKey();
   }
 
   constructor() {
@@ -86,14 +99,20 @@ export class RadioService {
 
     const excludeLinks = vault.map((s) => s.link).filter(Boolean);
     const excludeKeys = vault.map((s) => songKey(s)).filter(Boolean);
-    const ok = await this.start(seed, { excludeLinks, excludeKeys });
+    // Station start — spinner on vault header, not a single row.
+    const ok = await this.start(seed, { excludeLinks, excludeKeys, loadingKey: "" });
     return ok ? seed : null;
   }
 
   /** Replace playlist with seed + recommendations; arms radio mode. */
   async start(
     seed: Song,
-    opts?: { excludeLinks?: string[]; excludeKeys?: string[] },
+    opts?: {
+      excludeLinks?: string[];
+      excludeKeys?: string[];
+      /** Row focus key; omit/`""` = station control (header / full player). */
+      loadingKey?: string;
+    },
   ): Promise<boolean> {
     if (this.loading()) return false;
     if (!seed.artist?.trim() || !seed.title?.trim()) {
@@ -101,6 +120,7 @@ export class RadioService {
       return false;
     }
     this.loading.set(true);
+    this.loadingKey.set(opts?.loadingKey ?? "");
     this.error.set("");
 
     const excludeLinks = new Set(opts?.excludeLinks?.filter(Boolean) ?? []);
@@ -143,6 +163,7 @@ export class RadioService {
       return false;
     } finally {
       this.loading.set(false);
+      this.loadingKey.set("");
     }
   }
 

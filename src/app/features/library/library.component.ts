@@ -75,7 +75,9 @@ export class LibraryComponent {
   faArrowUp = faArrowUp;
   faArrowDown = faArrowDown;
   faWaveSquare = faWaveSquare;
-  radioLoading = this.radioService.loading;
+  /** Header Radio spinner — not per-song starts. */
+  radioLoading = () => this.radioService.isLoadingStation();
+  radioBusy = () => this.radioService.loading();
 
   /** Snapshot before first drag/bulk move — Cancel restores this. */
   private reorderSnapshot: Song[] | null = null;
@@ -85,7 +87,7 @@ export class LibraryComponent {
   }
 
   async startVaultRadio(): Promise<void> {
-    if (this.radioLoading() || this.editMode()) return;
+    if (this.radioBusy() || this.editMode()) return;
     const seed = await this.radioService.startFromVault(
       this.songs(),
       this.storage.listenStats(),

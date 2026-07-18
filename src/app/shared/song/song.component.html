@@ -133,7 +133,7 @@
           type="button"
           class="song-action-btn"
           (click)="startRadio($event)"
-          [disabled]="radioLoading()"
+          [disabled]="radioBusy()"
           aria-label="Start radio from this song"
           title="Start radio"
         >
