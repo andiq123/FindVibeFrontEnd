@@ -30,7 +30,12 @@
     </div>
 
     @if (explore.error(); as err) {
-      <div class="explore-empty">{{ err }}</div>
+      <app-empty-state
+        [icon]="faTriangleExclamation"
+        title="Couldn't load explore"
+        [description]="err"
+        variant="error"
+      />
     } @else if (explore.loading() && explore.sections().length === 0) {
       @for (_ of skeletons; track $index) {
         <section class="explore-shelf" aria-hidden="true">
@@ -52,9 +57,11 @@
         </section>
       }
     } @else if (explore.sections().length === 0) {
-      <div class="explore-empty">
-        No charts yet. Tap refresh to pull Romania + worldwide shelves.
-      </div>
+      <app-empty-state
+        [icon]="faCompass"
+        title="No charts yet"
+        description="Tap refresh to pull Romania and worldwide shelves."
+      />
     } @else {
       @for (section of explore.sections(); track section.id) {
         <section

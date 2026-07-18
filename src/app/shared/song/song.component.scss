@@ -36,26 +36,6 @@
   }
 }
 
-.song-action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 9999px;
-  color: color-mix(in oklab, var(--color-base-content) 35%, transparent);
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  transition:
-    color 0.15s ease,
-    background-color 0.15s ease,
-    scale var(--press-duration, 0.18s) var(--press-ease, cubic-bezier(0.32, 0.72, 0, 1));
-  &:active {
-    color: var(--color-primary);
-    background: color-mix(in oklab, var(--color-primary) 12%, transparent);
-  }
-}
-
 .song-actions {
   -webkit-tap-highlight-color: transparent;
 }

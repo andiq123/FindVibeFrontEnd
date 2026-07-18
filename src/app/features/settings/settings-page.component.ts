@@ -56,8 +56,15 @@ interface SourcesResponse {
   template: `
     <app-page-content>
       <div class="space-y-4 pt-1 max-w-xl mx-auto">
-        <header>
-          <h1 class="text-2xl font-bold tracking-tight leading-none">
+        <header class="mb-1">
+          <span
+            class="text-[10px] font-bold text-base-content/50 uppercase tracking-[0.18em]"
+          >
+            App
+          </span>
+          <h1
+            class="font-bold text-2xl tracking-tight bg-gradient-to-br from-base-content via-base-content/95 to-primary/80 bg-clip-text text-transparent"
+          >
             Settings
           </h1>
         </header>
@@ -128,7 +135,7 @@ interface SourcesResponse {
             </div>
             <button
               type="button"
-              class="shrink-0 h-8 px-2.5 rounded-lg text-xs font-semibold text-error/80 active:bg-error/10 disabled:opacity-40"
+              class="shrink-0 h-9 px-3 rounded-xl text-xs font-semibold text-error/80 active:bg-error/10 disabled:opacity-40"
               [disabled]="!recentCount()"
               (click)="clearHistory()"
             >
@@ -144,7 +151,7 @@ interface SourcesResponse {
             </div>
             <button
               type="button"
-              class="shrink-0 h-8 px-2.5 rounded-lg text-xs font-semibold text-primary active:bg-primary/10 disabled:opacity-40"
+              class="shrink-0 h-9 px-3 rounded-xl text-xs font-semibold bg-primary/15 text-primary disabled:opacity-40"
               [disabled]="exploreRefreshing()"
               (click)="refreshExplore()"
             >
@@ -197,7 +204,7 @@ interface SourcesResponse {
             <h2 class="text-sm font-bold tracking-tight">Source health</h2>
             <button
               type="button"
-              class="px-2.5 py-1.5 rounded-lg bg-base-200/60 border border-base-content/8 text-xs font-medium disabled:opacity-50"
+              class="h-9 px-3 rounded-xl text-xs font-semibold bg-base-content/[0.06] text-base-content/70 disabled:opacity-50"
               (click)="reload()"
               [disabled]="sources.isLoading()"
             >
@@ -206,14 +213,14 @@ interface SourcesResponse {
           </div>
 
           @if (sources.isLoading() && !sources.value()) {
-            <div class="premium-card py-6 flex justify-center">
+            <div class="py-6 flex justify-center">
               <fa-icon
                 [icon]="faCircleNotch"
                 class="text-lg text-primary animate-spin"
               />
             </div>
           } @else if (sources.error()) {
-            <div class="premium-card px-3 py-4 text-center space-y-1">
+            <div class="px-1 py-4 text-center space-y-1">
               <fa-icon
                 [icon]="faTriangleExclamation"
                 class="text-error text-base"
@@ -223,10 +230,10 @@ interface SourcesResponse {
               </p>
             </div>
           } @else {
-            <ul class="space-y-1.5">
+            <ul class="flex flex-col">
               @for (s of sources.value()?.sources ?? []; track s.name) {
                 <li
-                  class="premium-card px-3 py-2.5 flex items-center justify-between gap-3"
+                  class="px-2.5 py-2.5 rounded-xl flex items-center justify-between gap-3 hover:bg-base-content/[0.04]"
                 >
                   <div class="min-w-0">
                     <p class="text-sm font-semibold truncate">{{ s.name }}</p>
@@ -236,14 +243,14 @@ interface SourcesResponse {
                   </div>
                   @if (s.ok) {
                     <span
-                      class="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-success/15 text-success text-[10px] font-bold uppercase tracking-wide"
+                      class="shrink-0 inline-flex items-center gap-1 text-success text-[10px] font-bold uppercase tracking-wide"
                     >
                       <fa-icon [icon]="faCheckCircle" class="text-[10px]" />
                       Up
                     </span>
                   } @else {
                     <span
-                      class="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-error/15 text-error text-[10px] font-bold uppercase tracking-wide"
+                      class="shrink-0 inline-flex items-center gap-1 text-error text-[10px] font-bold uppercase tracking-wide"
                     >
                       <fa-icon
                         [icon]="faTriangleExclamation"
@@ -274,7 +281,7 @@ interface SourcesResponse {
         @if (isLoggedIn()) {
           <button
             type="button"
-            class="w-full h-10 rounded-xl border border-error/25 text-error font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
+            class="w-full h-10 rounded-xl border border-error/25 text-error font-semibold text-xs flex items-center justify-center gap-1.5"
             (click)="signOut()"
           >
             <fa-icon [icon]="faRightFromBracket" class="text-[11px]" />

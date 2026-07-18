@@ -1,8 +1,12 @@
 @if (isAbleToAddToFav()) {
 <button
   type="button"
-  class="flex items-center justify-center transition-all duration-300 pressable-native outline-none select-none touch-manipulation"
-  [class]="forPlayer() ? 'bg-transparent active:scale-90 transition-transform min-w-12 min-h-12 w-12 h-12' : 'w-12 h-12 rounded-full bg-base-content/5 border border-base-content/10 active:bg-base-content/10'"
+  class="flex items-center justify-center outline-none select-none touch-manipulation"
+  [class]="
+    forPlayer()
+      ? 'bg-transparent min-w-12 min-h-12 w-12 h-12'
+      : 'song-action-btn'
+  "
   (pointerdown)="$event.stopPropagation()"
   (click)="onToggle($event)"
   [disabled]="isLoadingFavorite()"

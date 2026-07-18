@@ -6,16 +6,26 @@ import {
 } from "@angular/core";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { PageContentComponent } from "../../shared/components/page-content/page-content.component";
+import { EmptyStateComponent } from "../../shared/empty-state/empty-state.component";
 import { SearchBarComponent } from "../search/search-bar/search-bar.component";
 import { PlayerService } from "../../core/services/player.service";
 import { ExploreService, ExploreSection } from "./explore.service";
 import { Song } from "../../core/models/song.model";
-import { faArrowRotateRight } from "../../shared/icons";
+import {
+  faArrowRotateRight,
+  faCompass,
+  faTriangleExclamation,
+} from "../../shared/icons";
 
 @Component({
   selector: "app-explore-page",
   standalone: true,
-  imports: [PageContentComponent, SearchBarComponent, FaIconComponent],
+  imports: [
+    PageContentComponent,
+    SearchBarComponent,
+    FaIconComponent,
+    EmptyStateComponent,
+  ],
   templateUrl: "./explore-page.component.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -24,6 +34,8 @@ export class ExplorePageComponent implements OnInit {
   private readonly player = inject(PlayerService);
 
   readonly faArrowRotateRight = faArrowRotateRight;
+  readonly faCompass = faCompass;
+  readonly faTriangleExclamation = faTriangleExclamation;
   readonly skeletons = [0, 1, 2];
 
   ngOnInit(): void {
