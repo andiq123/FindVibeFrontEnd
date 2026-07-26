@@ -6,8 +6,6 @@ import {
   signal,
   untracked,
 } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { firstValueFrom } from "rxjs";
 import { Song } from "../models/song.model";
 import {
   PlayerStatus,
@@ -21,7 +19,6 @@ import { RadioService } from "./radio.service";
 import { ToastService } from "./toast.service";
 import { StorageService } from "./storage.service";
 import { upgradeToHttps } from "../utils/utils";
-import { environment } from "../../../environments/environment";
 
 /** Cap consecutive dead tracks so a broken queue can't spin forever. */
 const MAX_ERROR_SKIPS = 10;
@@ -38,7 +35,6 @@ export class PlayerService implements OnDestroy {
   private readonly radioService = inject(RadioService);
   private readonly toast = inject(ToastService);
   private readonly storage = inject(StorageService);
-  private readonly http = inject(HttpClient);
   private currentObjectUrl: string | null = null;
   private handlingSongEnded = false;
   private handlingSongError = false;
@@ -228,30 +224,6 @@ export class PlayerService implements OnDestroy {
     this.allowErrorSkip = opts.fromQueue;
     this.playlistService.setCurrentSong(song);
     let secureLink = upgradeToHttps(song.link);
-    // Mp3musics search returns /file/{hex}; unlock audio URL on play (same as iOS).
-    const filePath = mp3musicsFilePath(secureLink);
-    if (filePath) {
-      try {
-        const res = await firstValueFrom(
-          this.http.get<{ link: string }>(
-            `${environment.API_URL}/resolve/mp3musics`,
-            { params: { file: filePath } },
-          ),
-        );
-        if (gen !== this.loadGen) return gen;
-        const unlocked = upgradeToHttps(res?.link ?? "");
-        if (!unlocked) throw new Error("empty stream");
-        secureLink = unlocked;
-        song = { ...song, link: unlocked };
-        this.playlistService.setCurrentSong(song);
-      } catch {
-        if (gen !== this.loadGen) return gen;
-        this.playError.set("Couldn't unlock Mp3musics stream");
-        this.audioService.fail();
-        this.persistNow();
-        return gen;
-      }
-    }
 
     // Online: CDN first — never await Cache API before play() (breaks iOS auto-next).
     // Offline: vault blob only.
@@ -482,19 +454,5 @@ export class PlayerService implements OnDestroy {
       document.removeEventListener("visibilitychange", this.visibilityHandler);
     }
     void this.releaseWakeLock();
-  }
-}
-
-/** Deferred Mp3musics `/file/{hex}` path for stream unlock. */
-function mp3musicsFilePath(link: string): string | null {
-  try {
-    const u = new URL(link);
-    if (!u.hostname.includes("mp3musics.pro")) return null;
-    if (!u.pathname.startsWith("/file/") || u.pathname.length <= "/file/".length) {
-      return null;
-    }
-    return u.pathname;
-  } catch {
-    return null;
   }
 }

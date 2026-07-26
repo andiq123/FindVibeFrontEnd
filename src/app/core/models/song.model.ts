@@ -16,7 +16,6 @@ const PROVIDER_HOST: Record<string, string> = {
   MuzJam: "muzjam.org",
   Mp3mn: "mp3mn.net",
   Musify: "musify.club",
-  Mp3musics: "mp3musics.pro",
 };
 
 /** Short host label for source badges (supports merged e.g. MuzJam+Mp3mn). */
