@@ -159,6 +159,9 @@ export class PlayerService implements OnDestroy {
     } else {
       this.audioService.pause();
       this.audioService.seek(0);
+      if (this.playlistService.radioActive()) {
+        this.toast.show("Radio reached the end");
+      }
     }
   }
 

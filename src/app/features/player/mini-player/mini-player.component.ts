@@ -3,7 +3,11 @@ import {
   input,
   output,
   inject,
+  signal,
+  effect,
+  untracked,
   ChangeDetectionStrategy,
+  DestroyRef,
 } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
@@ -20,6 +24,7 @@ import { MovingTitleComponent } from "../../../shared/moving-title/moving-title.
 import { Song } from "../../../core/models/song.model";
 import { NgOptimizedImage } from "@angular/common";
 import { PlayerService } from "../../../core/services/player.service";
+import { SettingsService } from "../../../core/services/settings.service";
 
 @Component({
   selector: "app-mini-player",
@@ -36,12 +41,17 @@ import { PlayerService } from "../../../core/services/player.service";
 })
 export class MiniPlayerComponent {
   private readonly playerService = inject(PlayerService);
+  private readonly settings = inject(SettingsService);
+  private readonly destroyRef = inject(DestroyRef);
+
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
   currentTime = input<number>(0);
   duration = input<number>(0);
   toggleSizeEvent = output<void>();
+
   readonly playError = this.playerService.playError;
+  readonly settling = signal(false);
   playerStatus = PlayerStatus;
   faArrowUp = faArrowUp;
   faPlay = faPlay;
@@ -49,13 +59,29 @@ export class MiniPlayerComponent {
   faStepBackward = faStepBackward;
   faStepForward = faStepForward;
   faTriangleExclamation = faTriangleExclamation;
+
+  private settleTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    effect(() => {
+      const tick = this.settings.miniSettled();
+      if (tick === 0) return;
+      untracked(() => this.pulseSettle());
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.settleTimer != null) clearTimeout(this.settleTimer);
+    });
+  }
+
   progress = () => {
     const dur = this.duration();
     return dur > 0 ? (this.currentTime() / dur) * 100 : 0;
   };
+
   toggleSize() {
     this.toggleSizeEvent.emit();
   }
+
   async togglePlay($event: Event) {
     $event.stopPropagation();
     if (this.status() === PlayerStatus.Playing) {
@@ -64,12 +90,29 @@ export class MiniPlayerComponent {
       await this.playerService.play();
     }
   }
+
   async previous($event: Event) {
     $event.stopPropagation();
     await this.playerService.setPreviousSong();
   }
+
   async next($event: Event) {
     $event.stopPropagation();
     await this.playerService.setNextSong();
+  }
+
+  private pulseSettle(): void {
+    if (
+      typeof matchMedia !== "undefined" &&
+      matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    if (this.settleTimer != null) clearTimeout(this.settleTimer);
+    this.settling.set(true);
+    this.settleTimer = setTimeout(() => {
+      this.settling.set(false);
+      this.settleTimer = null;
+    }, 420);
   }
 }

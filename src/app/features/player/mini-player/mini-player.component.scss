@@ -11,6 +11,11 @@
     transition-duration: var(--press-duration-in, 0.1s);
   }
 
+  &.mini-player-settle {
+    animation: mini-settle-pulse 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 12px 28px color-mix(in oklab, #000 22%, transparent);
+  }
+
   @media (max-width: 768px) {
     will-change: auto;
   }
@@ -30,9 +35,25 @@
   @media (prefers-reduced-motion: reduce) {
     transition: none !important;
     will-change: auto !important;
+    &.mini-player-settle {
+      animation: none;
+      box-shadow: none;
+    }
     &:active {
       scale: 1;
     }
+  }
+}
+
+@keyframes mini-settle-pulse {
+  0% {
+    scale: 0.96;
+  }
+  55% {
+    scale: 1.035;
+  }
+  100% {
+    scale: 1;
   }
 }
 

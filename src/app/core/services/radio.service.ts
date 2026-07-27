@@ -14,6 +14,7 @@ import {
   ListenStats,
   pickVaultRadioSeed,
 } from "../utils/listen-rank";
+import { ToastService } from "./toast.service";
 
 /** Prefetch early — backgrounded iOS may stall /recommend near empty queue. */
 const EXTEND_WHEN_LEFT = 5;
@@ -24,6 +25,7 @@ const STYLE_POOL = 6;
 export class RadioService {
   private readonly http = inject(HttpClient);
   private readonly playlist = inject(PlaylistService);
+  private readonly toast = inject(ToastService);
   private extending = false;
   private lastExtendKey = "";
   /** Station origin — never abandon this vibe for whatever is currently playing. */
@@ -230,6 +232,8 @@ export class RadioService {
 
     this.extending = true;
     this.lastExtendKey = extendKey;
+    const showFinding = this.playlist.remaining() <= 1;
+    if (showFinding) this.toast.hold("Finding more radio tracks…");
     try {
       const seen = new Set([
         ...this.playlist.queueLinks().filter(Boolean),
@@ -243,12 +247,20 @@ export class RadioService {
       if (next.length) {
         this.playlist.appendSongs(next);
         this.extendRound++;
+        this.toast.show(
+          next.length === 1
+            ? "Added 1 song to radio"
+            : `Added ${next.length} songs to radio`,
+        );
       } else {
         this.lastExtendKey = "";
         this.extendRound++;
+        // Leave end-of-queue copy to the player when the queue is drained.
+        if (showFinding) this.toast.clear();
       }
     } catch {
       this.lastExtendKey = "";
+      if (showFinding) this.toast.clear();
     } finally {
       this.extending = false;
     }

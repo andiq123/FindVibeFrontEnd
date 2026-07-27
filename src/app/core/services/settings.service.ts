@@ -34,6 +34,8 @@ export class SettingsService implements OnDestroy {
   private readonly _repeatMode = signal<RepeatMode>(RepeatMode.OFF);
   private readonly _isShuffle = signal(false);
   private readonly _isMiniPlayer = signal(true);
+  /** Bumps when full player closes into mini — drives settle feedback. */
+  private readonly _miniSettled = signal(0);
   private readonly _suggestRegion = signal<SuggestRegion>("ro");
   /** Full-player Save/Download MP3 button. */
   private readonly _showPlayerDownload = signal(true);
@@ -46,6 +48,7 @@ export class SettingsService implements OnDestroy {
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
+  readonly miniSettled = this._miniSettled.asReadonly();
   readonly suggestRegion = this._suggestRegion.asReadonly();
   readonly showPlayerDownload = this._showPlayerDownload.asReadonly();
   readonly autoOfflineCache = this._autoOfflineCache.asReadonly();
@@ -103,7 +106,12 @@ export class SettingsService implements OnDestroy {
   }
 
   toggleMiniPlayer(): void {
-    this._isMiniPlayer.set(!this._isMiniPlayer());
+    if (this._isMiniPlayer()) {
+      this._isMiniPlayer.set(false);
+      return;
+    }
+    this._isMiniPlayer.set(true);
+    this._miniSettled.update((n) => n + 1);
   }
 
   toggleRepeat(): void {

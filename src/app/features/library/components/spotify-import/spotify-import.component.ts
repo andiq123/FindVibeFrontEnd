@@ -91,6 +91,7 @@ type PlaylistPayload = {
             placeholder="https://open.spotify.com/playlist/…"
             [value]="url()"
             [disabled]="running()"
+            enterkeyhint="done"
             (input)="url.set($any($event.target).value)"
             (keydown.enter)="start()"
           />

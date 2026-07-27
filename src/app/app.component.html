@@ -28,8 +28,19 @@
     }
   }
   <app-navigation />
+  <app-keyboard-dismiss />
   @if (toast.message(); as msg) {
-    <div class="app-toast" role="status" aria-live="polite">{{ msg }}</div>
+    <div
+      class="app-toast"
+      role="status"
+      aria-live="polite"
+      [attr.aria-busy]="toast.loading() || null"
+    >
+      @if (toast.loading()) {
+        <span class="app-toast-spin" aria-hidden="true"></span>
+      }
+      <span>{{ msg }}</span>
+    </div>
   }
   @defer (when modalService.isOpen()) {
     <app-global-modal />
