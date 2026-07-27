@@ -3,11 +3,7 @@ import {
   input,
   output,
   inject,
-  signal,
-  effect,
-  untracked,
   ChangeDetectionStrategy,
-  DestroyRef,
 } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
@@ -42,7 +38,6 @@ import { SettingsService } from "../../../core/services/settings.service";
 export class MiniPlayerComponent {
   private readonly playerService = inject(PlayerService);
   private readonly settings = inject(SettingsService);
-  private readonly destroyRef = inject(DestroyRef);
 
   song = input.required<Song>();
   status = input.required<PlayerStatus>();
@@ -51,7 +46,9 @@ export class MiniPlayerComponent {
   toggleSizeEvent = output<void>();
 
   readonly playError = this.playerService.playError;
-  readonly settling = signal(false);
+  /** Entry slide only on cold show — not when returning from full player. */
+  readonly animateEntry = !this.settings.takeQuietMiniLand();
+
   playerStatus = PlayerStatus;
   faArrowUp = faArrowUp;
   faPlay = faPlay;
@@ -59,19 +56,6 @@ export class MiniPlayerComponent {
   faStepBackward = faStepBackward;
   faStepForward = faStepForward;
   faTriangleExclamation = faTriangleExclamation;
-
-  private settleTimer: ReturnType<typeof setTimeout> | null = null;
-
-  constructor() {
-    effect(() => {
-      const tick = this.settings.miniSettled();
-      if (tick === 0) return;
-      untracked(() => this.pulseSettle());
-    });
-    this.destroyRef.onDestroy(() => {
-      if (this.settleTimer != null) clearTimeout(this.settleTimer);
-    });
-  }
 
   progress = () => {
     const dur = this.duration();
@@ -99,20 +83,5 @@ export class MiniPlayerComponent {
   async next($event: Event) {
     $event.stopPropagation();
     await this.playerService.setNextSong();
-  }
-
-  private pulseSettle(): void {
-    if (
-      typeof matchMedia !== "undefined" &&
-      matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-    if (this.settleTimer != null) clearTimeout(this.settleTimer);
-    this.settling.set(true);
-    this.settleTimer = setTimeout(() => {
-      this.settling.set(false);
-      this.settleTimer = null;
-    }, 420);
   }
 }

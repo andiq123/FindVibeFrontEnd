@@ -34,8 +34,11 @@ export class SettingsService implements OnDestroy {
   private readonly _repeatMode = signal<RepeatMode>(RepeatMode.OFF);
   private readonly _isShuffle = signal(false);
   private readonly _isMiniPlayer = signal(true);
-  /** Bumps when full player closes into mini — drives settle feedback. */
-  private readonly _miniSettled = signal(0);
+  /**
+   * When true, the next mini mount should skip entry slide —
+   * full player already animated the close.
+   */
+  private quietMiniLand = false;
   private readonly _suggestRegion = signal<SuggestRegion>("ro");
   /** Full-player Save/Download MP3 button. */
   private readonly _showPlayerDownload = signal(true);
@@ -48,7 +51,6 @@ export class SettingsService implements OnDestroy {
   readonly repeatMode = this._repeatMode.asReadonly();
   readonly isShuffle = this._isShuffle.asReadonly();
   readonly isMiniPlayer = this._isMiniPlayer.asReadonly();
-  readonly miniSettled = this._miniSettled.asReadonly();
   readonly suggestRegion = this._suggestRegion.asReadonly();
   readonly showPlayerDownload = this._showPlayerDownload.asReadonly();
   readonly autoOfflineCache = this._autoOfflineCache.asReadonly();
@@ -110,8 +112,16 @@ export class SettingsService implements OnDestroy {
       this._isMiniPlayer.set(false);
       return;
     }
+    // Closing full → mini: don't re-run entry slide (full already slid down).
+    this.quietMiniLand = true;
     this._isMiniPlayer.set(true);
-    this._miniSettled.update((n) => n + 1);
+  }
+
+  /** One-shot: true if mini should appear without entry animation. */
+  takeQuietMiniLand(): boolean {
+    if (!this.quietMiniLand) return false;
+    this.quietMiniLand = false;
+    return true;
   }
 
   toggleRepeat(): void {
