@@ -12,7 +12,7 @@ const LOCAL_SHELF = new Set(["vault", "recents", "because", "because2"]);
 const BECAUSE_KEY = "exploreBecause";
 const CHARTS_KEY = "exploreCharts";
 /** Match Fiber exploreTTL / recommendTTL. */
-const CHARTS_TTL_MS = 6 * 60 * 60 * 1000;
+const CHARTS_TTL_MS = 24 * 60 * 60 * 1000;
 /** ponytail: /recommend is the expensive personalization hit — once/day per seed. */
 const BECAUSE_TTL_MS = 24 * 60 * 60 * 1000;
 const DAY_MS = 86_400_000;
