@@ -3,7 +3,6 @@ import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import {
   faCompass,
   faHeart,
-  faClockRotateLeft,
   faGear,
 } from "../../shared/icons";
 import { RouterLink, RouterLinkActive } from "@angular/router";
@@ -27,11 +26,6 @@ export class NavigationComponent {
       name: "Vault",
       icon: faHeart,
       link: "/library",
-    },
-    {
-      name: "Recent",
-      icon: faClockRotateLeft,
-      link: "/recent",
     },
     {
       name: "Settings",

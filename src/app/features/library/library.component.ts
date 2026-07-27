@@ -16,9 +16,11 @@ import {
   faArrowDown,
   faArrowUp,
   faCheck,
+  faClockRotateLeft,
   faWaveSquare,
 } from "../../shared/icons";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { RouterLink } from "@angular/router";
 import { PlaylistService } from "../../core/services/playlist.service";
 import { SettingsService } from "../../core/services/settings.service";
 import { RadioService } from "../../core/services/radio.service";
@@ -38,6 +40,7 @@ import { Song } from "../../core/models/song.model";
     FontAwesomeModule,
     PageContentComponent,
     SongListComponent,
+    RouterLink,
   ],
   templateUrl: "./library.component.html",
   styleUrl: "./library.component.scss",
@@ -75,6 +78,7 @@ export class LibraryComponent {
   faArrowUp = faArrowUp;
   faArrowDown = faArrowDown;
   faWaveSquare = faWaveSquare;
+  faClockRotateLeft = faClockRotateLeft;
   /** Header Radio spinner — not per-song starts. */
   radioLoading = () => this.radioService.isLoadingStation();
   radioBusy = () => this.radioService.loading();

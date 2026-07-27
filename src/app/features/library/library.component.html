@@ -22,6 +22,14 @@
           </div>
         </div>
         <div class="shrink-0 ml-auto flex items-center gap-2">
+          <a
+            routerLink="/recent"
+            class="h-9 px-3 rounded-xl text-xs font-semibold touch-manipulation inline-flex items-center gap-1.5 bg-base-content/[0.06] text-base-content/70 active:bg-primary/15 active:text-primary"
+            aria-label="Recently played"
+          >
+            <fa-icon [icon]="faClockRotateLeft" class="text-[11px]" />
+            Recent
+          </a>
           @if (songCount() >= 1 && !editMode()) {
             <button
               type="button"

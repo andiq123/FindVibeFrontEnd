@@ -28,9 +28,8 @@ import type { ActivatedRouteSnapshot } from "@angular/router";
 function routeOrder(path: string): number {
   if (!path) return 0;
   if (path.startsWith("songs")) return 1;
-  if (path === "library") return 2;
-  if (path === "recent") return 3;
-  if (path === "settings") return 4;
+  if (path === "library" || path === "recent") return 2;
+  if (path === "settings") return 3;
   return 0;
 }
 
